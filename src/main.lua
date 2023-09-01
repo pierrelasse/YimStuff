@@ -1,4 +1,5 @@
-local yu = (function()
+-- Made by pierrelasse <:D
+yu = (function()
     if yu ~= nil then return yu end
 
     local data = {
@@ -12,27 +13,30 @@ local yu = (function()
     }
 
     local function defineUtils()
-        -- Lua related
         api.shc = function(condition, trueValue, falseValue)
             return condition and trueValue or falseValue or true
         end
 
-        api.format_num = function(num)
+        api.format_num = function(num, separator)
             if type(num) ~= "number" then
                 return tostring(num)
             end
             return tostring(math.floor(num))
                 :reverse()
-                :gsub("(%d%d%d)", "%1,")
+                :gsub("(%d%d%d)", "%1"..separator)
                 :reverse()
         end
         
         api.boolstring = function(bool, trueValue, falseValue)
-            return bool and trueValue or falseValue
+            return bool and (trueValue or true) or (falseValue or false)
         end
 
-        api.get_between_or_default = function(value, min, max, defaultValue)
-            return (value >= min and value <= max) and value or defaultValue
+        api.is_num_between = function(num, min, max)
+            return num >= min and num <= max
+        end
+
+        api.get_between_or_default = function(num, min, max, defaultValue)
+            return api.is_num_between(num, min, max) and num or defaultValue
         end
 
         api.dict_get_or_default = function(dict, key, defaultValue)
@@ -67,29 +71,7 @@ local yu = (function()
             return string.format(format or "%02dH %02dM %02dS", hours, minutes, seconds)
         end
 
-        -- Menu related
-        api.pid = function()
-            return PLAYER.PLAYER_ID()
-        end
-
-        api.ppid = function()
-            return PLAYER.PLAYER_PED_ID()
-        end
-
-        api.veh = function()
-            if PED.IS_PED_IN_ANY_VEHICLE(api.ppid(), 0) then
-                return PED.GET_VEHICLE_PED_IS_IN(api.ppid(), false);
-            end
-        end
-
-        api.is_script_running_hash = function(hash)
-            return SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) ~= 0
-        end
-
-        api.is_script_running = function(name)
-            return api.is_script_running_hash(joaat(name))
-        end
-
+        -- Notifications
         api.set_default_notification_title = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
         end
@@ -123,11 +105,11 @@ local yu = (function()
             return value
         end
 
-        api.get_stat = function(key, default)
+        api.get_stat = function(key, defaultValue)
             if key == nil then
                 return nil
             end
-            return data.stats[key] or default
+            return data.stats[key] or defaultValue
         end
 
         api.set_default_stat = function(key, value)
@@ -135,6 +117,7 @@ local yu = (function()
                 return nil
             end
             data.stats[key] = value
+            return value
         end
     end
 
@@ -143,9 +126,13 @@ local yu = (function()
             return data
         end
 
-        api.gun = function()
+        api.get_unique_number = function()
             data.un = data.un + 1
             return data.un
+        end
+
+        api.gun = function()
+            return api.get_unique_number()
         end
 
         api.playerindex = function()
@@ -155,28 +142,56 @@ local yu = (function()
         api.mpx = function()
             return api.playerindex == 0 and "MP0_" or "MP1_"
         end
+
+        api.pid = function()
+            return PLAYER.PLAYER_ID()
+        end
+
+        api.ppid = function()
+            return PLAYER.PLAYER_PED_ID()
+        end
+
+        api.veh = function(pid)
+            local pid_ = pid or api.ppid()
+            if PED.IS_PED_IN_ANY_VEHICLE(pid_, 0) then
+                return PED.GET_VEHICLE_PED_IS_IN(pid_, false);
+            end
+        end
+
+        api.is_script_running_hash = function(hash)
+            return SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) ~= 0
+        end
+
+        api.is_script_running = function(name)
+            return api.is_script_running_hash(joaat(name))
+        end
     end
 
     local function initKeyListener()
-        local kl = {
+        data.key_listener = {
             cb = {},
             ks = {}
         }
+        api.key_listener = {}
 
-        local klapi = {}
-
-        klapi.add_callback = function(key, callback, keydown)
+        api.key_listener.add_callback = function(key, callback, keyup)
+            if key == nil or callback == nil then
+                return nil
+            end
             local id = api.gun()
-            kl.cb[key] = kl.cb[key] or {}
-            kl.cb[key][id] = {
+            data.key_listener.cb[key] = data.key_listener.cb[key] or {}
+            data.key_listener.cb[key][id] = {
                 callback = callback,
-                keydown = (keydown == true)
+                keyup = (keyup == true)
             }
             return id
         end
 
-        klapi.remove_callback = function(id)
-            for k, v in pairs(kl.cb) do
+        api.key_listener.remove_callback = function(id)
+            if id == nil then
+                return nil
+            end
+            for k, v in pairs(data.key_listener.cb) do
                 if v[id] then
                     v[id] = nil
                     return true
@@ -185,28 +200,31 @@ local yu = (function()
             return false
         end
         
-        kl.tick = function()
-            local cb, ks = data.key_listener.cb, data.key_listener.ks
-            if cb then
-                for k, v in pairs(cb) do
+        data.key_listener.tick = function()
+            if data.key_listener.cb then
+                for k, v in pairs(data.key_listener.cb) do
                     local isPressed = PAD.IS_DISABLED_CONTROL_PRESSED(0, k)
-                    if (isPressed and not ks[k] and v.keydown) or (not isPressed and not v.keydown) then
-                        ks[k] = true
-                        v.callback()
-                    elseif not isPressed then
-                        ks[k] = nil
+                    if isPressed ~= (data.key_listener.ks[k] == true) then
+                        data.key_listener.ks[k] = isPressed
+                        for k1, k2 in pairs(v) do
+                            if (isPressed and not k2.keyup) or (not isPressed and k2.keyup) then
+                                k2.callback()
+                            end
+                        end
                     end
                 end
             end
-        end        
-
-        data.key_listener = kl
-        api.key_listener = klapi
+        end
     end
 
     defineUtils()
     initStats()
     defineGetters()
+    initKeyListener()
+
+    script.register_looped("yimutils", function()
+        data.key_listener.tick()
+    end)
 
     return api
 end)()

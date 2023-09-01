@@ -1,5 +1,0 @@
-get_internal_data() >
-    Returns: Data you don't need to mess with normally
-keys >
-    Returns: Id of key
-    Example Usage: keys["L"]

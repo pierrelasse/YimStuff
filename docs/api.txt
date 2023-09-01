@@ -1,0 +1,121 @@
+# Utils - Lua related
+shc(condition, [trueValue], [falseValue])
+    Returns: trueValue if condition is true and falseValue if condition is not true
+
+format_num(num: number, [separator])
+    Param num: The number to format
+    Param separator: The used separator. Default: ","
+    Returns: Formatted number as string
+    Examle: format_num(1234) -> "1,234"
+
+boolstring(bool, [trueValue], [falseValue])
+    Param trueValue: Default: true
+    Param falseValue: Default: false
+    Returns: If bool is true, it returns trueValue. Else falseValue
+
+is_num_between(num: number, min: number, max: number)
+    Param num: The number to be checked
+    Param min: The minimum value
+    Param max: The maximum value
+    Returns: If num is between min and max
+
+get_between_or_default(num: number, min: number, max: number, defaultValue)
+    Param num: A number that must be between min and max
+    Param min: The min value the value must be between
+    Param max: The max value the value must be between
+    Param defaultValue: Returned when value is not between min and max
+    Returns: Itself or defaultValue based on conditions
+
+dict_get_or_default(dict: dict, key, defaultValue)
+    Aliases: dict_god
+    Param dict: The dict from where the value is obtained
+    Param key: The key that we want to get from the dict
+    Param defaultValue: Returned when dict does not have key
+    Returns: Value of dict for key, or defaultValue if not found
+
+get_key_from_dict(dict: dict, value)
+    Param dict: The dict from where the key gets obtained
+    Param value: The value from the key we need to find
+    Returns: The first key with the value value
+
+get_or_default(get, defaultValue)
+    Aliases: gd
+
+format_seconds(s, [format])
+    Param s: The duration in seconds to be formatted
+    Param format: Optional format string. Default: "%02dH %02dM %02dS"
+    Returns: A string representation of the duration in the specified format
+
+# Notifications
+set_default_notification_title(title)
+    Param title: Prefix of every title used in notify(type, message, [title])
+
+notify(type, message, [title])
+    Param type: Available input:
+        1 | "info"
+        2 | "warn" | "warning"
+        3 | "error" | "severe"
+    Param message: The message to be displayed
+    Param title: The suffix of the title
+
+# Stats (stats of menu. not gta related)
+set_stat(key, value)
+    Param key: The id of the stat
+    Param value: The value the stat will be set to
+    Returns: value
+
+get_stat(key, [defaultValue])
+    Param key: The id of the stat
+    Param defaultValue: Returned value when stat is not set
+    Returns: Stat with id key or defaultValue if not set
+
+set_default_stat(key, value)
+    Param key: The id of the stat
+    Param value: The value the stat will be set to when unset
+    Returns: value
+
+# Getters (and utils idk)
+internal_data()
+    Returns: Internal data you don't really need to tuche
+
+
+get_unique_number()
+    Aliases: gun
+    Returns: A number that was never returned from this function before
+
+playerindex()
+    Returns: 0 or something else i guess
+
+mpx()
+    Returns: "MP0_" or "MP1_"
+    Example usage: stats.get_int(yu.mpx().."SOME_STAT")
+
+pid()
+    Returns: The player's id
+
+ppid()
+    Returns: The player's ped id
+
+veh([pid])
+    Param: Ped id of target player. Default: pid()
+    Returns: The target player's vehicle if available
+
+is_script_running_hash(hash)
+    Param hash: The hash value of the script to check
+    Returns: true if a script with the given hash is running, false otherwise
+
+is_script_running(name)
+    Param name: The name of the script to check
+    Returns: true if a script with the given name is running, false otherwise
+
+# KeyListener
+add_callback(key: number, callback: function, [keyup: boolean])
+    Param key: Id of the key to add the callback to.
+        Get id of a key by using yu.keys["KEY_NAME"]
+    Param callback: The function to be executed
+    Param keyup: Whether the callback should be executed on keydown or keyup
+    Returns: Id of callback
+
+remove_callback(id)
+    Param id: Id of callback to remove. Returned from add_callback(key: number, callback: function, [keydown: boolean])
+    Returns: If removed successfully
