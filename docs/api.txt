@@ -1,4 +1,4 @@
-# Utils - Lua related
+# Utils
 shc(condition, [trueValue], [falseValue])
     Returns: trueValue if condition is true and falseValue if condition is not true
 
