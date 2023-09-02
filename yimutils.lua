@@ -1,5 +1,5 @@
 -- Made by pierrelasse <:D
-yu = (function()
+return (function()
     if yu ~= nil then return yu end
 
     local data = {
@@ -23,7 +23,7 @@ yu = (function()
             end
             return tostring(math.floor(num))
                 :reverse()
-                :gsub("(%d%d%d)", "%1"..separator)
+                :gsub("(%d%d%d)", "%1"..(separator or ","))
                 :reverse()
         end
         
@@ -40,7 +40,7 @@ yu = (function()
         end
 
         api.dict_get_or_default = function(dict, key, defaultValue)
-            return dict[key] or defaultValue
+            return dict[key] or defaultValue or "<null>"
         end
         
         api.dict_god = function(dict, key, defaultValue)
@@ -72,7 +72,7 @@ yu = (function()
         end
 
         -- Notifications
-        api.set_default_notification_title = function(title)
+        api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
         end
 
@@ -136,11 +136,12 @@ yu = (function()
         end
 
         api.playerindex = function()
-            return globals.get_int(1574918)
+            -- return globals.get_int(1574918)
+            return stats.get_int("MPPLY_LAST_MP_CHAR")
         end
 
         api.mpx = function()
-            return api.playerindex == 0 and "MP0_" or "MP1_"
+            return "MP"..api.shc(api.playerindex() == 0, 0, 1).."_"
         end
 
         api.pid = function()
@@ -201,7 +202,7 @@ yu = (function()
         end
         
         data.key_listener.tick = function()
-            if data.key_listener.cb then
+            if data.key_listener.cb and not gui.is_open() then
                 for k, v in pairs(data.key_listener.cb) do
                     local isPressed = PAD.IS_DISABLED_CONTROL_PRESSED(0, k)
                     if isPressed ~= (data.key_listener.ks[k] == true) then
