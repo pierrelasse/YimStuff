@@ -47,7 +47,7 @@ format_seconds(s, [format])
     Returns: A string representation of the duration in the specified format
 
 # Notifications
-set_default_notification_title(title)
+set_notification_title_prefix(title)
     Param title: Prefix of every title used in notify(type, message, [title])
 
 notify(type, message, [title])
@@ -57,22 +57,6 @@ notify(type, message, [title])
         3 | "error" | "severe"
     Param message: The message to be displayed
     Param title: The suffix of the title
-
-# Stats (stats of menu. not gta related)
-set_stat(key, value)
-    Param key: The id of the stat
-    Param value: The value the stat will be set to
-    Returns: value
-
-get_stat(key, [defaultValue])
-    Param key: The id of the stat
-    Param defaultValue: Returned value when stat is not set
-    Returns: Stat with id key or defaultValue if not set
-
-set_default_stat(key, value)
-    Param key: The id of the stat
-    Param value: The value the stat will be set to when unset
-    Returns: value
 
 # Getters (and utils idk)
 internal_data()
@@ -109,13 +93,38 @@ is_script_running(name)
     Returns: true if a script with the given name is running, false otherwise
 
 # KeyListener
-add_callback(key: number, callback: function, [keyup: boolean])
+key_listener.add_callback(key: number, callback: function, [keyup: boolean])
     Param key: Id of the key to add the callback to.
         Get id of a key by using yu.keys["KEY_NAME"]
     Param callback: The function to be executed
     Param keyup: Whether the callback should be executed on keydown or keyup
     Returns: Id of callback
 
-remove_callback(id)
+key_listener.remove_callback(id)
     Param id: Id of callback to remove. Returned from add_callback(key: number, callback: function, [keydown: boolean])
     Returns: If removed successfully
+
+# Stats (stats of menu. not gta related)
+set_stat(key, value)
+    Param key: The id of the stat
+    Param value: The value the stat will be set to
+    Returns: value
+
+get_stat(key, [defaultValue])
+    Param key: The id of the stat
+    Param defaultValue: Returned value when stat is not set
+    Returns: Stat with id key or defaultValue if not set
+
+set_default_stat(key, value)
+    Param key: The id of the stat
+    Param value: The value the stat will be set to when unset
+    Returns: value
+
+# Default Stats
+    NOTIFY_DEFTITLE: Normally set by using set_notification_title_prefix(title)
+    START_TIME: The unix time when the script was loaded
+
+# Tables
+keys
+    Format: KeyName: string = KeyId: number
+    More info: https://docs.fivem.net/docs/game-references/controls/
