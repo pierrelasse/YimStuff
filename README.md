@@ -6,7 +6,7 @@ Some cool utilities for yimmenu scripting :)
 2. Download yimutils.lua and put it into the same folder where your script is.
 
 ## Usage
-For usage, see [docs/api.txt](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.txt).
+For usage, see [docs/yimutils.txt](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.txt).
 There you will find all functions you can use.
 
 # SussySpt
