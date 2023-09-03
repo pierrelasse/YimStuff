@@ -39,25 +39,21 @@ return (function()
             return api.is_num_between(num, min, max) and num or defaultValue
         end
 
-        api.dict_get_or_default = function(dict, key, defaultValue)
-            return dict[key] or defaultValue or "<null>"
+        api.get_or_default = function(tbl, key, defaultValue)
+            return tbl[key] or defaultValue or "<null>"
         end
         
-        api.dict_god = function(dict, key, defaultValue)
-            return api.dict_get_or_default(dict, key, defaultValue)
+        api.god = function(tbl, key, defaultValue)
+            return api.get_or_default(tbl, key, defaultValue)
         end
 
-        api.get_key_from_dict = function(dict, value)
-            for k, v in pairs(dict) do
+        api.get_key_from_table = function(tbl, value)
+            for k, v in pairs(tbl) do
                 if v == value then
                     return k
                 end
             end
             return nil
-        end
-
-        api.get_or_default = function(get, defaultValue)
-            return get or defaultValue
         end
 
         api.gd = function(get, defaultValue)
@@ -69,6 +65,14 @@ return (function()
             local minutes = math.floor((s % 3600) / 60)
             local seconds = s % 60
             return string.format(format or "%02dH %02dM %02dS", hours, minutes, seconds)
+        end
+
+        api.copy_table = function(tbl)
+            local newTable = {}
+            for k, v in pairs(tbl) do
+                newTable[k] = v
+            end
+            return newTable
         end
 
         -- Notifications
@@ -118,6 +122,13 @@ return (function()
             end
             data.stats[key] = value
             return value
+        end
+
+        api.has_stat = function(key)
+            if key == nil then
+                return nil
+            end
+            return data.stats[key] ~= nil
         end
     end
 
@@ -218,10 +229,46 @@ return (function()
         end
     end
 
+    local function initRendering()
+        api.rendering = {}
+        data.rendering = {
+            nodes = {}
+        }
+
+        local function addElement(id, element)
+            table.insert(data.rendering[id], element)
+        end
+
+        api.rendering.createNode = function(id)
+            data.rendering.nodes[id] = {}
+            return id
+        end
+
+        api.rendering.add_text = function(id, text)
+            -- addElement(id, )
+        end
+
+        api.rendering.renderList = function(items, selectedItem, labelId)
+            if items == nil or labelId == nil then
+                return nil
+            end
+            if ImGui.BeginCombo("##"..labelId, items[selectedItem]) then
+                for k, v in pairs(items) do
+                    if (ImGui.Selectable(v, selectedItem == v)) then
+                        selectedItem = k
+                    end
+                end
+                ImGui.EndCombo()
+            end
+            return selectedItem
+        end
+    end
+
     defineUtils()
     initStats()
     defineGetters()
     initKeyListener()
+    initRendering()
 
     script.register_looped("yimutils", function()
         data.key_listener.tick()

@@ -26,25 +26,29 @@ get_between_or_default(num: number, min: number, max: number, defaultValue)
     Param defaultValue: Returned when value is not between min and max
     Returns: Itself or defaultValue based on conditions
 
-dict_get_or_default(dict: dict, key, defaultValue)
-    Aliases: dict_god
-    Param dict: The dict from where the value is obtained
-    Param key: The key that we want to get from the dict
-    Param defaultValue: Returned when dict does not have key
-    Returns: Value of dict for key, or defaultValue if not found
+get_or_default(tbl: table, key, defaultValue)
+    Aliases: god
+    Param tbl: The table from where the value is obtained
+    Param key: The key that we want to get from the table
+    Param defaultValue: Returned when tbl does not have key
+    Returns: Value of tbl for key, or defaultValue if not found
 
-get_key_from_dict(dict: dict, value)
-    Param dict: The dict from where the key gets obtained
+get_key_from_table(tbl: table, value)
+    Param tbl: The table from where the key gets obtained
     Param value: The value from the key we need to find
     Returns: The first key with the value value
 
-get_or_default(get, defaultValue)
-    Aliases: gd
+gd(get, defaultValue)
+    Returns: defaultValue if get is nil. Else get
 
 format_seconds(s, [format])
     Param s: The duration in seconds to be formatted
     Param format: Optional format string. Default: "%02dH %02dM %02dS"
     Returns: A string representation of the duration in the specified format
+
+copy_table(tbl: table)
+    Param tbl: The table to be copied
+    Returns: A copied version of tbl
 
 # Notifications
 set_notification_title_prefix(title)
@@ -119,6 +123,10 @@ set_default_stat(key, value)
     Param key: The id of the stat
     Param value: The value the stat will be set to when unset
     Returns: value
+
+has_stat(key)
+    Param key: The id of the stat
+    Returns: true if stat with id key is set. Else false
 
 # Default Stats
     NOTIFY_DEFTITLE: Normally set by using set_notification_title_prefix(title)

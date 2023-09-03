@@ -25,6 +25,224 @@ function SussySpt:new()
         end
     end)
 
+    -- Testing
+    local function initRendering()
+        -- local function render_heists_test()
+        --     if ImGui.BeginTabItem("LULLULU1") then
+        --         ImGui.EndTabItem()
+        --     end
+
+        --     if ImGui.BeginTabItem("LULLULU2") then
+        --         ImGui.EndTabItem()
+        --     end
+        -- end
+        -- local function render_heists()
+        --     if ImGui.Begin("Heists & Stuff Idk") then
+        --         ImGui.BeginTabBar(iml())
+
+        --         render_heists_test()
+
+        --         ImGui.EndTabBar()
+
+        --         ImGui.End()
+        --     end
+        -- end
+
+        local function heists_cayo_getstorage(i)
+            if stats.get_int(yu.mpx().."H4LOOT_CASH_"..i) > 0 then
+                return 2
+            elseif stats.get_int(yu.mpx().."H4LOOT_WEED_"..i) > 0 then
+                return 3
+            elseif stats.get_int(yu.mpx().."H4LOOT_COKE_"..i) > 0 then
+                return 4
+            elseif stats.get_int(yu.mpx().."H4LOOT_GOLD_"..i) > 0 then
+                return 5
+            end
+            return 1
+        end
+
+        local heists_cayo_a = {
+            primarytargets = {
+                [0] = "Tequila $900K",
+                [1] = "Necklace $1M",
+                [2] = "Bonds $1,1M",
+                [3] = "Diamond $1,3M",
+                [5] = "Statue $1,9M"
+            },
+            storages = {
+                [1] = "None",
+                [2] = "Cash",
+                [3] = "Weed",
+                [4] = "Coke",
+                [5] = "Gold"
+            },
+            islandstorage = heists_cayo_getstorage("I"),
+            compoundstorage = heists_cayo_getstorage("C"),
+            addpaintings = false,
+            difficulties = {
+                [126823] = "Normal",
+                [131055] = "Hard"
+            },
+            approaches = {
+                [65283] = "Kosatka",
+                [65413] = "Alkonost",
+                [65289] = "Velum",
+                [65425] = "Stealth Annihilator",
+                [65313] = "Patrol Boat",
+                [65345] = "Longfin",
+                [65535] = "*All*"
+            },
+            weapons = {
+                [1] = "Aggressor",
+                [2] = "Conspirator",
+                [3] = "Crackshot",
+                [4] = "Saboteur",
+                [5] = "Marksman"
+            },
+        }
+        heists_cayo_a.primarytarget = next(heists_cayo_a.primarytargets)
+
+        
+        local function render_heists_cayo()
+            if (ImGui.BeginTabItem("Cayo Perico Heist")) then
+                
+                ImGui.BeginGroup()
+
+                ImGui.Text("Preps")
+
+                if (ImGui.BeginListBox("##heists_cayo_listbox1")) then
+                    ImGui.Text("Primary Target:")
+                    ImGui.SameLine()
+                    heists_cayo_a.primarytarget = yu.rendering.renderList(heists_cayo_a.primarytargets, heists_cayo_a.primarytarget, "heists_cayo_primarytarget_list")
+
+                    ImGui.Text("Fill Compound Storages:")
+                    ImGui.SameLine()
+                    heists_cayo_a.compoundstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.compoundstorage, "heists_cayo_storagec_list")
+
+                    ImGui.Text("Fill Island Storages:")
+                    ImGui.SameLine()
+                    heists_cayo_a.islandstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.islandstorage, "heists_cayo_storagei_list")
+
+                    ImGui.Text("Add Paintings:")
+                    ImGui.SameLine()
+                    if (ImGui.Checkbox("##heists_cayo_addpaintings", heists_cayo_a.addpaintings)) then
+                        heists_cayo_a.addpaintings = true
+                    end
+
+
+                    if (ImGui.Button("Set")) then
+                    end
+        
+                    ImGui.SameLine()
+        
+                    if (ImGui.Button("Unlock POI & Accesspoints")) then
+                    end
+        
+                    ImGui.SameLine()
+        
+                    if (ImGui.Button("Complete Preps")) then
+                    end
+        
+                    ImGui.SameLine()
+        
+                    if (ImGui.Button("Reset Preps")) then
+                    end
+
+                    ImGui.EndListBox()
+                end
+                
+                ImGui.EndGroup()
+
+                ImGui.SameLine()
+
+                ImGui.BeginGroup()
+                ImGui.Text("2135325")
+                ImGui.EndGroup()
+
+                ImGui.EndTabItem()
+            end
+        end
+
+        local function render_heists_test2()
+            if (ImGui.BeginTabItem("TubItem2")) then
+                ImGui.Text("eheheheeh")
+                ImGui.EndTabItem()
+            end
+        end
+
+        local function render_heists()
+            if (ImGui.Begin("Heists & Stuff Idk")) then
+                ImGui.BeginTabBar("##heists_tabbar")
+
+                render_heists_cayo()
+                render_heists_test2()
+
+                ImGui.EndTabBar()
+            end
+            ImGui.End()
+        end
+
+        -- tab:add_imgui(function()
+        --     render_heists()
+        -- end)
+    end
+
+    initRendering()
+
+    -- ImGui.Text("Test4")
+    -- ImGui.Text("Test3")
+
+    -- ImGui.BeginGroup()
+    -- -- components.sub_title("SESSION_SWITCHER")
+
+    -- ImGui.SetWindowFontScale(1.2) -- Adjust the scale as needed
+    -- ImGui.Text("W Font")
+
+    -- ImGui.SetWindowFontScale(1.0)
+
+    -- if ImGui.BeginListBox(iml()) then
+    --     ImGui.Text("Primary Target")
+
+    --     -- for k, v in pairs({a = "b", c = "d"}) do
+    --     -- end
+
+    --     ImGui.EndListBox()
+    -- end
+
+    -- ImGui.EndGroup()
+
+    -- ImGui.Text("Test2")
+    -- ImGui.Text("Test")
+
+    -- ImGui::BeginGroup();
+	-- 	components::sub_title("SESSION_SWITCHER"_T);
+	-- 	if (ImGui::BeginListBox("###session_switch", get_listbox_dimensions()))
+	-- 	{
+	-- 		if (ImGui::BeginCombo("##regionswitcher", "REGIONS"_T.data()))
+	-- 		{
+	-- 			for (const auto& region_type : regions)
+	-- 			{
+	-- 				components::selectable(region_type.name, *g_pointers->m_gta.m_region_code == region_type.id, [&region_type] {
+	-- 					*g_pointers->m_gta.m_region_code = region_type.id;
+	-- 				});
+	-- 			}
+	-- 			ImGui::EndCombo();
+	-- 		}
+
+	-- 		ImGui::Spacing();
+
+	-- 		for (const auto& session_type : sessions)
+	-- 		{
+	-- 			components::selectable(session_type.name, false, [&session_type] {
+	-- 				session::join_type(session_type.id);
+	-- 			});
+	-- 		}
+	-- 		ImGui::EndListBox();
+	-- 	}
+
+	-- 	ImGui::EndGroup();
+    -- Testing End
+
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(yu.is_script_running("freemode"), "Yep", "fm script no run so no?"), "Loaded!")
 end
 
@@ -93,17 +311,6 @@ function SussySpt:initUtils()
             return tbs.tabs[key]
         end
     }
-end
-
-function yu.notify(type, message, title)
-    local _title = "[SussySpt] " .. (title or "")
-    if type == 1 or type == "info" then
-        gui.show_message(_title, message)
-    elseif type == 2 or type == "warn" or type == "warning" then
-        gui.show_warning(_title, message)
-    elseif type == 3 or type == "error" or type == "severe" then
-        gui.show_error(_title, message)
-    end
 end
 
 function SussySpt:initTabSelf()
@@ -378,7 +585,7 @@ function SussySpt:initTabSelf()
 end
 
 function SussySpt:initTabHeist()
-    local tab = tbs.getTab(SussySpt.tab, " Heist & Missions")
+    local tab = tbs.getTab(SussySpt.tab, " Heists & Stuff idk")
     tab:clear()
 
     local function initTabCayo()
@@ -1269,7 +1476,7 @@ function SussySpt:initTabHeist()
 
         otherTab:add_text("Nightclub")
 
-        otherTab:add_text("Popularity: " .. stats.get_int(yu.mpx().."CLUB_POPULARITY") .. "/1000")
+        otherTab:add_text("Popularity: "..stats.get_int(yu.mpx().."CLUB_POPULARITY").."/1000")
         otherTab:add_sameline()
         otherTab:add_button("Refill NightClub Popularity", function()
             stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
