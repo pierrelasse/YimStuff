@@ -673,7 +673,7 @@ function SussySpt:initTabHeist()
                 return "???"
             end
 
-            prepsTab:add_text("Primary Target ("..yu.dict_get_or_default(a.primarytargets, stats.get_int(yu.mpx().."H4CNF_TARGET"), "???").." ["..stats.get_int(yu.mpx().."H4CNF_TARGET").."]):")
+            prepsTab:add_text("Primary Target ("..yu.get_or_default(a.primarytargets, stats.get_int(yu.mpx().."H4CNF_TARGET"), "???").." ["..stats.get_int(yu.mpx().."H4CNF_TARGET").."]):")
             for k, v in pairs(a.primarytargets) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v..iml(), function()
@@ -837,7 +837,7 @@ function SussySpt:initTabHeist()
                 end)
             end
             
-            prepsTab:add_text("Approach ("..yu.dict_get_or_default(a.approaches, stats.get_int(yu.mpx().."H4_MISSIONS"), "???").." ["..stats.get_int(yu.mpx().."H4_MISSIONS").."]):")
+            prepsTab:add_text("Approach ("..yu.get_or_default(a.approaches, stats.get_int(yu.mpx().."H4_MISSIONS"), "???").." ["..stats.get_int(yu.mpx().."H4_MISSIONS").."]):")
             for k, v in pairs(a.approaches) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -847,7 +847,7 @@ function SussySpt:initTabHeist()
                 end)
             end
 
-            prepsTab:add_text("Weapons ("..yu.dict_get_or_default(a.weapons, stats.get_int(yu.mpx().."H4CNF_WEAPONS"), "???").." ["..stats.get_int(yu.mpx().."H4CNF_WEAPONS").."]):")
+            prepsTab:add_text("Weapons ("..yu.get_or_default(a.weapons, stats.get_int(yu.mpx().."H4CNF_WEAPONS"), "???").." ["..stats.get_int(yu.mpx().."H4CNF_WEAPONS").."]):")
             for k, v in pairs(a.weapons) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1014,7 +1014,7 @@ function SussySpt:initTabHeist()
             }
 
             yu.set_stat("TAB_HEISTS_APAR_CR", 1)
-            cutsTab:add_text("Cash Receiver ("..yu.dict_get_or_default(a.cashReceivers, yu.get_stat("TAB_HEISTS_APAR_CR")).." ["..yu.get_stat("TAB_HEISTS_APAR_CR").."]):")
+            cutsTab:add_text("Cash Receiver ("..yu.get_or_default(a.cashReceivers, yu.get_stat("TAB_HEISTS_APAR_CR")).." ["..yu.get_stat("TAB_HEISTS_APAR_CR").."]):")
             for k, v in pairs(a.cashReceivers) do
                 cutsTab:add_sameline()
                 cutsTab:add_button(v..iml(), function()
@@ -1160,7 +1160,7 @@ function SussySpt:initTabHeist()
                 end
             end
 
-            prepsTab:add_text("Target ("..yu.dict_get_or_default(a.targets, stats.get_int(yu.mpx().."H3OPT_TARGET")).." ["..stats.get_int(yu.mpx().."H3OPT_TARGET").."]):")
+            prepsTab:add_text("Target ("..yu.get_or_default(a.targets, stats.get_int(yu.mpx().."H3OPT_TARGET")).." ["..stats.get_int(yu.mpx().."H3OPT_TARGET").."]):")
             for k, v in pairs(a.targets) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1208,7 +1208,7 @@ function SussySpt:initTabHeist()
                 end)
             end
 
-            prepsTab:add_text("Gunman ("..yu.dict_get_or_default(a.gunmans, stats.get_int(yu.mpx().."H3OPT_CREWWEAP")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWWEAP").."]):")
+            prepsTab:add_text("Gunman ("..yu.get_or_default(a.gunmans, stats.get_int(yu.mpx().."H3OPT_CREWWEAP")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWWEAP").."]):")
             for k, v in pairs(a.gunmans) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1217,7 +1217,7 @@ function SussySpt:initTabHeist()
                 end)
             end
 
-            prepsTab:add_text("Driver ("..yu.dict_get_or_default(a.drivers, stats.get_int(yu.mpx().."H3OPT_CREWDRIVER")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWDRIVER").."]):")
+            prepsTab:add_text("Driver ("..yu.get_or_default(a.drivers, stats.get_int(yu.mpx().."H3OPT_CREWDRIVER")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWDRIVER").."]):")
             for k, v in pairs(a.drivers) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1226,7 +1226,7 @@ function SussySpt:initTabHeist()
                 end)
             end
 
-            prepsTab:add_text("Hacker ("..yu.dict_get_or_default(a.hackers, stats.get_int(yu.mpx().."H3OPT_CREWHACKER")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWHACKER").."]):")
+            prepsTab:add_text("Hacker ("..yu.get_or_default(a.hackers, stats.get_int(yu.mpx().."H3OPT_CREWHACKER")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWHACKER").."]):")
             for k, v in pairs(a.hackers) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1235,7 +1235,7 @@ function SussySpt:initTabHeist()
                 end)
             end
 
-            prepsTab:add_text("Mask ("..yu.dict_get_or_default(a.masks, stats.get_int(yu.mpx().."H3OPT_MASKS")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWHACKER").."]):")
+            prepsTab:add_text("Mask ("..yu.get_or_default(a.masks, stats.get_int(yu.mpx().."H3OPT_MASKS")).." ["..stats.get_int(yu.mpx().."H3OPT_CREWHACKER").."]):")
             for k, v in pairs(a.masks) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
@@ -1408,7 +1408,7 @@ function SussySpt:initTabHeist()
             local prepsTab = tbs.getTab(asTab, "   Preps", "autoshop")
             prepsTab:clear()
 
-            prepsTab:add_text("Mission ("..yu.dict_get_or_default(a.missions, stats.get_int(yu.mpx().."TUNER_CURRENT")).." ["..stats.get_int(yu.mpx().."TUNER_CURRENT").."]):")
+            prepsTab:add_text("Mission ("..yu.get_or_default(a.missions, stats.get_int(yu.mpx().."TUNER_CURRENT")).." ["..stats.get_int(yu.mpx().."TUNER_CURRENT").."]):")
             for k, v in pairs(a.missions) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
