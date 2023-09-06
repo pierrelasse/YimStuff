@@ -14,26 +14,24 @@ function SussySpt:new()
     local tab = gui.get_tab("SussySpt")
     SussySpt.tab = tab
 
-    if SussySpt.dmode then
-        tab:add_text("Version: "..SussySpt.version)
-        tab:add_text("Version id: "..SussySpt.versionid)
-        tab:add_text("Dev mode: "..yu.boolstring(SussySpt.dmode, "enabled", "disabled"))
+    tab:add_text("Version: "..SussySpt.version)
+    tab:add_text("Version id: "..SussySpt.versionid)
+    tab:add_text("Dev mode: "..yu.boolstring(SussySpt.dmode, "enabled", "disabled"))
 
-        SussySpt.rendercb = {}
-        SussySpt.add_render = function(cb)
-            if cb ~= nil then
-                SussySpt.rendercb[yu.gun()] = cb
-            end
+    SussySpt.rendercb = {}
+    SussySpt.add_render = function(cb)
+        if cb ~= nil then
+            SussySpt.rendercb[yu.gun()] = cb
         end
-
-        SussySpt:initRendering(tab)
-        tab:add_imgui(function()
-            for k, v in pairs(SussySpt.rendercb) do
-                v()
-            end
-        end)
-
     end
+
+    SussySpt:initRendering(tab)
+    tab:add_imgui(function()
+        for k, v in pairs(SussySpt.rendercb) do
+            v()
+        end
+    end)
+
     SussySpt:initTabSelf()
     SussySpt:initTabHBO()
     SussySpt:initTabHeist()
@@ -49,226 +47,6 @@ function SussySpt:new()
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
         end
     end)
-
-    -- Testing
-    if false then
-        -- local function initRendering()
-        --     -- local function render_heists_test()
-        --     --     if ImGui.BeginTabItem("LULLULU1") then
-        --     --         ImGui.EndTabItem()
-        --     --     end
-
-        --     --     if ImGui.BeginTabItem("LULLULU2") then
-        --     --         ImGui.EndTabItem()
-        --     --     end
-        --     -- end
-        --     -- local function render_heists()
-        --     --     if ImGui.Begin("Heists & Stuff Idk") then
-        --     --         ImGui.BeginTabBar(iml())
-
-        --     --         render_heists_test()
-
-        --     --         ImGui.EndTabBar()
-
-        --     --         ImGui.End()
-        --     --     end
-        --     -- end
-
-        --     local function heists_cayo_getstorage(i)
-        --         if stats.get_int(yu.mpx().."H4LOOT_CASH_"..i) > 0 then
-        --             return 2
-        --         elseif stats.get_int(yu.mpx().."H4LOOT_WEED_"..i) > 0 then
-        --             return 3
-        --         elseif stats.get_int(yu.mpx().."H4LOOT_COKE_"..i) > 0 then
-        --             return 4
-        --         elseif stats.get_int(yu.mpx().."H4LOOT_GOLD_"..i) > 0 then
-        --             return 5
-        --         end
-        --         return 1
-        --     end
-
-        --     local heists_cayo_a = {
-        --         primarytargets = {
-        --             [0] = "Tequila $900K",
-        --             [1] = "Necklace $1M",
-        --             [2] = "Bonds $1,1M",
-        --             [3] = "Diamond $1,3M",
-        --             [5] = "Statue $1,9M"
-        --         },
-        --         storages = {
-        --             [1] = "None",
-        --             [2] = "Cash",
-        --             [3] = "Weed",
-        --             [4] = "Coke",
-        --             [5] = "Gold"
-        --         },
-        --         islandstorage = heists_cayo_getstorage("I"),
-        --         compoundstorage = heists_cayo_getstorage("C"),
-        --         addpaintings = false,
-        --         difficulties = {
-        --             [126823] = "Normal",
-        --             [131055] = "Hard"
-        --         },
-        --         approaches = {
-        --             [65283] = "Kosatka",
-        --             [65413] = "Alkonost",
-        --             [65289] = "Velum",
-        --             [65425] = "Stealth Annihilator",
-        --             [65313] = "Patrol Boat",
-        --             [65345] = "Longfin",
-        --             [65535] = "*All*"
-        --         },
-        --         weapons = {
-        --             [1] = "Aggressor",
-        --             [2] = "Conspirator",
-        --             [3] = "Crackshot",
-        --             [4] = "Saboteur",
-        --             [5] = "Marksman"
-        --         },
-        --     }
-        --     heists_cayo_a.primarytarget = next(heists_cayo_a.primarytargets)
-
-            
-        --     local function render_heists_cayo()
-        --         if (ImGui.BeginTabItem("Cayo Perico Heist")) then
-                    
-        --             ImGui.BeginGroup()
-
-        --             ImGui.Text("Preps")
-
-        --             if (ImGui.BeginListBox("##heists_cayo_listbox1")) then
-        --                 ImGui.Text("Primary Target:")
-        --                 ImGui.SameLine()
-        --                 heists_cayo_a.primarytarget = yu.rendering.renderList(heists_cayo_a.primarytargets, heists_cayo_a.primarytarget, "heists_cayo_primarytarget_list")
-
-        --                 ImGui.Text("Fill Compound Storages:")
-        --                 ImGui.SameLine()
-        --                 heists_cayo_a.compoundstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.compoundstorage, "heists_cayo_storagec_list")
-
-        --                 ImGui.Text("Fill Island Storages:")
-        --                 ImGui.SameLine()
-        --                 heists_cayo_a.islandstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.islandstorage, "heists_cayo_storagei_list")
-
-        --                 ImGui.Text("Add Paintings:")
-        --                 ImGui.SameLine()
-        --                 if (ImGui.Checkbox("##heists_cayo_addpaintings", heists_cayo_a.addpaintings)) then
-        --                     heists_cayo_a.addpaintings = true
-        --                 end
-
-
-        --                 if (ImGui.Button("Set")) then
-        --                 end
-            
-        --                 ImGui.SameLine()
-            
-        --                 if (ImGui.Button("Unlock POI & Accesspoints")) then
-        --                 end
-            
-        --                 ImGui.SameLine()
-            
-        --                 if (ImGui.Button("Complete Preps")) then
-        --                 end
-            
-        --                 ImGui.SameLine()
-            
-        --                 if (ImGui.Button("Reset Preps")) then
-        --                 end
-
-        --                 ImGui.EndListBox()
-        --             end
-                    
-        --             ImGui.EndGroup()
-
-        --             ImGui.SameLine()
-
-        --             ImGui.BeginGroup()
-        --             ImGui.Text("2135325")
-        --             ImGui.EndGroup()
-
-        --             ImGui.EndTabItem()
-        --         end
-        --     end
-
-        --     local function render_heists_test2()
-        --         if (ImGui.BeginTabItem("TubItem2")) then
-        --             ImGui.Text("eheheheeh")
-        --             ImGui.EndTabItem()
-        --         end
-        --     end
-
-        --     local function render_heists()
-        --         if (ImGui.Begin("Heists & Stuff Idk")) then
-        --             ImGui.BeginTabBar("##heists_tabbar")
-
-        --             render_heists_cayo()
-        --             render_heists_test2()
-
-        --             ImGui.EndTabBar()
-        --         end
-        --         ImGui.End()
-        --     end
-
-        --     -- tab:add_imgui(function()
-        --     --     render_heists()
-        --     -- end)
-        -- end
-
-        -- initRendering()
-        -- ImGui.Text("Test4")
-        -- ImGui.Text("Test3")
-    
-        -- ImGui.BeginGroup()
-        -- -- components.sub_title("SESSION_SWITCHER")
-    
-        -- ImGui.SetWindowFontScale(1.2) -- Adjust the scale as needed
-        -- ImGui.Text("W Font")
-    
-        -- ImGui.SetWindowFontScale(1.0)
-    
-        -- if ImGui.BeginListBox(iml()) then
-        --     ImGui.Text("Primary Target")
-    
-        --     -- for k, v in pairs({a = "b", c = "d"}) do
-        --     -- end
-    
-        --     ImGui.EndListBox()
-        -- end
-    
-        -- ImGui.EndGroup()
-    
-        -- ImGui.Text("Test2")
-        -- ImGui.Text("Test")
-    
-        -- ImGui::BeginGroup();
-        --     components::sub_title("SESSION_SWITCHER"_T);
-        --     if (ImGui::BeginListBox("###session_switch", get_listbox_dimensions()))
-        --     {
-        --         if (ImGui::BeginCombo("##regionswitcher", "REGIONS"_T.data()))
-        --         {
-        --             for (const auto& region_type : regions)
-        --             {
-        --                 components::selectable(region_type.name, *g_pointers->m_gta.m_region_code == region_type.id, [&region_type] {
-        --                     *g_pointers->m_gta.m_region_code = region_type.id;
-        --                 });
-        --             }
-        --             ImGui::EndCombo();
-        --         }
-    
-        --         ImGui::Spacing();
-    
-        --         for (const auto& session_type : sessions)
-        --         {
-        --             components::selectable(session_type.name, false, [&session_type] {
-        --                 session::join_type(session_type.id);
-        --             });
-        --         }
-        --         ImGui::EndListBox();
-        --     }
-    
-        --     ImGui::EndGroup();
-        -- end
-    end
-    -- Testing End
 
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(yu.is_script_running("freemode"), "Yep", "fm script no run so no?"), "Loaded!")
 end
@@ -350,99 +128,126 @@ function SussySpt:initUtils()
 end
 
 function SussySpt:initTabSelf()
-    if SussySpt.dmode then
-        yu.rendering.setCheckboxChecked("self_invisible", false)
 
-        local tabBarId = "##"
-
-        local currentMentalState
-        local function updateMentalState()
-            currentMentalState = stats.get_float("MPPLY_PLAYER_MENTAL_STATE")
+    SussySpt.ensureVis = function(state, id, veh)
+        if state ~= true and state ~= false then
+            return nil
         end
-        updateMentalState()
-
-        local currentBadsport
-        local function updateBadsport()
-            currentBadsport = stats.get_bool("MPPLY_CHAR_IS_BADSPORT")
+        if id ~= nil then
+            ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
         end
-        updateBadsport()
-        local badsportEnable = "Enable"..iml()
-        local badsportDisable = "Disable"..iml()
-
-        SussySpt.add_render(function()
-            if yu.rendering.isCheckboxChecked("cat_self") then
-                if ImGui.Begin("Self") then
-                    ImGui.BeginTabBar(tabBarId)
-    
-                    if (ImGui.BeginTabItem("General")) then
-                        
-                        yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
-                            if state then
-                                SussySpt.invisible = true
-                            else
-                                SussySpt.disableInvis()
-                            end
-                        end)
-
-                        if ImGui.Button("Remove blackscreen") then
-                            yu.add_task(function()
-                                CAM.DO_SCREEN_FADE_IN(0)
-                            end)
-                        end
-
-                        ImGui.EndTabItem()
-                    end
-                    if (ImGui.BeginTabItem("Stats")) then
-                        if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
-                            yu.notify(1, "Reset mental state?")
-                            updateMentalState()
-                        end
-
-                        ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
-                        ImGui.SameLine()
-                        if ImGui.Button(badsportEnable) then
-                            stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-                            stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
-                        end
-                        ImGui.SameLine()
-                        if ImGui.Button(badsportDisable) then
-                            stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-                            stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
-                        end
-
-                        if ImGui.Button("Remove bounty") then
-                            globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
-                        end
-
-                        ImGui.EndTabItem()
-                    end
-
-                    if (ImGui.BeginTabItem("Unlocks")) then
-                        if ImGui.Button("Unlock fast run and reload") then
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
-                            yu.notify(2, "Switch sessions to apply changes", "Balls")
-                        end
-
-                        ImGui.EndTabItem()
-                    end
-    
-                    ImGui.EndTabBar()
-                end
-                ImGui.End()
-            end
-        end)
+        if veh ~= nil then
+            ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
+        end
     end
 
+    SussySpt.enableVis = function()
+        SussySpt.invisible = nil
+        SussySpt.ensureVis(true, yu.ppid(), yu.veh())
+    end
 
+    yu.rendering.setCheckboxChecked("self_invisible", false)
+
+    local tabBarId = "##self_tabbar"
+
+    local currentMentalState
+    local function updateMentalState()
+        currentMentalState = stats.get_float("MPPLY_PLAYER_MENTAL_STATE")
+    end
+    updateMentalState()
+
+    local currentBadsport
+    local function updateBadsport()
+        currentBadsport = stats.get_bool("MPPLY_CHAR_IS_BADSPORT")
+    end
+    updateBadsport()
+    local badsportEnable = "Enable"..iml()
+    local badsportDisable = "Disable"..iml()
+
+    SussySpt.add_render(function()
+        if yu.rendering.isCheckboxChecked("cat_self") then
+            if ImGui.Begin("Self") then
+                ImGui.BeginTabBar(tabBarId)
+
+                if (ImGui.BeginTabItem("General")) then
+                    
+                    yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
+                        if state then
+                            SussySpt.invisible = true
+                        else
+                            SussySpt.enableVis()
+                        end
+                    end)
+
+                    if ImGui.Button("Remove blackscreen") then
+                        yu.add_task(function()
+                            CAM.DO_SCREEN_FADE_IN(0)
+                        end)
+                    end
+
+                    ImGui.EndTabItem()
+                end
+                if (ImGui.BeginTabItem("Stats")) then
+                    if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
+                        yu.notify(1, "Reset mental state?")
+                        updateMentalState()
+                    end
+
+                    ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
+                    ImGui.SameLine()
+                    if ImGui.Button(badsportEnable) then
+                        stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                        stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                    end
+                    ImGui.SameLine()
+                    if ImGui.Button(badsportDisable) then
+                        stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                        stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                    end
+
+                    if ImGui.Button("Remove bounty") then
+                        globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
+                    end
+
+                    ImGui.EndTabItem()
+                end
+
+                if (ImGui.BeginTabItem("Unlocks")) then
+                    if ImGui.Button("Unlock fast run and reload") then
+                        stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
+                        stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
+                        stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
+                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
+                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
+                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
+                        yu.notify(2, "Switch sessions to apply changes", "Balls")
+                    end
+
+                    ImGui.EndTabItem()
+                end
+
+                ImGui.EndTabBar()
+            end
+            ImGui.End()
+        end
+    end)
+
+    yu.key_listener.add_callback(yu.keys["L"], function()
+        if not HUD.IS_PAUSE_MENU_ACTIVE() then
+            if SussySpt.invisible == true then
+                SussySpt.enableVis()
+            else
+                SussySpt.invisible = true
+            end
+            log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
+        end
+    end)
+
+    -- old
 
     local tab = tbs.getTab(SussySpt.tab, " Self")
     tab:clear()
@@ -451,11 +256,6 @@ function SussySpt:initTabSelf()
         SussySpt:initTabSelf()
     end)
     tab:add_separator()
-
-    tab:add_button("Remove bounty ["..globals.get_int(1 + 2359296 + 5150 + 13)..">2880000]", function()
-        globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
-        SussySpt:initTabSelf()
-    end)
 
     tab:add_text("Fast Run and Reload:")
     tab:add_sameline()
@@ -477,73 +277,6 @@ function SussySpt:initTabSelf()
         stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", 0)
         stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", 0)
         SussySpt:initTabSelf()
-    end)
-
-    tab:add_text("BadSport ["..yesNoBool(stats.get_bool("MPPLY_CHAR_IS_BADSPORT")).."]:")
-    tab:add_sameline()
-    tab:add_button("Add"..iml(), function()
-        stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-        stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
-        SussySpt:initTabSelf()
-    end)
-    tab:add_sameline()
-    tab:add_button("Remove"..iml(), function()
-        stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-        stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
-        SussySpt:initTabSelf()
-    end)
-
-    tab:add_text("Mental State ["..stats.get_float("MPPLY_PLAYER_MENTAL_STATE").."]:")
-    tab:add_sameline()
-    tab:add_button("Reset"..iml(), function()
-        stats.set_float(yu.mpx().."PLAYER_MENTAL_STATE", 0)
-        SussySpt:initTabSelf()
-    end)
-
-    SussySpt.ensureVis = function(state, id, veh)
-        if state ~= true and state ~= false then
-            return nil
-        end
-        if id ~= nil then
-            ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
-        end
-        if veh ~= nil then
-            ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
-        end
-    end
-
-    SussySpt.disableInvis = function()
-        SussySpt.invisible = nil
-        SussySpt.ensureVis(true, yu.ppid(), yu.veh())
-    end
-
-    SussySpt.toggleVis = function()
-        if SussySpt.invisible == true then
-            SussySpt.disableInvis()
-        else
-            SussySpt.invisible = true
-        end
-    end
-
-    tab:add_text("Invisible:")
-    tab:add_sameline()
-    tab:add_button("Enable"..iml(), function()
-        SussySpt.invisible = true
-    end)
-    tab:add_sameline()
-    tab:add_button("Disable"..iml(), function()
-        SussySpt.disableInvis()
-    end)
-
-    yu.key_listener.add_callback(yu.keys["L"], function()
-        if not HUD.IS_PAUSE_MENU_ACTIVE() then
-            SussySpt.toggleVis()
-            log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
-        end
     end)
 
     local function initTabStats()
@@ -1611,93 +1344,32 @@ function SussySpt:initTabHeist()
             end)
         end
 
-        local function initTabCuts()
-            local cutsTab = tbs.getTab(aparTab, "   Cuts", "apar")
-            cutsTab:clear()
-
-            local a = {
-                cashReceivers = {
-                    [1] = "All",
-                    [2] = "Only Crew",
-                    [3] = "Only Me"
-                },
-                fleeca = false,
-                lock = false
-            }
-
-            yu.set_stat("TAB_HEISTS_APAR_CR", 1)
-            cutsTab:add_text("Cash Receiver ("..yu.get_or_default(a.cashReceivers, yu.get_stat("TAB_HEISTS_APAR_CR")).." ["..yu.get_stat("TAB_HEISTS_APAR_CR").."]):")
-            for k, v in pairs(a.cashReceivers) do
-                cutsTab:add_sameline()
-                cutsTab:add_button(v..iml(), function()
-                    yu.notify(1, "Set 'Cash Receiver' to "..a.cashReceivers[k].." ["..k.."]")
-                    yu.set_stat("TAB_HEISTS_APAR_CR", k)
-                    initTabCuts()
-                end)
-            end
-
-            -- cutsTab:add_button("Fleeca Job ($15m) ("..boolToStr(a.fleeca, "enabled", "disabled")..")", function()
-            --     if a.lock == true then
-            --         yu.notify(3, "Button is currently on lock. Please wait")
-            --         return
-            --     end
-            --     a.lock = true
-            --     if a.fleeca then
-            --         a.fleeca = true
-            --         initTabCuts()
-            --         script.run_in_fiber(function(sc)
-            --             if a.cashReceiver == 1 then
-            --                 -- globals.set_int(1936397 + 1 + 1, 100 - (7453 * 2))
-            --                 -- globals.set_int(1936397 + 1 + 2, 7453)
-            --                 sc:sleep(1)
-            --                 menu.send_key_press(13)
-            --                 sc:sleep(1)
-            --                 menu.send_key_press(27)
-            --                 sc:sleep(1)
-            --                 -- globals.set_int(1938365 + 3008 + 1, 7453)
-            --             elseif a.cashReceiver == 2 then
-            --                 -- globals.set_int(1936397 + 1 + 1, 100 - (7453 * 2))
-            --                 -- globals.set_int(1936397 + 1 + 2, 7453)
-            --                 sc:sleep(1)
-            --                 menu.send_key_press(13)
-            --                 sc:sleep(1)
-            --                 menu.send_key_press(27)
-            --             elseif a.cashReceiver == 3 then
-            --                 globals.set_int(1938365 + 3008 + 1, 7453)
-            --             end
-            --             a.lock = false
-            --             yu.notify(1, "Applied!", "Fleeca Job ($15m)")
-            --         end)
-            --     else
-            --         -- globals.set_int(1936399, 60)
-            --         -- globals.set_int(1936400, 40)
-            --         -- globals.set_int(1938365 + 3008 + 1, 60)
-            --     end
-            --     initTabCuts()
-            -- end)
-        end
-
         local function initTabExtra()
             local extraTab = tbs.getTab(aparTab, "   Extra", "apar")
             extraTab:clear()
 
-            extraTab:add_button("Skip Fleeca hack", function()
-                locals.set_int("fm_mission_controller", 11760 + 24, 7)
+            extraTab:add_button("Skip fleeca hack", function()
+                if requireScript("fm_mission_controller") then
+                    locals.set_int("fm_mission_controller", 11760 + 24, 7)
+                end
             end)
 
-            extraTab:add_button("Skip Fleeca drill", function()
-                locals.set_int("fm_mission_controller", 11760 + 24, 7)
+            extraTab:add_button("Skip fleeca drill", function()
+                if requireScript("fm_mission_controller") then
+                    locals.set_int("fm_mission_controller", 11760 + 24, 7)
+                end
             end)
 
             extraTab:add_button("Instant finish (solo only)", function()
-                locals.set_int("fm_mission_controller", 19710, 12) 
-                locals.set_int("fm_mission_controller", 28331 + 1, 99999) 
-                locals.set_int("fm_mission_controller", 31587 + 69, 99999)
+                if requireScript("fm_mission_controller") then
+                    locals.set_int("fm_mission_controller", 19710, 12) 
+                    locals.set_int("fm_mission_controller", 28331 + 1, 99999) 
+                    locals.set_int("fm_mission_controller", 31587 + 69, 99999)
+                end
             end)
         end
 
         initTabPreps()
-        initTabCuts()
         initTabExtra()
     end
 
@@ -1880,7 +1552,7 @@ function SussySpt:initTabHeist()
             end)
             prepsTab:add_sameline()
             prepsTab:add_button("Unlock cancellation", function()
-                stats.set_int(yu.mpx().."CAS_HEIST_NOTS", -1) 
+                stats.set_int(yu.mpx().."CAS_HEIST_NOTS", -1)
                 stats.set_int(yu.mpx().."CAS_HEIST_FLOW", -1)
             end)
         end
@@ -2375,202 +2047,3 @@ function SussySpt:initTabCMM()
 end
 
 SussySpt:new()
-
-    
---     v.tab.money = {}
---     v.tab.money._ = v.tab._:add_tab(" Money")
---     v.tab.money._:add_text(
---         "Here are the best and safest ways to cheat money in GTA 5 online.")
---     v.tab.money._:add_text(
---         "BUT DO NOT GET A LOT OF MONEY, AND USE THE ''STAT EDITOR' SECTION FOR ACCOUNT SAFETY!!!")
---     v.tab.money._:add_text("Make money in moderation!")
---     v.tab.money.ceo = {}
---     v.tab.money.ceo._ = v.tab.money._:add_tab(" CEO")
---     v.tab.money.ceo.how2use = v.tab.money.ceo._:add_tab(" How2Use")
---     v.tab.money.ceo.how2use:add_text("For the buy Mission:")
---     v.tab.money.ceo.how2use:add_text(
---         "1) Click ''Show computer'' and select ''CEO''")
---     v.tab.money.ceo.how2use:add_text(
---         "2) select ur warhouse and start the 1 Crate Mission for 2k$")
---     v.tab.money.ceo.how2use:add_text(
---         "3) wait 1 second -> now your warehouse is full.")
---     v.tab.money.ceo.how2use:add_separator()
---     v.tab.money.ceo.how2use:add_text("How to get money")
---     v.tab.money.ceo.how2use:add_text(
---         " Click ''Show computer'' and select ''CEO'', click ''Sell Cargo'' and wait")
---     v.tab.money.ceo.how2use:add_text(
---         "Click ''CEO'' as many times as you need to make money (1 click = 6 m dollars)")
---     v.tab.money.ceo.how2use:add_text("Disable it and everything is normal again")
---     v.tab.money.ceo._:add_button("Show Computer", function()
---         local playerIndex = globals.get_int(1574918)
---         if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
---             run_script("apparcadebusinesshub")
---         else
---             if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
---                 run_script("apparcadebusinesshub")
---             else
---                 gui.show_message("Don't forget to register as CEO/Leader")
---                 run_script("apparcadebusinesshub")
---             end
---         end
---     end)
---     v.tab.money.casino = {}
---     v.tab.money.casino._ = v.tab.money._:add_tab(" Casino")
---     v.tab.money.casino._:add_text("Chips can be bought")
---     v.tab.money.casino._:add_button("Chips set to 1000000000", function()
---         script.run_in_fiber(function(script)
---             STATS.STAT_SET_INT(joaat("MPPLY_CASINO_CHIPS_PUR_GD"), -1000000000,
---                                true)
---         end)
---     end)
---     v.tab.money.casino._:add_button("Chips reset to 0", function()
---         script.run_in_fiber(function(script)
---             STATS.STAT_SET_INT(joaat("MPPLY_CASINO_CHIPS_PUR_GD"), 0, true)
---         end)
---     end)
---     v.tab.he = {}
---     v.tab.he._ = v.tab._:add_tab(" Heist Editor")
---     v.tab.he.cayo = {}
---     v.tab.he.cayo._ = v.tab.he._:add_tab(" Cayo Perico Heist")
---     v.tab.he.cayo._:add_button("Setup Panther + Hard Mode", function()
---         PlayerIndex = globals.get_int(1574918)
---         if PlayerIndex == 0 then
---             mpx = "MP0_"
---         else
---             mpx = "MP1_"
---         end
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_BS_GEN"), 131071, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_BS_ENTR"), 63, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_BS_ABIL"), 63, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_WEAPONS"), 5, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_WEP_DISRP"), 3, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_ARM_DISRP"), 3, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_HEL_DISRP"), 3, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_TARGET"), 5, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_TROJAN"), 2, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4CNF_APPROACH"), -1, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_CASH_I"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_CASH_C"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_WEED_I"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_WEED_C"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_COKE_I"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_COKE_C"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_CASH_I"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_GOLD_I"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_GOLD_C"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_PAINT"), -1, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4_PROGRESS"), 131055, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_CASH_I_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_CASH_C_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_WEED_I_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_WEED_C_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_COKE_I_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_COKE_C_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_GOLD_I_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_GOLD_C_SCOPED"), 0, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4LOOT_PAINT_SCOPED"), -1, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4_MISSIONS"), 65535, true)
---         STATS.STAT_SET_INT(joaat(yu.mpx().."H4_PLAYTHROUGH_STATUS"), 32, true)
---     end)
---     v.tab.he.cayo._:add_button("remove all cameras", function()
---         for _, ent in pairs(entities.get_all_objects_as_handles()) do
---             for __, cam in pairs(CamList) do
---                 if ENTITY.GET_ENTITY_MODEL(ent) == cam then
---                     ENTITY.SET_ENTITY_AS_MISSION_ENTITY(ent, true, true)
---                     ENTITY.DELETE_ENTITY(ent)
---                 end
---             end
---         end
---     end)
---     CamList = {
---         joaat("prop_cctv_cam_01a"), joaat("prop_cctv_cam_01b"),
---         joaat("prop_cctv_cam_02a"), joaat("prop_cctv_cam_03a"),
---         joaat("prop_cctv_cam_04a"), joaat("prop_cctv_cam_04c"),
---         joaat("prop_cctv_cam_05a"), joaat("prop_cctv_cam_06a"),
---         joaat("prop_cctv_cam_07a"), joaat("prop_cs_cctv"), joaat("p_cctv_s"),
---         joaat("hei_prop_bank_cctv_01"), joaat("hei_prop_bank_cctv_02"),
---         joaat("ch_prop_ch_cctv_cam_02a"),
---         joaat("xm_prop_x17_server_farm_cctv_01")
---     }
---     v.tab.he.cayo._:add_sameline()
---     v.tab.he.cayo._:add_button("Removed Perico hoplites", function()
---         for _, ent in pairs(entities.get_all_peds_as_handles()) do
---             if ENTITY.GET_ENTITY_MODEL(ent) == 193469166 then
---                 ENTITY.SET_ENTITY_AS_MISSION_ENTITY(ent, true, true)
---                 ENTITY.DELETE_ENTITY(ent)
---             end
---         end
---     end)
---     v.tab.he.fleeca = {}
---     v.tab.he.fleeca._ = v.tab.he._:add_tab(" Fleeca Heist")
---     v.tab.he.fleeca._:add_button("Skip Prep", function()
---         PlayerIndex = globals.get_int(1574907)
---         if PlayerIndex == 0 then
---             mpx = "MP0_"
---         else
---             mpx = "MP1_"
---         end
---         STATS.STAT_SET_INT(joaat(yu.mpx().."HEIST_PLANNING_STAGE"), -1, true)
---     end)
---     v.tab.he.fleeca._:add_sameline()
---     v.tab.he.fleeca._:add_button("Reset Prep", function()
---         PlayerIndex = globals.get_int(1574907)
---         if PlayerIndex == 0 then
---             mpx = "MP0_"
---         else
---             mpx = "MP1_"
---         end
---         STATS.STAT_SET_INT(joaat(yu.mpx().."HEIST_PLANNING_STAGE"), 0, true)
---     end)
-
---     v.tab.stateditor = {}
---     v.tab.stateditor._ = v.tab._:add_tab(" Stat Editor")
---     v.tab.stateditor._:add_text(
---         "Use ''Reset 1'' player or ''Reset 2 player'' and change session and exit the game to apply changes")
---     v.tab.stateditor._:add_separator()
---     v.tab.stateditor._:add_button("Reset 1 player", function()
---         gui.show_message("Player 1 Stats Reset",
---                          "Change session to apply changes")
---         script.run_in_fiber(function(script)
---             STATS.STAT_SET_INT(joaat("MPPLY_TOTAL_EVC"), 0, true)
---             STATS.STAT_SET_INT(joaat("MPPLY_TOTAL_SVC"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_JOBS"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MOEARN_SHARED"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_JOBSHARED"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_NEY_EARN_SELLING_VEH"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_WEAPON_ARMOR"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_VEH_MAINTENANCE"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_STYLE_ENT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_PROPERTY_UTIL"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_JOB_ACTIVITY"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_VEHICLE_EXPORT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_SPENT_VEHICLE_EXPORT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP0_MONEY_EARN_CLUB_DANCING"), 0, true)
---         end)
---     end)
---     v.tab.stateditor._:add_button("Reset 2 player", function()
---         gui.show_message("Player 2 Stats Reset",
---                          "Change session to apply changes")
---         script.run_in_fiber(function(script)
---             STATS.STAT_SET_INT(joaat("MPPLY_TOTAL_EVC"), 0, true)
---             STATS.STAT_SET_INT(joaat("MPPLY_TOTAL_SVC"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_JOBS"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MOEARN_SHARED"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_JOBSHARED"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_NEY_EARN_SELLING_VEH"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_WEAPON_ARMOR"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_VEH_MAINTENANCE"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_STYLE_ENT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_PROPERTY_UTIL"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_JOB_ACTIVITY"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_BETTING"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_VEHICLE_EXPORT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_SPENT_VEHICLE_EXPORT"), 0, true)
---             STATS.STAT_SET_INT(joaat("MP1_MONEY_EARN_CLUB_DANCING"), 0, true)
---         end)
---     end)
