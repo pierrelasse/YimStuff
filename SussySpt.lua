@@ -39,7 +39,6 @@ function SussySpt:new()
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
     SussySpt:initTabCMM()
-    SussySpt:injectTabPlayer()
 
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
         log.info("[CHAT] "..PLAYER.GET_PLAYER_NAME(player_id)..": "..chat_message)
@@ -2373,13 +2372,6 @@ function SussySpt:initTabCMM()
                 end
             end
         end)
-end
-
-function SussySpt:injectTabPlayer()
-    local tab = gui.get_tab("GUI_TAB_PLAYER")
-    tab:add_imgui(function()
-        ImGui.Text("Loool")
-    end)
 end
 
 SussySpt:new()
