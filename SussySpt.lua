@@ -35,9 +35,11 @@ function SussySpt:new()
 
     end
     SussySpt:initTabSelf()
+    SussySpt:initTabHBO()
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
     SussySpt:initTabCMM()
+    SussySpt:injectTabPlayer()
 
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
         log.info("[CHAT] "..PLAYER.GET_PLAYER_NAME(player_id)..": "..chat_message)
@@ -368,8 +370,6 @@ function SussySpt:initTabSelf()
         local badsportEnable = "Enable"..iml()
         local badsportDisable = "Disable"..iml()
 
-        
-
         SussySpt.add_render(function()
             if yu.rendering.isCheckboxChecked("cat_self") then
                 if ImGui.Begin("Self") then
@@ -384,6 +384,10 @@ function SussySpt:initTabSelf()
                                 SussySpt.disableInvis()
                             end
                         end)
+
+                        if ImGui.Button("Remove blackscreen") then
+                            CAM.DO_SCREEN_FADE_IN(0)
+                        end
 
                         ImGui.EndTabItem()
                     end
@@ -711,6 +715,485 @@ function SussySpt:initTabSelf()
     initTabUnlocks()
 end
 
+function SussySpt:initTabHBO()
+    local toRender = {}
+    local function addToRender(cb)
+        toRender[yu.gun()] = cb
+    end
+
+    local function initCayo()
+        local a = {
+            primarytargets = {
+                [0] = "Sinsimito Tequila $900K|990K",
+                [1] = "Ruby Necklace $1M|1,1M",
+                [2] = "Bearer Bonds $1,1M|1,12M",
+                [4] = "Minimadrazzo Files $1,1M|1,21M",
+                [3] = "Pink Diamond $1,3M|1,43M",
+                [5] = "Panther Statue $1,9M|2,09M",
+            },
+            storages = {
+                [1] = "None",
+                [2] = "Cash",
+                [3] = "Weed",
+                [4] = "Coke",
+                [5] = "Gold",
+            },
+            difficulties = {
+                [126823] = "Normal",
+                [131055] = "Hard",
+            },
+            approaches = {
+                [65283] = "Kosatka",
+                [65413] = "Alkonost",
+                [65289] = "Velum",
+                [65425] = "Stealth Annihilator",
+                [65313] = "Patrol Boat",
+                [65345] = "Longfin",
+                [65535] = "*All*",
+            },
+            weapons = {
+                [1] = "Aggressor [Assault SG + Machine Pistol + Machete + Grenade]",
+                [2] = "Conspirator [Military Rifle + AP + Knuckles + Stickies]",
+                [3] = "Crackshot [Sniper + AP + Knife + Molotov]",
+                [4] = "Saboteur [SMG Mk2 + SNS Pistol + Knife + Pipe Bomb]",
+                [5] = "Marksman [AK-47? + Pistol .50? + Machete + Pipe Bomb]",
+            },
+            supplytrucklocations = {
+                [1] = "Airport",
+                [2] = "North Dock",
+                [3] = "Main Dock - East",
+                [4] = "Main Dock - West",
+                [5] = "Inside Compound",
+            }
+        }
+
+        local function getStorage(i)
+            if stats.get_int(yu.mpx().."H4LOOT_CASH_"..i) > 0 then
+                return 2
+            elseif stats.get_int(yu.mpx().."H4LOOT_WEED_"..i) > 0 then
+                return 3
+            elseif stats.get_int(yu.mpx().."H4LOOT_COKE_"..i) > 0 then
+                return 4
+            elseif stats.get_int(yu.mpx().."H4LOOT_GOLD_"..i) > 0 then
+                return 5
+            end
+            return 1
+        end
+
+        local function refreshStats()
+            a.primarytarget = stats.get_int(yu.mpx().."H4CNF_TARGET")
+            a.compoundstorage = getStorage("C")
+            a.islandstorage = getStorage("I")
+            yu.rendering.setCheckboxChecked("hbo_cayo_addpaintings", stats.get_int("H4LOOT_PAINT_C") ~= 0)
+            a.difficulty = stats.get_int(yu.mpx().."H4_PROGRESS")
+            a.approach = stats.get_int(yu.mpx().."H4_MISSIONS")
+            a.weapon = stats.get_int(yu.mpx().."H4CNF_WEAPONS")
+            a.supplytrucklocation = stats.get_int(yu.mpx().."H4CNF_TROJAN")
+            yu.rendering.setCheckboxChecked("hbo_cayo_cuttingpowder", stats.get_int(yu.mpx().."H4CNF_TARGET") == 3)
+        end
+
+        refreshStats()
+
+        local cooldowns = {}
+        local function updateCooldowns()
+            for k, v in pairs({"H4_TARGET_POSIX", "H4_COOLDOWN", "H4_COOLDOWN_HARD"}) do
+                cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx()..v) - os.time())
+            end
+        end
+        updateCooldowns()
+        
+        addToRender(function()
+            if (ImGui.BeginTabItem("Cayo Perico Heist")) then
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Preperations")
+
+                local ptr = yu.rendering.renderList(a.primarytargets, a.primarytarget, "hbo_cayo_pt", "Primary Target")
+                if ptr.changed then
+                    yu.notify(1, "Set Primary Target to "..a.primarytargets[ptr.key].." ["..ptr.key.."]", "Cayo Perico Heist")
+                    a.primarytarget = ptr.key
+                    a.primarytargetchanged = true
+                end
+
+                local fcsr = yu.rendering.renderList(a.storages, a.compoundstorage, "hbo_cayo_fcs", "Fill Compound Storages")
+                if fcsr.changed then
+                    yu.notify(1, "Set Fill Compound Storages to "..a.storages[fcsr.key].." ["..fcsr.key.."]", "Cayo Perico Heist")
+                    a.compoundstorage = fcsr.key
+                    a.compoundstoragechanged = true
+                end
+
+                local fisr = yu.rendering.renderList(a.storages, a.islandstorage, "hbo_cayo_fcs", "Fill Island Storages")
+                if fisr.changed then
+                    yu.notify(1, "Set Fill Island Storages to "..a.storages[fisr.key].." ["..fisr.key.."]", "Cayo Perico Heist")
+                    a.islandstorage = fisr.key
+                    a.islandstoragechanged = true
+                end
+
+                yu.rendering.renderCheckbox("Add paintings", "hbo_cayo_addpaintings", function(state)
+                    a.addpaintingschanged = true
+                end)
+
+                local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
+                if dr.changed then
+                    yu.notify(1, "Set Difficulty to "..a.difficulties[dr.key].." ["..dr.key.."]", "Cayo Perico Heist")
+                    a.difficulty = dr.key
+                    a.difficultychanged = true
+                end
+
+                local ar = yu.rendering.renderList(a.approaches, a.approach, "hbo_cayo_a", "Approach")
+                if ar.changed then
+                    yu.notify(1, "Set Approach to "..a.approaches[ar.key].." ["..ar.key.."]", "Cayo Perico Heist")
+                    a.approach = ar.key
+                    a.approachchanged = true
+                end
+
+                local wr = yu.rendering.renderList(a.weapons, a.weapon, "hbo_cayo_w", "Weapons")
+                if wr.changed then
+                    yu.notify(1, "Set Weapons to "..a.weapons[wr.key].." ["..wr.key.."]", "Cayo Perico Heist")
+                    a.weapon = wr.key
+                    a.weaponchanged = true
+                end
+
+                local stlr = yu.rendering.renderList(a.supplytrucklocations, a.supplytrucklocation, "hbo_cayo_stl", "Supply truck location")
+                if stlr.changed then
+                    yu.notify(1, "Set Supply truck location to "..a.supplytrucklocations[stlr.key].." ["..stlr.key.."]", "Cayo Perico Heist")
+                    a.supplytrucklocation = stlr.key
+                    a.supplytrucklocationchanged = true
+                end
+
+                yu.rendering.renderCheckbox("Cutting powder", "hbo_cayo_cuttingpowder", function(state)
+                    a.cuttingpowderchanged = true
+                end)
+                if ImGui.IsItemHovered() then
+                    ImGui.SetTooltip("Pros don't need this ;)")
+                end
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Apply") then
+                    local changes = 0
+
+                    -- Primary Target
+                    if a.primarytargetchanged then
+                        changes = add(changes, 1)
+                        stats.set_int(yu.mpx().."H4CNF_TARGET", a.primarytarget)
+                    end
+
+                    -- Fill Compound Storages
+                    if a.compoundstoragechanged then
+                        changes = add(changes, 1)
+                        if a.compoundstorage == 1 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                        elseif a.compoundstorage == 2 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
+                        elseif a.compoundstorage == 3 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870) 
+                        elseif a.compoundstorage == 4 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095) 
+                        elseif a.compoundstorage == 5 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 255)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                        end
+                    end
+
+                    -- Fill Island Storages
+                    if a.islandstoragechanged then
+                        changes = add(changes, 1)
+                        if a.islandstorage == 1 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                        elseif a.islandstorage == 2 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
+                        elseif a.islandstorage == 3 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
+                        elseif a.islandstorage == 4 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
+                        elseif a.islandstorage == 5 then
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 16777215)
+                            stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                        end
+                    end
+
+                    -- Paintings
+                    if a.addpaintingschanged then
+                        changes = add(changes, 1)
+                        if yu.rendering.isCheckboxChecked("hbo_cayo_addpaintings") then
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT", 16)
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_SCOPED", 16)
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_V", 199710)
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C_SCOPED", 0)
+                        else
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C", 0)
+                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C_SCOPED", 0)
+                        end
+                    end
+
+                    -- Difficulty
+                    if a.difficultychanged then
+                        changes = add(changes, 1)
+                        stats.set_int(yu.mpx().."H4_PROGRESS", a.difficulty)
+                    end
+
+                    -- Approach
+                    if a.approachchanged then
+                        changes = add(changes, 1)
+                        stats.set_int(yu.mpx().."H4_MISSIONS", a.approach)
+                    end
+
+                    -- Weapons
+                    if a.weaponchanged then
+                        changes = add(changes, 1)
+                        stats.set_int(yu.mpx().."H4CNF_WEAPONS", a.weapon)
+                    end
+
+                    -- Truck Location
+                    if a.supplytrucklocationchanged then
+                        changes = add(changes, 1)
+                        stats.set_int(yu.mpx().."H4CNF_TROJAN", a.supplytrucklocation)
+                    end
+
+                    -- Cutting Powder
+                    if a.cuttingpowderchanged then
+                        changes = add(changes, 1)
+                        if yu.rendering.isCheckboxChecked("hbo_cayo_cuttingpowder") then
+                            stats.set_int(yu.mpx().."H4CNF_TARGET", 3)
+                        else
+                            stats.set_int(yu.mpx().."H4CNF_TARGET", 2)
+                        end
+                    end
+
+                    yu.notify(1, changes.." changes applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh settings") then
+                    refreshStats()
+                end
+
+                if ImGui.Button("Unlock accesspoints & approaches") then
+                    stats.set_int(yu.mpx().."H4CNF_BS_GEN", -1)
+                    stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 63)
+                    stats.set_int(yu.mpx().."H4CNF_APPROACH", -1)
+                    yu.notify("POI, accesspoints, approaches stuff should be unlocked i think", "Cayo Perico Heist")
+                end
+
+
+                if ImGui.Button("Complete Preps") then
+                    stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
+                    stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
+                    stats.set_int(yu.mpx().."H4CNF_TROJAN", 5)
+                    stats.set_int(yu.mpx().."H4CNF_WEP_DISRP", 3)
+                    stats.set_int(yu.mpx().."H4CNF_ARM_DISRP", 3)
+                    stats.set_int(yu.mpx().."H4CNF_HEL_DISRP", 3)
+                    yu.notify("Preperations completed :)", "Cayo Perico Heist")
+                end
+                
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset Preps") then
+                    stats.set_int(yu.mpx().."H4_MISSIONS", 0)
+                    stats.set_int(yu.mpx().."H4_PROGRESS", 0)
+                    stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
+                    stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
+                    stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
+                end
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Extra")
+
+                if ImGui.Button("Remove all cameras") then
+                    removeAllCameras()
+                end
+
+                if ImGui.Button("Skip sewer tunnel cut") then
+                    if requireScript("fm_mission_controller_2020")
+                        and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
+                            or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
+                        locals.set_int("fm_mission_controller_2020", 28446, 6)
+                        yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
+                    end
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip door hack") then
+                    if requireScript("fm_mission_controller_2020")
+                        and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
+                        locals.set_int("fm_mission_controller_2020", 54024, 5)
+                        yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
+                    end
+                end
+
+                if ImGui.Button("Skip fingerprint hack") then
+                    if requireScript("fm_mission_controller_2020")
+                        and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
+                        locals.set_int("fm_mission_controller_2020", 23669, 5)
+                        yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
+                    end
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip plasmacutter cut") then
+                    if requireScript("fm_mission_controller_2020") then
+                        locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
+                        yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
+                    end
+                end
+
+                if ImGui.Button("Instant finish (solo only)") then
+                    if requireScript("fm_mission_controller_2020") then
+                        locals.set_int("fm_mission_controller_2020", 45450, 9)
+                        locals.set_int("fm_mission_controller_2020", 46829, 50)
+                        yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                    end
+                end
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Refresh cooldowns") then
+                    yu.add_task(updateCooldowns)
+                end
+
+                for k, v in pairs(cooldowns) do
+                    ImGui.Text(v)
+                end
+
+                
+
+                ImGui.EndGroup()
+
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
+    local function initNightclub()
+        local popularity
+        local function updatePopularity()
+            popularity = stats.get_int(yu.mpx().."CLUB_POPULARITY")
+        end
+        updatePopularity()
+
+        addToRender(function()
+            if (ImGui.BeginTabItem("Nightclub")) then
+                if ImGui.Button("Refresh") then
+                    yu.add_task(updatePopularity)
+                end
+
+                ImGui.Separator()
+
+                ImGui.Text("Popularity: "..popularity.."/1000")
+
+                if ImGui.Button("Refill popularity") then
+                    stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
+                    yu.add_task(updatePopularity)
+                end
+
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
+    initCayo()
+    initNightclub()
+
+    local tabBarId = "##hbo"
+    SussySpt.add_render(function()
+        if yu.rendering.isCheckboxChecked("cat_hbo") then
+            if ImGui.Begin("HBO (Heists, Businesses & Other)") then
+                ImGui.BeginTabBar(tabBarId)
+
+                for k, v in pairs(toRender) do
+                    v()
+                end
+
+                ImGui.EndTabBar()
+            end
+            ImGui.End()
+        end
+    end)
+end
+
 function SussySpt:initTabHeist()
     local tab = tbs.getTab(SussySpt.tab, " Heists & Stuff idk")
     tab:clear()
@@ -999,6 +1482,7 @@ function SussySpt:initTabHeist()
                 stats.set_int(yu.mpx().."H4CNF_WEP_DISRP", 3)
                 stats.set_int(yu.mpx().."H4CNF_ARM_DISRP", 3)
                 stats.set_int(yu.mpx().."H4CNF_HEL_DISRP", 3)
+                stats.set_int(yu.mpx().."H4_PLAYTHROUGH_STATUS", 10)
                 initTabPreps()
             end)
             prepsTab:add_sameline()
@@ -1887,6 +2371,13 @@ function SussySpt:initTabCMM()
                 end
             end
         end)
+end
+
+function SussySpt:injectTabPlayer()
+    local tab = gui.get_tab("GUI_TAB_PLAYER")
+    tab:add_imgui(function()
+        ImGui.Text("Loool")
+    end)
 end
 
 SussySpt:new()

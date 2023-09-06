@@ -50,6 +50,11 @@ copy_table(tbl: table)
     Param tbl: The table to be copied
     Returns: A copied version of tbl
 
+add(num: number, amount: number)
+    Param num: The number to where the amount gets added
+    Param amount: The amount to add to num
+    Returns: num + amount
+
 # Notifications
 set_notification_title_prefix(title)
     Param title: Prefix of every title used in notify(type, message, [title])
@@ -131,6 +136,11 @@ has_stat(key)
 # Default Stats
     NOTIFY_DEFTITLE: Normally set by using set_notification_title_prefix(title)
     START_TIME: The unix time when the script was loaded
+
+# Tasks
+add_task(func: function)
+    Param func: The function to be executed
+    Returns: Id of the task
 
 # Tables
 keys

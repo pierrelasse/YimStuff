@@ -75,6 +75,10 @@ return (function()
             return newTable
         end
 
+        api.add = function(num, amount)
+            return num + amount
+        end
+
         -- Notifications
         api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
@@ -151,8 +155,8 @@ return (function()
             return stats.get_int("MPPLY_LAST_MP_CHAR")
         end
 
-        api.mpx = function()
-            return "MP"..api.shc(api.playerindex() == 0, 0, 1).."_"
+        api.mpx = function(t)
+            return "MP"..api.shc(api.playerindex() == 0, 0, 1).."_"..(t or "")
         end
 
         api.pid = function()
@@ -235,19 +239,24 @@ return (function()
             checkboxstates = {}
         }
 
-        api.rendering.renderList = function(items, selectedItem, labelId)
+        api.rendering.renderList = function(items, key, labelId, name)
             if items == nil or labelId == nil then
                 return nil
             end
-            if ImGui.BeginCombo("##"..labelId, items[selectedItem]) then
+            local newKey = key
+            if ImGui.BeginCombo((name or "").."##"..labelId, items[key]) then
                 for k, v in pairs(items) do
-                    if (ImGui.Selectable(v, selectedItem == v)) then
-                        selectedItem = k
+                    if (ImGui.Selectable(v, key == v)) then
+                        newKey = k
                     end
                 end
                 ImGui.EndCombo()
             end
-            return selectedItem
+            return {
+                changed = key ~= newKey,
+                oldKey = key,
+                key = newKey
+            }
         end
 
         api.rendering.setCheckboxChecked = function(id, value)
@@ -280,14 +289,35 @@ return (function()
         end
     end
 
+    local function initTasks()
+        data.tasks = {
+            asap = {}
+        }
+
+        api.add_task = function(func)
+            if func ~= nil then
+                local id = api.gun()
+                data.tasks.asap[id] = func
+                return id
+            end
+            return nil
+        end
+    end
+
     defineUtils()
     initStats()
     defineGetters()
     initKeyListener()
     initRendering()
+    initTasks()
 
     script.register_looped("yimutils", function()
         data.key_listener.tick()
+
+        for k, v in pairs(data.tasks.asap) do
+            v()
+        end
+        data.tasks.asap = {}
     end)
 
     return api
