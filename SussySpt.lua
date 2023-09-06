@@ -386,7 +386,9 @@ function SussySpt:initTabSelf()
                         end)
 
                         if ImGui.Button("Remove blackscreen") then
-                            CAM.DO_SCREEN_FADE_IN(0)
+                            yu.add_task(function()
+                                CAM.DO_SCREEN_FADE_IN(0)
+                            end)
                         end
 
                         ImGui.EndTabItem()
