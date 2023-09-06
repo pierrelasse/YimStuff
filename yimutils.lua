@@ -28,7 +28,7 @@ return (function()
         end
         
         api.boolstring = function(bool, trueValue, falseValue)
-            return bool and (trueValue or true) or (falseValue or false)
+            return bool and (trueValue or "true") or (falseValue or "false")
         end
 
         api.is_num_between = function(num, min, max)
@@ -232,21 +232,8 @@ return (function()
     local function initRendering()
         api.rendering = {}
         data.rendering = {
-            nodes = {}
+            checkboxstates = {}
         }
-
-        local function addElement(id, element)
-            table.insert(data.rendering[id], element)
-        end
-
-        api.rendering.createNode = function(id)
-            data.rendering.nodes[id] = {}
-            return id
-        end
-
-        api.rendering.add_text = function(id, text)
-            -- addElement(id, )
-        end
 
         api.rendering.renderList = function(items, selectedItem, labelId)
             if items == nil or labelId == nil then
@@ -261,6 +248,35 @@ return (function()
                 ImGui.EndCombo()
             end
             return selectedItem
+        end
+
+        api.rendering.setCheckboxChecked = function(id, value)
+            data.rendering.checkboxstates[id] = {
+                state = value,
+                oldstate = value
+            }
+        end
+
+        api.rendering.renderCheckbox = function(name, id, callback)
+            local d = data.rendering.checkboxstates[id] or { state = false, oldstate = false }
+            
+            if ImGui.Checkbox(name, d.state) ~= d.oldstate then
+                d.state = not d.state
+                d.oldstate = d.state
+                callback(d.state)
+            end
+            
+            data.rendering.checkboxstates[id] = d
+        end
+        
+        api.rendering.isCheckboxChecked = function(id)
+            return (data.rendering.checkboxstates[id] or { oldstate = false }).oldstate
+        end
+
+        api.rendering.bigText = function(text)
+            ImGui.SetWindowFontScale(1.22)
+            ImGui.Text(text)
+            ImGui.SetWindowFontScale(1)
         end
     end
 

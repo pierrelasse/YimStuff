@@ -1,15 +1,39 @@
 yu = require "yimutils"
 
-SussySpt = {}
+SussySpt = {
+    version = "1.0.0",
+    versionid = 1,
+    dmode = true
+}
 
 function SussySpt:new()
     SussySpt:initUtils()
 
-    yu.set_notification_title_prefix("[SussySpt]")
+    yu.set_notification_title_prefix("[SussySpt] ")
 
     local tab = gui.get_tab("SussySpt")
     SussySpt.tab = tab
 
+    if SussySpt.dmode then
+        tab:add_text("Version: "..SussySpt.version)
+        tab:add_text("Version id: "..SussySpt.versionid)
+        tab:add_text("Dev mode: "..yu.boolstring(SussySpt.dmode, "enabled", "disabled"))
+
+        SussySpt.rendercb = {}
+        SussySpt.add_render = function(cb)
+            if cb ~= nil then
+                SussySpt.rendercb[yu.gun()] = cb
+            end
+        end
+
+        SussySpt:initRendering(tab)
+        tab:add_imgui(function()
+            for k, v in pairs(SussySpt.rendercb) do
+                v()
+            end
+        end)
+
+    end
     SussySpt:initTabSelf()
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
@@ -26,224 +50,235 @@ function SussySpt:new()
     end)
 
     -- Testing
-    local function initRendering()
-        -- local function render_heists_test()
-        --     if ImGui.BeginTabItem("LULLULU1") then
-        --         ImGui.EndTabItem()
+    if false then
+        -- local function initRendering()
+        --     -- local function render_heists_test()
+        --     --     if ImGui.BeginTabItem("LULLULU1") then
+        --     --         ImGui.EndTabItem()
+        --     --     end
+
+        --     --     if ImGui.BeginTabItem("LULLULU2") then
+        --     --         ImGui.EndTabItem()
+        --     --     end
+        --     -- end
+        --     -- local function render_heists()
+        --     --     if ImGui.Begin("Heists & Stuff Idk") then
+        --     --         ImGui.BeginTabBar(iml())
+
+        --     --         render_heists_test()
+
+        --     --         ImGui.EndTabBar()
+
+        --     --         ImGui.End()
+        --     --     end
+        --     -- end
+
+        --     local function heists_cayo_getstorage(i)
+        --         if stats.get_int(yu.mpx().."H4LOOT_CASH_"..i) > 0 then
+        --             return 2
+        --         elseif stats.get_int(yu.mpx().."H4LOOT_WEED_"..i) > 0 then
+        --             return 3
+        --         elseif stats.get_int(yu.mpx().."H4LOOT_COKE_"..i) > 0 then
+        --             return 4
+        --         elseif stats.get_int(yu.mpx().."H4LOOT_GOLD_"..i) > 0 then
+        --             return 5
+        --         end
+        --         return 1
         --     end
 
-        --     if ImGui.BeginTabItem("LULLULU2") then
-        --         ImGui.EndTabItem()
+        --     local heists_cayo_a = {
+        --         primarytargets = {
+        --             [0] = "Tequila $900K",
+        --             [1] = "Necklace $1M",
+        --             [2] = "Bonds $1,1M",
+        --             [3] = "Diamond $1,3M",
+        --             [5] = "Statue $1,9M"
+        --         },
+        --         storages = {
+        --             [1] = "None",
+        --             [2] = "Cash",
+        --             [3] = "Weed",
+        --             [4] = "Coke",
+        --             [5] = "Gold"
+        --         },
+        --         islandstorage = heists_cayo_getstorage("I"),
+        --         compoundstorage = heists_cayo_getstorage("C"),
+        --         addpaintings = false,
+        --         difficulties = {
+        --             [126823] = "Normal",
+        --             [131055] = "Hard"
+        --         },
+        --         approaches = {
+        --             [65283] = "Kosatka",
+        --             [65413] = "Alkonost",
+        --             [65289] = "Velum",
+        --             [65425] = "Stealth Annihilator",
+        --             [65313] = "Patrol Boat",
+        --             [65345] = "Longfin",
+        --             [65535] = "*All*"
+        --         },
+        --         weapons = {
+        --             [1] = "Aggressor",
+        --             [2] = "Conspirator",
+        --             [3] = "Crackshot",
+        --             [4] = "Saboteur",
+        --             [5] = "Marksman"
+        --         },
+        --     }
+        --     heists_cayo_a.primarytarget = next(heists_cayo_a.primarytargets)
+
+            
+        --     local function render_heists_cayo()
+        --         if (ImGui.BeginTabItem("Cayo Perico Heist")) then
+                    
+        --             ImGui.BeginGroup()
+
+        --             ImGui.Text("Preps")
+
+        --             if (ImGui.BeginListBox("##heists_cayo_listbox1")) then
+        --                 ImGui.Text("Primary Target:")
+        --                 ImGui.SameLine()
+        --                 heists_cayo_a.primarytarget = yu.rendering.renderList(heists_cayo_a.primarytargets, heists_cayo_a.primarytarget, "heists_cayo_primarytarget_list")
+
+        --                 ImGui.Text("Fill Compound Storages:")
+        --                 ImGui.SameLine()
+        --                 heists_cayo_a.compoundstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.compoundstorage, "heists_cayo_storagec_list")
+
+        --                 ImGui.Text("Fill Island Storages:")
+        --                 ImGui.SameLine()
+        --                 heists_cayo_a.islandstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.islandstorage, "heists_cayo_storagei_list")
+
+        --                 ImGui.Text("Add Paintings:")
+        --                 ImGui.SameLine()
+        --                 if (ImGui.Checkbox("##heists_cayo_addpaintings", heists_cayo_a.addpaintings)) then
+        --                     heists_cayo_a.addpaintings = true
+        --                 end
+
+
+        --                 if (ImGui.Button("Set")) then
+        --                 end
+            
+        --                 ImGui.SameLine()
+            
+        --                 if (ImGui.Button("Unlock POI & Accesspoints")) then
+        --                 end
+            
+        --                 ImGui.SameLine()
+            
+        --                 if (ImGui.Button("Complete Preps")) then
+        --                 end
+            
+        --                 ImGui.SameLine()
+            
+        --                 if (ImGui.Button("Reset Preps")) then
+        --                 end
+
+        --                 ImGui.EndListBox()
+        --             end
+                    
+        --             ImGui.EndGroup()
+
+        --             ImGui.SameLine()
+
+        --             ImGui.BeginGroup()
+        --             ImGui.Text("2135325")
+        --             ImGui.EndGroup()
+
+        --             ImGui.EndTabItem()
+        --         end
         --     end
-        -- end
-        -- local function render_heists()
-        --     if ImGui.Begin("Heists & Stuff Idk") then
-        --         ImGui.BeginTabBar(iml())
 
-        --         render_heists_test()
+        --     local function render_heists_test2()
+        --         if (ImGui.BeginTabItem("TubItem2")) then
+        --             ImGui.Text("eheheheeh")
+        --             ImGui.EndTabItem()
+        --         end
+        --     end
 
-        --         ImGui.EndTabBar()
+        --     local function render_heists()
+        --         if (ImGui.Begin("Heists & Stuff Idk")) then
+        --             ImGui.BeginTabBar("##heists_tabbar")
 
+        --             render_heists_cayo()
+        --             render_heists_test2()
+
+        --             ImGui.EndTabBar()
+        --         end
         --         ImGui.End()
         --     end
+
+        --     -- tab:add_imgui(function()
+        --     --     render_heists()
+        --     -- end)
         -- end
 
-        local function heists_cayo_getstorage(i)
-            if stats.get_int(yu.mpx().."H4LOOT_CASH_"..i) > 0 then
-                return 2
-            elseif stats.get_int(yu.mpx().."H4LOOT_WEED_"..i) > 0 then
-                return 3
-            elseif stats.get_int(yu.mpx().."H4LOOT_COKE_"..i) > 0 then
-                return 4
-            elseif stats.get_int(yu.mpx().."H4LOOT_GOLD_"..i) > 0 then
-                return 5
-            end
-            return 1
-        end
-
-        local heists_cayo_a = {
-            primarytargets = {
-                [0] = "Tequila $900K",
-                [1] = "Necklace $1M",
-                [2] = "Bonds $1,1M",
-                [3] = "Diamond $1,3M",
-                [5] = "Statue $1,9M"
-            },
-            storages = {
-                [1] = "None",
-                [2] = "Cash",
-                [3] = "Weed",
-                [4] = "Coke",
-                [5] = "Gold"
-            },
-            islandstorage = heists_cayo_getstorage("I"),
-            compoundstorage = heists_cayo_getstorage("C"),
-            addpaintings = false,
-            difficulties = {
-                [126823] = "Normal",
-                [131055] = "Hard"
-            },
-            approaches = {
-                [65283] = "Kosatka",
-                [65413] = "Alkonost",
-                [65289] = "Velum",
-                [65425] = "Stealth Annihilator",
-                [65313] = "Patrol Boat",
-                [65345] = "Longfin",
-                [65535] = "*All*"
-            },
-            weapons = {
-                [1] = "Aggressor",
-                [2] = "Conspirator",
-                [3] = "Crackshot",
-                [4] = "Saboteur",
-                [5] = "Marksman"
-            },
-        }
-        heists_cayo_a.primarytarget = next(heists_cayo_a.primarytargets)
-
-        
-        local function render_heists_cayo()
-            if (ImGui.BeginTabItem("Cayo Perico Heist")) then
-                
-                ImGui.BeginGroup()
-
-                ImGui.Text("Preps")
-
-                if (ImGui.BeginListBox("##heists_cayo_listbox1")) then
-                    ImGui.Text("Primary Target:")
-                    ImGui.SameLine()
-                    heists_cayo_a.primarytarget = yu.rendering.renderList(heists_cayo_a.primarytargets, heists_cayo_a.primarytarget, "heists_cayo_primarytarget_list")
-
-                    ImGui.Text("Fill Compound Storages:")
-                    ImGui.SameLine()
-                    heists_cayo_a.compoundstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.compoundstorage, "heists_cayo_storagec_list")
-
-                    ImGui.Text("Fill Island Storages:")
-                    ImGui.SameLine()
-                    heists_cayo_a.islandstorage = yu.rendering.renderList(heists_cayo_a.storages, heists_cayo_a.islandstorage, "heists_cayo_storagei_list")
-
-                    ImGui.Text("Add Paintings:")
-                    ImGui.SameLine()
-                    if (ImGui.Checkbox("##heists_cayo_addpaintings", heists_cayo_a.addpaintings)) then
-                        heists_cayo_a.addpaintings = true
-                    end
-
-
-                    if (ImGui.Button("Set")) then
-                    end
-        
-                    ImGui.SameLine()
-        
-                    if (ImGui.Button("Unlock POI & Accesspoints")) then
-                    end
-        
-                    ImGui.SameLine()
-        
-                    if (ImGui.Button("Complete Preps")) then
-                    end
-        
-                    ImGui.SameLine()
-        
-                    if (ImGui.Button("Reset Preps")) then
-                    end
-
-                    ImGui.EndListBox()
-                end
-                
-                ImGui.EndGroup()
-
-                ImGui.SameLine()
-
-                ImGui.BeginGroup()
-                ImGui.Text("2135325")
-                ImGui.EndGroup()
-
-                ImGui.EndTabItem()
-            end
-        end
-
-        local function render_heists_test2()
-            if (ImGui.BeginTabItem("TubItem2")) then
-                ImGui.Text("eheheheeh")
-                ImGui.EndTabItem()
-            end
-        end
-
-        local function render_heists()
-            if (ImGui.Begin("Heists & Stuff Idk")) then
-                ImGui.BeginTabBar("##heists_tabbar")
-
-                render_heists_cayo()
-                render_heists_test2()
-
-                ImGui.EndTabBar()
-            end
-            ImGui.End()
-        end
-
-        -- tab:add_imgui(function()
-        --     render_heists()
-        -- end)
+        -- initRendering()
+        -- ImGui.Text("Test4")
+        -- ImGui.Text("Test3")
+    
+        -- ImGui.BeginGroup()
+        -- -- components.sub_title("SESSION_SWITCHER")
+    
+        -- ImGui.SetWindowFontScale(1.2) -- Adjust the scale as needed
+        -- ImGui.Text("W Font")
+    
+        -- ImGui.SetWindowFontScale(1.0)
+    
+        -- if ImGui.BeginListBox(iml()) then
+        --     ImGui.Text("Primary Target")
+    
+        --     -- for k, v in pairs({a = "b", c = "d"}) do
+        --     -- end
+    
+        --     ImGui.EndListBox()
+        -- end
+    
+        -- ImGui.EndGroup()
+    
+        -- ImGui.Text("Test2")
+        -- ImGui.Text("Test")
+    
+        -- ImGui::BeginGroup();
+        --     components::sub_title("SESSION_SWITCHER"_T);
+        --     if (ImGui::BeginListBox("###session_switch", get_listbox_dimensions()))
+        --     {
+        --         if (ImGui::BeginCombo("##regionswitcher", "REGIONS"_T.data()))
+        --         {
+        --             for (const auto& region_type : regions)
+        --             {
+        --                 components::selectable(region_type.name, *g_pointers->m_gta.m_region_code == region_type.id, [&region_type] {
+        --                     *g_pointers->m_gta.m_region_code = region_type.id;
+        --                 });
+        --             }
+        --             ImGui::EndCombo();
+        --         }
+    
+        --         ImGui::Spacing();
+    
+        --         for (const auto& session_type : sessions)
+        --         {
+        --             components::selectable(session_type.name, false, [&session_type] {
+        --                 session::join_type(session_type.id);
+        --             });
+        --         }
+        --         ImGui::EndListBox();
+        --     }
+    
+        --     ImGui::EndGroup();
+        -- end
     end
-
-    initRendering()
-
-    -- ImGui.Text("Test4")
-    -- ImGui.Text("Test3")
-
-    -- ImGui.BeginGroup()
-    -- -- components.sub_title("SESSION_SWITCHER")
-
-    -- ImGui.SetWindowFontScale(1.2) -- Adjust the scale as needed
-    -- ImGui.Text("W Font")
-
-    -- ImGui.SetWindowFontScale(1.0)
-
-    -- if ImGui.BeginListBox(iml()) then
-    --     ImGui.Text("Primary Target")
-
-    --     -- for k, v in pairs({a = "b", c = "d"}) do
-    --     -- end
-
-    --     ImGui.EndListBox()
-    -- end
-
-    -- ImGui.EndGroup()
-
-    -- ImGui.Text("Test2")
-    -- ImGui.Text("Test")
-
-    -- ImGui::BeginGroup();
-	-- 	components::sub_title("SESSION_SWITCHER"_T);
-	-- 	if (ImGui::BeginListBox("###session_switch", get_listbox_dimensions()))
-	-- 	{
-	-- 		if (ImGui::BeginCombo("##regionswitcher", "REGIONS"_T.data()))
-	-- 		{
-	-- 			for (const auto& region_type : regions)
-	-- 			{
-	-- 				components::selectable(region_type.name, *g_pointers->m_gta.m_region_code == region_type.id, [&region_type] {
-	-- 					*g_pointers->m_gta.m_region_code = region_type.id;
-	-- 				});
-	-- 			}
-	-- 			ImGui::EndCombo();
-	-- 		}
-
-	-- 		ImGui::Spacing();
-
-	-- 		for (const auto& session_type : sessions)
-	-- 		{
-	-- 			components::selectable(session_type.name, false, [&session_type] {
-	-- 				session::join_type(session_type.id);
-	-- 			});
-	-- 		}
-	-- 		ImGui::EndListBox();
-	-- 	}
-
-	-- 	ImGui::EndGroup();
     -- Testing End
 
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(yu.is_script_running("freemode"), "Yep", "fm script no run so no?"), "Loaded!")
+end
+
+function SussySpt:initRendering(tab)
+    tab:add_separator()
+    tab:add_text("Categories:")
+    SussySpt.add_render(function()
+        yu.rendering.renderCheckbox("Self", "cat_self", function(state) end)
+        yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
+    end)
 end
 
 function SussySpt:initUtils()
@@ -314,6 +349,96 @@ function SussySpt:initUtils()
 end
 
 function SussySpt:initTabSelf()
+    if SussySpt.dmode then
+        yu.rendering.setCheckboxChecked("self_invisible", false)
+
+        local tabBarId = "##"
+
+        local currentMentalState
+        local function updateMentalState()
+            currentMentalState = stats.get_float("MPPLY_PLAYER_MENTAL_STATE")
+        end
+        updateMentalState()
+
+        local currentBadsport
+        local function updateBadsport()
+            currentBadsport = stats.get_bool("MPPLY_CHAR_IS_BADSPORT")
+        end
+        updateBadsport()
+        local badsportEnable = "Enable"..iml()
+        local badsportDisable = "Disable"..iml()
+
+        
+
+        SussySpt.add_render(function()
+            if yu.rendering.isCheckboxChecked("cat_self") then
+                if ImGui.Begin("Self") then
+                    ImGui.BeginTabBar(tabBarId)
+    
+                    if (ImGui.BeginTabItem("General")) then
+                        
+                        yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
+                            if state then
+                                SussySpt.invisible = true
+                            else
+                                SussySpt.disableInvis()
+                            end
+                        end)
+
+                        ImGui.EndTabItem()
+                    end
+                    if (ImGui.BeginTabItem("Stats")) then
+                        if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
+                            yu.notify(1, "Reset mental state?")
+                            updateMentalState()
+                        end
+
+                        ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
+                        ImGui.SameLine()
+                        if ImGui.Button(badsportEnable) then
+                            stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                            stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.Button(badsportDisable) then
+                            stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                            stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                        end
+
+                        if ImGui.Button("Remove bounty") then
+                            globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
+                        end
+
+                        ImGui.EndTabItem()
+                    end
+
+                    if (ImGui.BeginTabItem("Unlocks")) then
+                        if ImGui.Button("Unlock fast run and reload") then
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
+                            yu.notify(2, "Switch sessions to apply changes", "Balls")
+                        end
+
+                        ImGui.EndTabItem()
+                    end
+    
+                    ImGui.EndTabBar()
+                end
+                ImGui.End()
+            end
+        end)
+    end
+
+
+
     local tab = tbs.getTab(SussySpt.tab, " Self")
     tab:clear()
 
@@ -410,8 +535,10 @@ function SussySpt:initTabSelf()
     end)
 
     yu.key_listener.add_callback(yu.keys["L"], function()
-        SussySpt.toggleVis()
-        log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
+        if not HUD.IS_PAUSE_MENU_ACTIVE() then
+            SussySpt.toggleVis()
+            log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
+        end
     end)
 
     local function initTabStats()
