@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.0",
-    versionid = 1,
+    version = "1.0.1",
+    versionid = 2,
     dmode = true
 }
 
@@ -34,6 +34,9 @@ function SussySpt:new()
 
     SussySpt:initTabSelf()
     SussySpt:initTabHBO()
+    SussySpt:initTabLua()
+
+
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
     SussySpt:initTabCMM()
@@ -57,6 +60,7 @@ function SussySpt:initRendering(tab)
     SussySpt.add_render(function()
         yu.rendering.renderCheckbox("Self", "cat_self", function(state) end)
         yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
+        yu.rendering.renderCheckbox("Lua", "cat_lua", function(state) end)
     end)
 end
 
@@ -69,7 +73,7 @@ function SussySpt:initUtils()
             SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
         end)
     end
-    
+
     function requireScript(name)
         if yu.is_script_running(name) == false then
             yu.notify(3, "Script '"..name.."' is not running!")
@@ -104,13 +108,13 @@ function SussySpt:initUtils()
     function iml()
         return "##"..yu.gun()
     end
-    
+
 
     tbs = {
         tabs = {},
         getTab = function(tab, name, cat)
             if tab == nil or name == nil then
-                return nil
+                return gui.get_tab("void")
             end
             local key = name..
                 (function()
@@ -170,7 +174,7 @@ function SussySpt:initTabSelf()
                 ImGui.BeginTabBar(tabBarId)
 
                 if (ImGui.BeginTabItem("General")) then
-                    
+
                     yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
                         if state then
                             SussySpt.invisible = true
@@ -375,9 +379,9 @@ function SussySpt:initTabSelf()
 
         unlocksTab:add_text("LSCustoms")
         unlocksTab:add_button("Unlock hidden Liveries", function()
-            stats.set_int("MPPLY_XMASLIVERIES", -1) 
-            for i = 1, 20 do 
-                stats.set_int("MPPLY_XMASLIVERIES" .. i, -1) 
+            stats.set_int("MPPLY_XMASLIVERIES", -1)
+            for i = 1, 20 do
+                stats.set_int("MPPLY_XMASLIVERIES" .. i, -1)
             end
         end)
 
@@ -401,12 +405,12 @@ function SussySpt:initTabSelf()
         unlocksTab:add_separator()
         unlocksTab:add_text("Flight School")
         unlocksTab:add_button("Unlock all Gold Medals", function()
-            stats.set_int("MPPLY_NUM_CAPTURES_CREATED", 100) 
-            for i = 0, 9 do 
-                stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_" .. i , -1) 
-                stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_" .. i, -1) 
-                stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_" .. i, true) 
-            end 
+            stats.set_int("MPPLY_NUM_CAPTURES_CREATED", 100)
+            for i = 0, 9 do
+                stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_" .. i , -1)
+                stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_" .. i, -1)
+                stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_" .. i, true)
+            end
         end)
 
         unlocksTab:add_separator()
@@ -414,16 +418,16 @@ function SussySpt:initTabSelf()
         unlocksTab:add_text("Shooting Stand thing")
         unlocksTab:add_button("Unlock All Shooting Range Rewards", function()
             stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
-            stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860) 
-            stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690) 
-            stats.set_int(yu.mpx().."SR_HIGHSCORE_4", 2660) 
-            stats.set_int(yu.mpx().."SR_HIGHSCORE_5", 2650) 
-            stats.set_int(yu.mpx().."SR_HIGHSCORE_6", 450) 
-            stats.set_int(yu.mpx().."SR_TARGETS_HIT", 269) 
-            stats.set_int(yu.mpx().."SR_WEAPON_BIT_SET", -1) 
-            stats.set_bool(yu.mpx().."SR_TIER_1_REWARD", true) 
-            stats.set_bool(yu.mpx().."SR_TIER_3_REWARD", true) 
-            stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true) 
+            stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
+            stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690)
+            stats.set_int(yu.mpx().."SR_HIGHSCORE_4", 2660)
+            stats.set_int(yu.mpx().."SR_HIGHSCORE_5", 2650)
+            stats.set_int(yu.mpx().."SR_HIGHSCORE_6", 450)
+            stats.set_int(yu.mpx().."SR_TARGETS_HIT", 269)
+            stats.set_int(yu.mpx().."SR_WEAPON_BIT_SET", -1)
+            stats.set_bool(yu.mpx().."SR_TIER_1_REWARD", true)
+            stats.set_bool(yu.mpx().."SR_TIER_3_REWARD", true)
+            stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
         end)
 
         unlocksTab:add_separator()
@@ -535,7 +539,7 @@ function SussySpt:initTabHBO()
             end
         end
         updateCooldowns()
-        
+
         addToRender(function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
                 ImGui.BeginGroup()
@@ -567,6 +571,7 @@ function SussySpt:initTabHBO()
                 end)
 
                 local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
+                ImGui.Text("C")
                 if dr.changed then
                     yu.notify(1, "Set Difficulty to "..a.difficulties[dr.key].." ["..dr.key.."]", "Cayo Perico Heist")
                     a.difficulty = dr.key
@@ -643,7 +648,7 @@ function SussySpt:initTabHBO()
                             stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
                             stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                             stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870) 
+                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
                         elseif a.compoundstorage == 4 then
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -653,7 +658,7 @@ function SussySpt:initTabHBO()
                             stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
                             stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                             stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095) 
+                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
                         elseif a.compoundstorage == 5 then
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -777,35 +782,41 @@ function SussySpt:initTabHBO()
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh settings") then
-                    refreshStats()
+                    yu.add_task(refreshStats)
                 end
 
                 if ImGui.Button("Unlock accesspoints & approaches") then
-                    stats.set_int(yu.mpx().."H4CNF_BS_GEN", -1)
-                    stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 63)
-                    stats.set_int(yu.mpx().."H4CNF_APPROACH", -1)
-                    yu.notify("POI, accesspoints, approaches stuff should be unlocked i think", "Cayo Perico Heist")
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H4CNF_BS_GEN", -1)
+                        stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 63)
+                        stats.set_int(yu.mpx().."H4CNF_APPROACH", -1)
+                        yu.notify("POI, accesspoints, approaches stuff should be unlocked i think", "Cayo Perico Heist")
+                    end)
                 end
 
 
                 if ImGui.Button("Complete Preps") then
-                    stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
-                    stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
-                    stats.set_int(yu.mpx().."H4CNF_TROJAN", 5)
-                    stats.set_int(yu.mpx().."H4CNF_WEP_DISRP", 3)
-                    stats.set_int(yu.mpx().."H4CNF_ARM_DISRP", 3)
-                    stats.set_int(yu.mpx().."H4CNF_HEL_DISRP", 3)
-                    yu.notify("Preperations completed :)", "Cayo Perico Heist")
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
+                        stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
+                        stats.set_int(yu.mpx().."H4CNF_TROJAN", 5)
+                        stats.set_int(yu.mpx().."H4CNF_WEP_DISRP", 3)
+                        stats.set_int(yu.mpx().."H4CNF_ARM_DISRP", 3)
+                        stats.set_int(yu.mpx().."H4CNF_HEL_DISRP", 3)
+                        yu.notify("Preperations completed :)", "Cayo Perico Heist")
+                    end)
                 end
-                
+
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset Preps") then
-                    stats.set_int(yu.mpx().."H4_MISSIONS", 0)
-                    stats.set_int(yu.mpx().."H4_PROGRESS", 0)
-                    stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
-                    stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
-                    stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H4_MISSIONS", 0)
+                        stats.set_int(yu.mpx().."H4_PROGRESS", 0)
+                        stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
+                        stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
+                        stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
+                    end)
                 end
 
                 ImGui.EndGroup()
@@ -872,7 +883,7 @@ function SussySpt:initTabHBO()
                     ImGui.Text(v)
                 end
 
-                
+
 
                 ImGui.EndGroup()
 
@@ -911,10 +922,43 @@ function SussySpt:initTabHBO()
     initCayo()
     initNightclub()
 
-    local tabBarId = "##hbo"
+    local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_hbo") then
             if ImGui.Begin("HBO (Heists, Businesses & Other)") then
+                ImGui.BeginTabBar(tabBarId)
+
+                for k, v in pairs(toRender) do
+                    v()
+                end
+
+                ImGui.EndTabBar()
+            end
+            ImGui.End()
+        end
+    end)
+end
+
+function SussySpt:initTabLua()
+    local toRender = {}
+    local function addToRender(cb)
+        toRender[yu.gun()] = cb
+    end
+
+    local function initExecuter()
+        addToRender(function()
+            if (ImGui.BeginTabItem("Executer")) then
+                ImGui.Text()
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
+    local tabBarId = "##cat_lua"
+
+    SussySpt.add_render(function()
+        if yu.rendering.isCheckboxChecked("cat_lua") then
+            if ImGui.Begin("Lua") then
                 ImGui.BeginTabBar(tabBarId)
 
                 for k, v in pairs(toRender) do
@@ -1061,7 +1105,7 @@ function SussySpt:initTabHeist()
                         stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
                         stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                         stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                        stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870) 
+                        stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
                     elseif k == 4 then
                         stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                         stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -1071,7 +1115,7 @@ function SussySpt:initTabHeist()
                         stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
                         stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                         stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                        stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095) 
+                        stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
                     elseif k == 5 then
                         stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                         stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -1148,7 +1192,7 @@ function SussySpt:initTabHeist()
                     initTabPreps()
                 end)
             end
-            
+
             prepsTab:add_text("Add Paintings ("..getPaintings().." ["..stats.get_int(yu.mpx().."H4LOOT_PAINT_C").."]):")
             prepsTab:add_sameline()
             prepsTab:add_button("Enable"..iml(), function()
@@ -1170,7 +1214,7 @@ function SussySpt:initTabHeist()
                 yu.notify(1, "Disabled 'Add Paintings'. Value: ["..stats.get_int(yu.mpx().."H4LOOT_PAINT_C").."]")
                 initTabPreps()
             end)
-            
+
             prepsTab:add_text("Difficulty ("..getDifficulty().." ["..stats.get_int(yu.mpx().."H4_PROGRESS").."]):")
             for k, v in pairs(a.difficulties) do
                 prepsTab:add_sameline()
@@ -1180,13 +1224,13 @@ function SussySpt:initTabHeist()
                     initTabPreps()
                 end)
             end
-            
+
             prepsTab:add_text("Approach ("..yu.get_or_default(a.approaches, stats.get_int(yu.mpx().."H4_MISSIONS"), "???").." ["..stats.get_int(yu.mpx().."H4_MISSIONS").."]):")
             for k, v in pairs(a.approaches) do
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
                     yu.notify(1, "Set 'Approach' to "..a.approaches[k].." ["..stats.get_int(yu.mpx().."H4_PROGRESS").."]")
-                    stats.set_int(yu.mpx().."H4_MISSIONS", k) 
+                    stats.set_int(yu.mpx().."H4_MISSIONS", k)
                     initTabPreps()
                 end)
             end
@@ -1196,13 +1240,13 @@ function SussySpt:initTabHeist()
                 prepsTab:add_sameline()
                 prepsTab:add_button(v, function()
                     yu.notify(1, "Set 'Weapons' to "..a.weapons[k].." ["..stats.get_int(yu.mpx().."H4CNF_WEAPONS").."]")
-                    stats.set_int(yu.mpx().."H4CNF_WEAPONS", k) 
+                    stats.set_int(yu.mpx().."H4CNF_WEAPONS", k)
                     initTabPreps()
                 end)
             end
 
             prepsTab:add_separator()
-            
+
             prepsTab:add_button("Unlock all Accesspoints & Approaches", function()
                 stats.set_int(yu.mpx().."H4CNF_BS_GEN", -1)
                 stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 63)
@@ -1255,7 +1299,7 @@ function SussySpt:initTabHeist()
             end)
 
             extraTab:add_separator()
-            
+
             extraTab:add_button("Skip FingerPrint Hack", function()
                 if requireScript("fm_mission_controller_2020") and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
                     locals.set_int("fm_mission_controller_2020", 23669, 5)
@@ -1326,8 +1370,8 @@ function SussySpt:initTabHeist()
         aparTab:add_text("  planning room, press «Complete Preps»")
         aparTab:add_text("  white board and press «E» and leave")
         aparTab:add_text("")
-        aparTab:add_text("Complete Preps for other heists:") 
-        aparTab:add_text("  Start the mission and leave after the 1st") 
+        aparTab:add_text("Complete Preps for other heists:")
+        aparTab:add_text("  Start the mission and leave after the 1st")
         aparTab:add_text("  cutscene ends, press «Complete Preps»")
         aparTab:add_text("  near white board and press «E»")
 
@@ -1362,8 +1406,8 @@ function SussySpt:initTabHeist()
 
             extraTab:add_button("Instant finish (solo only)", function()
                 if requireScript("fm_mission_controller") then
-                    locals.set_int("fm_mission_controller", 19710, 12) 
-                    locals.set_int("fm_mission_controller", 28331 + 1, 99999) 
+                    locals.set_int("fm_mission_controller", 19710, 12)
+                    locals.set_int("fm_mission_controller", 28331 + 1, 99999)
                     locals.set_int("fm_mission_controller", 31587 + 69, 99999)
                 end
             end)
@@ -1380,7 +1424,7 @@ function SussySpt:initTabHeist()
         local function initTabPreps()
             local prepsTab = tbs.getTab(casinoTab, "   Preps", "dc")
             prepsTab:clear()
-            
+
             local a = {
                 targets = {
                     [0] = "Cash",
@@ -1531,7 +1575,7 @@ function SussySpt:initTabHeist()
             prepsTab:add_separator()
 
             prepsTab:add_button("Unlock all POI & Accesspoints", function()
-                stats.set_int(yu.mpx().."H3OPT_POI", -1) 
+                stats.set_int(yu.mpx().."H3OPT_POI", -1)
                 stats.set_int(yu.mpx().."H3OPT_ACCESSPOINTS", -1)
             end)
             prepsTab:add_sameline()
@@ -1586,7 +1630,7 @@ function SussySpt:initTabHeist()
             end)
 
             extraTab:add_separator()
-            
+
             extraTab:add_text("H3_COMPLETEDPOSIX: "..stats.get_int(yu.mpx().."H3_COMPLETEDPOSIX"))
             extraTab:add_text("MPPLY_H3_COOLDOWN: "..yu.format_seconds(stats.get_int("MPPLY_H3_COOLDOWN") - os.time()))
             extraTab:add_button("Refresh cooldowns", function()
@@ -1614,18 +1658,18 @@ function SussySpt:initTabHeist()
             prepsTab:add_text("OneClick:")
 
             prepsTab:add_button("OneClick Act 1: The Data Breaches Setup", function()
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FLOW_MISSION_PROG"), 7, true)
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FM_MISSION_PROG"), 7, true)
+                stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 7)
+                stats.set_int(yu.mpx().."GANGOPS_FM_MISSION_PROG", 7)
             end)
-            
+
             prepsTab:add_button("OneClick Act 2: The Bodgan Problem Setup", function()
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FLOW_MISSION_PROG"), 240, true)
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FM_MISSION_PROG"), 248, true)
+                stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 240)
+                stats.set_int(yu.mpx().."GANGOPS_FM_MISSION_PROG", 248)
             end)
-            
+
             prepsTab:add_button("OneClick Act 3: Doomsday Scenario Setup", function()
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FLOW_MISSION_PROG"), 15872, true)
-                STATS.STAT_SET_INT(joaat(yu.mpx().."GANGOPS_FM_MISSION_PROG"), 16128, true)
+                stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 15872)
+                stats.set_int(yu.mpx().."GANGOPS_FM_MISSION_PROG", 16128)
             end)
 
             prepsTab:add_separator()
@@ -1662,8 +1706,8 @@ function SussySpt:initTabHeist()
             prepsTab:add_sameline()
 
             prepsTab:add_button("Reset Preps", function()
-                stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 240) 
-                stats.set_int(yu.mpx().."GANGOPS_HEIST_STATUS", 0) 
+                stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 240)
+                stats.set_int(yu.mpx().."GANGOPS_HEIST_STATUS", 0)
                 stats.set_int(yu.mpx().."GANGOPS_FLOW_NOTIFICATIONS", 1557)
             end)
         end
@@ -1740,8 +1784,6 @@ function SussySpt:initTabHeist()
             for i = 0, 7 do
                 extraTab:add_text("  - "..(a.missions[i])..": "..yu.format_seconds(stats.get_int(yu.mpx().."TUNER_CONTRACT"..i.."_POSIX") - os.time()))
             end
-
-            
         end
 
         initTabPreps()
@@ -1791,7 +1833,7 @@ function SussySpt:initTabHeist()
         end)
 
         otherTab:add_separator()
-        
+
         otherTab:add_button("Remove VIP/MC cooldown ["..stats.get_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER").."]", function()
             stats.set_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER", 0)
             initTabOther()
@@ -1887,7 +1929,7 @@ function SussySpt:initTabMisc()
     tab:add_separator()
 
     tab:add_text("Kosatka (no work gud):")
-    
+
     tab:add_text("  - Remove missle cooldown ["..globals.get_int(262145 + 30394).."]:")
     tab:add_sameline()
     tab:add_button("Enable"..iml(), function()
@@ -1907,7 +1949,7 @@ function SussySpt:initTabMisc()
     tab:add_button("Disable"..iml(), function()
         globals.set_int(262145 + 30395, 4000)
     end)
-    
+
 
     local function initTabSnow()
         local snowTab = tbs.getTab(tab, "  Snow", "misc")

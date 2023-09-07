@@ -1,0 +1,23 @@
+{
+    "Lua.diagnostics.globals": [
+        "gui",
+        "menu_event",
+        "event",
+        "log",
+        "PLAYER",
+        "script",
+        "ImGui",
+        "stats",
+        "joaat",
+        "entities",
+        "SCRIPT",
+        "PED",
+        "ENTITY",
+        "SYSTEM",
+        "locals",
+        "globals"
+    ],
+    "Lua.diagnostics.disable": [
+        "lowercase-global"
+    ]
+}
