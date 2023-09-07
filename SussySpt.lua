@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.1",
-    versionid = 2,
+    versionid = 3,
     dmode = true
 }
 
@@ -34,8 +34,7 @@ function SussySpt:new()
 
     SussySpt:initTabSelf()
     SussySpt:initTabHBO()
-    SussySpt:initTabLua()
-
+    -- SussySpt:initTabLua()
 
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
@@ -55,12 +54,22 @@ function SussySpt:new()
 end
 
 function SussySpt:initRendering(tab)
+    SussySpt.refreshInOnline = function()
+        SussySpt.in_online = yu.is_script_running("freemode")
+        return SussySpt.in_online
+    end
+    SussySpt.refreshInOnline()
+
     tab:add_separator()
+    tab:add_button("Recheck if online", SussySpt.refreshInOnline)
     tab:add_text("Categories:")
     SussySpt.add_render(function()
         yu.rendering.renderCheckbox("Self", "cat_self", function(state) end)
-        yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
-        yu.rendering.renderCheckbox("Lua", "cat_lua", function(state) end)
+        if SussySpt.in_online then
+            yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
+        end
+
+        -- yu.rendering.renderCheckbox("Lua", "cat_lua", function(state) end)
     end)
 end
 
@@ -132,7 +141,6 @@ function SussySpt:initUtils()
 end
 
 function SussySpt:initTabSelf()
-
     SussySpt.ensureVis = function(state, id, veh)
         if state ~= true and state ~= false then
             return nil
@@ -191,47 +199,50 @@ function SussySpt:initTabSelf()
 
                     ImGui.EndTabItem()
                 end
-                if (ImGui.BeginTabItem("Stats")) then
-                    if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
-                        yu.notify(1, "Reset mental state?")
-                        updateMentalState()
+
+                if SussySpt.in_online then
+                    if (ImGui.BeginTabItem("Stats")) then
+                        if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
+                            yu.notify(1, "Reset mental state?")
+                            updateMentalState()
+                        end
+
+                        ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
+                        ImGui.SameLine()
+                        if ImGui.Button(badsportEnable) then
+                            stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                            stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.Button(badsportDisable) then
+                            stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                            stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                        end
+
+                        if ImGui.Button("Remove bounty") then
+                            globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
+                        end
+
+                        ImGui.EndTabItem()
                     end
 
-                    ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
-                    ImGui.SameLine()
-                    if ImGui.Button(badsportEnable) then
-                        stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-                        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-                        stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-                        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
-                    end
-                    ImGui.SameLine()
-                    if ImGui.Button(badsportDisable) then
-                        stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-                        stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-                        stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-                        stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
-                    end
+                    if (ImGui.BeginTabItem("Unlocks")) then
+                        if ImGui.Button("Unlock fast run and reload") then
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
+                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
+                            yu.notify(2, "Switch sessions to apply changes", "Balls")
+                        end
 
-                    if ImGui.Button("Remove bounty") then
-                        globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
+                        ImGui.EndTabItem()
                     end
-
-                    ImGui.EndTabItem()
-                end
-
-                if (ImGui.BeginTabItem("Unlocks")) then
-                    if ImGui.Button("Unlock fast run and reload") then
-                        stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
-                        stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
-                        stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
-                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
-                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
-                        stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
-                        yu.notify(2, "Switch sessions to apply changes", "Balls")
-                    end
-
-                    ImGui.EndTabItem()
                 end
 
                 ImGui.EndTabBar()
@@ -571,7 +582,6 @@ function SussySpt:initTabHBO()
                 end)
 
                 local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
-                ImGui.Text("C")
                 if dr.changed then
                     yu.notify(1, "Set Difficulty to "..a.difficulties[dr.key].." ["..dr.key.."]", "Cayo Perico Heist")
                     a.difficulty = dr.key
@@ -613,13 +623,13 @@ function SussySpt:initTabHBO()
 
                     -- Primary Target
                     if a.primarytargetchanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         stats.set_int(yu.mpx().."H4CNF_TARGET", a.primarytarget)
                     end
 
                     -- Fill Compound Storages
                     if a.compoundstoragechanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         if a.compoundstorage == 1 then
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                             stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -674,7 +684,7 @@ function SussySpt:initTabHBO()
 
                     -- Fill Island Storages
                     if a.islandstoragechanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         if a.islandstorage == 1 then
                             stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
                             stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
@@ -729,7 +739,7 @@ function SussySpt:initTabHBO()
 
                     -- Paintings
                     if a.addpaintingschanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         if yu.rendering.isCheckboxChecked("hbo_cayo_addpaintings") then
                             stats.set_int(yu.mpx().."H4LOOT_PAINT", 16)
                             stats.set_int(yu.mpx().."H4LOOT_PAINT_SCOPED", 16)
@@ -744,31 +754,31 @@ function SussySpt:initTabHBO()
 
                     -- Difficulty
                     if a.difficultychanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         stats.set_int(yu.mpx().."H4_PROGRESS", a.difficulty)
                     end
 
                     -- Approach
                     if a.approachchanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         stats.set_int(yu.mpx().."H4_MISSIONS", a.approach)
                     end
 
                     -- Weapons
                     if a.weaponchanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         stats.set_int(yu.mpx().."H4CNF_WEAPONS", a.weapon)
                     end
 
                     -- Truck Location
                     if a.supplytrucklocationchanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         stats.set_int(yu.mpx().."H4CNF_TROJAN", a.supplytrucklocation)
                     end
 
                     -- Cutting Powder
                     if a.cuttingpowderchanged then
-                        changes = add(changes, 1)
+                        changes = yu.add(changes, 1)
                         if yu.rendering.isCheckboxChecked("hbo_cayo_cuttingpowder") then
                             stats.set_int(yu.mpx().."H4CNF_TARGET", 3)
                         else
@@ -924,7 +934,7 @@ function SussySpt:initTabHBO()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
-        if yu.rendering.isCheckboxChecked("cat_hbo") then
+        if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_hbo") then
             if ImGui.Begin("HBO (Heists, Businesses & Other)") then
                 ImGui.BeginTabBar(tabBarId)
 
@@ -946,13 +956,45 @@ function SussySpt:initTabLua()
     end
 
     local function initExecuter()
+        local emptyString = ""
+        local inputText = emptyString
+        local errorText = emptyString
+
         addToRender(function()
             if (ImGui.BeginTabItem("Executer")) then
-                ImGui.Text()
+
+                if ImGui.Button("Clear") then
+                    inputText = emptyString
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Execute") then
+                    errorText = emptyString
+                    local compiledFunction, errorMessage = loadstring(inputText)
+                    if compiledFunction then
+                        local success, errorOrResult = pcall(compiledFunction)
+
+                        if not success then
+                            errorText = errorOrResult
+                        end
+                    else
+                        errorText = errorMessage or emptyString
+                    end
+                end
+
+                inputText, _ = ImGui.InputTextMultiline("##cat_lua_executer_input", inputText, 256, 300.0, 150.0, 0)
+
+                if errorText and errorText ~= emptyString then
+                    ImGui.Text("Error: "..errorText)
+                end
+
                 ImGui.EndTabItem()
             end
         end)
     end
+
+    initExecuter()
 
     local tabBarId = "##cat_lua"
 

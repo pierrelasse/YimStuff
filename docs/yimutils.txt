@@ -142,6 +142,10 @@ add_task(func: function)
     Param func: The function to be executed
     Returns: Id of the task
 
+has_task(id: number)
+    Param id: The id of the task. Returned from add_task(func: function)
+    Returns: true if task is with id is active. Else false
+
 # Tables
 keys
     Format: KeyName: string = KeyId: number

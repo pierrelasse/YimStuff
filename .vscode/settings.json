@@ -15,7 +15,9 @@
         "ENTITY",
         "SYSTEM",
         "locals",
-        "globals"
+        "globals",
+        "CAM",
+        "HUD"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

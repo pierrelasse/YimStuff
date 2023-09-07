@@ -82,6 +82,14 @@ return (function()
             return num + amount
         end
 
+        api.splitText = function(inputText, delimiter)
+            local lines = {}
+            for line in inputText:gmatch(delimiter) do
+                table.insert(lines, line)
+            end
+            return lines
+        end
+
         -- Notifications
         api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
@@ -184,6 +192,10 @@ return (function()
         api.is_script_running = function(name)
             return api.is_script_running_hash(joaat(name))
         end
+
+        -- api.in_online = function()
+        --     return api.is_script_running("freemode")
+        -- end
     end
 
     local function initKeyListener()
@@ -251,7 +263,7 @@ return (function()
                 }
             end
             local newKey = key
-            if ImGui.BeginCombo((name or "").."##"..labelId, items[key]) then
+            if ImGui.BeginCombo((name or "").."##"..labelId, api.get_or_default(items, key, next(items))) then
                 for k, v in pairs(items) do
                     if (ImGui.Selectable(v, key == v)) then
                         newKey = k
@@ -279,7 +291,9 @@ return (function()
             if ImGui.Checkbox(name, d.state) ~= d.oldstate then
                 d.state = not d.state
                 d.oldstate = d.state
-                callback(d.state)
+                if callback ~= nil then
+                    callback(d.state)
+                end
             end
 
             data.rendering.checkboxstates[id] = d
@@ -308,6 +322,10 @@ return (function()
                 return id
             end
             return nil
+        end
+
+        api.has_task = function(id)
+            return id ~= nil and data.tasks.asap[id] ~= nil
         end
     end
 
