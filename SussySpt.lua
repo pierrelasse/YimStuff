@@ -494,6 +494,50 @@ function SussySpt:initTabHBO()
                 [4] = "Coke",
                 [5] = "Gold",
             },
+            storagesid = {
+                [2] = "CASH",
+                [3] = "WEED",
+                [4] = "COKE",
+                [5] = "GOLD"
+            },
+            compoundstorageamounts = {
+                [0] = 0,
+                [1] = 64,
+                [2] = 128,
+                [3] = 196,
+                [4] = 204,
+                [5] = 220,
+                [6] = 252,
+                [7] = 253,
+                [8] = 255
+            },
+            islandstorageamounts = {
+                [0] = 0,
+                [1] = 8388608,
+                [2] = 12582912,
+                [3] = 12845056,
+                [4] = 12976128,
+                [5] = 13500416,
+                [6] = 14548992,
+                [7] = 16646144,
+                [8] = 16711680,
+                [9] = 16744448,
+                [10] = 16760832,
+                [11] = 16769024,
+                [12] = 16769536,
+                [13] = 16770560,
+                [14] = 16770816,
+                [15] = 16770880,
+                [16] = 16771008,
+                [17] = 16773056,
+                [18] = 16777152,
+                [19] = 16777184,
+                [20] = 16777200,
+                [21] = 16777202,
+                [22] = 16777203,
+                [23] = 16777211,
+                [24] = 16777215
+            },
             difficulties = {
                 [126823] = "Normal",
                 [131055] = "Hard",
@@ -539,20 +583,41 @@ function SussySpt:initTabHBO()
         local function refreshStats()
             a.primarytarget = stats.get_int(yu.mpx().."H4CNF_TARGET")
             addUnknownValue(a.primarytargets, a.primarytarget)
+
             a.compoundstorage = getStorage("C")
             addUnknownValue(a.storages, a.compoundstorage)
+
+            local compoundstorageid = a.storagesid[a.compoundstorage]
+            if compoundstorageid == nil then
+                a.compoundstorageamount = 0
+            else
+                a.compoundstorageamount = yu.get_key_from_table(a.compoundstorageamounts, stats.get_int(yu.mpx("H4LOOT_"..compoundstorageid.."_C_SCOPED")), 0)
+            end
+
             a.islandstorage = getStorage("I")
             addUnknownValue(a.storages, a.islandstorage)
+
+            local islandstorageid = a.storagesid[a.islandstorage]
+            if islandstorageid == nil then
+                a.islandstorageamount = 0
+            else
+                a.islandstorageamount = yu.get_key_from_table(a.islandstorageamounts, stats.get_int(yu.mpx("H4LOOT_"..islandstorageid.."_I_SCOPED")), 0)
+            end
+
             a.paintingsamount = yu.get_between_or_default(stats.get_int(yu.mpx("H4LOOT_PAINT_SCOPED")), 0, 7)
-            yu.rendering.setCheckboxChecked("hbo_cayo_addpaintings", stats.get_int("H4LOOT_PAINT_C") ~= 0)
+
             a.difficulty = stats.get_int(yu.mpx().."H4_PROGRESS")
             addUnknownValue(a.difficulties, a.difficulty)
+
             a.approach = stats.get_int(yu.mpx().."H4_MISSIONS")
             addUnknownValue(a.approaches, a.approach)
+
             a.weapon = stats.get_int(yu.mpx().."H4CNF_WEAPONS")
             addUnknownValue(a.weapons, a.weapon)
+
             a.supplytrucklocation = stats.get_int(yu.mpx().."H4CNF_TROJAN")
             addUnknownValue(a.supplytrucklocations, a.supplytrucklocation)
+
             yu.rendering.setCheckboxChecked("hbo_cayo_cuttingpowder", stats.get_int(yu.mpx().."H4CNF_TARGET") == 3)
         end
 
@@ -571,25 +636,37 @@ function SussySpt:initTabHBO()
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Preperations")
 
-                local ptr = yu.rendering.renderList(a.primarytargets, a.primarytarget, "hbo_cayo_pt", "Primary Target")
+                local ptr = yu.rendering.renderList(a.primarytargets, a.primarytarget, "hbo_cayo_pt", "Primary target")
                 if ptr.changed then
                     yu.notify(1, "Set Primary Target to "..a.primarytargets[ptr.key].." ["..ptr.key.."]", "Cayo Perico Heist")
                     a.primarytarget = ptr.key
                     a.primarytargetchanged = true
                 end
 
-                local fcsr = yu.rendering.renderList(a.storages, a.compoundstorage, "hbo_cayo_fcs", "Fill Compound Storages")
+                local fcsr = yu.rendering.renderList(a.storages, a.compoundstorage, "hbo_cayo_fcs", "Fill compound storages")
                 if fcsr.changed then
-                    yu.notify(1, "Set Fill Compound Storages to "..a.storages[fcsr.key].." ["..fcsr.key.."]", "Cayo Perico Heist")
+                    yu.notify(1, "Set Fill compound storages to "..a.storages[fcsr.key].." ["..fcsr.key.."]", "Cayo Perico Heist")
                     a.compoundstorage = fcsr.key
                     a.compoundstoragechanged = true
                 end
 
-                local fisr = yu.rendering.renderList(a.storages, a.islandstorage, "hbo_cayo_fcs", "Fill Island Storages")
+                local fcsar, fcsavc = ImGui.SliderInt("Compound storage amount", a.compoundstorageamount, 0, #a.compoundstorageamounts - 1, a.compoundstorageamount.."##hbo_cayo_compoundstorageamount", 1)
+                if fcsavc then
+                    a.compoundstorageamount = fcsar
+                    a.compoundstorageamountchanged = true
+                end
+
+                local fisr = yu.rendering.renderList(a.storages, a.islandstorage, "hbo_cayo_fcs", "Fill island storages")
                 if fisr.changed then
-                    yu.notify(1, "Set Fill Island Storages to "..a.storages[fisr.key].." ["..fisr.key.."]", "Cayo Perico Heist")
+                    yu.notify(1, "Set Fill island storages to "..a.storages[fisr.key].." ["..fisr.key.."]", "Cayo Perico Heist")
                     a.islandstorage = fisr.key
                     a.islandstoragechanged = true
+                end
+
+                local fisar, fisavc = ImGui.SliderInt("Islands storage amount", a.islandstorageamount, 0, #a.islandstorageamounts - 1, a.islandstorageamount.."##hbo_cayo_paintingsamount", 1)
+                if fisavc then
+                    a.islandstorageamount = fisar
+                    a.islandstorageamountchanged = true
                 end
 
                 local par, pavc = ImGui.SliderInt("Paintings amount", a.paintingsamount, 0, 7, a.paintingsamount.."##hbo_cayo_paintingsamount", 1)
@@ -597,7 +674,7 @@ function SussySpt:initTabHBO()
                     a.paintingsamount = par
                     a.paintingsamountchanged = true
                 end
-                
+
                 local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
                 if dr.changed then
                     yu.notify(1, "Set Difficulty to "..a.difficulties[dr.key].." ["..dr.key.."]", "Cayo Perico Heist")
@@ -646,8 +723,9 @@ function SussySpt:initTabHBO()
                         end
 
                         -- Fill Compound Storages
-                        if a.compoundstoragechanged then
+                        if a.compoundstoragechanged or a.compoundstorageamountchanged then
                             changes = yu.add(changes, 1)
+                            local amount = a.compoundstorageamounts[a.compoundstorageamount]
                             if a.compoundstorage == 1 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
@@ -658,8 +736,8 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
                             elseif a.compoundstorage == 2 then
-                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 255)
-                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
@@ -670,8 +748,8 @@ function SussySpt:initTabHBO()
                             elseif a.compoundstorage == 3 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 255)
-                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
@@ -682,8 +760,8 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 255)
-                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
@@ -694,15 +772,16 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 255)
-                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
                             end
                         end
 
                         -- Fill Island Storages
-                        if a.islandstoragechanged then
+                        if a.islandstoragechanged or a.islandstorageamountchanged then
                             changes = yu.add(changes, 1)
+                            local amount = a.islandstorageamounts[a.islandstorageamount]
                             if a.islandstorage == 1 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
@@ -713,8 +792,8 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
                             elseif a.islandstorage == 2 then
-                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 16777215)
-                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
@@ -725,8 +804,8 @@ function SussySpt:initTabHBO()
                             elseif a.islandstorage == 3 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 16777215)
-                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
@@ -737,8 +816,8 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 16777215)
-                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
@@ -749,8 +828,8 @@ function SussySpt:initTabHBO()
                                 stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
                                 stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
-                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 16777215)
-                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", amount)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", amount)
                                 stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
                             end
                         end
@@ -797,7 +876,7 @@ function SussySpt:initTabHBO()
                             end
                         end
 
-                        yu.notify(1, changes.." changes applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
                     end)
                 end
 

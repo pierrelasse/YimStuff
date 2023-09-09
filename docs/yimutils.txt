@@ -33,9 +33,10 @@ get_or_default(tbl: table, key, defaultValue)
     Param defaultValue: Returned when tbl does not have key
     Returns: Value of tbl for key, or defaultValue if not found
 
-get_key_from_table(tbl: table, value)
+get_key_from_table(tbl: table, value, defaultValue)
     Param tbl: The table from where the key gets obtained
     Param value: The value from the key we need to find
+    Param defaultValue: Returned when value with key key was not foudn
     Returns: The first key with the value value
 
 gd(get, defaultValue)

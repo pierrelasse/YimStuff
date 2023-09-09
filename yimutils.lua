@@ -50,13 +50,13 @@ return (function()
             return api.get_or_default(tbl, key, defaultValue)
         end
 
-        api.get_key_from_table = function(tbl, value)
+        api.get_key_from_table = function(tbl, value, defaultValue)
             for k, v in pairs(tbl) do
                 if v == value then
                     return k
                 end
             end
-            return nil
+            return defaultValue
         end
 
         api.gd = function(get, defaultValue)
