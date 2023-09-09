@@ -232,14 +232,110 @@ function SussySpt:initTabSelf()
                     end
 
                     if (ImGui.BeginTabItem("Unlocks")) then
+                        ImGui.Text("LSCustoms")
+
+                        if ImGui.Button("Unlock hidden liveries") then
+                            yu.add_task(function()
+                                stats.set_int("MPPLY_XMASLIVERIES", -1)
+                                for i = 1, 20 do
+                                    stats.set_int("MPPLY_XMASLIVERIES" .. i, -1)
+                                end
+                            end)
+                        end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("LSCarMeet")
+                        ImGui.Text("  Buy a membership, activate, sit in a test car and go to the track.")
+                        ImGui.Text("  If your level is not 1, then activate and buy something in the LSCM store.")
+                        ImGui.Text("  If you've used LS Tuners awards unlock before, all unlocks will be temporary only.")
+
+                        if ImGui.Button("Unlock Trade Prices for headlights") then
+                            yu.add_task(function()
+                                for i = 18, 29 do
+                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                                end
+                            end)
+                        end
+
+                        if ImGui.Button("Unlock podium prize") then
+                            yu.add_task(function()
+                                stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
+                                stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
+                            end)
+                        end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("Flight school")
+
+                        if ImGui.Button("Unlock all gold medals") then
+                            yu.add_task(function()
+                                stats.set_int("MPPLY_NUM_CAPTURES_CREATED", 100)
+                                for i = 0, 9 do
+                                    stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_" .. i , -1)
+                                    stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_" .. i, -1)
+                                    stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_" .. i, true)
+                                end
+                            end)
+                        end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("Shooting thing in bunker i guess")
+
+                        if ImGui.Button("Unlock all shooting range rewards") then
+                            yu.add_task(function()
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690)
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_4", 2660)
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_5", 2650)
+                                stats.set_int(yu.mpx().."SR_HIGHSCORE_6", 450)
+                                stats.set_int(yu.mpx().."SR_TARGETS_HIT", 269)
+                                stats.set_int(yu.mpx().."SR_WEAPON_BIT_SET", -1)
+                                stats.set_bool(yu.mpx().."SR_TIER_1_REWARD", true)
+                                stats.set_bool(yu.mpx().."SR_TIER_3_REWARD", true)
+                                stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
+                            end)
+                        end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("Arena war")
+
+                        if ImGui.Button("Unlock trade prices for vehicles") then
+                            yu.add_task(function()
+                                for i = 1, 16 do
+                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                                end
+                                for i = 11, 19 do
+                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL2", true, i)
+                                end
+                            end)
+                        end
+
+                        if ImGui.Button("Unlock trade prices for headlights") then
+                            yu.add_task(function()
+                                for i = 18, 29 do
+                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                                end
+                            end)
+                        end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("Other")
+
                         if ImGui.Button("Unlock fast run and reload") then
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
-                            yu.notify(2, "Switch sessions to apply changes", "Balls")
+                            yu.add_task(function()
+                                stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
+                            end)
                         end
 
                         ImGui.EndTabItem()
@@ -305,84 +401,58 @@ function SussySpt:initTabSelf()
         statsTab:add_separator()
 
         statsTab:add_text("Marked as:")
-        statsTab:add_text("  - Cheater: " .. yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
-        statsTab:add_text("  - BadSport: " .. yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
-        statsTab:add_text("  - HighEarner: " .. yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
+        statsTab:add_text("  - Is cheater: ".. yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
+        statsTab:add_text("  - Was i badsport: ".. yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
+        statsTab:add_text("  - Is high earner: ".. yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
         statsTab:add_separator()
         statsTab:add_text("Reports:")
-        statsTab:add_text("  - Griefing: " .. stats.get_int("MPPLY_GRIEFING"))
-        statsTab:add_text("  - Exploits: " .. stats.get_int("MPPLY_EXPLOITS"))
-        statsTab:add_text("  - Game Exploits: " .. stats.get_int("MPPLY_GAME_EXPLOITS"))
-        statsTab:add_text("  - Text Chat > Annoying Me: " .. stats.get_int("MPPLY_TC_ANNOYINGME"))
-        statsTab:add_text("  - Text Chat > Hate Speech: " .. stats.get_int("MPPLY_TC_HATE"))
-        statsTab:add_text("  - Voice Chat > Hate Speech: " .. stats.get_int("MPPLY_VC_ANNOYINGME"))
-        statsTab:add_text("  - Voice Chat > Hate Speech: " .. stats.get_int("MPPLY_VC_HATE"))
-        statsTab:add_text("  - Offensive Language: " .. stats.get_int("MPPLY_OFFENSIVE_LANGUAGE"))
-        statsTab:add_text("  - Offensive Tagplate: " .. stats.get_int("MPPLY_OFFENSIVE_TAGPLATE"))
-        statsTab:add_text("  - Offensive Content: " .. stats.get_int("MPPLY_OFFENSIVE_UGC"))
-        statsTab:add_text("  - Bad Crew Name: " .. stats.get_int("MPPLY_BAD_CREW_NAME"))
-        statsTab:add_text("  - Bad Crew Motto: " .. stats.get_int("MPPLY_BAD_CREW_MOTTO"))
-        statsTab:add_text("  - Bad Crew Status: " .. stats.get_int("MPPLY_BAD_CREW_STATUS"))
-        statsTab:add_text("  - Bad Crew Emblem: " .. stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
-        statsTab:add_text("  - Friendly: " .. stats.get_int("MPPLY_FRIENDLY"))
-        statsTab:add_text("  - Helpful: " .. stats.get_int("MPPLY_HELPFUL"))
+        statsTab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
+        statsTab:add_text("  - Exploits: "..stats.get_int("MPPLY_EXPLOITS"))
+        statsTab:add_text("  - Game exploits: "..stats.get_int("MPPLY_GAME_EXPLOITS"))
+        statsTab:add_text("  - Text chat > Annoying me: "..stats.get_int("MPPLY_TC_ANNOYINGME"))
+        statsTab:add_text("  - Text chat > Hate Speech: "..stats.get_int("MPPLY_TC_HATE"))
+        statsTab:add_text("  - Voice chat > Annoying me: "..stats.get_int("MPPLY_VC_ANNOYINGME"))
+        statsTab:add_text("  - Voice chat > Hate Speech: "..stats.get_int("MPPLY_VC_HATE"))
+        statsTab:add_text("  - Offensive language: "..stats.get_int("MPPLY_OFFENSIVE_LANGUAGE"))
+        statsTab:add_text("  - Offensive tagplate: "..stats.get_int("MPPLY_OFFENSIVE_TAGPLATE"))
+        statsTab:add_text("  - Offensive content: "..stats.get_int("MPPLY_OFFENSIVE_UGC"))
+        statsTab:add_text("  - Bad crew name: "..stats.get_int("MPPLY_BAD_CREW_NAME"))
+        statsTab:add_text("  - Bad crew motto: "..stats.get_int("MPPLY_BAD_CREW_MOTTO"))
+        statsTab:add_text("  - Bad crew status: "..stats.get_int("MPPLY_BAD_CREW_STATUS"))
+        statsTab:add_text("  - Bad crew emblem: "..stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
+        statsTab:add_text("  - Friendly: "..stats.get_int("MPPLY_FRIENDLY"))
+        statsTab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
         statsTab:add_separator()
         statsTab:add_text("Other:")
-
-        -- v.tab.self._:add_text("Casino:")
-        -- v.tab.self._:add_button("Skip Fingerprint", function()
-        --     local i = 52964;
-        --     local heist_script = script("fm_mission_controller")
-        --     if heist_script and heist_script:is_active() then
-        --         if heist_script:get_int(i) == 3 or heist_script:get_int(i) == 4 then
-        --             heist_script:set_int(i, 5)
-        --         end
-        --     end
-        --     v:notify(1, "[Casino] Skipped!")
-        -- end)
-        -- v.tab.self._:add_separator()
-
-        -- v.tab.resetMentalState = v.tab.self._:add_button("Reset MentalState",
-        --                                                  function()
-        --     stats.set_float(yu.mpx().."PLAYER_MENTAL_STATE", 0)
-        --     v:notify(1, "[Self] Reset PLAYER_MENTAL_STATE?")
-        -- end)
-
-        -- v.tab.self.stats = {}
-        -- v.tab.self.stats._ = v.tab.self._:add_tab(" Stats")
-        local function addIntStat(key, stat)
-            statsTab:add_text("  - "..key..": "..yu.format_num(stats.get_int(stat)))
-        end
-
-        addIntStat("Earned Money", "MPPLY_TOTAL_EVC")
-        addIntStat("Spent Money", "MPPLY_TOTAL_SVC")
-        addIntStat("Players Killed", "MPPLY_KILLS_PLAYERS")
-        addIntStat("Deatsh per player", "MPPLY_DEATHS_PLAYER")
-        addIntStat("PvP K/D Ratio", "MPPLY_KILL_DEATH_RATIO")
-        addIntStat("Deathmatches Published", "MPPLY_AWD_FM_CR_DM_MADE")
-        addIntStat("Races Published", "MPPLY_AWD_FM_CR_RACES_MADE")
-        addIntStat("Screenshots Published", "MPPLY_NUM_CAPTURES_CREATED")
-        addIntStat("LTS Published", "MPPLY_AWD_FM_CR_RACES_MADE")
-        addIntStat("Persons who have played your misions", "MPPLY_AWD_FM_CR_PLAYED_BY_PEEP")
-        addIntStat("Likes to missions", "MPPLY_AWD_FM_CR_MISSION_SCORE")
-        addIntStat("Traveled (metters)", "MPPLY_CHAR_DIST_TRAVELLED")
-        addIntStat("Swiming", yu.mpx().."DIST_SWIMMING")
-        addIntStat("Walking", yu.mpx().."DIST_WALKING")
-        addIntStat("Running", yu.mpx().."DIST_RUNNING")
-        addIntStat("Highest fall without dying", yu.mpx().."LONGEST_SURVIVED_FREEFALL")
-        addIntStat("Driving Cars", yu.mpx().."DIST_CAR")
-        addIntStat("Driving motorbikes", yu.mpx().."DIST_BIKE")
-        addIntStat("Flying Helicopters", yu.mpx().."DIST_HELI")
-        addIntStat("Flying Planes", yu.mpx().."DIST_PLANE")
-        addIntStat("Driving Botes", yu.mpx().."DIST_BOAT")
-        addIntStat("Driving ATVs", yu.mpx().."DIST_QUADBIKE")
-        addIntStat("Driving Bicycles", yu.mpx().."DIST_BICYCLE")
-        addIntStat("Longest Front Willie", yu.mpx().."LONGEST_STOPPIE_DIST")
-        addIntStat("Longest Willie", yu.mpx().."LONGEST_WHEELIE_DIST")
-        addIntStat("Largest driving without crashing", yu.mpx().."LONGEST_DRIVE_NOCRASH")
-        addIntStat("Longest Jump", yu.mpx().."FARTHEST_JUMP_DIST")
-        addIntStat("Longest Jump in Vehicle", yu.mpx().."HIGHEST_JUMP_REACHED")
-        addIntStat("Highest Hidraulic Jump", yu.mpx().."LOW_HYDRAULIC_JUMP")
+        statsTab:add_text("  - Earned Money", stats.get_int("MPPLY_TOTAL_EVC"))
+        statsTab:add_text("  - Spent Money", stats.get_int("MPPLY_TOTAL_SVC"))
+        statsTab:add_text("  - Players Killed", stats.get_int("MPPLY_KILLS_PLAYERS"))
+        statsTab:add_text("  - Deatsh per player", stats.get_int("MPPLY_DEATHS_PLAYER"))
+        statsTab:add_text("  - PvP K/D Ratio", stats.get_int("MPPLY_KILL_DEATH_RATIO"))
+        statsTab:add_text("  - Deathmatches Published", stats.get_int("MPPLY_AWD_FM_CR_DM_MADE"))
+        statsTab:add_text("  - Races Published", stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
+        statsTab:add_text("  - Screenshots Published", stats.get_int("MPPLY_NUM_CAPTURES_CREATED"))
+        statsTab:add_text("  - LTS Published", stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
+        statsTab:add_text("  - Persons who have played your misions", stats.get_int("MPPLY_AWD_FM_CR_PLAYED_BY_PEEP"))
+        statsTab:add_text("  - Likes to missions", stats.get_int("MPPLY_AWD_FM_CR_MISSION_SCORE"))
+        statsTab:add_text("  - Traveled (metters)", stats.get_int("MPPLY_CHAR_DIST_TRAVELLED"))
+        statsTab:add_text("  - Swiming", stats.get_int(yu.mpx().."DIST_SWIMMING"))
+        statsTab:add_text("  - Walking", stats.get_int(yu.mpx().."DIST_WALKING"))
+        statsTab:add_text("  - Running", stats.get_int(yu.mpx().."DIST_RUNNING"))
+        statsTab:add_text("  - Highest fall without dying", stats.get_int(yu.mpx().."LONGEST_SURVIVED_FREEFALL"))
+        statsTab:add_text("  - Driving Cars", stats.get_int(yu.mpx().."DIST_CAR"))
+        statsTab:add_text("  - Driving motorbikes", stats.get_int(yu.mpx().."DIST_BIKE"))
+        statsTab:add_text("  - Flying Helicopters", stats.get_int(yu.mpx().."DIST_HELI"))
+        statsTab:add_text("  - Flying Planes", stats.get_int(yu.mpx().."DIST_PLANE"))
+        statsTab:add_text("  - Driving Botes", stats.get_int(yu.mpx().."DIST_BOAT"))
+        statsTab:add_text("  - Driving ATVs", stats.get_int(yu.mpx().."DIST_QUADBIKE"))
+        statsTab:add_text("  - Driving Bicycles", stats.get_int(yu.mpx().."DIST_BICYCLE"))
+        statsTab:add_text("  - Longest Front Willie", stats.get_int(yu.mpx().."LONGEST_STOPPIE_DIST"))
+        statsTab:add_text("  - Longest Willie", stats.get_int(yu.mpx().."LONGEST_WHEELIE_DIST"))
+        statsTab:add_text("  - Largest driving without crashing", stats.get_int(yu.mpx().."LONGEST_DRIVE_NOCRASH"))
+        statsTab:add_text("  - Longest Jump", stats.get_int(yu.mpx().."FARTHEST_JUMP_DIST"))
+        statsTab:add_text("  - Longest Jump in Vehicle", stats.get_int(yu.mpx().."HIGHEST_JUMP_REACHED"))
+        statsTab:add_text("  - Highest Hidraulic Jump", stats.get_int(yu.mpx().."LOW_HYDRAULIC_JUMP"))
     end
 
     local function initTabUnlocks()
