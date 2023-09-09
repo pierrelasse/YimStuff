@@ -35,6 +35,7 @@ function SussySpt:new()
     SussySpt:initTabSelf()
     SussySpt:initTabHBO()
     -- SussySpt:initTabLua()
+    SussySpt:initTabQA()
 
     SussySpt:initTabHeist()
     SussySpt:initTabMisc()
@@ -68,6 +69,8 @@ function SussySpt:initRendering(tab)
         if SussySpt.in_online then
             yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
         end
+
+        yu.rendering.renderCheckbox("Quick actions", "cat_qa", function(state) end)
 
         -- yu.rendering.renderCheckbox("Lua", "cat_lua", function(state) end)
     end)
@@ -470,6 +473,12 @@ function SussySpt:initTabHBO()
         toRender[yu.gun()] = cb
     end
 
+    local function addUnknownValue(tbl, v)
+        if tbl[v] == nil then
+            tbl[v] = "??? ["..v.."]"
+        end
+    end
+
     local function initCayo()
         local a = {
             primarytargets = {
@@ -529,12 +538,6 @@ function SussySpt:initTabHBO()
             return 1
         end
 
-        local function addUnknownValue(tbl, v)
-            if tbl[v] == nil then
-                tbl[v] = "??? ["..v.."]"
-            end
-        end
-
         local function refreshStats()
             a.primarytarget = stats.get_int(yu.mpx().."H4CNF_TARGET")
             addUnknownValue(a.primarytargets, a.primarytarget)
@@ -542,6 +545,7 @@ function SussySpt:initTabHBO()
             addUnknownValue(a.storages, a.compoundstorage)
             a.islandstorage = getStorage("I")
             addUnknownValue(a.storages, a.islandstorage)
+            a.paintingsamount = yu.get_between_or_default(stats.get_int(yu.mpx("H4LOOT_PAINT_SCOPED")), 0, 7)
             yu.rendering.setCheckboxChecked("hbo_cayo_addpaintings", stats.get_int("H4LOOT_PAINT_C") ~= 0)
             a.difficulty = stats.get_int(yu.mpx().."H4_PROGRESS")
             addUnknownValue(a.difficulties, a.difficulty)
@@ -590,9 +594,11 @@ function SussySpt:initTabHBO()
                     a.islandstoragechanged = true
                 end
 
-                yu.rendering.renderCheckbox("Add paintings", "hbo_cayo_addpaintings", function(state)
-                    a.addpaintingschanged = true
-                end)
+                local par, pavc = ImGui.SliderInt("Paintings amount", a.paintingsamount, 0, 7, a.paintingsamount.."##hbo_cayo_paintingsamount", 1)
+                if pavc then
+                    a.paintingsamount = par
+                    a.paintingsamountchanged = true
+                end
                 
                 local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
                 if dr.changed then
@@ -632,174 +638,169 @@ function SussySpt:initTabHBO()
                 ImGui.Spacing()
 
                 if ImGui.Button("Apply") then
-                    local changes = 0
+                    yu.add_task(function()
+                        local changes = 0
 
-                    -- Primary Target
-                    if a.primarytargetchanged then
-                        changes = yu.add(changes, 1)
-                        stats.set_int(yu.mpx().."H4CNF_TARGET", a.primarytarget)
-                    end
-
-                    -- Fill Compound Storages
-                    if a.compoundstoragechanged then
-                        changes = yu.add(changes, 1)
-                        if a.compoundstorage == 1 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                        elseif a.compoundstorage == 2 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
-                        elseif a.compoundstorage == 3 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
-                        elseif a.compoundstorage == 4 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
-                        elseif a.compoundstorage == 5 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 255)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                        -- Primary Target
+                        if a.primarytargetchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H4CNF_TARGET", a.primarytarget)
                         end
-                    end
 
-                    -- Fill Island Storages
-                    if a.islandstoragechanged then
-                        changes = yu.add(changes, 1)
-                        if a.islandstorage == 1 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
-                        elseif a.islandstorage == 2 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
-                        elseif a.islandstorage == 3 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
-                        elseif a.islandstorage == 4 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
-                        elseif a.islandstorage == 5 then
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 16777215)
-                            stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                        -- Fill Compound Storages
+                        if a.compoundstoragechanged then
+                            changes = yu.add(changes, 1)
+                            if a.compoundstorage == 1 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                            elseif a.compoundstorage == 2 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
+                            elseif a.compoundstorage == 3 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
+                            elseif a.compoundstorage == 4 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
+                            elseif a.compoundstorage == 5 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_C_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_C_SCOPED", 255)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                            end
                         end
-                    end
 
-                    -- Paintings
-                    if a.addpaintingschanged then
-                        changes = yu.add(changes, 1)
-                        if yu.rendering.isCheckboxChecked("hbo_cayo_addpaintings") then
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT", 16)
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_SCOPED", 16)
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_V", 199710)
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C_SCOPED", 0)
-                        else
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C", 0)
-                            stats.set_int(yu.mpx().."H4LOOT_PAINT_C_SCOPED", 0)
+                        -- Fill Island Storages
+                        if a.islandstoragechanged then
+                            changes = yu.add(changes, 1)
+                            if a.islandstorage == 1 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                            elseif a.islandstorage == 2 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_V", 90000)
+                            elseif a.islandstorage == 3 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_V", 147870)
+                            elseif a.islandstorage == 4 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_V", 200095)
+                            elseif a.islandstorage == 5 then
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_CASH_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_WEED_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_COKE_I_SCOPED", 0)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_I_SCOPED", 16777215)
+                                stats.set_int(yu.mpx().."H4LOOT_GOLD_V", 330350)
+                            end
                         end
-                    end
 
-                    -- Difficulty
-                    if a.difficultychanged then
-                        changes = yu.add(changes, 1)
-                        stats.set_int(yu.mpx().."H4_PROGRESS", a.difficulty)
-                    end
-
-                    -- Approach
-                    if a.approachchanged then
-                        changes = yu.add(changes, 1)
-                        stats.set_int(yu.mpx().."H4_MISSIONS", a.approach)
-                    end
-
-                    -- Weapons
-                    if a.weaponchanged then
-                        changes = yu.add(changes, 1)
-                        stats.set_int(yu.mpx().."H4CNF_WEAPONS", a.weapon)
-                    end
-
-                    -- Truck Location
-                    if a.supplytrucklocationchanged then
-                        changes = yu.add(changes, 1)
-                        stats.set_int(yu.mpx().."H4CNF_TROJAN", a.supplytrucklocation)
-                    end
-
-                    -- Cutting Powder
-                    if a.cuttingpowderchanged then
-                        changes = yu.add(changes, 1)
-                        if yu.rendering.isCheckboxChecked("hbo_cayo_cuttingpowder") then
-                            stats.set_int(yu.mpx().."H4CNF_TARGET", 3)
-                        else
-                            stats.set_int(yu.mpx().."H4CNF_TARGET", 2)
+                        -- Paintings
+                        if a.paintingsamountchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx("H4LOOT_PAINT"), a.paintingsamount)
+                            stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), a.paintingsamount)
+                            stats.set_int(yu.mpx("H4LOOT_PAINT_V"), 189500)
                         end
-                    end
 
-                    yu.notify(1, changes.." changes applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
+                        -- Difficulty
+                        if a.difficultychanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H4_PROGRESS", a.difficulty)
+                        end
+
+                        -- Approach
+                        if a.approachchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H4_MISSIONS", a.approach)
+                        end
+
+                        -- Weapons
+                        if a.weaponchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H4CNF_WEAPONS", a.weapon)
+                        end
+
+                        -- Truck Location
+                        if a.supplytrucklocationchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H4CNF_TROJAN", a.supplytrucklocation)
+                        end
+
+                        -- Cutting Powder
+                        if a.cuttingpowderchanged then
+                            changes = yu.add(changes, 1)
+                            if yu.rendering.isCheckboxChecked("hbo_cayo_cuttingpowder") then
+                                stats.set_int(yu.mpx().."H4CNF_TARGET", 3)
+                            else
+                                stats.set_int(yu.mpx().."H4CNF_TARGET", 2)
+                            end
+                        end
+
+                        yu.notify(1, changes.." changes applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
+                    end)
                 end
 
                 ImGui.SameLine()
@@ -1021,6 +1022,52 @@ function SussySpt:initTabLua()
                 end
 
                 ImGui.EndTabBar()
+            end
+            ImGui.End()
+        end
+    end)
+end
+
+function SussySpt:initTabQA()
+    SussySpt.add_render(function()
+        if yu.rendering.isCheckboxChecked("cat_qa") then
+            if ImGui.Begin("Quick actions") then
+                if ImGui.Button("Heal") then
+                    yu.add_task(function()
+                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0);
+			            PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()));
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refill health") then
+                    yu.add_task(function()
+                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0);
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refill armor") then
+                    yu.add_task(function()
+                        PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()));
+                    end)
+                end
+
+                if ImGui.Button("Clear wanted level") then
+                    yu.add_task(function()
+                        PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
+                    end)
+                end
+
+                if ImGui.Button("Repair vehicle") then
+                    local veh = yu.veh()
+                    if veh ~= nil then
+                        VEHICLE.SET_VEHICLE_FIXED(veh)
+                        VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0);
+                    end
+                end
             end
             ImGui.End()
         end

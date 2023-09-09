@@ -19,11 +19,11 @@ is_num_between(num: number, min: number, max: number)
     Param max: The maximum value
     Returns: If num is between min and max
 
-get_between_or_default(num: number, min: number, max: number, defaultValue)
+get_between_or_default(num: number, min: number, max: number, [defaultValue])
     Param num: A number that must be between min and max
     Param min: The min value the value must be between
     Param max: The max value the value must be between
-    Param defaultValue: Returned when value is not between min and max
+    Param defaultValue: Returned when value is not between min and max. Default: min
     Returns: Itself or defaultValue based on conditions
 
 get_or_default(tbl: table, key, defaultValue)

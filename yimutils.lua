@@ -39,7 +39,7 @@ return (function()
         end
 
         api.get_between_or_default = function(num, min, max, defaultValue)
-            return api.is_num_between(num, min, max) and num or defaultValue
+            return api.is_num_between(num, min, max) and num or (defaultValue or min)
         end
 
         api.get_or_default = function(tbl, key, defaultValue)
