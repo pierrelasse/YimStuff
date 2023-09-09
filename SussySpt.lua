@@ -2,8 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 4,
-    dmode = true
+    versionid = 5
 }
 
 function SussySpt:new()
@@ -16,7 +15,6 @@ function SussySpt:new()
 
     tab:add_text("Version: "..SussySpt.version)
     tab:add_text("Version id: "..SussySpt.versionid)
-    tab:add_text("Dev mode: "..yu.boolstring(SussySpt.dmode, "enabled", "disabled"))
 
     SussySpt.rendercb = {}
     SussySpt.add_render = function(cb)
