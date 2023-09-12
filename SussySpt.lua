@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 7
+    versionid = 8
 }
 
 function SussySpt:new()
@@ -1220,6 +1220,10 @@ function SussySpt:initTabQA()
                         VEHICLE.SET_VEHICLE_FIXED(veh)
                         VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0);
                     end
+                end
+
+                if ImGui.Button("Instant BST") then
+                    globals.set_int(2672524 + 3690, 1)
                 end
             end
             ImGui.End()
