@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 5
+    versionid = 7
 }
 
 function SussySpt:new()
@@ -336,6 +336,12 @@ function SussySpt:initTabSelf()
                                 stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
                                 stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
                             end)
+                        end
+
+                        if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
+                            globals.set_int(262145 + 34131, 0)
+                            globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
+                            globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
                         end
 
                         ImGui.EndTabItem()
@@ -2177,9 +2183,9 @@ function SussySpt:initTabMisc()
 
     tab:add_separator()
 
-    tab:add_text("Kosatka (no work gud):")
+    tab:add_text("Kosatka:")
 
-    tab:add_text("  - Remove missle cooldown ["..globals.get_int(262145 + 30394).."]:")
+    tab:add_text("  Remove missle cooldown ["..globals.get_int(262145 + 30394).."]:")
     tab:add_sameline()
     tab:add_button("Enable"..iml(), function()
         globals.set_int(262145 + 30394, 0)
@@ -2189,7 +2195,7 @@ function SussySpt:initTabMisc()
         globals.set_int(262145 + 30394, 60000)
     end)
 
-    tab:add_text("  - Set missle range to 99999 ["..globals.get_int(262145 + 30395).."]:")
+    tab:add_text("  Set missle range to 99999 ["..globals.get_int(262145 + 30395).."]:")
     tab:add_sameline()
     tab:add_button("Enable"..iml(), function()
         globals.set_int(262145 + 30395, 99999)
