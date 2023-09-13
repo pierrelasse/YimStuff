@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 27
+    versionid = 28
 }
 
 function SussySpt:new()
@@ -1005,7 +1005,7 @@ function SussySpt:initTabHBO()
                 yu.rendering.bigText("Extra")
 
                 if ImGui.Button("Remove all cameras") then
-                    removeAllCameras()
+                    yu.add_task(removeAllCameras)
                 end
 
                 if ImGui.Button("Skip sewer tunnel cut") then
@@ -1777,7 +1777,7 @@ function SussySpt:initTabHeist()
             extraTab:add_separator()
 
             extraTab:add_button("Remove all cameras", function()
-                removeAllCameras()
+                yu.add_task(removeAllCameras)
             end)
 
             extraTab:add_separator()
@@ -2100,7 +2100,7 @@ function SussySpt:initTabHeist()
             extraTab:clear()
 
             extraTab:add_button("Remove all cameras", function()
-                removeAllCameras()
+                yu.add_task(removeAllCameras)
             end)
 
             extraTab:add_separator()
@@ -2364,7 +2364,7 @@ function SussySpt:initTabMisc()
     tab:clear()
 
     tab:add_button("Remove all cameras", function()
-        removeAllCameras()
+        yu.add_task(removeAllCameras)
     end)
 
     tab:add_separator()
