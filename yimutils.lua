@@ -24,10 +24,14 @@ return (function()
             if type(num) ~= "number" then
                 return tostring(num)
             end
-            return tostring(math.floor(num))
-                :reverse()
-                :gsub("(%d%d%d)", "%1"..(separator or ","))
-                :reverse()
+            local fn = tostring(math.floor(num))
+            if separator then
+                fn = fn
+                    :reverse()
+                    :gsub("(%d%d%d)", "%1"..separator)
+                    :reverse()
+            end
+            return fn
         end
 
         api.boolstring = function(bool, trueValue, falseValue)
@@ -329,12 +333,19 @@ return (function()
         end
     end
 
+    local function injectFeatures()
+        function string.endswith(str, ending)
+            return (str == nil or ending == nil or ending == "") or str:sub(-#ending) == ending
+        end
+    end
+
     defineUtils()
     initStats()
     defineGetters()
     initKeyListener()
     initRendering()
     initTasks()
+    injectFeatures()
 
     script.register_looped("yimutils", function()
         data.key_listener.tick()

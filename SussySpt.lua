@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 10
+    versionid = 27
 }
 
 function SussySpt:new()
@@ -63,14 +63,12 @@ function SussySpt:initRendering(tab)
     tab:add_button("Recheck if online", SussySpt.refreshInOnline)
     tab:add_text("Categories:")
     SussySpt.add_render(function()
-        yu.rendering.renderCheckbox("Self", "cat_self", function(state) end)
+        yu.rendering.renderCheckbox("Self", "cat_self")
         if SussySpt.in_online then
-            yu.rendering.renderCheckbox("HBO", "cat_hbo", function(state) end)
+            yu.rendering.renderCheckbox("HBO", "cat_hbo")
         end
 
-        yu.rendering.renderCheckbox("Quick actions", "cat_qa", function(state) end)
-
-        -- yu.rendering.renderCheckbox("Lua", "cat_lua", function(state) end)
+        yu.rendering.renderCheckbox("Quick actions", "cat_qa")
     end)
 end
 
@@ -183,7 +181,6 @@ function SussySpt:initTabSelf()
                 ImGui.BeginTabBar(tabBarId)
 
                 if (ImGui.BeginTabItem("General")) then
-
                     yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
                         if state then
                             SussySpt.invisible = true
@@ -543,13 +540,13 @@ end
 
 function SussySpt:initTabHBO()
     local toRender = {}
-    local function addToRender(cb)
-        toRender[yu.gun()] = cb
+    local function addToRender(id, cb)
+        toRender[id] = cb
     end
 
     local function addUnknownValue(tbl, v)
         if tbl[v] == nil then
-            tbl[v] = "??? ["..v.."]"
+            tbl[v] = "??? ["..(v or "<null>").."]"
         end
     end
 
@@ -707,7 +704,7 @@ function SussySpt:initTabHBO()
         end
         updateCooldowns()
 
-        addToRender(function()
+        addToRender(1, function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Preperations")
@@ -953,6 +950,11 @@ function SussySpt:initTabHBO()
                         end
 
                         yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied. (Re)enter your kosatka to see changes.", "Cayo Perico Heist")
+                        for k, v in pairs(a) do
+                            if tostring(k):endswith("changed") then
+                                a[k] = nil
+                            end
+                        end
                     end)
                 end
 
@@ -1069,6 +1071,301 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initCasino()
+        local a = {
+            targets = {
+                [0] = "Cash",
+                [1] = "Gold",
+                [2] = "Art",
+                [3] = "Diamonds",
+            },
+            approaches = {
+                [1] = "Normal - Silent n Sneaky",
+                [2] = "Normal - Big Con",
+                [3] = "Normal - Aggressive",
+                [4] = "Hard - Silent n Sneaky",
+                [5] = "Hard - Big Con",
+                [6] = "Hard - Aggressive"
+            },
+            gunmans = {
+                [1] = "Karl Abolaji (5%)",
+                [3] = "Charlie Reed (7%)",
+                [5] = "Patrick McReary (8%)",
+                [2] = "Gustavo Mota (9%)",
+                [4] = "Chester McCoy (10%)"
+            },
+            drivers = {
+                [1] = "Karim Deniz (5%)",
+                [4] = "Zach Nelson (6%)",
+                [2] = "Taliana Martinez (7%)",
+                [3] = "Eddie Toh (9%)",
+                [5] = "Chester McCoy (10%)"
+            },
+            hackers = {
+                [1] = "Rickie Lukens (3%)",
+                [3] = "Yohan Blair (5%)",
+                [2] = "Christian Feltz (7%)",
+                [5] = "Page Harris (9%)",
+                [4] = "Avi Schwartzman (10%)"
+            },
+            masks = {
+                [1] = "Geometic Set",
+                [2] = "Hunter Set",
+                [3] = "Oni Half Mask Set",
+                [4] = "Emoji Set",
+                [5] = "Ornate Skull Set",
+                [6] = "Lucky Fruit Set",
+                [7] = "Guerilla Set",
+                [8] = "Clown Set",
+                [9] = "Animal Set",
+                [10] = "Riot Set",
+                [11] = "Oni Full Mask Set",
+                [12] = "Hockey Set"
+            }
+        }
+
+        local function getApproach()
+            local a,b,c,d=stats.get_int(yu.mpx().."H3_LAST_APPROACH"),stats.get_int(yu.mpx().."H3_HARD_APPROACH"),stats.get_int(yu.mpx().."H3_APPROACH"),stats.get_int(yu.mpx().."H3OPT_APPROACH")
+            if a==3 and b==2 and c==1 and d==1 then return 1
+            elseif a==3 and b==1 and c==2 and d==2 then return 2
+            elseif a==1 and b==2 and c==3 and d==3 then return 3
+            elseif a==2 and b==1 and c==3 and d==1 then return 4
+            elseif a==1 and b==2 and c==3 and d==2 then return 5
+            elseif a==2 and b==3 and c==1 and d==3 then return 6
+            end
+            return -1
+        end
+
+        local function refreshStats()
+            a.target = stats.get_int(yu.mpx().."H3OPT_TARGET")
+            addUnknownValue(a.targets, a.target)
+
+            a.approach = getApproach()
+            addUnknownValue(a.approaches, a.approach)
+
+            a.gunman = stats.get_int(yu.mpx().."H3OPT_CREWWEAP")
+            addUnknownValue(a.gunmans, a.gunman)
+
+            a.driver = stats.get_int(yu.mpx().."H3OPT_CREWDRIVER")
+            addUnknownValue(a.drivers, a.driver)
+
+            a.hacker = stats.get_int(yu.mpx().."H3OPT_CREWHACKER")
+            addUnknownValue(a.hackers, a.hacker)
+
+            a.mask = stats.get_int(yu.mpx().."H3OPT_MASKS")
+            addUnknownValue(a.masks, a.mask)
+        end
+
+        refreshStats()
+
+        local cooldowns = {}
+        local function updateCooldowns()
+            for k, v in pairs({"H3_COMPLETEDPOSIX", "MPPLY_H3_COOLDOWN"}) do
+                cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx()..v) - os.time())
+            end
+        end
+        updateCooldowns()
+
+        addToRender(2, function()
+            if (ImGui.BeginTabItem("The Diamond Casino Heist")) then
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Preperations")
+
+                local tr = yu.rendering.renderList(a.targets, a.target, "hbo_casino_t", "Target")
+                if tr.changed then
+                    yu.notify(1, "Set Target to "..a.targets[tr.key].." ["..tr.key.."]", "Diamond Casino Heist")
+                    a.target = tr.key
+                    a.targetchanged = true
+                end
+
+                local appr = yu.rendering.renderList(a.approaches, a.approach, "hbo_casino_app", "Approach")
+                if appr.changed then
+                    yu.notify(1, "Set Approach to "..a.approaches[appr.key].." ["..appr.key.."]", "Diamond Casino Heist")
+                    a.approach = appr.key
+                    a.approachchanged = true
+                end
+
+                local gmr = yu.rendering.renderList(a.gunmans, a.gunman, "hbo_casino_gm", "Gunman")
+                if gmr.changed then
+                    yu.notify(1, "Set Gunman to "..a.gunmans[gmr.key].." ["..gmr.key.."]", "Diamond Casino Heist")
+                    a.gunman = gmr.key
+                    a.gunmanchanged = true
+                end
+
+                local dr = yu.rendering.renderList(a.drivers, a.driver, "hbo_casino_d", "Driver")
+                if dr.changed then
+                    yu.notify(1, "Set Driver to "..a.drivers[dr.key].." ["..dr.key.."]", "Diamond Casino Heist")
+                    a.driver = dr.key
+                    a.driverchanged = true
+                end
+
+                local hr = yu.rendering.renderList(a.hackers, a.hacker, "hbo_casino_h", "Hacker")
+                if hr.changed then
+                    yu.notify(1, "Set Hacker to "..a.hackers[hr.key].." ["..hr.key.."]", "Diamond Casino Heist")
+                    a.hacker = hr.key
+                    a.hackerchanged = true
+                end
+
+                local mr = yu.rendering.renderList(a.masks, a.mask, "hbo_casino_m", "Mask")
+                if mr.changed then
+                    yu.notify(1, "Set Mask to "..a.masks[mr.key].." ["..mr.key.."]", "Diamond Casino Heist")
+                    a.mask = mr.key
+                    a.maskchanged = true
+                end
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Apply") then
+                    yu.add_task(function()
+                        local changes = 0
+
+                        -- Target
+                        if a.targetchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H3OPT_CREWWEAP", a.target)
+                        end
+
+                        -- Approach
+                        if a.approachchanged then
+                            changes = yu.add(changes, 1)
+                            local k = a.approach
+                            if k == 1 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 1)
+                            elseif k == 2 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 2)
+                            elseif k == 3 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 3)
+                            elseif k == 4 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 1)
+                            elseif k == 5 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 2)
+                            elseif k == 6 then
+                                stats.set_int(yu.mpx().."H3_LAST_APPROACH", 2)
+                                stats.set_int(yu.mpx().."H3_HARD_APPROACH", 3)
+                                stats.set_int(yu.mpx().."H3_APPROACH", 1)
+                                stats.set_int(yu.mpx().."H3OPT_APPROACH", 3)
+                            end
+                        end
+
+                        -- Gunman
+                        if a.gunmanchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H3OPT_CREWWEAP", a.gunman)
+                        end
+
+                        -- Driver
+                        if a.driverchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H3OPT_CREWDRIVER", a.driver)
+                        end
+
+                        -- Hacker
+                        if a.hackerchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H3OPT_CREWHACKER", a.hacker)
+                        end
+
+                        -- Mask
+                        if a.maskchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx().."H3OPT_MASKS", a.mask)
+                        end
+
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Diamond Casino Heist")
+                        for k, v in pairs(a) do
+                            if tostring(k):endswith("changed") then
+                                a[k] = nil
+                            end
+                        end
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh settings") then
+                    yu.add_task(refreshStats)
+                end
+
+                if ImGui.Button("Unlock POI & accesspoints") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H3OPT_POI", -1)
+                        stats.set_int(yu.mpx().."H3OPT_ACCESSPOINTS", -1)
+                    end)
+                end
+
+                if ImGui.Button("Complete Preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H3OPT_DISRUPTSHIP", 3)
+                        stats.set_int(yu.mpx().."H3OPT_KEYLEVELS", 2)
+                        stats.set_int(yu.mpx().."H3OPT_VEHS", 3)
+                        stats.set_int(yu.mpx().."H3OPT_WEAPS", 0)
+                        stats.set_int(yu.mpx().."H3OPT_BITSET0", -1)
+                        stats.set_int(yu.mpx().."H3OPT_BITSET1", -1)
+                        stats.set_int(yu.mpx().."H3OPT_COMPLETEDPOSIX", -1)
+                        yu.notify(1, "You will need to wait some time for the heist to be ready", "Diamond Casino Heist")
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset Preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."H4_MISSIONS", 0)
+                        stats.set_int(yu.mpx().."H4_PROGRESS", 0)
+                        stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
+                        stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
+                        stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Unlock cancellation") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."CAS_HEIST_NOTS", -1)
+                        stats.set_int(yu.mpx().."CAS_HEIST_FLOW", -1)
+                    end)
+                end
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Extra")
+
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Refresh cooldowns") then
+                    yu.add_task(updateCooldowns)
+                end
+
+                for k, v in pairs(cooldowns) do
+                    ImGui.Text(v)
+                end
+
+                ImGui.EndGroup()
+
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
     local function initNightclub()
         local popularity
         local function updatePopularity()
@@ -1076,7 +1373,7 @@ function SussySpt:initTabHBO()
         end
         updatePopularity()
 
-        addToRender(function()
+        addToRender(3, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
                     yu.add_task(updatePopularity)
@@ -1097,77 +1394,13 @@ function SussySpt:initTabHBO()
     end
 
     initCayo()
+    initCasino()
     initNightclub()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
         if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_hbo") then
             if ImGui.Begin("HBO (Heists, Businesses & Other)") then
-                ImGui.BeginTabBar(tabBarId)
-
-                for k, v in pairs(toRender) do
-                    v()
-                end
-
-                ImGui.EndTabBar()
-            end
-            ImGui.End()
-        end
-    end)
-end
-
-function SussySpt:initTabLua()
-    local toRender = {}
-    local function addToRender(cb)
-        toRender[yu.gun()] = cb
-    end
-
-    local function initExecuter()
-        local emptyString = ""
-        local inputText = emptyString
-        local errorText = emptyString
-
-        addToRender(function()
-            if (ImGui.BeginTabItem("Executer")) then
-
-                if ImGui.Button("Clear") then
-                    inputText = emptyString
-                end
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Execute") then
-                    errorText = emptyString
-                    local compiledFunction, errorMessage = loadstring(inputText)
-                    if compiledFunction then
-                        local success, errorOrResult = pcall(compiledFunction)
-
-                        if not success then
-                            errorText = errorOrResult
-                        end
-                    else
-                        errorText = errorMessage or emptyString
-                    end
-                end
-
-                inputText, _ = ImGui.InputTextMultiline("##cat_lua_executer_input", inputText, 256, 300.0, 150.0, 0)
-
-                if errorText and errorText ~= emptyString then
-                    ImGui.Text("Error: "..errorText)
-                end
-
-                ImGui.EndTabItem()
-            end
-        end)
-    end
-
-    initExecuter()
-
-    local tabBarId = "##cat_lua"
-
-    SussySpt.add_render(function()
-        if yu.rendering.isCheckboxChecked("cat_lua") then
-            if ImGui.Begin("Lua") then
                 ImGui.BeginTabBar(tabBarId)
 
                 for k, v in pairs(toRender) do

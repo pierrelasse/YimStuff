@@ -1,57 +1,57 @@
 # Utils
-shc(condition, [trueValue], [falseValue])
+shc(condition, [trueValue], [falseValue]) : any
     Returns: trueValue if condition is true and falseValue if condition is not true
 
-format_num(num: number, [separator])
+format_num(num: number, [separator]) : string
     Param num: The number to format
     Param separator: The used separator. Default: ","
     Returns: Formatted number as string
     Examle: format_num(1234) -> "1,234"
 
-boolstring(bool, [trueValue], [falseValue])
-    Param trueValue: Default: true
-    Param falseValue: Default: false
+boolstring(bool, [trueValue], [falseValue]) : string|any
+    Param trueValue: Default: "true"
+    Param falseValue: Default: "false"
     Returns: If bool is true, it returns trueValue. Else falseValue
 
-is_num_between(num: number, min: number, max: number)
+is_num_between(num: number, min: number, max: number) : boolean
     Param num: The number to be checked
     Param min: The minimum value
     Param max: The maximum value
     Returns: If num is between min and max
 
-get_between_or_default(num: number, min: number, max: number, [defaultValue])
+get_between_or_default(num: number, min: number, max: number, [defaultValue]) : number|any
     Param num: A number that must be between min and max
     Param min: The min value the value must be between
     Param max: The max value the value must be between
     Param defaultValue: Returned when value is not between min and max. Default: min
     Returns: Itself or defaultValue based on conditions
 
-get_or_default(tbl: table, key, defaultValue)
+get_or_default(tbl: table, key, defaultValue) : any
     Aliases: god
     Param tbl: The table from where the value is obtained
     Param key: The key that we want to get from the table
     Param defaultValue: Returned when tbl does not have key
     Returns: Value of tbl for key, or defaultValue if not found
 
-get_key_from_table(tbl: table, value, defaultValue)
+get_key_from_table(tbl: table, value, defaultValue) : any
     Param tbl: The table from where the key gets obtained
     Param value: The value from the key we need to find
     Param defaultValue: Returned when value with key key was not foudn
     Returns: The first key with the value value
 
-gd(get, defaultValue)
+gd(get, defaultValue) : any
     Returns: defaultValue if get is nil. Else get
 
-format_seconds(s, [format])
+format_seconds(s, [format]) : string
     Param s: The duration in seconds to be formatted
     Param format: Optional format string. Default: "%02dH %02dM %02dS"
     Returns: A string representation of the duration in the specified format
 
-copy_table(tbl: table)
+copy_table(tbl: table) : table
     Param tbl: The table to be copied
     Returns: A copied version of tbl
 
-add(num: number, amount: number)
+add(num: number, amount: number) : number
     Param num: The number to where the amount gets added
     Param amount: The amount to add to num
     Returns: num + amount
@@ -69,68 +69,70 @@ notify(type, message, [title])
     Param title: The suffix of the title
 
 # Getters (and utils idk)
-internal_data()
+internal_data() : table
     Returns: Internal data you don't really need to tuche
 
-
-get_unique_number()
+get_unique_number() : number
     Aliases: gun
     Returns: A number that was never returned from this function before
 
-playerindex()
+playerindex() : ?
     Returns: 0 or something else i guess
 
-mpx()
-    Returns: "MP0_" or "MP1_"
-    Example usage: stats.get_int(yu.mpx().."SOME_STAT")
+mpx([append]) : string
+    Param append: Can be set to automaticly append the text to the returned value
+    Returns: ("MP0_" or "MP1_") + [append]
+    Example usages:
+        stats.get_int(yu.mpx().."SOME_STAT")
+        stats.get_int(yu.mpx("SOME_STAT"))
 
-pid()
+pid() : number?
     Returns: The player's id
 
-ppid()
+ppid() : number?
     Returns: The player's ped id
 
-veh([pid])
+veh([pid]) : ?
     Param: Ped id of target player. Default: pid()
     Returns: The target player's vehicle if available
 
-is_script_running_hash(hash)
+is_script_running_hash(hash) : boolean
     Param hash: The hash value of the script to check
     Returns: true if a script with the given hash is running, false otherwise
 
-is_script_running(name)
+is_script_running(name) : boolean
     Param name: The name of the script to check
     Returns: true if a script with the given name is running, false otherwise
 
 # KeyListener
-key_listener.add_callback(key: number, callback: function, [keyup: boolean])
+key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : number
     Param key: Id of the key to add the callback to.
         Get id of a key by using yu.keys["KEY_NAME"]
     Param callback: The function to be executed
     Param keyup: Whether the callback should be executed on keydown or keyup
     Returns: Id of callback
 
-key_listener.remove_callback(id)
+key_listener.remove_callback(id) : boolean
     Param id: Id of callback to remove. Returned from add_callback(key: number, callback: function, [keydown: boolean])
     Returns: If removed successfully
 
 # Stats (stats of menu. not gta related)
-set_stat(key, value)
+set_stat(key, value) : any
     Param key: The id of the stat
     Param value: The value the stat will be set to
     Returns: value
 
-get_stat(key, [defaultValue])
+get_stat(key, [defaultValue]) : any
     Param key: The id of the stat
     Param defaultValue: Returned value when stat is not set
     Returns: Stat with id key or defaultValue if not set
 
-set_default_stat(key, value)
+set_default_stat(key, value) : any
     Param key: The id of the stat
     Param value: The value the stat will be set to when unset
     Returns: value
 
-has_stat(key)
+has_stat(key) : boolean
     Param key: The id of the stat
     Returns: true if stat with id key is set. Else false
 
@@ -139,11 +141,11 @@ has_stat(key)
     START_TIME: The unix time when the script was loaded
 
 # Tasks
-add_task(func: function)
+add_task(func: function) : number
     Param func: The function to be executed
     Returns: Id of the task
 
-has_task(id: number)
+has_task(id: number) : boolean
     Param id: The id of the task. Returned from add_task(func: function)
     Returns: true if task is with id is active. Else false
 
@@ -151,3 +153,9 @@ has_task(id: number)
 keys
     Format: KeyName: string = KeyId: number
     More info: https://docs.fivem.net/docs/game-references/controls/
+
+# "Injected" features
+string.endswith(ending: string) : boolean
+    Param ending: What the string must end with
+    Example usage: "Hello".endswith("llo") returns true
+    Returns: Whether the string ends with ending
