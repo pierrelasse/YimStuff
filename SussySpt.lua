@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 8
+    versionid = 9
 }
 
 function SussySpt:new()
@@ -1222,8 +1222,10 @@ function SussySpt:initTabQA()
                     end
                 end
 
-                if ImGui.Button("Instant BST") then
-                    globals.set_int(2672524 + 3690, 1)
+                if SussySpt.in_online then
+                    if ImGui.Button("Instant BST") then
+                        globals.set_int(2672524 + 3690, 1)
+                    end
                 end
             end
             ImGui.End()
