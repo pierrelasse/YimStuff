@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 28
+    versionid = 29
 }
 
 function SussySpt:new()
@@ -1348,6 +1348,29 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Extra")
 
+                if ImGui.Button("Skip fingerprint hack") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
+                            locals.set_int("fm_mission_controller", 52964, 5)
+                        end
+                    end)
+                end
+
+                if ImGui.Button("Skip keypad hack") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 54026) ~= 4 then
+                            locals.set_int("fm_mission_controller", 54026, 5)
+                        end
+                    end)
+                end
+
+                if ImGui.Button("Skip vault door drill") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") then
+                            locals.set_int("fm_mission_controller", 10101 + 7, locals.get_int("fm_mission_controller", 10101 + 37))
+                        end
+                    end)
+                end
 
                 ImGui.Spacing()
 
