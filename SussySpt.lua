@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 52
+    versionid = 53
 }
 
 function SussySpt:new()
@@ -971,6 +971,14 @@ function SussySpt:initTabHBO()
 
                 if ImGui.Button("Refresh settings") then
                     yu.add_task(refreshStats)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reload planning board") then
+                    if requireScript("heist_island_planning") then
+                        locals.set_int("heist_island_planning", 1526, 2)
+                    end
                 end
 
                 if ImGui.Button("Unlock accesspoints & approaches") then
