@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 29
+    versionid = 45
 }
 
 function SussySpt:new()
@@ -201,6 +201,7 @@ function SussySpt:initTabSelf()
                 if SussySpt.in_online then
                     if (ImGui.BeginTabItem("Stats")) then
                         if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
+                            stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0)
                             yu.notify(1, "Reset mental state?")
                             updateMentalState()
                         end
@@ -692,6 +693,8 @@ function SussySpt:initTabHBO()
             addUnknownValue(a.supplytrucklocations, a.supplytrucklocation)
 
             yu.rendering.setCheckboxChecked("hbo_cayo_cuttingpowder", stats.get_int(yu.mpx().."H4CNF_TARGET") == 3)
+
+            a.cuts = {}
         end
 
         refreshStats()
@@ -703,6 +706,14 @@ function SussySpt:initTabHBO()
             end
         end
         updateCooldowns()
+
+        local function renderCutsSlider(index)
+            local value = a.cuts[index] or -1
+            local newValue, changed = ImGui.SliderInt("Player "..index.."'s Cut", 1, -1, 250, value.."%")
+            if changed then
+                a.cuts[index] = newValue
+            end
+        end
 
         addToRender(1, function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
@@ -1001,6 +1012,26 @@ function SussySpt:initTabHBO()
                 ImGui.EndGroup()
                 ImGui.Separator()
                 ImGui.BeginGroup()
+
+                -- Hi sneaky :)
+                -- yu.rendering.bigText("Cuts")
+
+                -- renderCutsSlider(1)
+                -- renderCutsSlider(2)
+                -- renderCutsSlider(3)
+                -- renderCutsSlider(4)
+
+                -- if ImGui.Button("Apply cuts") then
+                -- end
+
+                -- if ImGui.Button("100%") then
+                --     globals.set_int(1978495 + 881 + 1, 15)
+                --     globals.set_int(1978495 + 881 + 2, 120)
+                -- end
+
+                -- ImGui.EndGroup()
+                -- ImGui.Separator()
+                -- ImGui.BeginGroup()
 
                 yu.rendering.bigText("Extra")
 
