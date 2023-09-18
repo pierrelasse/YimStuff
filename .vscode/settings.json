@@ -18,7 +18,8 @@
         "globals",
         "CAM",
         "HUD",
-        "VEHICLE"
+        "VEHICLE",
+        "INTERIOR"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

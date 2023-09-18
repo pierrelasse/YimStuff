@@ -312,6 +312,12 @@ return (function()
             ImGui.Text(text)
             ImGui.SetWindowFontScale(1)
         end
+
+        api.rendering.tooltip = function(text)
+            if ImGui.IsItemHovered() then
+                ImGui.SetTooltip(text)
+            end
+        end
     end
 
     local function initTasks()

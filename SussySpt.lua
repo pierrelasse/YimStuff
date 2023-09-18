@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 45
+    versionid = 52
 }
 
 function SussySpt:new()
@@ -790,9 +790,7 @@ function SussySpt:initTabHBO()
                 yu.rendering.renderCheckbox("Cutting powder", "hbo_cayo_cuttingpowder", function(state)
                     a.cuttingpowderchanged = true
                 end)
-                if ImGui.IsItemHovered() then
-                    ImGui.SetTooltip("Pros don't need this ;)")
-                end
+                yu.rendering.tooltip("Pros don't need this ;)")
 
                 ImGui.Spacing()
 
@@ -1500,6 +1498,13 @@ function SussySpt:initTabQA()
                         PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
                     end)
                 end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh interior") then
+				    INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
+                end
+                yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.")
 
                 if ImGui.Button("Repair vehicle") then
                     local veh = yu.veh()
