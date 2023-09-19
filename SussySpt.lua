@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 103
+    versionid = 105
 }
 
 function SussySpt:new()
@@ -272,16 +272,13 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        ImGui.Spacing()
-
                         if ImGui.Button("Unlock LSCarMeet podium prize") then
                             yu.add_task(function()
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
                             end)
                         end
-
-                        ImGui.Spacing()
+                        yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
 
                         if ImGui.Button("Unlock flightschool stuff") then
                             yu.add_task(function()
@@ -294,8 +291,6 @@ function SussySpt:initTabSelf()
                             end)
                         end
                         yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
-
-                        ImGui.Spacing()
 
                         if ImGui.Button("Unlock all shooting range rewards") then
                             yu.add_task(function()
@@ -312,8 +307,7 @@ function SussySpt:initTabSelf()
                                 stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
                             end)
                         end
-
-                        ImGui.Spacing()
+                        yu.rendering.tooltip("Bunker thing")
 
                         if ImGui.Button("Unlock trade prices for arenawar vehicles") then
                             yu.add_task(function()
@@ -333,8 +327,7 @@ function SussySpt:initTabSelf()
                                 end
                             end)
                         end
-
-                        ImGui.Spacing()
+                        yu.rendering.tooltip("Only available in arena war car workstation")
 
                         if ImGui.Button("Unlock fast run and reload") then
                             yu.add_task(function()
@@ -346,6 +339,7 @@ function SussySpt:initTabSelf()
                                 stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
                             end)
                         end
+                        yu.rendering.tooltip("Makes you run faster and reload weapons faster")
 
                         if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
                             yu.add_task(function()
@@ -354,6 +348,7 @@ function SussySpt:initTabSelf()
                                 globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
                             end)
                         end
+                        yu.rendering.tooltip("RGB GAMER colors")
 
                         if ImGui.Button("Unlock all tattos") then
                             yu.add_task(function()
@@ -368,7 +363,7 @@ function SussySpt:initTabSelf()
                         if ImGui.Button("CEO & MC money clutter") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
-                                
+
                                 for k, v in pairs({
                                     ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
                                     ["LIFETIME_BIKER_BUY_UNDERTA"]=1000,["LIFETIME_BIKER_SELL_COMPLET"]=1000,["LIFETIME_BIKER_SELL_UNDERTA"]=1000,["LIFETIME_BIKER_BUY_COMPLET1"]=1000,["LIFETIME_BIKER_BUY_UNDERTA1"]=1000,
@@ -393,8 +388,9 @@ function SussySpt:initTabSelf()
                                 end
                             end)
                         end
+                        yu.rendering.tooltip("Money on floor")
 
-                        if ImGui.Button("Skip lamar missions") then
+                        if ImGui.Button("Skip Lamar missions") then
                             yu.add_task(function()
                                 stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
                                 stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
@@ -417,7 +413,7 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        if ImGui.Button("Skip ulp missions") then
+                        if ImGui.Button("Skip ULP missions") then
                             yu.add_task(function()
                                 stats.set_int(yu.mpx().."ULP_MISSION_PROGRESS", 127)
                                 stats.set_int(yu.mpx().."ULP_MISSION_CURRENT", 0)
@@ -1810,6 +1806,8 @@ function SussySpt:initTabHBO()
                 yu.notify(1, "Winning "..luckyWheelPrizes[prize].." from the lucky wheel!", "Diamond Casino & Resort")
                 locals.set_int("casino_lucky_wheel", (prize_wheel_win_state) + (prize_wheel_prize), prize)
                 locals.set_int("casino_lucky_wheel", prize_wheel_win_state + prize_wheel_prize_state, 11)
+            else
+                yu.notify(2, "Try going near the lucky wheel", "Diamond Casino & Resort")
             end
         end
 
