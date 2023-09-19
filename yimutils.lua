@@ -21,17 +21,11 @@ return (function()
         end
 
         api.format_num = function(num, separator)
-            if type(num) ~= "number" then
-                return tostring(num)
-            end
-            local fn = tostring(math.floor(num))
-            if separator then
-                fn = fn
-                    :reverse()
-                    :gsub("(%d%d%d)", "%1"..separator)
-                    :reverse()
-            end
-            return fn
+            return string.format("%d", tostring(num))
+                :reverse()
+                :gsub("(%d%d%d)", "%1,")
+                :reverse()
+                :gsub("^,", "")
         end
 
         api.boolstring = function(bool, trueValue, falseValue)
