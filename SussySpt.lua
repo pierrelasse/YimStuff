@@ -104,7 +104,7 @@ function SussySpt:initUtils()
 
     function requireScript(name)
         if yu.is_script_running(name) == false then
-            yu.notify(3, "Script '"..name.."' is not running!")
+            yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
             return false
         end
         return true
@@ -220,6 +220,15 @@ function SussySpt:initTabSelf()
                     if ImGui.Button("Remove blackscreen") then
                         yu.add_task(function()
                             CAM.DO_SCREEN_FADE_IN(0)
+                        end)
+                    end
+
+                    if ImGui.Button("Max singleplayer cash") then
+                        yu.add_task(function()
+                            local amount = 2147483647
+                            stats.set_int("SP0_TOTAL_CASH", amount) -- Michael
+                            stats.set_int("SP1_TOTAL_CASH", amount) -- Franklin
+                            stats.set_int("SP2_TOTAL_CASH", amount) -- Trevor
                         end)
                     end
 
