@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 84
+    versionid = 103
 }
 
 function SussySpt:new()
@@ -564,8 +564,8 @@ function SussySpt:initTabSelf()
         statsTab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
         statsTab:add_separator()
         statsTab:add_text("Other:")
-        statsTab:add_text("  - Earned Money: "..stats.get_int("MPPLY_TOTAL_EVC"))
-        statsTab:add_text("  - Spent Money: "..stats.get_int("MPPLY_TOTAL_SVC"))
+        statsTab:add_text("  - Earned Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_EVC")))
+        statsTab:add_text("  - Spent Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_SVC")))
         statsTab:add_text("  - Players Killed: "..stats.get_int("MPPLY_KILLS_PLAYERS"))
         statsTab:add_text("  - Deatsh per player: "..stats.get_int("MPPLY_DEATHS_PLAYER"))
         statsTab:add_text("  - PvP K/D Ratio: "..stats.get_int("MPPLY_KILL_DEATH_RATIO"))
@@ -835,6 +835,24 @@ function SussySpt:initTabHBO()
 
         refreshStats()
 
+        local function refreshExtra()
+            if yu.is_script_running("fm_mission_controller_2020") then
+                a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
+            else
+                a.realtake = 289700
+            end
+        end
+
+        refreshExtra()
+
+        SussySpt.registerRepeatingTask(function()
+            if yu.is_script_running("fm_mission_controller_2020") then
+                a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
+            else
+                a.lifes = 0
+            end
+        end)
+
         local cooldowns = {}
         local function updateCooldowns()
             for k, v in pairs({"H4_TARGET_POSIX", "H4_COOLDOWN", "H4_COOLDOWN_HARD"}) do
@@ -845,7 +863,8 @@ function SussySpt:initTabHBO()
 
         local function renderCutsSlider(index)
             local value = a.cuts[index] or 15
-            local newValue, changed = ImGui.SliderInt("Player "..index.."'s Cut", value, 15, 250, value.."%")
+            local text = yu.shc(index == -2, "Non-host self cut", "Player "..index.."'s cut")
+            local newValue, changed = ImGui.SliderInt(text, value, 15, 250, value.."%")
             if changed then
                 a.cuts[index] = newValue
             end
@@ -1157,13 +1176,15 @@ function SussySpt:initTabHBO()
                 end
 
                 yu.rendering.renderCheckbox("Remove Pavel & Fencing cut", "hbo_cayo_removenpccuts", function(state)
-                    if state then
-                        globals.set_float(291786, 0)
-                        globals.set_float(291787, 0)
-                    else
-                        globals.set_float(291786, -0.1)
-                        globals.set_float(291787, -0.02)
-                    end
+                    yu.add_task(function()
+                        if state then
+                            globals.set_float(291786, 0)
+                            globals.set_float(291787, 0)
+                        else
+                            globals.set_float(291786, -0.1)
+                            globals.set_float(291787, -0.02)
+                        end
+                    end)
                 end)
                 yu.rendering.tooltip("I'm to lazy to make this good so you will have to\nenable and disable to disable it and enable it to enable it :)")
 
@@ -1178,13 +1199,19 @@ function SussySpt:initTabHBO()
                 renderCutsSlider(2)
                 renderCutsSlider(3)
                 renderCutsSlider(4)
+                renderCutsSlider(-2)
                 ImGui.PopItemWidth()
 
                 if ImGui.Button("Apply cuts") then
                     for k, v in pairs(a.cuts) do
                         if yu.is_num_between(v, 15, 250) then
-                            -- globals.set_int(1978495 + 881 + k, v)
-                            log.info("Set cut for player "..k.." to "..v)
+                            if k == -2 then
+                                globals.set_int(2722097, v)
+                                log.info("Set cut for self to "..v)
+                            else
+                                globals.set_int(1978495 + 881 + k, v)
+                                log.info("Set cut for player "..k.." to "..v)
+                            end
                         end
                     end
                 end
@@ -1235,14 +1262,50 @@ function SussySpt:initTabHBO()
                     end
                 end
 
+                ImGui.Spacing()
+
                 if ImGui.Button("Instant finish (solo only)") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 45450, 9)
+                            locals.set_int("fm_mission_controller_2020", 46829, 50)
+                            yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                        end
+                    end)
+                end
+
+                ImGui.Spacing()
+                ImGui.PushItemWidth(390)
+
+                if ImGui.Button("Refresh##extra") then
+                    yu.add_task(refreshExtra)
+                end
+
+                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                yu.rendering.tooltip("Like how many lifes you have left")
+                if lifesChanged then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, lifesValue)
+                        end
+                    end)
+                end
+
+                local realTakeValue, realTakeChanged = ImGui.SliderInt("Real take", a.realtake, 100000, 8691000, yu.format_num(a.realtake))
+                yu.rendering.tooltip("Set real take to 2,897,000 for 100% or smth")
+                if realTakeChanged then
+                    a.realtake = realTakeValue
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Apply##realtake") then
                     if requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 45450, 9)
-                        locals.set_int("fm_mission_controller_2020", 46829, 50)
-                        yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                        locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
                     end
                 end
 
+                ImGui.PopItemWidth()
                 ImGui.Spacing()
 
                 if ImGui.Button("Refresh cooldowns") then
