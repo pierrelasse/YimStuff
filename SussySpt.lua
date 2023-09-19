@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 81
+    versionid = 84
 }
 
 function SussySpt:new()
@@ -254,6 +254,10 @@ function SussySpt:initTabSelf()
                             globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
                         end
 
+                        if ImGui.Button("Remove griefing cooldown for VIP/CEO") then
+                            stats.set_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER", 0)
+                        end
+
                         ImGui.EndTabItem()
                     end
 
@@ -358,6 +362,65 @@ function SussySpt:initTabSelf()
                                 for i = 0, 47 do
                                     stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
                                 end
+                            end)
+                        end
+
+                        if ImGui.Button("CEO & MC money clutter") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                
+                                for k, v in pairs({
+                                    ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
+                                    ["LIFETIME_BIKER_BUY_UNDERTA"]=1000,["LIFETIME_BIKER_SELL_COMPLET"]=1000,["LIFETIME_BIKER_SELL_UNDERTA"]=1000,["LIFETIME_BIKER_BUY_COMPLET1"]=1000,["LIFETIME_BIKER_BUY_UNDERTA1"]=1000,
+                                    ["LIFETIME_BIKER_SELL_COMPLET1"]=1000,["LIFETIME_BIKER_SELL_UNDERTA1"]=1000,["LIFETIME_BIKER_BUY_COMPLET2"]=1000,["LIFETIME_BIKER_BUY_UNDERTA2"]=1000,["LIFETIME_BIKER_SELL_COMPLET2"]=1000,
+                                    ["LIFETIME_BIKER_SELL_UNDERTA2"]=1000,["LIFETIME_BIKER_BUY_COMPLET3"]=1000,["LIFETIME_BIKER_BUY_UNDERTA3"]=1000,["LIFETIME_BIKER_SELL_COMPLET3"]=1000,["LIFETIME_BIKER_SELL_UNDERTA3"]=1000,
+                                    ["LIFETIME_BIKER_BUY_COMPLET4"]=1000,["LIFETIME_BIKER_BUY_UNDERTA4"]=1000,["LIFETIME_BIKER_SELL_COMPLET4"]=1000,["LIFETIME_BIKER_SELL_UNDERTA4"]=1000,["LIFETIME_BIKER_BUY_COMPLET5"]=1000,
+                                    ["LIFETIME_BIKER_BUY_UNDERTA5"]=1000,["LIFETIME_BIKER_SELL_COMPLET5"]=1000,["LIFETIME_BIKER_SELL_UNDERTA5"]=1000,["LIFETIME_BKR_SELL_EARNINGS0"]=20000000,["LIFETIME_BKR_SELL_EARNINGS1"]=20000000,
+                                    ["LIFETIME_BKR_SELL_EARNINGS2"]=20000000,["LIFETIME_BKR_SELL_EARNINGS3"]=20000000,["LIFETIME_BKR_SELL_EARNINGS4"]=20000000,["LIFETIME_BKR_SELL_EARNINGS5"]=20000000,["LFETIME_IE_EXPORT_COMPLETED"]=1000,
+                                    ["LFETIME_IE_MISSION_EARNINGS"]=20000000,["LFETIME_HANGAR_EARNINGS"]=20000000,["BKR_PROD_STOP_COUT_S1_0"]=500,["BKR_PROD_STOP_COUT_S2_0"]=500,["BKR_PROD_STOP_COUT_S3_0"]=500,
+                                    ["LIFETIME_BKR_SELL_UNDERTABC"]=500,["LIFETIME_BKR_SELL_COMPLETBC"]=500,["LFETIME_BIKER_BUY_UNDERTA1"]=500,["LFETIME_BIKER_BUY_COMPLET1"]=500,["LFETIME_BIKER_SELL_UNDERTA1"]=500,
+                                    ["LFETIME_BIKER_SELL_COMPLET1"]=500,["LIFETIME_BKR_SEL_UNDERTABC1"]=500,["LIFETIME_BKR_SEL_COMPLETBC1"]=500,["BKR_PROD_STOP_COUT_S1_1"]=500,["BKR_PROD_STOP_COUT_S2_1"]=500,["BKR_PROD_STOP_COUT_S3_1"]=500,
+                                    ["LFETIME_BIKER_BUY_UNDERTA2"]=500,["LFETIME_BIKER_BUY_COMPLET2"]=500,["LFETIME_BIKER_SELL_UNDERTA2"]=500,["LFETIME_BIKER_SELL_COMPLET2"]=500,["LIFETIME_BKR_SEL_UNDERTABC2"]=500,
+                                    ["LIFETIME_BKR_SEL_COMPLETBC2"]=500,["BKR_PROD_STOP_COUT_S1_2"]=500,["BKR_PROD_STOP_COUT_S2_2"]=500,["BKR_PROD_STOP_COUT_S3_2"]=500,["LFETIME_BIKER_BUY_UNDERTA3"]=500,["LFETIME_BIKER_BUY_COMPLET3"]=500,
+                                    ["LFETIME_BIKER_SELL_UNDERTA3"]=500,["LFETIME_BIKER_SELL_COMPLET3"]=500,["LIFETIME_BKR_SEL_UNDERTABC3"]=500,["LIFETIME_BKR_SEL_COMPLETBC3"]=500,["BKR_PROD_STOP_COUT_S1_3"]=500,["BKR_PROD_STOP_COUT_S2_3"]=500,
+                                    ["BKR_PROD_STOP_COUT_S3_3"]=500,["LFETIME_BIKER_BUY_UNDERTA4"]=500,["LFETIME_BIKER_BUY_COMPLET4"]=500,["LFETIME_BIKER_SELL_UNDERTA4"]=500,["LFETIME_BIKER_SELL_COMPLET4"]=500,["LIFETIME_BKR_SEL_UNDERTABC4"]=500,
+                                    ["LIFETIME_BKR_SEL_COMPLETBC4"]=500,["BKR_PROD_STOP_COUT_S1_4"]=500,["BKR_PROD_STOP_COUT_S2_4"]=500,["BKR_PROD_STOP_COUT_S3_4"]=500,["LFETIME_BIKER_BUY_UNDERTA5"]=500,["LFETIME_BIKER_BUY_COMPLET5"]=500,
+                                    ["LIFETIME_BKR_SEL_UNDERTABC5"]=500,["LIFETIME_BKR_SEL_COMPLETBC5"]=500,["LFETIME_BIKER_SELL_UNDERTA5"]=500,["LFETIME_BIKER_SELL_COMPLET5"]=500,["BUNKER_UNITS_MANUFAC"]=500,["LFETIME_HANGAR_BUY_UNDETAK"]=500,
+                                    ["LFETIME_HANGAR_BUY_COMPLET"]=500,["LFETIME_HANGAR_SEL_UNDETAK"]=500,["LFETIME_HANGAR_SEL_COMPLET"]=500,["LFETIME_HANGAR_EARN_BONUS"]=1598746,["RIVAL_HANGAR_CRATES_STOLEN"]=500,["LFETIME_IE_STEAL_STARTED"]=500,
+                                    ["LFETIME_IE_EXPORT_STARTED"]=500,["AT_FLOW_IMPEXP_NUM"]=500
+                                }) do
+                                    stats.set_int(mpx..k, v)
+                                end
+                            end)
+                        end
+
+                        if ImGui.Button("Skip lamar missions") then
+                            yu.add_task(function()
+                                stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
+                                stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
+                                stats.set_bool(yu.mpx().."LOW_FLOW_CS_FUN_SEEN", true)
+                                stats.set_bool(yu.mpx().."LOW_FLOW_CS_PHO_SEEN", true)
+                                stats.set_bool(yu.mpx().."LOW_FLOW_CS_FIN_SEEN", true)
+                                stats.set_bool(yu.mpx().."LOW_BEN_INTRO_CS_SEEN", true)
+                                stats.set_int(yu.mpx().."LOWRIDER_FLOW_COMPLETE", 4)
+                                stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_PROG", 9)
+                                stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_CALL", 9)
+                                stats.set_int(yu.mpx().."LOW_FLOW_CS_HELPTEXT", 66)
+                            end)
+                        end
+
+                        if ImGui.Button("Skip yacht missions") then
+                            yu.add_task(function()
+                                stats.set_int(yu.mpx().."YACHT_MISSION_PROG", 0)
+                                stats.set_int(yu.mpx().."YACHT_MISSION_FLOW", 21845)
+                                stats.set_int(yu.mpx().."CASINO_DECORATION_GIFT_1", -1)
+                            end)
+                        end
+
+                        if ImGui.Button("Skip ulp missions") then
+                            yu.add_task(function()
+                                stats.set_int(yu.mpx().."ULP_MISSION_PROGRESS", 127)
+                                stats.set_int(yu.mpx().."ULP_MISSION_CURRENT", 0)
                             end)
                         end
 
@@ -998,6 +1061,8 @@ function SussySpt:initTabHBO()
                             changes = yu.add(changes, 1)
                             stats.set_int(yu.mpx("H4LOOT_PAINT"), a.paintingsamount)
                             stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), a.paintingsamount)
+                            stats.set_int(yu.mpx("H4LOOT_PAINT_C"), 127)
+                            stats.set_int(yu.mpx("H4LOOT_PAINT_C_SCOPED"), 127)
                             stats.set_int(yu.mpx("H4LOOT_PAINT_V"), 189500)
                         end
 
@@ -1067,7 +1132,6 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
-
                 if ImGui.Button("Complete Preps") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
@@ -1091,6 +1155,17 @@ function SussySpt:initTabHBO()
                         stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
                     end)
                 end
+
+                yu.rendering.renderCheckbox("Remove Pavel & Fencing cut", "hbo_cayo_removenpccuts", function(state)
+                    if state then
+                        globals.set_float(291786, 0)
+                        globals.set_float(291787, 0)
+                    else
+                        globals.set_float(291786, -0.1)
+                        globals.set_float(291787, -0.02)
+                    end
+                end)
+                yu.rendering.tooltip("I'm to lazy to make this good so you will have to\nenable and disable to disable it and enable it to enable it :)")
 
                 ImGui.EndGroup()
                 ImGui.Separator()
@@ -1645,13 +1720,11 @@ function SussySpt:initTabHBO()
                                 slot_result = math.random(0, 7)
                             end
                             locals.set_int("casino_slots", (slots_random_results_table) + (slots_iter), slot_result)
-                            log.info("Set slot result!")
                         end
                     end
                 end
             end
         end)
-
     end
 
     local function initNightclub()
@@ -2665,7 +2738,7 @@ function SussySpt:initTabMisc()
 
     tab:add_separator()
 
-    tab:add_button("Complete todays objectives (not goals idk + this WILL rate limit so not gud)", function()
+    tab:add_button("Complete objectives (this WILL rate limit so not gud)", function()
         stats.set_int(yu.mpx().."COMPLETEDAILYOBJ", 100)
         stats.set_int(yu.mpx().."COMPLETEDAILYOBJTOTAL", 100)
         stats.set_int(yu.mpx().."TOTALDAYCOMPLETED", 100)
