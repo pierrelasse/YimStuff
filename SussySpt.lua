@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 53
+    versionid = 54
 }
 
 function SussySpt:new()
@@ -60,7 +60,13 @@ function SussySpt:initRendering(tab)
     SussySpt.refreshInOnline()
 
     tab:add_separator()
-    tab:add_button("Recheck if online", SussySpt.refreshInOnline)
+    SussySpt.add_render(function()
+        if not SussySpt.in_online then
+            if ImGui.Button("Recheck if online") then
+                yu.add_task(SussySpt.refreshInOnline)
+            end
+        end
+    end)
     tab:add_text("Categories:")
     SussySpt.add_render(function()
         yu.rendering.renderCheckbox("Self", "cat_self")
