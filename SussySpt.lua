@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 58
+    versionid = 81
 }
 
 function SussySpt:new()
@@ -21,6 +21,16 @@ function SussySpt:new()
         if cb ~= nil then
             SussySpt.rendercb[yu.gun()] = cb
         end
+    end
+
+    SussySpt.repeatingTasks = {}
+    SussySpt.registerRepeatingTask = function(cb)
+        local id = #SussySpt.repeatingTasks + 1
+        SussySpt.repeatingTasks[id] = cb
+        return id
+    end
+    SussySpt.unregisterRepeatingTask = function(id)
+        SussySpt.repeatingTasks[id] = nil
     end
 
     SussySpt:initRendering(tab)
@@ -46,6 +56,10 @@ function SussySpt:new()
     script.register_looped("sussyspt", function()
         if SussySpt.invisible == true then
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
+        end
+
+        for k, v in pairs(SussySpt.repeatingTasks) do
+            v()
         end
     end)
 
@@ -308,7 +322,7 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        if ImGui.Button("Unlock colored headlights (same as below. idk)") then
+                        if ImGui.Button("Unlock colored headlights") then
                             yu.add_task(function()
                                 for i = 18, 29 do
                                     stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
@@ -347,40 +361,42 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        ImGui.Spacing()
+                        -- ImGui.Spacing()
 
-                        if ImGui.Button("Unlock bunker research (temp?)") then
-                            yu.add_task(function()
-                                local mpx = yu.mpx();
-                                for j = 0, 63 do
-                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j, mpx)
-                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j, mpx)
-                                end
-                                local bitSize = 8
-                                for j = 0, 64 / bitSize - 1 do
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
-                                end
-                            end)
-                        end
+                        -- if ImGui.Button("Unlock bunker research (temp?)") then
+                        --     yu.add_task(function()
+                        --         local mpx = yu.mpx()
+
+                        --         for j = 0, 63 do
+                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j, mpx)
+                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j, mpx)
+                        --         end
+
+                        --         local bitSize = 8
+                        --         for j = 0, 64 / bitSize - 1 do
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
+                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
+                        --         end
+                        --     end)
+                        -- end
 
                         ImGui.EndTabItem()
                     end
@@ -765,8 +781,8 @@ function SussySpt:initTabHBO()
         updateCooldowns()
 
         local function renderCutsSlider(index)
-            local value = a.cuts[index] or -1
-            local newValue, changed = ImGui.SliderInt("Player "..index.."'s Cut", 1, -1, 250, value.."%")
+            local value = a.cuts[index] or 15
+            local newValue, changed = ImGui.SliderInt("Player "..index.."'s Cut", value, 15, 250, value.."%")
             if changed then
                 a.cuts[index] = newValue
             end
@@ -776,6 +792,8 @@ function SussySpt:initTabHBO()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Preperations")
+
+                ImGui.PushItemWidth(360)
 
                 local ptr = yu.rendering.renderList(a.primarytargets, a.primarytarget, "hbo_cayo_pt", "Primary target")
                 if ptr.changed then
@@ -848,6 +866,8 @@ function SussySpt:initTabHBO()
                     a.cuttingpowderchanged = true
                 end)
                 yu.rendering.tooltip("Pros don't need this ;)")
+
+                ImGui.PopItemWidth()
 
                 ImGui.Spacing()
 
@@ -1076,25 +1096,27 @@ function SussySpt:initTabHBO()
                 ImGui.Separator()
                 ImGui.BeginGroup()
 
-                -- Hi sneaky :)
-                -- yu.rendering.bigText("Cuts")
+                yu.rendering.bigText("Cuts")
 
-                -- renderCutsSlider(1)
-                -- renderCutsSlider(2)
-                -- renderCutsSlider(3)
-                -- renderCutsSlider(4)
+                ImGui.PushItemWidth(165)
+                renderCutsSlider(1)
+                renderCutsSlider(2)
+                renderCutsSlider(3)
+                renderCutsSlider(4)
+                ImGui.PopItemWidth()
 
-                -- if ImGui.Button("Apply cuts") then
-                -- end
+                if ImGui.Button("Apply cuts") then
+                    for k, v in pairs(a.cuts) do
+                        if yu.is_num_between(v, 15, 250) then
+                            -- globals.set_int(1978495 + 881 + k, v)
+                            log.info("Set cut for player "..k.." to "..v)
+                        end
+                    end
+                end
 
-                -- if ImGui.Button("100%") then
-                --     globals.set_int(1978495 + 881 + 1, 15)
-                --     globals.set_int(1978495 + 881 + 2, 120)
-                -- end
-
-                -- ImGui.EndGroup()
-                -- ImGui.Separator()
-                -- ImGui.BeginGroup()
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
 
                 yu.rendering.bigText("Extra")
 
@@ -1165,7 +1187,7 @@ function SussySpt:initTabHBO()
         end)
     end
 
-    local function initCasino()
+    local function initCasinoHeist()
         local a = {
             targets = {
                 [0] = "Cash",
@@ -1261,9 +1283,11 @@ function SussySpt:initTabHBO()
         updateCooldowns()
 
         addToRender(2, function()
-            if (ImGui.BeginTabItem("The Diamond Casino Heist")) then
+            if (ImGui.BeginTabItem("Diamond Casino Heist")) then
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Preperations")
+
+                ImGui.PushItemWidth(360)
 
                 local tr = yu.rendering.renderList(a.targets, a.target, "hbo_casino_t", "Target")
                 if tr.changed then
@@ -1306,6 +1330,8 @@ function SussySpt:initTabHBO()
                     a.mask = mr.key
                     a.maskchanged = true
                 end
+
+                ImGui.PopItemWidth()
 
                 ImGui.Spacing()
 
@@ -1402,6 +1428,24 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
+                ImGui.SameLine()
+
+                if ImGui.Button("Remove npc cuts") then
+                    yu.add_task(function()
+                        local tuneable = 262145
+
+                        -- Lester
+                        globals.set_int(tuneable + 28998, 0)
+
+                        -- Gunman, Driver, and Hacker
+                        for k, v in ipairs({29024, 29029, 29035}) do
+                            for i = 0, 4 do
+                                globals.set_int(tuneable + v + i, 0)
+                            end
+                        end
+                    end)
+                end
+
                 if ImGui.Button("Complete Preps") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H3OPT_DISRUPTSHIP", 3)
@@ -1483,6 +1527,133 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initCasino()
+        local rigSlotMachinesId = "hbo_casinoresort_rsm"
+        -- local rigSlotMachinesSmartId = "hbo_casinoresort_rsms"
+
+        local luckyWheelPrizes = {
+            [0] = "CLOTHING (1)",
+            [1] = "2,500 RP",
+            [2] = "$20,000",
+            [3] = "10,000 Chips",
+            [4] = "DISCOUNT %",
+            [5] = "5,000 RP",
+            [6] = "$30,000",
+            [7] = "15,000 Chips",
+            [8] = "CLOTHING (2)",
+            [9] = "7,500 RP",
+            [10] = "20,000 Chips",
+            [11] = "MYSTERY",
+            [12] = "CLOTHING (3)",
+            [13] = "10,000 RP",
+            [14] = "$40,000",
+            [15] = "25,000 Chips",
+            [16] = "CLOTHING (4)",
+            [17] = "15,000 RP",
+            [18] = "VEHICLE"
+        }
+
+        local prize_wheel_win_state = 276
+        local prize_wheel_prize = 14
+        local prize_wheel_prize_state = 45
+
+        local winPrize = 0
+        local winPrizeChanged = false
+
+        function winLuckyWheel(prize)
+            if requireScript("casino_lucky_wheel") and yu.is_num_between(prize, 0, 18) then
+                yu.notify(1, "Winning "..luckyWheelPrizes[prize].." from the lucky wheel!", "Diamond Casino & Resort")
+                locals.set_int("casino_lucky_wheel", (prize_wheel_win_state) + (prize_wheel_prize), prize)
+                locals.set_int("casino_lucky_wheel", prize_wheel_win_state + prize_wheel_prize_state, 11)
+            end
+        end
+
+        yu.set_default_stat("RIGSLOTMACHINES_LAST", false)
+
+        addToRender(3, function()
+            if (ImGui.BeginTabItem("Diamond Casino & Resort")) then
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Slots")
+
+                yu.rendering.renderCheckbox("Rig slot machines", rigSlotMachinesId)
+                yu.rendering.tooltip("Dream luck")
+
+                -- ImGui.SameLine()
+
+                -- yu.rendering.renderCheckbox("Smart", rigSlotMachinesSmartId)
+                -- yu.rendering.tooltip("This will enable and disable the feature\nso that you won't get rate limited.")
+
+                ImGui.Separator()
+
+                yu.rendering.bigText("Lucky wheel")
+
+                ImGui.PushItemWidth(165)
+
+                local lwpr = yu.rendering.renderList(luckyWheelPrizes, winPrize, "hbo_casinoresort_luckywheel", "Prize")
+                if lwpr.changed then
+                    winPrize = lwpr.key
+                    winPrizeChanged = true
+                end
+
+                ImGui.PopItemWidth()
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Win") then
+                    if not winPrizeChanged then
+                        yu.notify(3, "Please select a prize to win first", "Diamond Casino & Resort")
+                    else
+                        winLuckyWheel(winPrize)
+                    end
+                end
+
+                ImGui.EndTabItem()
+            end
+        end)
+
+        local slots_random_results_table = 1344
+
+        SussySpt.registerRepeatingTask(function()
+            if yu.is_script_running("casino_slots") then
+                local needsRun = false
+
+                if yu.rendering.isCheckboxChecked(rigSlotMachinesId) then
+                    for slots_iter = 3, 195, 1 do
+                        if slots_iter ~= 67 and slots_iter ~= 132 then
+                            if locals.get_int("casino_slots", (slots_random_results_table) + (slots_iter)) ~= 6 then
+                                needsRun = true
+                            end
+                        end
+                    end
+                else
+                    local sum = 0
+                    for slots_iter = 3, 195, 1 do
+                        if slots_iter ~= 67 and slots_iter ~= 132 then
+                            sum = sum + locals.get_int("casino_slots", (slots_random_results_table) + (slots_iter))
+                        end
+                    end
+                    needsRun = sum == 1146
+                end
+
+                if needsRun then
+                    for slots_iter = 3, 195, 1 do
+                        if slots_iter ~= 67 and slots_iter ~= 132 then
+                            local slot_result = 6
+                            if yu.rendering.isCheckboxChecked(rigSlotMachinesId) == false then
+                                math.randomseed(os.time() + slots_iter)
+                                slot_result = math.random(0, 7)
+                            end
+                            locals.set_int("casino_slots", (slots_random_results_table) + (slots_iter), slot_result)
+                            log.info("Set slot result!")
+                        end
+                    end
+                end
+            end
+        end)
+
+    end
+
     local function initNightclub()
         local popularity
         local function updatePopularity()
@@ -1490,7 +1661,7 @@ function SussySpt:initTabHBO()
         end
         updatePopularity()
 
-        addToRender(3, function()
+        addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
                     yu.add_task(updatePopularity)
@@ -1511,6 +1682,7 @@ function SussySpt:initTabHBO()
     end
 
     initCayo()
+    initCasinoHeist()
     initCasino()
     initNightclub()
 
