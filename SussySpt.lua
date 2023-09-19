@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 54
+    versionid = 58
 }
 
 function SussySpt:new()
@@ -94,6 +94,14 @@ function SussySpt:initUtils()
             return false
         end
         return true
+    end
+
+    function requireOnline()
+        local inOnline = SussySpt.refreshInOnline() == true
+        if not inOnline then
+            yu.notify(3, "You need to be in online to use this", "<insert title here>")
+        end
+        return inOnline
     end
 
     function removeAllCameras()
@@ -236,9 +244,8 @@ function SussySpt:initTabSelf()
                     end
 
                     if (ImGui.BeginTabItem("Unlocks")) then
-                        ImGui.Text("LSCustoms")
 
-                        if ImGui.Button("Unlock hidden liveries") then
+                        if ImGui.Button("Unlock xmas liveries") then
                             yu.add_task(function()
                                 stats.set_int("MPPLY_XMASLIVERIES", -1)
                                 for i = 1, 20 do
@@ -247,35 +254,20 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        ImGui.Separator()
+                        ImGui.Spacing()
 
-                        ImGui.Text("LSCarMeet")
-                        ImGui.Text("  Buy a membership, activate, sit in a test car and go to the track.")
-                        ImGui.Text("  If your level is not 1, then activate and buy something in the LSCM store.")
-                        ImGui.Text("  If you've used LS Tuners awards unlock before, all unlocks will be temporary only.")
-
-                        if ImGui.Button("Unlock Trade Prices for headlights") then
-                            yu.add_task(function()
-                                for i = 18, 29 do
-                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
-                                end
-                            end)
-                        end
-
-                        if ImGui.Button("Unlock podium prize") then
+                        if ImGui.Button("Unlock LSCarMeet podium prize") then
                             yu.add_task(function()
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
                             end)
                         end
 
-                        ImGui.Separator()
+                        ImGui.Spacing()
 
-                        ImGui.Text("Flight school")
-
-                        if ImGui.Button("Unlock all gold medals") then
+                        if ImGui.Button("Unlock flightschool stuff") then
                             yu.add_task(function()
-                                stats.set_int("MPPLY_NUM_CAPTURES_CREATED", 100)
+                                stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
                                 for i = 0, 9 do
                                     stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_" .. i , -1)
                                     stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_" .. i, -1)
@@ -283,10 +275,9 @@ function SussySpt:initTabSelf()
                                 end
                             end)
                         end
+                        yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
 
-                        ImGui.Separator()
-
-                        ImGui.Text("Shooting thing in bunker i guess")
+                        ImGui.Spacing()
 
                         if ImGui.Button("Unlock all shooting range rewards") then
                             yu.add_task(function()
@@ -304,11 +295,9 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        ImGui.Separator()
+                        ImGui.Spacing()
 
-                        ImGui.Text("Arena war")
-
-                        if ImGui.Button("Unlock trade prices for vehicles") then
+                        if ImGui.Button("Unlock trade prices for arenawar vehicles") then
                             yu.add_task(function()
                                 for i = 1, 16 do
                                     stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
@@ -319,7 +308,7 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        if ImGui.Button("Unlock trade prices for headlights") then
+                        if ImGui.Button("Unlock colored headlights (same as below. idk)") then
                             yu.add_task(function()
                                 for i = 18, 29 do
                                     stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
@@ -327,9 +316,7 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        ImGui.Separator()
-
-                        ImGui.Text("Other")
+                        ImGui.Spacing()
 
                         if ImGui.Button("Unlock fast run and reload") then
                             yu.add_task(function()
@@ -343,13 +330,77 @@ function SussySpt:initTabSelf()
                         end
 
                         if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
-                            globals.set_int(262145 + 34131, 0)
-                            globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
-                            globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
+                            yu.add_task(function()
+                                globals.set_int(262145 + 34131, 0)
+                                globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
+                                globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
+                            end)
+                        end
+
+                        if ImGui.Button("Unlock all tattos") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
+                                for i = 0, 47 do
+                                    stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
+                                end
+                            end)
+                        end
+
+                        ImGui.Spacing()
+
+                        if ImGui.Button("Unlock bunker research (temp?)") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx();
+                                for j = 0, 63 do
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j, mpx)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j, mpx)
+                                end
+                                local bitSize = 8
+                                for j = 0, 64 / bitSize - 1 do
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
+                                end
+                            end)
                         end
 
                         ImGui.EndTabItem()
                     end
+
+                    -- if (ImGui.BeginTabItem("Vehicle")) then
+                    --     yu.rendering.renderCheckbox("F1 - Covers", "self_vehicle_f1covers", function(state)
+                    --         yu.add_task(function()
+                    --             local veh = yu.veh()
+                    --             if veh == nil then
+                    --                 yu.notify(3, "No vehicle found!", "F1 Covers")
+                    --             else
+                    --                 if state then
+                    --                 else
+                    --                 end
+                    --             end
+                    --         end)
+                    --     end)
+
+                    --     ImGui.EndTabItem()
+                    -- end
                 end
 
                 ImGui.EndTabBar()
