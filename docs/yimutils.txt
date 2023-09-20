@@ -104,6 +104,9 @@ is_script_running(name) : boolean
     Param name: The name of the script to check
     Returns: true if a script with the given name is running, false otherwise
 
+xp_for_crew_rank() : table[number]
+    Returns: A table starting with: 0,800,2100,3800,6100
+
 # KeyListener
 key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : number
     Param key: Id of the key to add the callback to.

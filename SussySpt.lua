@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 109
+    versionid = 129
 }
 
 function SussySpt:new()
@@ -202,6 +202,75 @@ function SussySpt:initTabSelf()
     updateBadsport()
     local badsportEnable = "Enable"..iml()
     local badsportDisable = "Disable"..iml()
+
+    -- for k, v in pairs(xpToCrewRank) do
+    --     if xpToCrewRank2[k] ~= v then
+    --         log.info("Not the same! > "..k)
+    --         break
+    --     end
+    -- end
+
+    local crew = 1
+    local crewRank = 0
+    local minCrewRank = 0
+    local checkingCrewRank = false
+
+    function getCrewRankByXp(xp)
+        local rank = 0
+        for k, v in pairs(yu.xp_for_crew_rank()) do
+            if v < xp then
+                rank = k
+                log.info("Set: "..k..","..v..","..rank..",xp:"..xp)
+            else
+                log.info("Return: "..k..","..v..","..rank..",xp:"..xp)
+                return rank
+            end
+        end
+        log.info("Else: "..rank..",xp:"..xp)
+        return rank
+    end
+
+    function updateCrewRank()
+        if not checkingCrewRank then
+            checkingCrewRank = true
+            yu.add_task(function()
+                local currentXp = stats.get_int("MPPLY_CREW_LOCAL_XP_"..crew)
+                -- crewRank = yu.get_key_from_table(xpToCrewRank, currentXP, currentXP)
+                crewRank = getCrewRankByXp(currentXp)
+                minCrewRank = crewRank
+                log.info(currentXp..","..crewRank)
+                checkingCrewRank = false
+            end)
+        end
+    end
+
+    yu.add_task(updateCrewRank)
+
+    function renderCrewRank()
+        local crewNewValue, crewChanged = ImGui.SliderInt("Crew", crew, 0, 4)
+        if crewChanged then
+            crew = crewNewValue
+            updateCrewRank()
+        end
+        yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews.")
+
+        local rankNewValue, rankChanged = ImGui.SliderInt("Rank", crewRank, minCrewRank, 8000)
+        if rankChanged then
+            crewRank = rankNewValue
+        end
+        yu.rendering.tooltip("You can't go down again!")
+
+        if ImGui.Button("Set") then
+            yu.add_task(function()
+                if crewRank >= minCrewRank then
+                    stats.set_int("MPPLY_CREW_LOCAL_XP_"..crew, yu.xp_for_crew_rank()[crewRank] + 100)
+                    yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
+                    yu.notify(1, "Set rank to "..crewRank.."!!!!1 :DDD", "It's fine... No ban!!!11")
+                end
+                updateCrewRank()
+            end)
+        end
+    end
 
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_self") then
@@ -576,6 +645,15 @@ function SussySpt:initTabSelf()
                         --         end
                         --     end)
                         -- end
+
+                        ImGui.Separator()
+
+                        ImGui.Text("Crew rank")
+
+                        renderCrewRank()
+
+
+
 
                         ImGui.EndTabItem()
                     end
