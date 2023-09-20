@@ -19,7 +19,8 @@
         "CAM",
         "HUD",
         "VEHICLE",
-        "INTERIOR"
+        "INTERIOR",
+        "STREAMING"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

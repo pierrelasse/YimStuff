@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 105
+    versionid = 107
 }
 
 function SussySpt:new()
@@ -230,6 +230,10 @@ function SussySpt:initTabSelf()
                             stats.set_int("SP1_TOTAL_CASH", amount) -- Franklin
                             stats.set_int("SP2_TOTAL_CASH", amount) -- Trevor
                         end)
+                    end
+
+                    if ImGui.Button("STOP_PLAYER_SWITCH") then
+                        STREAMING.STOP_PLAYER_SWITCH()
                     end
 
                     ImGui.EndTabItem()
