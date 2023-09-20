@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.3",
-    versionid = 107
+    versionid = 109
 }
 
 function SussySpt:new()
@@ -1310,13 +1310,11 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Cuts")
 
-                ImGui.PushItemWidth(165)
                 renderCutsSlider(1)
                 renderCutsSlider(2)
                 renderCutsSlider(3)
                 renderCutsSlider(4)
                 renderCutsSlider(-2)
-                ImGui.PopItemWidth()
 
                 if ImGui.Button("Apply cuts") then
                     for k, v in pairs(a.cuts) do
@@ -1715,13 +1713,15 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Reset Preps") then
+                if ImGui.Button("Reset Preps & POI & Accesspoints") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4_MISSIONS", 0)
                         stats.set_int(yu.mpx().."H4_PROGRESS", 0)
                         stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
                         stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
                         stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
+                        stats.set_int(yu.mpx().."H3OPT_POI", 0)
+                        stats.set_int(yu.mpx().."H3OPT_ACCESSPOINTS", 0)
                     end)
                 end
 
