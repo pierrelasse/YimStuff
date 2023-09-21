@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.4",
-    versionid = 132
+    versionid = 135
 }
 
 function SussySpt:new()
@@ -15,7 +15,8 @@ function SussySpt:new()
 
     tab:add_text("Version: "..SussySpt.version)
     tab:add_text("Version id: "..SussySpt.versionid)
-    tab:add_text("Made by pierrelasse. github.com/pierrelasse/YimStuff")
+    tab:add_text("Made by pierrelasse.")
+    tab:add_text("github.com/pierrelasse/YimStuff")
 
     SussySpt.rendercb = {}
     SussySpt.add_render = function(cb)
@@ -923,21 +924,16 @@ function SussySpt:initTabHBO()
 
         local function refreshExtra()
             if yu.is_script_running("fm_mission_controller_2020") then
+                a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
                 a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
             else
+                a.lifes = 0
                 a.realtake = 289700
             end
+            
         end
 
         refreshExtra()
-
-        SussySpt.registerRepeatingTask(function()
-            if yu.is_script_running("fm_mission_controller_2020") then
-                a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
-            else
-                a.lifes = 0
-            end
-        end)
 
         local cooldowns = {}
         local function updateCooldowns()
@@ -1368,11 +1364,15 @@ function SussySpt:initTabHBO()
                 local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
                 yu.rendering.tooltip("Like how many lifes you have left")
                 if lifesChanged then
-                    yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
-                            locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, lifesValue)
-                        end
-                    end)
+                    a.lifes = lifesValue
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Apply##lifes") then
+                    if requireScript("fm_mission_controller_2020") then
+                        locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, a.lifes)
+                    end
                 end
 
                 local realTakeValue, realTakeChanged = ImGui.SliderInt("Real take", a.realtake, 100000, 8691000, yu.format_num(a.realtake))
