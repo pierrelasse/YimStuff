@@ -8,7 +8,7 @@ It also offers a key listener, a notification system, and utils for lua like boo
 
 ### How to use in your script????
 Add `yu = require "yimutils"` to the top of your script to use yimutils.<br />
-You can then use functions using `yu.<function>`.<br />
+Then you can do `yu.` and like use it idk.<br />
 You can find [the docs here](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.txt).
 
 ## Lua Utils
@@ -90,7 +90,7 @@ SussySpt (weird name idk) is currently in development and features are getting a
     - Badsport (Makes you badsport or not)
     - Remove bounty
     - Remove griefing cooldown for VIP/CEO (Idk what this does. Just copied from somewhere)
-- Unlocks
+- Unlocks<br />
     ![Too lazy to write here](https://cdn.discordapp.com/attachments/1130207747867156566/1154437564510523472/image.png)
 
 ## HBO (Heists, Businesses & Other)
@@ -169,3 +169,7 @@ SussySpt (weird name idk) is currently in development and features are getting a
         - Remove missile cooldown
         - Set missle range to 99999
     - Enable/Disable snow
+
+# Cool
+I used "idk" 6 times in the README! Now 7.
+Also please give feedback and give me ideas on what to do.
