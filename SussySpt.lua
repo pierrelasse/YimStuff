@@ -161,7 +161,7 @@ function SussySpt:initUtils()
             if tbs.tabs[key] == nil then
                 tbs.tabs[key] = tab:add_tab(name..iml())
             end
-            return tbs.tabs[key]
+            return tbs.tabs[key] or gui.get_tab("void")
         end
     }
 end
@@ -413,12 +413,12 @@ function SussySpt:initTabSelf()
 
                         if ImGui.Button("Unlock fast run and reload") then
                             yu.add_task(function()
-                                stats.set_int(yu.mpx().."CHAR_ABILITY_1_UNLCK", -1)
-                                stats.set_int(yu.mpx().."CHAR_ABILITY_2_UNLCK", -1)
-                                stats.set_int(yu.mpx().."CHAR_ABILITY_3_UNLCK", -1)
-                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_1_UNLCK", -1)
-                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_2_UNLCK", -1)
-                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_3_UNLCK", -1)
+                                for i = 1, 3 do
+                                    stats.set_int(yu.mpx().."CHAR_ABILITY_"..i.."_UNLCK", -1)
+                                end
+                                for i = 1, 3 do
+                                    stats.set_int(yu.mpx().."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
+                                end
                             end)
                         end
                         yu.rendering.tooltip("Makes you run faster and reload weapons faster")
@@ -609,42 +609,42 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        -- ImGui.Spacing()
+                        ImGui.Spacing()
 
-                        -- if ImGui.Button("Unlock bunker research (temp?)") then
-                        --     yu.add_task(function()
-                        --         local mpx = yu.mpx()
+                        if ImGui.Button("Unlock bunker research (temp?)") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
 
-                        --         for j = 0, 63 do
-                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j, mpx)
-                        --             stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j, mpx)
-                        --         end
+                                for j = 0, 63 do
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j)
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j)
+                                    stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j)
+                                    stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j)
+                                end
 
-                        --         local bitSize = 8
-                        --         for j = 0, 64 / bitSize - 1 do
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
-                        --             stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
-                        --         end
-                        --     end)
-                        -- end
+                                local bitSize = 8
+                                for j = 0, 64 / bitSize - 1 do
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize)
+                                end
+                            end)
+                        end
 
                         ImGui.Separator()
 
