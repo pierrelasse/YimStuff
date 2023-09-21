@@ -33,14 +33,14 @@ get_or_default(tbl: table, key, defaultValue) : any
     Param defaultValue: Returned when tbl does not have key
     Returns: Value of tbl for key, or defaultValue if not found
 
+gd(get, defaultValue) : any
+    Returns: defaultValue if get is nil. Else get
+
 get_key_from_table(tbl: table, value, defaultValue) : any
     Param tbl: The table from where the key gets obtained
     Param value: The value from the key we need to find
     Param defaultValue: Returned when value with key key was not foudn
     Returns: The first key with the value value
-
-gd(get, defaultValue) : any
-    Returns: defaultValue if get is nil. Else get
 
 format_seconds(s, [format]) : string
     Param s: The duration in seconds to be formatted
@@ -107,7 +107,7 @@ is_script_running(name) : boolean
 xp_for_crew_rank() : table[number]
     Returns: A table starting with: 0,800,2100,3800,6100
 
-# KeyListener
+# Key Listener
 key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : number
     Param key: Id of the key to add the callback to.
         Get id of a key by using yu.keys["KEY_NAME"]

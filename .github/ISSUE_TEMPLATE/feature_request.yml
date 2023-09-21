@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest a feature
+title: "[Request]: "
+labels: request
+body:
+- type: textarea
+  attributes:
+    label: What2Add
+    description: What would you like to to have added?
+  validations:
+    required: false

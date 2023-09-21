@@ -21,7 +21,8 @@
         "VEHICLE",
         "INTERIOR",
         "STREAMING",
-        "PAD"
+        "PAD",
+        "STATS"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

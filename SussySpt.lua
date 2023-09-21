@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.3",
-    versionid = 129
+    version = "1.0.4",
+    versionid = 132
 }
 
 function SussySpt:new()
@@ -15,6 +15,7 @@ function SussySpt:new()
 
     tab:add_text("Version: "..SussySpt.version)
     tab:add_text("Version id: "..SussySpt.versionid)
+    tab:add_text("Made by pierrelasse. github.com/pierrelasse/YimStuff")
 
     SussySpt.rendercb = {}
     SussySpt.add_render = function(cb)
@@ -219,13 +220,13 @@ function SussySpt:initTabSelf()
         for k, v in pairs(yu.xp_for_crew_rank()) do
             if v < xp then
                 rank = k
-                log.info("Set: "..k..","..v..","..rank..",xp:"..xp)
+                -- log.info("Set: "..k..","..v..","..rank..",xp:"..xp)
             else
-                log.info("Return: "..k..","..v..","..rank..",xp:"..xp)
+                -- log.info("Return: "..k..","..v..","..rank..",xp:"..xp)
                 return rank
             end
         end
-        log.info("Else: "..rank..",xp:"..xp)
+        -- log.info("Else: "..rank..",xp:"..xp)
         return rank
     end
 
@@ -237,7 +238,7 @@ function SussySpt:initTabSelf()
                 -- crewRank = yu.get_key_from_table(xpToCrewRank, currentXP, currentXP)
                 crewRank = getCrewRankByXp(currentXp)
                 minCrewRank = crewRank
-                log.info(currentXp..","..crewRank)
+                -- log.info(currentXp..","..crewRank)
                 checkingCrewRank = false
             end)
         end
@@ -602,10 +603,10 @@ function SussySpt:initTabSelf()
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
-                                if (stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5) then
-                                    stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
+                                if (STATS.GET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT379"), 0, 8) < 5) then
+                                    STATS.SET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT379"), 5, 0, 8)
                                 end
-                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
+                                STATS.SET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT380"), 20, 40, 8)
                             end)
                         end
 
@@ -629,19 +630,19 @@ function SussySpt:initTabSelf()
 
                                 local bitSize = 8
                                 for j = 0, 64 / bitSize - 1 do
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT0", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT1", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT2", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT3", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT4", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT5", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT6", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT7", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT8", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT9", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT10", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT11", -1), j * bitSize)
+                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT12", -1), j * bitSize)
                                 end
                             end)
                         end
@@ -2293,32 +2294,6 @@ function SussySpt:initTabMisc()
         stats.set_bool(yu.mpx().."AWD_DAILYOBJWEEKBONUS", true)
         stats.set_bool(yu.mpx().."AWD_DAILYOBJWEEKBONUSSA", true)
         stats.set_bool(yu.mpx().."AWD_DAILYOBJMONTHBONUSSA", true)
-    end)
-
-    tab:add_separator()
-
-    tab:add_button("Skip Lamar missions", function()
-        stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
-        stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
-        stats.set_bool(yu.mpx().."LOW_FLOW_CS_FUN_SEEN", true)
-        stats.set_bool(yu.mpx().."LOW_FLOW_CS_PHO_SEEN", true)
-        stats.set_bool(yu.mpx().."LOW_FLOW_CS_FIN_SEEN", true)
-        stats.set_bool(yu.mpx().."LOW_BEN_INTRO_CS_SEEN", true)
-        stats.set_int(yu.mpx().."LOWRIDER_FLOW_COMPLETE", 4)
-        stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_PROG", 9)
-        stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_CALL", 9)
-        stats.set_int(yu.mpx().."LOW_FLOW_CS_HELPTEXT", 66)
-    end)
-
-    tab:add_button("Skip yacht missions", function()
-        stats.set_int(yu.mpx().."YACHT_MISSION_PROG", 0)
-        stats.set_int(yu.mpx().."YACHT_MISSION_FLOW", 21845)
-        stats.set_int(yu.mpx().."CASINO_DECORATION_GIFT_1", -1)
-    end)
-
-    tab:add_button("Skip ULP missions", function()
-        stats.set_int(yu.mpx().."ULP_MISSION_PROGRESS", 127)
-        stats.set_int(yu.mpx().."ULP_MISSION_CURRENT", 0)
     end)
 
     tab:add_separator()

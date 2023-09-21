@@ -1,0 +1,23 @@
+name: Bug report
+description: Report a bug :D
+title: "[Bug]: "
+labels: bug
+body:
+- type: textarea
+  attributes:
+    label: What is the bug?
+    description: A clear description of what the bug is
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: How to reproduce
+    description: What did you do to make this bug happen?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: How it should be
+    description: What did you excpect to happen? What do you think should happen instead.
+  validations:
+    required: true
