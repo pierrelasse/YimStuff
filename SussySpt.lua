@@ -1964,6 +1964,12 @@ function SussySpt:initTabQA()
                 end
                 yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.")
 
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip cutscene") then
+                    CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                end
+
                 if ImGui.Button("Repair vehicle") then
                     local veh = yu.veh()
                     if veh ~= nil then
