@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.9",
-    versionid = 186
+    versionid = 190
 }
 
 function SussySpt:new()
@@ -169,6 +169,33 @@ function SussySpt:initUtils()
 end
 
 function SussySpt:initTabSelf()
+    local a = {
+        tabBarId = "##self_tabbar",
+        spCharacters = {
+            [0] = "Michael",
+            [1] = "Franklin",
+            [2] = "Trevor"
+        }
+    }
+
+    local function refresh()
+        a.mentalState = stats.get_float("MPPLY_PLAYER_MENTAL_STATE")
+
+        a.badsport = stats.get_bool("MPPLY_CHAR_IS_BADSPORT")
+
+        a.spCash = {}
+        for k, v in pairs(a.spCharacters) do
+            a.spCash[k] = stats.get_int("SP"..k.."_TOTAL_CASH")
+        end
+    end
+
+    refresh()
+
+    -- local amount = 2147483647
+    -- stats.set_int("SP0_TOTAL_CASH", amount) -- Michael
+    -- stats.set_int("SP1_TOTAL_CASH", amount) -- Franklin
+    -- stats.set_int("SP2_TOTAL_CASH", amount) -- Trevor
+
     SussySpt.ensureVis = function(state, id, veh)
         if state ~= true and state ~= false then
             return nil
@@ -188,29 +215,6 @@ function SussySpt:initTabSelf()
 
     yu.rendering.setCheckboxChecked("self_invisible", false)
 
-    local tabBarId = "##self_tabbar"
-
-    local currentMentalState
-    local function updateMentalState()
-        currentMentalState = stats.get_float("MPPLY_PLAYER_MENTAL_STATE")
-    end
-    updateMentalState()
-
-    local currentBadsport
-    local function updateBadsport()
-        currentBadsport = stats.get_bool("MPPLY_CHAR_IS_BADSPORT")
-    end
-    updateBadsport()
-    local badsportEnable = "Enable"..iml()
-    local badsportDisable = "Disable"..iml()
-
-    -- for k, v in pairs(xpToCrewRank) do
-    --     if xpToCrewRank2[k] ~= v then
-    --         log.info("Not the same! > "..k)
-    --         break
-    --     end
-    -- end
-
     local crew = 1
     local crewRank = 0
     local minCrewRank = 0
@@ -221,13 +225,10 @@ function SussySpt:initTabSelf()
         for k, v in pairs(yu.xp_for_crew_rank()) do
             if v < xp then
                 rank = k
-                -- log.info("Set: "..k..","..v..","..rank..",xp:"..xp)
             else
-                -- log.info("Return: "..k..","..v..","..rank..",xp:"..xp)
                 return rank
             end
         end
-        -- log.info("Else: "..rank..",xp:"..xp)
         return rank
     end
 
@@ -235,11 +236,8 @@ function SussySpt:initTabSelf()
         if not checkingCrewRank then
             checkingCrewRank = true
             yu.add_task(function()
-                local currentXp = stats.get_int("MPPLY_CREW_LOCAL_XP_"..crew)
-                -- crewRank = yu.get_key_from_table(xpToCrewRank, currentXP, currentXP)
-                crewRank = getCrewRankByXp(currentXp)
+                crewRank = getCrewRankByXp(stats.get_int("MPPLY_CREW_LOCAL_XP_"..crew))
                 minCrewRank = crewRank
-                -- log.info(currentXp..","..crewRank)
                 checkingCrewRank = false
             end)
         end
@@ -275,10 +273,18 @@ function SussySpt:initTabSelf()
         end
     end
 
+    local function renderSPCash(index)
+        local value = a.spCash[index] or 0
+        local newValue, changed = ImGui.InputInt(a.spCharacters[index].."'s money", value, 0, 2147483647)
+        if changed then
+            a.spCash[index] = newValue
+        end
+    end
+
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_self") then
             if ImGui.Begin("Self") then
-                ImGui.BeginTabBar(tabBarId)
+                ImGui.BeginTabBar(a.tabBarId)
 
                 if (ImGui.BeginTabItem("General")) then
                     yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
@@ -295,17 +301,10 @@ function SussySpt:initTabSelf()
                         end)
                     end
 
-                    if ImGui.Button("Max singleplayer cash") then
-                        yu.add_task(function()
-                            local amount = 2147483647
-                            stats.set_int("SP0_TOTAL_CASH", amount) -- Michael
-                            stats.set_int("SP1_TOTAL_CASH", amount) -- Franklin
-                            stats.set_int("SP2_TOTAL_CASH", amount) -- Trevor
-                        end)
-                    end
-
                     if ImGui.Button("STOP_PLAYER_SWITCH") then
-                        STREAMING.STOP_PLAYER_SWITCH()
+                        yu.add_task(function()
+                            STREAMING.STOP_PLAYER_SWITCH()
+                        end)
                     end
 
                     ImGui.EndTabItem()
@@ -313,27 +312,26 @@ function SussySpt:initTabSelf()
 
                 if SussySpt.in_online then
                     if (ImGui.BeginTabItem("Stats")) then
-                        if ImGui.Button("Reset MentalState ["..currentMentalState.."]") then
-                            stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0)
-                            yu.notify(1, "Reset mental state?")
-                            updateMentalState()
+                        if ImGui.Button("Reset MentalState ["..a.mentalState.."]") then
+                            yu.add_task(function()
+                                stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0)
+                                refresh()
+                            end)
                         end
 
-                        ImGui.Text("BadSport ["..yu.boolstring(currentBadsport, "yes (L)", "no").."]:")
-                        ImGui.SameLine()
-                        if ImGui.Button(badsportEnable) then
-                            stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-                            stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
-                        end
-                        ImGui.SameLine()
-                        if ImGui.Button(badsportDisable) then
-                            stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-                            stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-                            stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-                            stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
-                        end
+                        yu.rendering.renderCheckbox("Badsport", "self_badsporet", function(state)
+                            if state then
+                                stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                                stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                            else
+                                stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                                stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                            end
+                        end)
 
                         if ImGui.Button("Remove bounty") then
                             globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
@@ -677,6 +675,22 @@ function SussySpt:initTabSelf()
 
                     --     ImGui.EndTabItem()
                     -- end
+                end
+
+                if (ImGui.BeginTabItem("Singleplayer")) then
+                    for k, v in pairs(a.spCash) do
+                        renderSPCash(k)
+                    end
+
+                    if ImGui.Button("Apply cash") then
+                        yu.add_task(function()
+                            for k, v in pairs(a.spCash) do
+                                stats.set_int("SP"..k.."_TOTAL_CASH", v)
+                            end
+                        end)
+                    end
+
+                    ImGui.EndTabItem()
                 end
 
                 ImGui.EndTabBar()
@@ -2041,7 +2055,6 @@ function SussySpt:initTabHBO()
 
         local function refresh()
             a.heist = yu.get_key_from_table(a.heistsids, globals.get_int(1934636 + 3008 + 1), 1)
-            log.info("Heist: "..a.heists[a.heist])
             a.heistchanged = false
         end
 
