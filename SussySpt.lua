@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.9",
-    versionid = 190
+    version = "1.1.0",
+    versionid = 194
 }
 
 function SussySpt:new()
@@ -275,7 +275,7 @@ function SussySpt:initTabSelf()
 
     local function renderSPCash(index)
         local value = a.spCash[index] or 0
-        local newValue, changed = ImGui.InputInt(a.spCharacters[index].."'s money", value, 0, 2147483647)
+        local newValue, changed = ImGui.InputInt(a.spCharacters[index].."'s cash", value, 0, 2147483647)
         if changed then
             a.spCash[index] = newValue
         end
@@ -306,6 +306,12 @@ function SussySpt:initTabSelf()
                             STREAMING.STOP_PLAYER_SWITCH()
                         end)
                     end
+
+                    -- if ImGui.Button("Funny test") then
+                    --     yu.add_task(function()
+                    --         ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), 1, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                    --     end)
+                    -- end
 
                     ImGui.EndTabItem()
                 end
