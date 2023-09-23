@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.8",
-    versionid = 184
+    version = "1.0.9",
+    versionid = 186
 }
 
 function SussySpt:new()
@@ -1935,9 +1935,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.PushItemWidth(140)
                 local pnv, pc ImGui.InputInt("Popularity", a.popularity, 0, 1000)
-                if not ImGui.IsItemActive() then
-                    yu.rendering.tooltip("Type number in and then click Set :D")
-                end
+                yu.rendering.tooltip("Type number in and then click Set :D")
                 ImGui.PopItemWidth()
                 if pc then
                     a.popularity = pnv
@@ -1978,6 +1976,17 @@ function SussySpt:initTabHBO()
                 for k, v in pairs(a.storages) do
                     renderStorage(k)
                 end
+
+                ImGui.EndGroup()
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Other")
+
+                yu.rendering.renderCheckbox("Remove Tony's cut", "hbo_nightclub_tony", function(state)
+                    yu.add_task(function()
+                        globals.set_float(286403, yu.shc(state, 0, .025))
+                    end)
+                end)
+                yu.rendering.tooltip("Set Tony's cut to 0.\nWhen disabled, the cut will be set back to 0.025.")
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
