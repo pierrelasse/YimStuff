@@ -1,8 +1,8 @@
 # For YimUtils & SussySpt
 Feel free to create an issue to report a bug, suggest a feature, or something else idk.
+**YimUtils & SussySpt are made for [YimMenu](https://github.com/YimMenu/YimMenu).**<br />
 
 # YimUtils
-**YimUtils was made for [YimMenu](https://github.com/YimMenu/YimMenu).**<br />
 YimUtils is some sort of a libary for script developers to easily code without having to worry about things like mpx or if a script is running or other basic stuff.<br />
 It also offers a key listener, a notification system, and utils for lua like boolstring which converts a boolean to a string or format_seconds, and more.<br />
 
