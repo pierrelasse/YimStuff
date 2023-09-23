@@ -23,7 +23,8 @@
         "STREAMING",
         "PAD",
         "STATS",
-        "CUTSCENE"
+        "CUTSCENE",
+        "TASK"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

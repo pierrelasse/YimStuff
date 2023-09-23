@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.5",
-    versionid = 176
+    version = "1.0.6",
+    versionid = 177
 }
 
 function SussySpt:new()
@@ -2215,6 +2215,15 @@ function SussySpt:initTabQA()
                     end)
                 end
                 yu.rendering.tooltip("Repairs the vehicle.\nUse with caution because this closes doors and stuff.")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Clear ped tasks") then
+                    yu.add_task(function()
+                        TASK.CLEAR_PED_TASKS_IMMEDIATELY(yu.ppid())
+                    end)
+                end
+                yu.rendering.tooltip("Makes the player stop what it's doing")
 
                 if SussySpt.in_online then
                     if ImGui.Button("Instant BST") then
