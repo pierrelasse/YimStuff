@@ -22,7 +22,8 @@
         "INTERIOR",
         "STREAMING",
         "PAD",
-        "STATS"
+        "STATS",
+        "CUTSCENE"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
