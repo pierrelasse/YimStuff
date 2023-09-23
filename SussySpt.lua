@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.6",
-    versionid = 177
+    version = "1.0.7",
+    versionid = 183
 }
 
 function SussySpt:new()
@@ -1892,13 +1892,36 @@ function SussySpt:initTabHBO()
     end
 
     local function initNightclub()
-        local a = {}
+        local a = {
+            storages = {
+                [286294 + 1] = "Sporting goods",
+                [286294 + 2] = "S.A. imports",
+                [286294 + 3] = "Pharmaceutical",
+                [286294 + 4] = "Organic produce",
+                [286294 + 5] = "Printing and copying",
+                [286294 + 6] = "Cash Creation",
+                [286294 + 7] = "Cargo Shipments"
+            }
+        }
 
         local function refresh()
             a.popularity = stats.get_int(yu.mpx().."CLUB_POPULARITY")
+
+            a.storage = {}
+            for k, v in pairs(a.storages) do
+                a.storage[k] = globals.get_int(k)
+            end
         end
 
         refresh()
+
+        local function renderStorage(index)
+            local value = a.storage[index] or 0
+            local newValue, changed = ImGui.InputInt(a.storages[index], value, value / 2, value * 2)
+            if changed then
+                a.storage[index] = newValue
+            end
+        end
 
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
@@ -1909,7 +1932,6 @@ function SussySpt:initTabHBO()
                 ImGui.Separator()
 
                 ImGui.BeginGroup()
-                yu.rendering.bigText("Popularity")
 
                 ImGui.PushItemWidth(140)
                 local pnv, pc ImGui.InputInt("Popularity", a.popularity, 0, 1000)
@@ -1942,9 +1964,19 @@ function SussySpt:initTabHBO()
                 end
                 yu.rendering.tooltip("Set the popularity to 1000")
 
-                -- ImGui.EndGroup()
-                -- ImGui.BeginGroup()
-                -- yu.rendering.bigText("Storage")
+                if ImGui.Button("Pay now") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("CLUB_PAY_TIME_LEFT"), -1)
+                    end)
+                end
+
+                ImGui.EndGroup()
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Storage")
+
+                for k, v in pairs(a.storages) do
+                    renderStorage(k)
+                end
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
