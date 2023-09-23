@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.4",
-    versionid = 135
+    version = "1.0.5",
+    versionid = 167
 }
 
 function SussySpt:new()
@@ -774,6 +774,27 @@ function SussySpt:initTabHBO()
         end
     end
 
+    local function renderCutsSlider(tbl, index)
+        local value = tbl[index] or 0
+        local text = yu.shc(index == -2, "Non-host self cut", "Player "..index.."'s cut")
+        local newValue, changed = ImGui.DragInt(text, value, .2, 0, 250, "%d%%", 5)
+        if changed then
+            tbl[index] = newValue
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button(" + ##cuts_+"..index) then
+            tbl[index] = value + 1
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button(" - ##cuts_-"..index) then
+            tbl[index] = value - 1
+        end
+    end
+
     local function initCayo()
         local a = {
             primarytargets = {
@@ -930,7 +951,7 @@ function SussySpt:initTabHBO()
                 a.lifes = 0
                 a.realtake = 289700
             end
-            
+
         end
 
         refreshExtra()
@@ -942,15 +963,6 @@ function SussySpt:initTabHBO()
             end
         end
         updateCooldowns()
-
-        local function renderCutsSlider(index)
-            local value = a.cuts[index] or 15
-            local text = yu.shc(index == -2, "Non-host self cut", "Player "..index.."'s cut")
-            local newValue, changed = ImGui.SliderInt(text, value, 15, 250, value.."%")
-            if changed then
-                a.cuts[index] = newValue
-            end
-        end
 
         addToRender(1, function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
@@ -1233,7 +1245,7 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
-                if ImGui.Button("Complete Preps") then
+                if ImGui.Button("Complete preps") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
                         stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
@@ -1276,15 +1288,15 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Cuts")
 
-                renderCutsSlider(1)
-                renderCutsSlider(2)
-                renderCutsSlider(3)
-                renderCutsSlider(4)
-                renderCutsSlider(-2)
+                renderCutsSlider(a.cuts, 1)
+                renderCutsSlider(a.cuts, 2)
+                renderCutsSlider(a.cuts, 3)
+                renderCutsSlider(a.cuts, 4)
+                renderCutsSlider(a.cuts, -2)
 
                 if ImGui.Button("Apply cuts") then
                     for k, v in pairs(a.cuts) do
-                        if yu.is_num_between(v, 15, 250) then
+                        if yu.is_num_between(v, 0, 250) then
                             if k == -2 then
                                 globals.set_int(2722097, v)
                                 log.info("Set cut for self to "..v)
@@ -1902,10 +1914,177 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initApartment()
+        local a = {
+            heists = {
+                "Fleeca $5M",
+                "Fleeca $10M",
+                "Fleeca $15M",
+                "Prison break $5M",
+                "Prison break $10M",
+                "Prison break $15M",
+                "Humane labs raid $5M",
+                "Humane labs raid $10M",
+                "Humane labs raid $15M",
+                "Series A funding $5M",
+                "Series A funding $10M",
+                "Series A funding $15M",
+                "The pacific standard $5M",
+                "The pacific standard $10M",
+                "The pacific standard $15M"
+            },
+            heistsids = {
+                [1] = 3500,
+                [2] = 7000,
+                [3] = 10434,
+                [4] = 1000,
+                [5] = 2000,
+                [6] = 3000,
+                [7] = 750,
+                [8] = 1482,
+                [9] = 2220,
+                [10] = 991,
+                [11] = 1981,
+                [12] = 2970,
+                [13] = 400,
+                [14] = 800,
+                [15] = 1200
+            },
+            cuts = {}
+        }
+
+        local function refresh()
+            a.heist = yu.get_key_from_table(a.heistsids, globals.get_int(1934636 + 3008 + 1), 1)
+            log.info("Heist: "..a.heists[a.heist])
+            a.heistchanged = false
+        end
+
+        refresh()
+
+        addToRender(5, function()
+            if (ImGui.BeginTabItem("Apartment Heists")) then
+                ImGui.BeginGroup()
+
+                if ImGui.Button("Refresh") then
+                    yu.add_task(refresh)
+                end
+
+                yu.rendering.bigText("Preperations")
+
+                local hr = yu.rendering.renderList(a.heists, a.heist, "hbo_apartment_heist", "Heist")
+                if hr.changed then
+                    a.heist = hr.key
+                    a.heistchanged = true
+                end
+
+                if ImGui.Button("Apply") then
+                    yu.add_task(function()
+                        local changes = 0
+
+                        -- Heist
+                        if a.heistchanged then
+                            changes = yu.add(changes, 1)
+                            globals.set_int(1934636 + 3008 + 1, a.heistsids[a.heist])
+                        end
+
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Diamond Casino Heist")
+                        for k, v in pairs(a) do
+                            if tostring(k):endswith("changed") then
+                                a[k] = nil
+                            end
+                        end
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Complete preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", -1)
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", 0)
+                    end)
+                end
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Extra")
+
+                ImGui.Text("Fleeca:")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip hack##fleeca") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") then
+                            locals.set_int("fm_mission_controller", 11760 + 24, 7)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("When being passenger, you need to play snake.")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip drill##fleeca") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") then
+                            locals.set_int("fm_mission_controller", 11760 + 24, 7)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Skip drilling")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Instant finish (solo only)##fleeca") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller") then
+                            locals.set_int("fm_mission_controller", 19710, 12)
+                            locals.set_int("fm_mission_controller", 28331 + 1, 99999)
+                            locals.set_int("fm_mission_controller", 31587 + 69, 99999)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Never tested this before")
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Cuts")
+
+                renderCutsSlider(a.cuts, 1)
+                renderCutsSlider(a.cuts, 2)
+                renderCutsSlider(a.cuts, 3)
+                renderCutsSlider(a.cuts, 4)
+
+                if ImGui.Button("Apply cuts") then
+                    for k, v in pairs(a.cuts) do
+                        if yu.is_num_between(v, 0, 250) then
+                            globals.set_int(1937644 + k, v)
+                        end
+                    end
+                end
+
+                ImGui.EndGroup()
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
     initCayo()
     initCasinoHeist()
     initCasino()
     initNightclub()
+    initApartment()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
@@ -1934,6 +2113,7 @@ function SussySpt:initTabQA()
 			            PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()));
                     end)
                 end
+                yu.rendering.tooltip("Refill health & armor")
 
                 ImGui.SameLine()
 
@@ -1942,6 +2122,7 @@ function SussySpt:initTabQA()
                         ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0);
                     end)
                 end
+                yu.rendering.tooltip("Refill health")
 
                 ImGui.SameLine()
 
@@ -1950,25 +2131,28 @@ function SussySpt:initTabQA()
                         PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()));
                     end)
                 end
+                yu.rendering.tooltip("Refill armor")
+
+                ImGui.SameLine()
 
                 if ImGui.Button("Clear wanted level") then
                     yu.add_task(function()
                         PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
                     end)
                 end
-
-                ImGui.SameLine()
+                yu.rendering.tooltip("CLEAR_PLAYER_WANTED_LEVEL")
 
                 if ImGui.Button("Refresh interior") then
 				    INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
                 end
-                yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.")
+                yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.\nMay not always work.")
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip cutscene") then
                     CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
                 end
+                yu.rendering.tooltip("There are some unskippable cutscenes where this doesn't work.")
 
                 if ImGui.Button("Repair vehicle") then
                     local veh = yu.veh()
@@ -1977,11 +2161,13 @@ function SussySpt:initTabQA()
                         VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0);
                     end
                 end
+                yu.rendering.tooltip("Repairs the vehicle.\nUse with caution because this closes doors and stuff.")
 
                 if SussySpt.in_online then
                     if ImGui.Button("Instant BST") then
                         globals.set_int(2672524 + 3690, 1)
                     end
+                    yu.rendering.tooltip("Give bullshark testosterone.\nYou will receive less damage and do more damage.")
                 end
             end
             ImGui.End()
