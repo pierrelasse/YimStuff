@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.5",
-    versionid = 168
+    versionid = 176
 }
 
 function SussySpt:new()
@@ -1892,27 +1892,61 @@ function SussySpt:initTabHBO()
     end
 
     local function initNightclub()
-        local popularity
-        local function updatePopularity()
-            popularity = stats.get_int(yu.mpx().."CLUB_POPULARITY")
+        local a = {}
+
+        local function refresh()
+            a.popularity = stats.get_int(yu.mpx().."CLUB_POPULARITY")
         end
-        updatePopularity()
+
+        refresh()
 
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
-                    yu.add_task(updatePopularity)
+                    yu.add_task(refresh)
                 end
 
                 ImGui.Separator()
 
-                ImGui.Text("Popularity: "..popularity.."/1000")
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Popularity")
 
-                if ImGui.Button("Refill popularity") then
-                    stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
-                    yu.add_task(updatePopularity)
+                ImGui.PushItemWidth(140)
+                local pnv, pc ImGui.InputInt("Popularity", a.popularity, 0, 1000)
+                if not ImGui.IsItemActive() then
+                    yu.rendering.tooltip("Type number in and then click Set :D")
+                end
+                ImGui.PopItemWidth()
+                if pc then
+                    a.popularity = pnv
                 end
 
+                ImGui.SameLine()
+
+                if ImGui.Button("Set") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."CLUB_POPULARITY", a.popularity)
+                        refresh()
+                    end)
+                end
+                yu.rendering.tooltip("Set the popularity to the input field")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refill") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
+                        a.popularity = 1000
+                        refresh()
+                    end)
+                end
+                yu.rendering.tooltip("Set the popularity to 1000")
+
+                -- ImGui.EndGroup()
+                -- ImGui.BeginGroup()
+                -- yu.rendering.bigText("Storage")
+
+                ImGui.EndGroup()
                 ImGui.EndTabItem()
             end
         end)
@@ -2147,23 +2181,38 @@ function SussySpt:initTabQA()
                 yu.rendering.tooltip("CLEAR_PLAYER_WANTED_LEVEL")
 
                 if ImGui.Button("Refresh interior") then
-				    INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
+                    yu.add_task(function()
+				        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
+                    end)
                 end
                 yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.\nMay not always work.")
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip cutscene") then
-                    CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                    yu.add_task(function()
+                        CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                    end)
                 end
                 yu.rendering.tooltip("There are some unskippable cutscenes where this doesn't work.")
 
+                ImGui.SameLine()
+
+                if ImGui.Button("Remove blackscreen") then
+                    yu.add_task(function()
+                        CAM.DO_SCREEN_FADE_IN(0)
+                    end)
+                end
+                yu.rendering.tooltip("Remove the blackscreen :D")
+
                 if ImGui.Button("Repair vehicle") then
-                    local veh = yu.veh()
-                    if veh ~= nil then
-                        VEHICLE.SET_VEHICLE_FIXED(veh)
-                        VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0);
-                    end
+                    yu.add_task(function()
+                        local veh = yu.veh()
+                        if veh ~= nil then
+                            VEHICLE.SET_VEHICLE_FIXED(veh)
+                            VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0);
+                        end
+                    end)
                 end
                 yu.rendering.tooltip("Repairs the vehicle.\nUse with caution because this closes doors and stuff.")
 
