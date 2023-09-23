@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.0.7",
-    versionid = 183
+    version = "1.0.8",
+    versionid = 184
 }
 
 function SussySpt:new()
@@ -1969,6 +1969,7 @@ function SussySpt:initTabHBO()
                         stats.set_int(yu.mpx("CLUB_PAY_TIME_LEFT"), -1)
                     end)
                 end
+                yu.rendering.tooltip("This will decrease the popularity by 50 and will put $50k in the safe.")
 
                 ImGui.EndGroup()
                 ImGui.BeginGroup()
