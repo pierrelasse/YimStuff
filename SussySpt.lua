@@ -364,6 +364,12 @@ function SussySpt:initTabSelf()
                         end
                         yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
 
+                        if ImGui.Button("LSCarMeet unlocks") then
+                            for i = 293419, 293446 do
+                                globals.set_float(i, 100000)
+                            end
+                        end
+
                         if ImGui.Button("Unlock flightschool stuff") then
                             yu.add_task(function()
                                 stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
