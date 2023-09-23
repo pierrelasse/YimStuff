@@ -313,7 +313,7 @@ return (function()
         end
 
         api.rendering.tooltip = function(text)
-            if ImGui.IsItemHovered() then
+            if ImGui.IsItemActive() then
                 ImGui.SetTooltip(text)
             end
         end
