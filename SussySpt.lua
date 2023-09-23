@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.0.5",
-    versionid = 167
+    versionid = 168
 }
 
 function SussySpt:new()
@@ -784,6 +784,8 @@ function SussySpt:initTabHBO()
 
         ImGui.SameLine()
 
+        ImGui.PushButtonRepeat(true)
+
         if ImGui.Button(" + ##cuts_+"..index) then
             tbl[index] = value + 1
         end
@@ -793,6 +795,8 @@ function SussySpt:initTabHBO()
         if ImGui.Button(" - ##cuts_-"..index) then
             tbl[index] = value - 1
         end
+
+        ImGui.PopButtonRepeat()
     end
 
     local function initCayo()
