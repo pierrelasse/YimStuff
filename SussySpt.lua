@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.0",
-    versionid = 194
+    versionid = 202
 }
 
 function SussySpt:new()
@@ -313,6 +313,30 @@ function SussySpt:initTabSelf()
                     --     end)
                     -- end
 
+                    -- if ImGui.Button("Test2") then
+                    --     script.run_in_fiber(function(script)
+                    --         local pid = 1
+                    --         for k, v in pairs({1104117595,697566862,1268038438,915462795,697566862,1268038438,915462795}) do
+                    --             local _a = math.random(-2147483647, 2147483647)
+                    --             local _b = math.random(-1987543, 1987543)
+                    --             local _c = math.random(-19, 19)
+                    --             network.trigger_script_event(1 << pid, {v, pid, _a, _c, _b, _b, _a, _a, _c, _c, _a, _c, _b, _c, _a, _a, _b, _c, _a, _b, _b, _c, _c})
+                    --             script:yield()
+                    --         end
+                    --     end)
+                    -- end
+
+                    -- if ImGui.Button("Loop") then
+                    --     yu.add_task(function()
+                    --         -- for k, v in pairs(entities.get_all_peds_as_handles()) do
+                    --         --     local player = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(k)
+                    --         --     if player ~= -1 then
+                    --         --         log.info("Ped: "..k..":"..v.."N:"..PLAYER.GET_PLAYER_NAME(player))
+                    --         --     end
+                    --         -- end
+                    --     end)
+                    -- end
+
                     ImGui.EndTabItem()
                 end
 
@@ -321,6 +345,7 @@ function SussySpt:initTabSelf()
                         if ImGui.Button("Reset MentalState ["..a.mentalState.."]") then
                             yu.add_task(function()
                                 stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0)
+                                stats.get_float("MPPLY_PLAYER_MENTAL_STATE") -- This updates it i think
                                 refresh()
                             end)
                         end
@@ -1920,13 +1945,13 @@ function SussySpt:initTabHBO()
     local function initNightclub()
         local a = {
             storages = {
-                [286294 + 1] = "Sporting goods",
-                [286294 + 2] = "S.A. imports",
-                [286294 + 3] = "Pharmaceutical",
-                [286294 + 4] = "Organic produce",
-                [286294 + 5] = "Printing and copying",
-                [286294 + 6] = "Cash Creation",
-                [286294 + 7] = "Cargo Shipments"
+                [286294 + 1] = "Sporting Goods (Gunrunning Bunker)",
+                [286294 + 2] = "South American Imports (M/C Cocaine Lockup)",
+                [286294 + 3] = "Pharmaceutical Research (M/C Methamphetamine Lab)",
+                [286294 + 4] = "Organic Produce (M/C Weed Farm)",
+                [286294 + 5] = "Printing & Copying (M/C Document Forgery Office)",
+                [286294 + 6] = "Cash Creation (M/C Counterfeit Cash Factory)",
+                [286294 + 7] = "Cargo and Shipments (CEO Office Special Cargo Warehouse or Smuggler's Hangar)"
             }
         }
 

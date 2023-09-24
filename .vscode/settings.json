@@ -24,7 +24,9 @@
         "PAD",
         "STATS",
         "CUTSCENE",
-        "TASK"
+        "TASK",
+        "network",
+        "NETWORK"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

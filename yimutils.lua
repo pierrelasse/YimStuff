@@ -220,14 +220,6 @@ return (function()
             -- end
             return nil
         end
-
-        -- TODO: Add to docs & make this useful
-        api.get_entity_coords = function(entity)
-            if entity == nil then
-                return nil
-            end
-            return ENTITY.GET_ENTITY_COORDS(entity)
-        end
     end
 
     local function initKeyListener()
