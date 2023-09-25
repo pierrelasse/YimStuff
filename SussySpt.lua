@@ -1399,40 +1399,59 @@ function SussySpt:initTabHBO()
                     yu.add_task(removeAllCameras)
                 end
 
+                ImGui.SameLine()
+
+                if ImGui.Button("Skip printing cutscene") then
+                    yu.add_task(function()
+                        if locals.get_int("fm_mission_controller", 22032) == 4 then
+                            locals.set_int("fm_mission_controller", 22032, 5)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Idfk what this is or what this does")
+
                 if ImGui.Button("Skip sewer tunnel cut") then
-                    if requireScript("fm_mission_controller_2020")
-                        and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
-                            or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
-                        locals.set_int("fm_mission_controller_2020", 28446, 6)
-                        yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
-                    end
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020")
+                            and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
+                                or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
+                            locals.set_int("fm_mission_controller_2020", 28446, 6)
+                            yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip door hack") then
-                    if requireScript("fm_mission_controller_2020")
-                        and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
-                        locals.set_int("fm_mission_controller_2020", 54024, 5)
-                        yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
-                    end
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020")
+                            and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
+                            locals.set_int("fm_mission_controller_2020", 54024, 5)
+                            yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    if requireScript("fm_mission_controller_2020")
-                        and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
-                        locals.set_int("fm_mission_controller_2020", 23669, 5)
-                        yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
-                    end
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020")
+                            and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
+                            locals.set_int("fm_mission_controller_2020", 23669, 5)
+                            yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip plasmacutter cut") then
-                    if requireScript("fm_mission_controller_2020") then
-                        locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
-                        yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
-                    end
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
+                            yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 ImGui.Spacing()
@@ -1454,7 +1473,7 @@ function SussySpt:initTabHBO()
                     yu.add_task(refreshExtra)
                 end
 
-                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes (Self)", a.lifes, 0, 10)
                 yu.rendering.tooltip("Like how many lifes you have left")
                 if lifesChanged then
                     a.lifes = lifesValue
