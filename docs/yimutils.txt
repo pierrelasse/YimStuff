@@ -56,6 +56,14 @@ add(num: number, amount: number) : number
     Param amount: The amount to add to num
     Returns: num + amount
 
+splitText(inputText: string, [delimiter: string])
+    Param inputText: The text to be split
+    Param delimiter: At what char the string should get split
+
+loop(amount: number, cb: function)
+    Param amount: How many cb should be executed
+    Param cb: The function to be executed
+
 # Notifications
 set_notification_title_prefix(title)
     Param title: Prefix of every title used in notify(type, message, [title])

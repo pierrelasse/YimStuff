@@ -88,6 +88,17 @@ return (function()
             return lines
         end
 
+        api.loop = function(amount, cb)
+            if type(amount) ~= "number" or type(cb) ~= "function" or amount <= 0 then
+                return nil
+            end
+            i = 0
+            while i < amount do
+                i = i + 1
+                cb()
+            end
+        end
+
         -- Notifications
         api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
