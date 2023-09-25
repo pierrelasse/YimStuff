@@ -709,6 +709,49 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
+                        if ImGui.Button("Unlock guns") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                for i in pairs({
+                                        "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
+                                        "CHAR_WEAP_ADDON_2_UNLCK","CHAR_WEAP_ADDON_3_UNLCK","CHAR_WEAP_ADDON_4_UNLCK","CHAR_WEAP_FREE","CHAR_WEAP_FREE2",
+                                        "CHAR_FM_WEAP_FREE","CHAR_FM_WEAP_FREE2","CHAR_FM_WEAP_FREE3","CHAR_FM_WEAP_FREE4","CHAR_WEAP_PURCHASED",
+                                        "CHAR_WEAP_PURCHASED2","WEAPON_PICKUP_BITSET","WEAPON_PICKUP_BITSET2","CHAR_FM_WEAP_UNLOCKED","NO_WEAPONS_UNLOCK",
+                                        "NO_WEAPON_MODS_UNLOCK","NO_WEAPON_CLR_MOD_UNLOCK","CHAR_FM_WEAP_UNLOCKED2","CHAR_FM_WEAP_UNLOCKED3",
+                                        "CHAR_FM_WEAP_UNLOCKED4","CHAR_KIT_1_FM_UNLCK","CHAR_KIT_2_FM_UNLCK","CHAR_KIT_3_FM_UNLCK","CHAR_KIT_4_FM_UNLCK",
+                                        "CHAR_KIT_5_FM_UNLCK","CHAR_KIT_6_FM_UNLCK","CHAR_KIT_7_FM_UNLCK","CHAR_KIT_8_FM_UNLCK","CHAR_KIT_9_FM_UNLCK",
+                                        "CHAR_KIT_10_FM_UNLCK","CHAR_KIT_11_FM_UNLCK","CHAR_KIT_12_FM_UNLCK","CHAR_KIT_FM_PURCHASE","CHAR_WEAP_FM_PURCHASE",
+                                        "CHAR_WEAP_FM_PURCHASE2","CHAR_WEAP_FM_PURCHASE3","CHAR_WEAP_FM_PURCHASE4"}) do
+                                    stats.set_int(mpx..i, -1)
+                                end
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_BLUE", 1000)
+                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH", -1)
+                            for i = 2, 19 do
+                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH"..i, -1)
+                            end
+                            for i = 1, 19 do
+                                stats.set_int(mpx.."CHAR_FM_WEAP_ADDON_"..i.."_UNLCK", -1)
+                            end
+                            for i = 1, 41 do
+                                stats.set_int(mpx.."CHAR_KIT_"..i.."_FM_UNLCK", -1)
+                            end
+                            for i = 2, 41 do
+                                stats.set_int(mpx.."CHAR_KIT_FM_PURCHASE"..i, -1)
+                            end
+                            end)
+                        end
+
                         ImGui.Separator()
 
                         renderCrewRank()
