@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.0",
-    versionid = 205
+    versionid = 207
 }
 
 function SussySpt:new()
@@ -664,19 +664,19 @@ function SussySpt:initTabSelf()
 
                                 local bitSize = 8
                                 for j = 0, 64 / bitSize - 1 do
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, mpx)
-                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, mpx)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
                                 end
                             end)
                         end
