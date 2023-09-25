@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.0",
-    versionid = 202
+    versionid = 203
 }
 
 function SussySpt:new()
@@ -639,14 +639,12 @@ function SussySpt:initTabSelf()
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
-                                if (STATS.GET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT379"), 0, 8) < 5) then
-                                    STATS.SET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT379"), 5, 0, 8)
+                                if (stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5) then
+                                    stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
                                 end
-                                STATS.SET_MASKED_INT(joaat(mpx.."BUSINESSBATPSTAT_INT380"), 20, 40, 8)
+                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
                             end)
                         end
-
-                        ImGui.Spacing()
 
                         if ImGui.Button("Unlock bunker research (temp?)") then
                             yu.add_task(function()
@@ -666,20 +664,48 @@ function SussySpt:initTabSelf()
 
                                 local bitSize = 8
                                 for j = 0, 64 / bitSize - 1 do
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT0", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT1", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT2", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT3", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT4", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT5", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT6", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT7", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT8", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT9", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT10", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT11", -1), j * bitSize)
-                                    STATS.SET_MASKED_INT(joaat(mpx.."GUNRPSTAT_INT12", -1), j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize)
+                                    stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize)
                                 end
+                            end)
+                        end
+
+                        if ImGui.Button("Unlock diamond casino heist outfits") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL1", true, 63) -- Refuse Collectors
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 0) -- Undertakers
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 1) -- Valet Outfits
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 3) -- Prison Guards
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 4) -- FIB Suits
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 6) -- Gruppe Sechs Gear
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 7) -- Bugstars Uniforms
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 8) -- Maintenance
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 9) -- Yung Ancestors
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 10) -- Firefighter Gear
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 11) -- Orderly Armor
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 12) -- Upscale Armor
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 13) -- Evening Armor
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 14) -- Reinforced: Padded Combat
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 15) -- Reinforced: Bulk Combat
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 16) -- Reinforced: Compact Combat
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 17) -- Balaclava Crook
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 18) -- Classic Crook
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 19) -- High-end Crook
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 20) -- Infiltration: Upgraded Tech
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 21) -- Infiltration: Advanced Tech
+                                stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 22) -- Infiltration: Modernized Tech
                             end)
                         end
 
