@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.0",
-    versionid = 212
+    version = "1.1.1",
+    versionid = 217
 }
 
 function SussySpt:new()
@@ -65,7 +65,7 @@ function SussySpt:new()
         end
     end)
 
-    yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(yu.is_script_running("freemode"), "Yep", "fm script no run so no?"), "Loaded!")
+    yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(SussySpt.in_online, "Yep", "fm script no run so no?"), "Loaded!")
 end
 
 function SussySpt:initRendering(tab)
@@ -112,17 +112,9 @@ function SussySpt:initUtils()
         return true
     end
 
-    function requireOnline()
-        local inOnline = SussySpt.refreshInOnline() == true
-        if not inOnline then
-            yu.notify(3, "You need to be in online to use this", "<insert title here>")
-        end
-        return inOnline
-    end
-
     function removeAllCameras()
-        for _, ent in pairs(entities.get_all_objects_as_handles()) do
-            for __, cam in pairs({
+        for k, entity in pairs(entities.get_all_objects_as_handles()) do
+            for k1, hash in pairs({
                 joaat("prop_cctv_cam_01a"), joaat("prop_cctv_cam_01b"),
                 joaat("prop_cctv_cam_02a"), joaat("prop_cctv_cam_03a"),
                 joaat("prop_cctv_cam_04a"), joaat("prop_cctv_cam_04c"),
@@ -131,9 +123,9 @@ function SussySpt:initUtils()
                 joaat("p_cctv_s"), joaat("hei_prop_bank_cctv_01"),
                 joaat("hei_prop_bank_cctv_02"), joaat("ch_prop_ch_cctv_cam_02a"),
                 joaat("xm_prop_x17_server_farm_cctv_01")}) do
-                if ENTITY.GET_ENTITY_MODEL(ent) == cam then
-                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(ent, true, true)
-                    ENTITY.DELETE_ENTITY(ent)
+                if ENTITY.GET_ENTITY_MODEL(entity) == hash then
+                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(entity, true, true)
+                    ENTITY.DELETE_ENTITY(entity)
                 end
             end
         end
@@ -190,11 +182,6 @@ function SussySpt:initTabSelf()
     end
 
     refresh()
-
-    -- local amount = 2147483647
-    -- stats.set_int("SP0_TOTAL_CASH", amount) -- Michael
-    -- stats.set_int("SP1_TOTAL_CASH", amount) -- Franklin
-    -- stats.set_int("SP2_TOTAL_CASH", amount) -- Trevor
 
     SussySpt.ensureVis = function(state, id, veh)
         if state ~= true and state ~= false then
@@ -295,24 +282,6 @@ function SussySpt:initTabSelf()
                         end
                     end)
 
-                    if ImGui.Button("Remove blackscreen") then
-                        yu.add_task(function()
-                            CAM.DO_SCREEN_FADE_IN(0)
-                        end)
-                    end
-
-                    if ImGui.Button("STOP_PLAYER_SWITCH") then
-                        yu.add_task(function()
-                            STREAMING.STOP_PLAYER_SWITCH()
-                        end)
-                    end
-
-                    if ImGui.Button("ENABLE_ALL_CONTROL_ACTIONS") then
-                        yu.add_task(function()
-                            PAD.ENABLE_ALL_CONTROL_ACTIONS(0)
-                        end)
-                    end
-
                     -- if ImGui.Button("Funny test") then
                     --     yu.add_task(function()
                     --         ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), 1, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
@@ -357,25 +326,31 @@ function SussySpt:initTabSelf()
                         end
 
                         yu.rendering.renderCheckbox("Badsport", "self_badsporet", function(state)
-                            if state then
-                                stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-                                stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
-                            else
-                                stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-                                stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
-                            end
+                            yu.add_task(function()
+                                if state then
+                                    stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                                    stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                                    stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                                    stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                                else
+                                    stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                                    stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                                    stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                                    stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                                end
+                            end)
                         end)
 
                         if ImGui.Button("Remove bounty") then
-                            globals.set_int(1 + 2359296 + 5150 + 13, 2880000)
+                            yu.add_task(function()
+                                globals.set_int(2364460, 2880000)
+                            end)
                         end
 
                         if ImGui.Button("Remove griefing cooldown for VIP/CEO") then
-                            stats.set_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER", 0)
+                            yu.add_task(function()
+                                stats.set_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER", 0)
+                            end)
                         end
 
                         ImGui.EndTabItem()
@@ -400,9 +375,11 @@ function SussySpt:initTabSelf()
                         yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
 
                         if ImGui.Button("LSCarMeet unlocks") then
-                            for i = 293419, 293446 do
-                                globals.set_float(i, 100000)
-                            end
+                            yu.add_task(function()
+                                for i = 293419, 293446 do
+                                    globals.set_float(i, 100000)
+                                end
+                            end)
                         end
 
                         if ImGui.Button("Unlock flightschool stuff") then
@@ -831,9 +808,9 @@ function SussySpt:initTabSelf()
         statsTab:add_separator()
 
         statsTab:add_text("Marked as:")
-        statsTab:add_text("  - Is cheater: ".. yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
-        statsTab:add_text("  - Was i badsport: ".. yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
-        statsTab:add_text("  - Is high earner: ".. yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
+        statsTab:add_text("  - Is cheater: "..yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
+        statsTab:add_text("  - Was i badsport: "..yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
+        statsTab:add_text("  - Is high earner: "..yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
         statsTab:add_separator()
         statsTab:add_text("Reports:")
         statsTab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
@@ -1621,7 +1598,11 @@ function SussySpt:initTabHBO()
         }
 
         local function getApproach()
-            local a,b,c,d=stats.get_int(yu.mpx().."H3_LAST_APPROACH"),stats.get_int(yu.mpx().."H3_HARD_APPROACH"),stats.get_int(yu.mpx().."H3_APPROACH"),stats.get_int(yu.mpx().."H3OPT_APPROACH")
+            local a, b, c, d =
+                stats.get_int(yu.mpx().."H3_LAST_APPROACH"),
+                stats.get_int(yu.mpx().."H3_HARD_APPROACH"),
+                stats.get_int(yu.mpx().."H3_APPROACH"),
+                stats.get_int(yu.mpx().."H3OPT_APPROACH")
             if a==3 and b==2 and c==1 and d==1 then return 1
             elseif a==3 and b==1 and c==2 and d==2 then return 2
             elseif a==1 and b==2 and c==3 and d==3 then return 3
@@ -1960,13 +1941,8 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Slots")
 
+                ImGui.Text("Tip: Enable this, spin, disable, spin, enable, spin and so on to not get blocked.")
                 yu.rendering.renderCheckbox("Rig slot machines", rigSlotMachinesId)
-                yu.rendering.tooltip("Dream luck")
-
-                -- ImGui.SameLine()
-
-                -- yu.rendering.renderCheckbox("Smart", rigSlotMachinesSmartId)
-                -- yu.rendering.tooltip("This will enable and disable the feature\nso that you won't get rate limited.")
 
                 ImGui.Separator()
 
@@ -2117,6 +2093,9 @@ function SussySpt:initTabHBO()
                 ImGui.EndGroup()
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Storage")
+
+                ImGui.Text("This is garbe and completely useless.")
+                ImGui.Text("This will get removed or updated")
 
                 for k, v in pairs(a.storages) do
                     renderStorage(k)
@@ -2391,6 +2370,22 @@ function SussySpt:initTabQA()
                 end
                 yu.rendering.tooltip("Remove the blackscreen :D")
 
+                ImGui.SameLine()
+
+                if ImGui.Button("STOP_PLAYER_SWITCH") then
+                    yu.add_task(function()
+                        STREAMING.STOP_PLAYER_SWITCH()
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("ENABLE_ALL_CONTROL_ACTIONS") then
+                    yu.add_task(function()
+                        PAD.ENABLE_ALL_CONTROL_ACTIONS(0)
+                    end)
+                end
+
                 if ImGui.Button("Repair vehicle") then
                     yu.add_task(function()
                         local veh = yu.veh()
@@ -2456,33 +2451,7 @@ function SussySpt:initTabHeist()
             end)
         end
 
-        local function initTabExtra()
-            local extraTab = tbs.getTab(aparTab, "   Extra", "apar")
-            extraTab:clear()
-
-            extraTab:add_button("Skip fleeca hack", function()
-                if requireScript("fm_mission_controller") then
-                    locals.set_int("fm_mission_controller", 11760 + 24, 7)
-                end
-            end)
-
-            extraTab:add_button("Skip fleeca drill", function()
-                if requireScript("fm_mission_controller") then
-                    locals.set_int("fm_mission_controller", 11760 + 24, 7)
-                end
-            end)
-
-            extraTab:add_button("Instant finish (solo only)", function()
-                if requireScript("fm_mission_controller") then
-                    locals.set_int("fm_mission_controller", 19710, 12)
-                    locals.set_int("fm_mission_controller", 28331 + 1, 99999)
-                    locals.set_int("fm_mission_controller", 31587 + 69, 99999)
-                end
-            end)
-        end
-
         initTabPreps()
-        initTabExtra()
     end
 
     local function initTabDDay()
@@ -2638,17 +2607,6 @@ function SussySpt:initTabHeist()
 
         otherTab:add_separator()
 
-        otherTab:add_text("Nightclub")
-
-        otherTab:add_text("Popularity: "..stats.get_int(yu.mpx().."CLUB_POPULARITY").."/1000")
-        otherTab:add_sameline()
-        otherTab:add_button("Refill NightClub Popularity", function()
-            stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
-            initTabOther()
-        end)
-
-        otherTab:add_separator()
-
         otherTab:add_text("Drug Wars")
 
         otherTab:add_text("Current cooldown: "..yu.format_seconds(stats.get_int(yu.mpx().."XM22JUGGALOWORKCDTIMER") - os.time() + 17))
@@ -2671,11 +2629,6 @@ function SussySpt:initTabHeist()
         end)
 
         otherTab:add_separator()
-
-        otherTab:add_button("Remove VIP/MC cooldown ["..stats.get_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER").."]", function()
-            stats.set_int("MPPLY_VIPGAMEPLAYDISABLEDTIMER", 0)
-            initTabOther()
-        end)
 
         otherTab:add_separator()
 
@@ -2705,36 +2658,6 @@ function SussySpt:initTabMisc()
     local tab = tbs.getTab(SussySpt.tab, " Misc")
     tab:clear()
 
-    tab:add_button("Remove all cameras", function()
-        yu.add_task(removeAllCameras)
-    end)
-
-    tab:add_separator()
-
-    tab:add_button("Complete objectives (this WILL rate limit so not gud)", function()
-        stats.set_int(yu.mpx().."COMPLETEDAILYOBJ", 100)
-        stats.set_int(yu.mpx().."COMPLETEDAILYOBJTOTAL", 100)
-        stats.set_int(yu.mpx().."TOTALDAYCOMPLETED", 100)
-        stats.set_int(yu.mpx().."TOTALWEEKCOMPLETED", 400)
-        stats.set_int(yu.mpx().."TOTALMONTHCOMPLETED", 1800)
-        stats.set_int(yu.mpx().."CONSECUTIVEDAYCOMPLETED", 30)
-        stats.set_int(yu.mpx().."CONSECUTIVEWEEKCOMPLETED", 4)
-        stats.set_int(yu.mpx().."CONSECUTIVEMONTHCOMPLETE", 1)
-        stats.set_int(yu.mpx().."COMPLETEDAILYOBJSA", 100)
-        stats.set_int(yu.mpx().."COMPLETEDAILYOBJTOTALSA", 100)
-        stats.set_int(yu.mpx().."TOTALDAYCOMPLETEDSA", 100)
-        stats.set_int(yu.mpx().."TOTALWEEKCOMPLETEDSA", 400)
-        stats.set_int(yu.mpx().."TOTALMONTHCOMPLETEDSA", 1800)
-        stats.set_int(yu.mpx().."CONSECUTIVEDAYCOMPLETEDSA", 30)
-        stats.set_int(yu.mpx().."CONSECUTIVEWEEKCOMPLETEDSA", 4)
-        stats.set_int(yu.mpx().."CONSECUTIVEMONTHCOMPLETESA", 1)
-        stats.set_int(yu.mpx().."AWD_DAILYOBJCOMPLETEDSA", 100)
-        stats.set_int(yu.mpx().."AWD_DAILYOBJCOMPLETED", 100)
-        stats.set_bool(yu.mpx().."AWD_DAILYOBJMONTHBONUS", true)
-        stats.set_bool(yu.mpx().."AWD_DAILYOBJWEEKBONUS", true)
-        stats.set_bool(yu.mpx().."AWD_DAILYOBJWEEKBONUSSA", true)
-        stats.set_bool(yu.mpx().."AWD_DAILYOBJMONTHBONUSSA", true)
-    end)
 
     tab:add_separator()
 
