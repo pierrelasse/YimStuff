@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.0",
-    versionid = 207
+    versionid = 212
 }
 
 function SussySpt:new()
@@ -304,6 +304,12 @@ function SussySpt:initTabSelf()
                     if ImGui.Button("STOP_PLAYER_SWITCH") then
                         yu.add_task(function()
                             STREAMING.STOP_PLAYER_SWITCH()
+                        end)
+                    end
+
+                    if ImGui.Button("ENABLE_ALL_CONTROL_ACTIONS") then
+                        yu.add_task(function()
+                            PAD.ENABLE_ALL_CONTROL_ACTIONS(0)
                         end)
                     end
 
