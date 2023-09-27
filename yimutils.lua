@@ -371,6 +371,9 @@ return (function()
     end
 
     local function injectFeatures()
+        function string.startswith(str, prefix)
+            return (str == nil or prefix == nil or prefix == "") or str:sub(1, #prefix) == prefix
+        end
         function string.endswith(str, ending)
             return (str == nil or ending == nil or ending == "") or str:sub(-#ending) == ending
         end

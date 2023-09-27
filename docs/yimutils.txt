@@ -166,6 +166,11 @@ keys
     More info: https://docs.fivem.net/docs/game-references/controls/
 
 # "Injected" features
+string.startswith(prefix: string) : boolean
+    Param prefix: What the string must start with
+    Example usage: "Hello".startswith("llo") returns true
+    Returns: Whether the string starts with prefix
+
 string.endswith(ending: string) : boolean
     Param ending: What the string must end with
     Example usage: "Hello".endswith("llo") returns true
