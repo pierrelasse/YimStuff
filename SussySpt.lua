@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.4",
-    versionid = 247
+    version = "1.1.5",
+    versionid = 250
 }
 
 function SussySpt:new()
@@ -2609,6 +2609,14 @@ function SussySpt:initTabHBO()
             return yu.shc(a.heist == 1, 4351, 12543)
         end
 
+        local cooldowns = {}
+        local function refreshCooldowns()
+            for i = 0, 7 do
+                cooldowns[i] = "  - "..a.heists[i]..": "..yu.format_seconds(stats.get_int(yu.mpx("TUNER_CONTRACT"..i.."_POSIX")) - os.time())
+            end
+        end
+        refreshCooldowns()
+
         addToRender(6, function()
             if (ImGui.BeginTabItem("AutoShop Heists")) then
                 ImGui.BeginGroup()
@@ -2684,6 +2692,30 @@ function SussySpt:initTabHBO()
                     end)
                 end
                 yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
+
+                if ImGui.Button("Instant finish (solo only)") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 45451, 51338977)
+                            locals.set_int("fm_mission_controller_2020", 46829, 101)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Idk")
+
+                ImGui.Spacing()
+
+                ImGui.Text("Cooldowns:")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh##cooldowns") then
+                    yu.add_task(refreshCooldowns)
+                end
+
+                for k, v in pairs(cooldowns) do
+                    ImGui.Text(v)
+                end
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
@@ -2831,38 +2863,6 @@ function SussySpt:initTabHeist()
     local tab = tbs.getTab(SussySpt.tab, " Heists & Stuff idk")
     tab:clear()
 
-    local function initTabApar()
-        local aparTab = tbs.getTab(tab, "  Apartement Heists", "heists")
-        aparTab:clear()
-
-        aparTab:add_text("Complete Preps for fleeca:")
-        aparTab:add_text("  Pay for the preparation, start the first")
-        aparTab:add_text("  mission and as soon as you are sent to")
-        aparTab:add_text("  scout, change the session, come back to")
-        aparTab:add_text("  planning room, press «Complete Preps»")
-        aparTab:add_text("  white board and press «E» and leave")
-        aparTab:add_text("")
-        aparTab:add_text("Complete Preps for other heists:")
-        aparTab:add_text("  Start the mission and leave after the 1st")
-        aparTab:add_text("  cutscene ends, press «Complete Preps»")
-        aparTab:add_text("  near white board and press «E»")
-
-        local function initTabPreps()
-            local prepsTab = tbs.getTab(aparTab, "   Preps", "apar")
-            prepsTab:clear()
-
-            prepsTab:add_button("Complete Preps (any heist)", function()
-                stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", -1)
-            end)
-            prepsTab:add_sameline()
-            prepsTab:add_button("Reset Preps", function()
-                stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", 0)
-            end)
-        end
-
-        initTabPreps()
-    end
-
     local function initTabDDay()
         local ddayTab = tbs.getTab(tab, "  Doomsday", "heists")
         ddayTab:clear()
@@ -2931,81 +2931,6 @@ function SussySpt:initTabHeist()
         initTabPreps()
     end
 
-    local function initTabAutoshop()
-        local asTab = tbs.getTab(tab, "  AutoShop", "heists")
-        asTab:clear()
-
-        local a = {
-            missions = {
-                [0] = "Union Depository",
-                [1] = "Superdollar Deal",
-                [2] = "Bank Contract",
-                [3] = "ECU Job",
-                [4] = "Prison Contract",
-                [5] = "Agency Deal",
-                [6] = "Lost Contract",
-                [7] = "Data Contract"
-            }
-        }
-
-        local function initTabPreps()
-            local prepsTab = tbs.getTab(asTab, "   Preps", "autoshop")
-            prepsTab:clear()
-
-            prepsTab:add_text("Mission ("..yu.get_or_default(a.missions, stats.get_int(yu.mpx().."TUNER_CURRENT")).." ["..stats.get_int(yu.mpx().."TUNER_CURRENT").."]):")
-            for k, v in pairs(a.missions) do
-                prepsTab:add_sameline()
-                prepsTab:add_button(v, function()
-                    yu.notify(1, "Set 'Mission' to "..a.missions[k].." ["..k.."]")
-                    stats.set_int(yu.mpx().."TUNER_CURRENT", k)
-                    initTabPreps()
-                end)
-            end
-
-            prepsTab:add_separator()
-
-            prepsTab:add_button("Complete Preps", function()
-                if stats.get_int(yu.mpx().."TUNER_CURRENT") == 1 then
-                    stats.set_int(yu.mpx().."TUNER_GEN_BS", 4351)
-                else
-                    stats.set_int(yu.mpx().."TUNER_GEN_BS", 12543)
-                end
-            end)
-        end
-
-        local function initTabExtra()
-            local extraTab = tbs.getTab(asTab, "   Extra", "autoshop")
-            extraTab:clear()
-
-            extraTab:add_button("Instant Finish (solo only)", function()
-                if requireScript("fm_mission_controller_2020") then
-                    locals.set_int("fm_mission_controller_2020", 45450 + 1, 51338977)
-                    locals.set_int("fm_mission_controller_2020", 45450 + 1378 + 1, 101)
-                end
-            end)
-
-            extraTab:add_button("Cooldown remover", function()
-                for i = 0, 7 do
-                    stats.set_int(yu.mpx().."TUNER_CONTRACT"..i.."_POSIX")
-                end
-                initTabExtra()
-            end)
-
-            extraTab:add_separator()
-            extraTab:add_button("Refresh", function()
-                initTabExtra()
-            end)
-
-            extraTab:add_text("Cooldowns:")
-            for i = 0, 7 do
-                extraTab:add_text("  - "..(a.missions[i])..": "..yu.format_seconds(stats.get_int(yu.mpx().."TUNER_CONTRACT"..i.."_POSIX") - os.time()))
-            end
-        end
-
-        initTabPreps()
-        initTabExtra()
-    end
-
     local function initTabOther()
         local otherTab = tbs.getTab(tab, "  Other")
         otherTab:clear()
@@ -3057,9 +2982,7 @@ function SussySpt:initTabHeist()
         end
     end
 
-    initTabApar()
     initTabDDay()
-    initTabAutoshop()
     initTabOther()
 end
 
