@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.2",
-    versionid = 225
+    versionid = 243
 }
 
 function SussySpt:new()
@@ -1115,11 +1115,13 @@ function SussySpt:initTabHBO()
             addUnknownValue(a.supplytrucklocations, a.supplytrucklocation)
 
             yu.rendering.setCheckboxChecked("hbo_cayo_cuttingpowder", stats.get_int(yu.mpx().."H4CNF_TARGET") == 3)
+        end
+        refreshStats()
 
+        local function refreshCuts()
             a.cuts = {}
         end
-
-        refreshStats()
+        refreshCuts()
 
         local function refreshExtra()
             if yu.is_script_running("fm_mission_controller_2020") then
@@ -1131,16 +1133,15 @@ function SussySpt:initTabHBO()
             end
 
         end
-
         refreshExtra()
 
         local cooldowns = {}
-        local function updateCooldowns()
+        local function refreshCooldowns()
             for k, v in pairs({"H4_TARGET_POSIX", "H4_COOLDOWN", "H4_COOLDOWN_HARD"}) do
                 cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx()..v) - os.time())
             end
         end
-        updateCooldowns()
+        refreshCooldowns()
 
         addToRender(1, function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
@@ -1225,7 +1226,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.Spacing()
 
-                if ImGui.Button("Apply") then
+                if ImGui.Button("Apply##stats") then
                     yu.add_task(function()
                         local changes = 0
 
@@ -1402,7 +1403,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Refresh settings") then
+                if ImGui.Button("Refresh##stats") then
                     yu.add_task(refreshStats)
                 end
 
@@ -1423,7 +1424,17 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
-                if ImGui.Button("Complete preps") then
+                ImGui.SameLine()
+
+                if ImGui.Button("Remove npc cuts") then
+                    yu.add_task(function()
+                        globals.set_float(291786, 0)
+                        globals.set_float(291787, 0)
+                    end)
+                end
+                yu.rendering.tooltip("I think no one wants to add them back...")
+
+                if ImGui.Button("Complete Preps") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
                         stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
@@ -1437,7 +1448,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Reset Preps") then
+                if ImGui.Button("Reset heist") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4_MISSIONS", 0)
                         stats.set_int(yu.mpx().."H4_PROGRESS", 0)
@@ -1446,19 +1457,6 @@ function SussySpt:initTabHBO()
                         stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
                     end)
                 end
-
-                yu.rendering.renderCheckbox("Remove Pavel & Fencing cut", "hbo_cayo_removenpccuts", function(state)
-                    yu.add_task(function()
-                        if state then
-                            globals.set_float(291786, 0)
-                            globals.set_float(291787, 0)
-                        else
-                            globals.set_float(291786, -0.1)
-                            globals.set_float(291787, -0.02)
-                        end
-                    end)
-                end)
-                yu.rendering.tooltip("I'm to lazy to make this good so you will have to\nenable and disable to disable it and enable it to enable it :)")
 
                 ImGui.EndGroup()
                 ImGui.Separator()
@@ -1472,18 +1470,20 @@ function SussySpt:initTabHBO()
                 renderCutsSlider(a.cuts, 4)
                 renderCutsSlider(a.cuts, -2)
 
-                if ImGui.Button("Apply cuts") then
+                if ImGui.Button("Apply##cuts") then
                     for k, v in pairs(a.cuts) do
-                        if yu.is_num_between(v, 0, 250) then
-                            if k == -2 then
-                                globals.set_int(2722097, v)
-                                log.info("Set cut for self to "..v)
-                            else
-                                globals.set_int(1978495 + 881 + k, v)
-                                log.info("Set cut for player "..k.." to "..v)
-                            end
+                        if k == -2 then
+                            globals.set_int(2722097, v)
+                        else
+                            globals.set_int(1978495 + 881 + k, v)
                         end
                     end
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh##cuts") then
+                    yu.add_task(refreshCuts)
                 end
 
                 ImGui.EndGroup()
@@ -1551,18 +1551,6 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
-                ImGui.Spacing()
-
-                if ImGui.Button("Instant finish (solo only)") then
-                    yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
-                            locals.set_int("fm_mission_controller_2020", 45450, 9)
-                            locals.set_int("fm_mission_controller_2020", 46829, 50)
-                            yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
-                        end
-                    end)
-                end
-
                 if ImGui.Button("Obtain the primary target") then
                     yu.add_task(function()
                         if requireScript("fm_mission_controller_2020") then
@@ -1580,15 +1568,26 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
+                if ImGui.Button("Instant finish (solo only)") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 45450, 9)
+                            locals.set_int("fm_mission_controller_2020", 46829, 50)
+                            yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                        end
+                    end)
+                end
+
                 ImGui.Spacing()
-                ImGui.PushItemWidth(390)
 
                 if ImGui.Button("Refresh##extra") then
                     yu.add_task(refreshExtra)
                 end
 
-                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes (Self)", a.lifes, 0, 10)
-                yu.rendering.tooltip("Like how many lifes you have left")
+                ImGui.PushItemWidth(390)
+
+                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                yu.rendering.tooltip("Only works when you are playing alone (i think)")
                 if lifesChanged then
                     a.lifes = lifesValue
                 end
@@ -1618,7 +1617,7 @@ function SussySpt:initTabHBO()
                 ImGui.Text("Simulate bag for:")
                 for i = 1, 4 do
                     ImGui.SameLine()
-                    if ImGui.Button(i.." Player") then
+                    if ImGui.Button(i.." Player"..yu.shc(i == 1, "", "s")) then
                         yu.add_task(function()
                             globals.set_int(292084, 1800 * i)
                         end)
@@ -1626,10 +1625,10 @@ function SussySpt:initTabHBO()
                 end
 
                 ImGui.PopItemWidth()
-                ImGui.Spacing()
+                ImGui.Separator()
 
-                if ImGui.Button("Refresh cooldowns") then
-                    yu.add_task(updateCooldowns)
+                if ImGui.Button("Refresh##cooldowns") then
+                    yu.add_task(refreshCooldowns)
                 end
 
                 for k, v in pairs(cooldowns) do
@@ -1651,19 +1650,24 @@ function SussySpt:initTabHBO()
                 [3] = "Diamonds",
             },
             approaches = {
-                [1] = "Normal - Silent n Sneaky",
-                [2] = "Normal - Big Con",
+                [1] = "Normal - Silent & Sneaky",
+                [2] = "Normal - BigCon",
                 [3] = "Normal - Aggressive",
-                [4] = "Hard - Silent n Sneaky",
-                [5] = "Hard - Big Con",
+                [4] = "Hard - Silent & Sneaky",
+                [5] = "Hard - BigCon",
                 [6] = "Hard - Aggressive"
             },
             gunmans = {
                 [1] = "Karl Abolaji (5%)",
-                [3] = "Charlie Reed (7%)",
-                [5] = "Patrick McReary (8%)",
                 [2] = "Gustavo Mota (9%)",
-                [4] = "Chester McCoy (10%)"
+                [3] = "Charlie Reed (7%)",
+                [4] = "Chester McCoy (10%)",
+                [5] = "Patrick McReary (8%)",
+                [7] = "None"
+            },
+            weaponvariations = {
+                [0] = "Worst",
+                [1] = "Best"
             },
             drivers = {
                 [1] = "Karim Deniz (5%)",
@@ -1672,14 +1676,22 @@ function SussySpt:initTabHBO()
                 [3] = "Eddie Toh (9%)",
                 [5] = "Chester McCoy (10%)"
             },
+            vehiclevariations = {
+                [0] = "Worst",
+                [1] = "Fine",
+                [2] = "Good",
+                [3] = "Best"
+            },
             hackers = {
                 [1] = "Rickie Lukens (3%)",
-                [3] = "Yohan Blair (5%)",
                 [2] = "Christian Feltz (7%)",
+                [3] = "Yohan Blair (5%)",
+                [4] = "Avi Schwartzman (10%)",
                 [5] = "Page Harris (9%)",
-                [4] = "Avi Schwartzman (10%)"
+                [6] = "None"
             },
             masks = {
+                [-1] = "None",
                 [1] = "Geometic Set",
                 [2] = "Hunter Set",
                 [3] = "Oni Half Mask Set",
@@ -1692,15 +1704,17 @@ function SussySpt:initTabHBO()
                 [10] = "Riot Set",
                 [11] = "Oni Full Mask Set",
                 [12] = "Hockey Set"
+            },
+            guardstrengthes = {
+                [0] = "Strongest",
+                [1] = "Strong",
+                [2] = "Weak",
+                [3] = "Weakest"
             }
         }
 
         local function getApproach()
-            local a, b, c, d =
-                stats.get_int(yu.mpx().."H3_LAST_APPROACH"),
-                stats.get_int(yu.mpx().."H3_HARD_APPROACH"),
-                stats.get_int(yu.mpx().."H3_APPROACH"),
-                stats.get_int(yu.mpx().."H3OPT_APPROACH")
+            local a,b,c,d=stats.get_int(yu.mpx("H3_LAST_APPROACH")),stats.get_int(yu.mpx("H3_HARD_APPROACH")),stats.get_int(yu.mpx("H3_APPROACH")),stats.get_int(yu.mpx("H3OPT_APPROACH"))
             if a==3 and b==2 and c==1 and d==1 then return 1
             elseif a==3 and b==1 and c==2 and d==2 then return 2
             elseif a==1 and b==2 and c==3 and d==3 then return 3
@@ -1716,22 +1730,56 @@ function SussySpt:initTabHBO()
             addUnknownValue(a.targets, a.target)
 
             a.approach = getApproach()
-            addUnknownValue(a.approaches, a.approach)
+            if a.approach == -1 then
+                a.approaches[a.approach] = "Failed to figure out the approach"
+            else
+                addUnknownValue(a.approaches, a.approach)
+            end
 
             a.gunman = stats.get_int(yu.mpx().."H3OPT_CREWWEAP")
             addUnknownValue(a.gunmans, a.gunman)
 
+            a.weaponvariation = stats.get_int(yu.mpx("H3OPT_WEAPS"))
+            if a.weaponvariation ~= 0 or a.weaponvariation ~= 1 then
+                a.weaponvariation = 0
+            end
+
             a.driver = stats.get_int(yu.mpx().."H3OPT_CREWDRIVER")
             addUnknownValue(a.drivers, a.driver)
 
-            a.hacker = stats.get_int(yu.mpx().."H3OPT_CREWHACKER")
+            a.vehiclevariation = stats.get_int(yu.mpx("H3OPT_VEHS"))
+            addUnknownValue(a.vehiclevariations, a.vehiclevariation)
+
+            a.hacker = stats.get_int(yu.mpx("H3OPT_CREWHACKER"))
             addUnknownValue(a.hackers, a.hacker)
 
             a.mask = stats.get_int(yu.mpx().."H3OPT_MASKS")
             addUnknownValue(a.masks, a.mask)
-        end
 
+            a.guardstrength = stats.get_int(yu.mpx("H3OPT_DISRUPTSHIP"))
+            addUnknownValue(a.guardstrengthes, a.guardstrength)
+
+            a.splvl = stats.get_int(yu.mpx("H3OPT_KEYLEVELS"))
+            if yu.is_num_between(a.splvl, 0, 2) then
+                a.splvl = 2
+            end
+        end
         refreshStats()
+
+        local function refreshCuts()
+            a.cuts = {}
+        end
+        refreshCuts()
+
+        local function refreshExtra()
+            if yu.is_script_running("fm_mission_controller") then
+                a.lifes = locals.get_int("fm_mission_controller", 27400)
+            else
+                a.lifes = 0
+            end
+
+        end
+        refreshExtra()
 
         local cooldowns = {}
         local function updateCooldowns()
@@ -1748,18 +1796,18 @@ function SussySpt:initTabHBO()
 
                 ImGui.PushItemWidth(360)
 
-                local tr = yu.rendering.renderList(a.targets, a.target, "hbo_casino_t", "Target")
-                if tr.changed then
-                    yu.notify(1, "Set Target to "..a.targets[tr.key].." ["..tr.key.."]", "Diamond Casino Heist")
-                    a.target = tr.key
-                    a.targetchanged = true
-                end
-
                 local appr = yu.rendering.renderList(a.approaches, a.approach, "hbo_casino_app", "Approach")
                 if appr.changed then
                     yu.notify(1, "Set Approach to "..a.approaches[appr.key].." ["..appr.key.."]", "Diamond Casino Heist")
                     a.approach = appr.key
                     a.approachchanged = true
+                end
+
+                local tr = yu.rendering.renderList(a.targets, a.target, "hbo_casino_t", "Target")
+                if tr.changed then
+                    yu.notify(1, "Set Target to "..a.targets[tr.key].." ["..tr.key.."]", "Diamond Casino Heist")
+                    a.target = tr.key
+                    a.targetchanged = true
                 end
 
                 local gmr = yu.rendering.renderList(a.gunmans, a.gunman, "hbo_casino_gm", "Gunman")
@@ -1769,11 +1817,24 @@ function SussySpt:initTabHBO()
                     a.gunmanchanged = true
                 end
 
+                local wwr = yu.rendering.renderList(a.weaponvariations, a.weaponvariation, "hbo_casino_ww", "Weapon variation")
+                if wwr.changed then
+                    yu.notify(1, "Set Weapon variation to "..a.weaponvariations[wwr.key].." ["..wwr.key.."]", "Diamond Casino Heist")
+                    a.weaponvariation = wwr.key
+                end
+
                 local dr = yu.rendering.renderList(a.drivers, a.driver, "hbo_casino_d", "Driver")
                 if dr.changed then
                     yu.notify(1, "Set Driver to "..a.drivers[dr.key].." ["..dr.key.."]", "Diamond Casino Heist")
                     a.driver = dr.key
                     a.driverchanged = true
+                end
+
+                local vvr = yu.rendering.renderList(a.vehiclevariations, a.vehiclevariation, "hbo_casino_vv", "Vehicle variation")
+                if vvr.changed then
+                    yu.notify(1, "Set Vehicle variation to "..a.vehiclevariations[vvr.key].." ["..vvr.key.."]", "Diamond Casino Heist")
+                    a.vehiclevariation = vvr.key
+                    a.vehiclevariationchanged = true
                 end
 
                 local hr = yu.rendering.renderList(a.hackers, a.hacker, "hbo_casino_h", "Hacker")
@@ -1790,6 +1851,17 @@ function SussySpt:initTabHBO()
                     a.maskchanged = true
                 end
 
+                local gsr = yu.rendering.renderList(a.guardstrengthes, a.guardstrength, "hbo_casino_gs", "Guard strength")
+                if gsr.changed then
+                    yu.notify(1, "Set Guard strength to "..a.guardstrengthes[gsr.key].." ["..gsr.key.."]", "Diamond Casino Heist")
+                    a.guardstrength = gsr.key
+                end
+
+                local spLvlValue, spLvlChanged = ImGui.SliderInt("Security pass level", a.splvl, 0, 2)
+                if spLvlChanged then
+                    a.splvl = spLvlValue
+                end
+
                 ImGui.PopItemWidth()
 
                 ImGui.Spacing()
@@ -1797,12 +1869,6 @@ function SussySpt:initTabHBO()
                 if ImGui.Button("Apply") then
                     yu.add_task(function()
                         local changes = 0
-
-                        -- Target
-                        if a.targetchanged then
-                            changes = yu.add(changes, 1)
-                            stats.set_int(yu.mpx().."H3OPT_CREWWEAP", a.target)
-                        end
 
                         -- Approach
                         if a.approachchanged then
@@ -1841,16 +1907,34 @@ function SussySpt:initTabHBO()
                             end
                         end
 
+                        -- Target
+                        if a.targetchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx("H3OPT_TARGET"), a.target)
+                        end
+
                         -- Gunman
                         if a.gunmanchanged then
                             changes = yu.add(changes, 1)
-                            stats.set_int(yu.mpx().."H3OPT_CREWWEAP", a.gunman)
+                            stats.set_int(yu.mpx("H3OPT_CREWWEAP"), a.gunman)
+                        end
+
+                        -- Weapon variation
+                        if a.weaponvariationchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx("H3OPT_WEAPS"), a.weaponvariation)
                         end
 
                         -- Driver
                         if a.driverchanged then
                             changes = yu.add(changes, 1)
                             stats.set_int(yu.mpx().."H3OPT_CREWDRIVER", a.driver)
+                        end
+
+                        -- Vehicle variation
+                        if a.vehiclevariationchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx("H3OPT_VEHS"), a.vehiclevariation)
                         end
 
                         -- Hacker
@@ -1876,9 +1960,26 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Refresh settings") then
+                if ImGui.Button("Refresh##stats") then
                     yu.add_task(refreshStats)
                 end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reload planning board") then
+                    yu.add_task(function()
+                        local oldBS0 = stats.get_int("H3OPT_BITSET0")
+                        local oldBS1 = stats.get_int("H3OPT_BITSET1")
+                        local integerLimit = 2147483647
+                        stats.set_int("H3OPT_BITSET0", math.random(integerLimit))
+                        stats.set_int("H3OPT_BITSET1", math.random(integerLimit))
+                        yu.add_task(function()
+                            stats.set_int("H3OPT_BITSET0", oldBS0)
+                            stats.set_int("H3OPT_BITSET1", oldBS1)
+                        end)
+                    end)
+                end
+                yu.rendering.tooltip("I think this only works when opened")
 
                 if ImGui.Button("Unlock POI & accesspoints") then
                     yu.add_task(function()
@@ -1907,10 +2008,10 @@ function SussySpt:initTabHBO()
 
                 if ImGui.Button("Complete Preps") then
                     yu.add_task(function()
-                        stats.set_int(yu.mpx().."H3OPT_DISRUPTSHIP", 3)
-                        stats.set_int(yu.mpx().."H3OPT_KEYLEVELS", 2)
+                        stats.set_int(yu.mpx().."H3OPT_DISRUPTSHIP", a.guardstrength)
+                        stats.set_int(yu.mpx().."H3OPT_KEYLEVELS", a.splvl)
                         stats.set_int(yu.mpx().."H3OPT_VEHS", 3)
-                        stats.set_int(yu.mpx().."H3OPT_WEAPS", 0)
+                        stats.set_int(yu.mpx().."H3OPT_WEAPS", a.weaponvariation)
                         stats.set_int(yu.mpx().."H3OPT_BITSET0", -1)
                         stats.set_int(yu.mpx().."H3OPT_BITSET1", -1)
                         stats.set_int(yu.mpx().."H3OPT_COMPLETEDPOSIX", -1)
@@ -1920,7 +2021,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Reset Preps & POI & Accesspoints") then
+                if ImGui.Button("Reset heist") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."H4_MISSIONS", 0)
                         stats.set_int(yu.mpx().."H4_PROGRESS", 0)
@@ -1945,7 +2046,43 @@ function SussySpt:initTabHBO()
                 ImGui.Separator()
                 ImGui.BeginGroup()
 
+                yu.rendering.bigText("Cuts")
+
+                renderCutsSlider(a.cuts, 1)
+                renderCutsSlider(a.cuts, 2)
+                renderCutsSlider(a.cuts, 3)
+                renderCutsSlider(a.cuts, 4)
+                renderCutsSlider(a.cuts, -2)
+
+                if ImGui.Button("Apply##cuts") then
+                    for k, v in pairs(a.cuts) do
+                        if k == -2 then
+                            globals.set_int(2722097, v)
+                        else
+                            globals.set_int(1969064 + k, v)
+                        end
+                    end
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh##cuts") then
+                    yu.add_task(refreshCuts)
+                end
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
                 yu.rendering.bigText("Extra")
+
+                if ImGui.Button("Set all players ready") then
+                    yu.add_task(function()
+                        for i = 0, 3 do
+                            globals.set_int(1974016 + i, -1)
+                        end
+                    end)
+                end
 
                 if ImGui.Button("Skip fingerprint hack") then
                     yu.add_task(function()
@@ -1955,23 +2092,52 @@ function SussySpt:initTabHBO()
                     end)
                 end
 
+                ImGui.SameLine()
+
                 if ImGui.Button("Skip keypad hack") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 54026) ~= 4 then
+                        if requireScript("fm_mission_controller")
+                            and locals.get_int("fm_mission_controller", 54026) ~= 4 then
                             locals.set_int("fm_mission_controller", 54026, 5)
                         end
                     end)
                 end
 
+                ImGui.SameLine()
+
                 if ImGui.Button("Skip vault door drill") then
                     yu.add_task(function()
                         if requireScript("fm_mission_controller") then
-                            locals.set_int("fm_mission_controller", 10101 + 7, locals.get_int("fm_mission_controller", 10101 + 37))
+                            locals.set_int(
+                                "fm_mission_controller",
+                                10108,
+                                locals.get_int("fm_mission_controller", 10138)
+                            )
                         end
                     end)
                 end
 
                 ImGui.Spacing()
+
+                if ImGui.Button("Refresh##extra") then
+                    yu.add_task(refreshExtra)
+                end
+
+                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                yu.rendering.tooltip("Not tested")
+                if lifesChanged then
+                    a.lifes = lifesValue
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Apply##lifes") then
+                    if requireScript("fm_mission_controller_2020") then
+                        locals.set_int("fm_mission_controller_2020", 27400, a.lifes)
+                    end
+                end
+
+                ImGui.Separator()
 
                 if ImGui.Button("Refresh cooldowns") then
                     yu.add_task(updateCooldowns)
@@ -2033,6 +2199,29 @@ function SussySpt:initTabHBO()
 
         yu.set_default_stat("RIGSLOTMACHINES_LAST", false)
 
+        local storyMissions = {
+            [1048576] = "Loose Cheng",
+            [1310785] = "House Keeping",
+            [1310915] = "Strong Arm Tactics",
+            [1311175] = "Play to Win",
+            [1311695] = "Bad Beat",
+            [1312735] = "Cashing Out"
+        }
+        local storyMissionIds = {
+            [1048576] = 0,
+            [1310785] = 1,
+            [1310915] = 2,
+            [1311175] = 3,
+            [1311695] = 4,
+            [1312735] = 5
+        }
+        local storyMission
+        local function updateStoryMission()
+            storyMission = stats.get_int(yu.mpx("VCM_FLOW_PROGRESS"))
+            addUnknownValue(storyMissions, storyMission)
+        end
+        updateStoryMission()
+
         addToRender(3, function()
             if (ImGui.BeginTabItem("Diamond Casino & Resort")) then
                 ImGui.BeginGroup()
@@ -2041,8 +2230,6 @@ function SussySpt:initTabHBO()
 
                 ImGui.Text("Tip: Enable this, spin, disable, spin, enable, spin and so on to not get blocked.")
                 yu.rendering.renderCheckbox("Rig slot machines", rigSlotMachinesId)
-
-                ImGui.Separator()
 
                 yu.rendering.bigText("Lucky wheel")
 
@@ -2064,6 +2251,22 @@ function SussySpt:initTabHBO()
                     else
                         winLuckyWheel(winPrize)
                     end
+                end
+
+                yu.rendering.bigText("Story Missions")
+
+                local smr = yu.rendering.renderList(storyMissions, storyMission, "hbo_casinoresort_sm", "Story mission")
+                if smr.changed then
+                    storyMission = smr.key
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Apply#sm") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
+                        stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
+                    end)
                 end
 
                 ImGui.EndTabItem()
