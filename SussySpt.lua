@@ -1559,6 +1559,7 @@ function SussySpt:initTabHBO()
                         end
                     end)
                 end
+                yu.rendering.tooltip("It works i guess but the object will not get changed")
 
                 ImGui.SameLine()
 
@@ -1567,6 +1568,7 @@ function SussySpt:initTabHBO()
                         deleteEntityByName("prop_chem_grill_bit")
                     end)
                 end
+                yu.rendering.tooltip("This is good")
 
                 if ImGui.Button("Instant finish (solo only)") then
                     yu.add_task(function()
