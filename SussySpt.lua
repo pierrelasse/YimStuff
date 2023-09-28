@@ -131,6 +131,16 @@ function SussySpt:initUtils()
         end
     end
 
+    function deleteEntityByName(name)
+        local hash = joaat(name)
+        for k, v in pairs(entities.get_all_objects_as_handles()) do
+            if ENTITY.GET_ENTITY_MODEL(v) == hash then
+                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(v, true, true)
+                ENTITY.DELETE_ENTITY(v)
+            end
+        end
+    end
+
     function yesNoBool(bool)
         return yu.boolstring(bool, "yes", "no")
     end
@@ -1550,6 +1560,23 @@ function SussySpt:initTabHBO()
                             locals.set_int("fm_mission_controller_2020", 46829, 50)
                             yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
                         end
+                    end)
+                end
+
+                if ImGui.Button("Obtain the primary target") then
+                    yu.add_task(function()
+                        if requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 29684, 5)
+                            locals.set_int("fm_mission_controller_2020", 29685, 3)
+                        end
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Remove the drainage pipe") then
+                    yu.add_task(function()
+                        deleteEntityByName("prop_chem_grill_bit")
                     end)
                 end
 
