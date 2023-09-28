@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.2",
-    versionid = 243
+    version = "1.1.3",
+    versionid = 244
 }
 
 function SussySpt:new()
