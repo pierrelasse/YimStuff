@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.3",
-    versionid = 244
+    version = "1.1.4",
+    versionid = 247
 }
 
 function SussySpt:new()
@@ -2132,8 +2132,8 @@ function SussySpt:initTabHBO()
                 ImGui.SameLine()
 
                 if ImGui.Button("Apply##lifes") then
-                    if requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 27400, a.lifes)
+                    if requireScript("fm_mission_controller") then
+                        locals.set_int("fm_mission_controller", 27400, a.lifes)
                     end
                 end
 
@@ -2584,11 +2584,119 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initAutoShop()
+        local a = {
+            heists = {
+                [0] = "Union Depository",
+                [1] = "The Superdollar Deal", -- bs = 4351 | 12543
+                [2] = "The Bank Contract",
+                [3] = "The ECU Job",
+                [4] = "The Prison Contract",
+                [5] = "The Agency Deal",
+                [6] = "The Lost Contract",
+                [7] = "The Data Contract",
+            }
+        }
+
+        local function refresh()
+            a.heist = stats.get_int(yu.mpx("TUNER_CURRENT"))
+            addUnknownValue(a.heists, a.heist)
+        end
+
+        refresh()
+
+        local function getBS()
+            return yu.shc(a.heist == 1, 4351, 12543)
+        end
+
+        addToRender(6, function()
+            if (ImGui.BeginTabItem("AutoShop Heists")) then
+                ImGui.BeginGroup()
+
+                if ImGui.Button("Refresh") then
+                    yu.add_task(refresh)
+                end
+
+                yu.rendering.bigText("Preperations")
+
+                ImGui.PushItemWidth(360)
+
+                local hr = yu.rendering.renderList(a.heists, a.heist, "hbo_as_heist", "Heist")
+                if hr.changed then
+                    yu.notify(1, "Set Heist to "..a.heists[hr.key].." ["..hr.key.."]", "AutoShop Heists")
+                    a.heist = hr.key
+                    a.heistchanged = true
+                end
+
+                ImGui.PopItemWidth()
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Apply##stats") then
+                    yu.add_task(function()
+                        local changes = 0
+
+                        -- Heist
+                        if a.heistchanged then
+                            changes = yu.add(changes, 1)
+                            stats.set_int(yu.mpx("TUNER_GEN_BS"), getBS())
+                            stats.set_int(yu.mpx("TUNER_CURRENT"), a.heist)
+                        end
+
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied", "AutoShop Heists")
+                        for k, v in pairs(a) do
+                            if tostring(k):endswith("changed") then
+                                a[k] = nil
+                            end
+                        end
+                    end)
+                end
+
+                if ImGui.Button("Complete Preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("TUNER_GEN_BS"), -1)
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset Preps") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("TUNER_GEN_BS"), 12467)
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset contract") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("TUNER_GEN_BS"), 8371)
+                        stats.set_int(yu.mpx("TUNER_CURRENT"), -1)
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset stats") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("TUNER_COUNT"), 0)
+                        stats.set_int(yu.mpx("TUNER_EARNINGS"), 0)
+                    end)
+                end
+                yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
+
+                ImGui.EndGroup()
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
     initCayo()
     initCasinoHeist()
     initCasino()
     initNightclub()
     initApartment()
+    initAutoShop()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
