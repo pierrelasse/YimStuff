@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.2",
-    versionid = 224
+    versionid = 225
 }
 
 function SussySpt:new()
@@ -1585,6 +1585,16 @@ function SussySpt:initTabHBO()
                 if ImGui.Button("Apply##realtake") then
                     if requireScript("fm_mission_controller_2020") then
                         locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
+                    end
+                end
+
+                ImGui.Text("Simulate bag for:")
+                for i = 1, 4 do
+                    ImGui.SameLine()
+                    if ImGui.Button(i.." Player") then
+                        yu.add_task(function()
+                            globals.set_int(292084, 1800 * i)
+                        end)
                     end
                 end
 
