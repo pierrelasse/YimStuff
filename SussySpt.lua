@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.1.5",
-    versionid = 250
+    versionid = 262
 }
 
 function SussySpt:new()
@@ -2264,7 +2264,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Apply#sm") then
+                if ImGui.Button("Apply##sm") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
                         stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
@@ -2590,7 +2590,7 @@ function SussySpt:initTabHBO()
         local a = {
             heists = {
                 [0] = "Union Depository",
-                [1] = "The Superdollar Deal", -- bs = 4351 | 12543
+                [1] = "The Superdollar Deal",
                 [2] = "The Bank Contract",
                 [3] = "The ECU Job",
                 [4] = "The Prison Contract",
@@ -2725,12 +2725,195 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initDrugWars()
+        local a = {
+            productiondelayp = 279721
+        }
+
+        local function refresh()
+            a.daxcooldown = stats.get_int(yu.mpx("XM22JUGGALOWORKCDTIMER"))
+            a.productiondelay = globals.get_int(a.productiondelayp)
+        end
+        refresh()
+
+        addToRender(7, function()
+            if (ImGui.BeginTabItem("DrugWars")) then
+                ImGui.BeginGroup()
+
+                if ImGui.Button("Refresh") then
+                    yu.add_task(refresh)
+                end
+
+                ImGui.Spacing()
+
+                ImGui.Text("Cooldown: "..yu.format_seconds(a.daxcooldown))
+                if ImGui.Button("Remove Dax cooldown") then
+                    yu.add_task(function()
+                        stats.set_int(yu.mpx("XM22JUGGALOWORKCDTIMER"), os.time() - 17)
+                    end)
+                end
+
+                ImGui.Spacing()
+
+                ImGui.Text("Production delay ["..a.productiondelay.."]:")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset") then
+                    yu.add_task(function()
+                        globals.set_int(a.productiondelayp, 135000)
+                        refresh()
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Set to 1") then
+                    yu.add_task(function()
+                        globals.set_int(a.productiondelayp, 1)
+                        refresh()
+                    end)
+                end
+
+                ImGui.EndGroup()
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
+    local function initAgency()
+        local a = {
+            vipcontracts = {
+                [3] = "Nightlife Leak -> Investigation: The Nightclub",
+                [4] = "Nightlife Leak -> Investigation: The Marina",
+                [12] = "Nightlife Leak -> Nightlife Leak/Finale",
+                [28] = "High Society Leak -> Investigation: The Country Club",
+                [60] = "High Society Leak -> Investigation: Guest List",
+                [124] = "High Society Leak -> High Society Leak/Finale",
+                [252] = "South Central Leak -> Investigation: Davis",
+                [508] = "South Central Leak -> Investigation: The Ballas",
+                [2044] = "South Central Leak -> South Central Leak/Finale",
+                [-1] = "Studio Time",
+                [4092] = "Don't Fuck With Dre"
+            },
+            vipcontractssort = {
+                [1] = 3,
+                [2] = 4,
+                [3] = 12,
+                [4] = 28,
+                [5] = 60,
+                [6] = 124,
+                [7] = 252,
+                [8] = 508,
+                [9] = 2044,
+                [10] = -1,
+                [11] = 4092
+            }
+        }
+
+        local function refreshStats()
+            a.vipcontract = stats.get_int(yu.mpx("FIXER_STORY_BS"))
+            addUnknownValue(a.vipcontracts, a.vipcontract)
+        end
+        refreshStats()
+
+        addToRender(8, function()
+            if (ImGui.BeginTabItem("Agency")) then
+                ImGui.BeginGroup()
+                yu.rendering.bigText("Preperations")
+
+                local dlr = yu.rendering.renderList(a.vipcontracts, a.vipcontract, "hbo_agency_dl", "The Dr. Dre VIP Contract", a.vipcontractssort)
+                if dlr.changed then
+                    yu.notify(1, "Set The Dr. Dre VIP Contract to "..a.vipcontracts[dlr.key].." ["..dlr.key.."]", "Agency")
+                    a.vipcontract = dlr.key
+                    a.vipcontractchanged = true
+                end
+
+                ImGui.Spacing()
+
+                if ImGui.Button("Apply##stats") then
+                    yu.add_task(function()
+                        local changes = 0
+
+                        -- The Dr. Dre VIP Contract
+                        if a.vipcontractchanged then
+                            changes = yu.add(changes, 1)
+
+                            stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
+
+                            for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_STRAND","FIXER_STORY_COOLDOWN"}) do
+                                stats.set_int(yu.mpx(k), -1)
+                            end
+
+                            if a.vipcontract == -1 then
+                                stats.set_int(yu.mpx("FIXER_STORY_STRAND"), -1)
+                            end
+                        end
+
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Agency")
+                        for k, v in pairs(a) do
+                            if tostring(k):endswith("changed") then
+                                a[k] = nil
+                            end
+                        end
+                    end)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Refresh##stats") then
+                    yu.add_task(refreshStats)
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Complete all missions") then
+                    yu.add_task(function()
+                        for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
+                            stats.set_int(yu.mpx(k), -1)
+                        end
+                    end)
+                end
+
+                ImGui.EndGroup()
+                ImGui.Separator()
+                ImGui.BeginGroup()
+
+                yu.rendering.bigText("Extra")
+
+                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_24mfinale", function(state)
+                    yu.add_task(function()
+                        globals.set_int(293534, yu.shc(state, 2400000, 1000000))
+                    end)
+                end)
+                yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
+
+                yu.rendering.renderCheckbox("Remove contracts & payphone hits cooldown", "hbo_agency_cphcd", function(state)
+                    yu.add_task(function()
+                        globals.set_int(293490, yu.shc(state, 0, 300000))
+                    end)
+                end)
+
+                yu.rendering.renderCheckbox("Remove security mission cooldown", "hbo_agency_smcd", function(state)
+                    yu.add_task(function()
+                        globals.set_int(294134, yu.shc(state, 0, 1200000))
+                    end)
+                end)
+
+                ImGui.EndGroup()
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
     initCayo()
     initCasinoHeist()
     initCasino()
     initNightclub()
     initApartment()
     initAutoShop()
+    initDrugWars()
+    initAgency()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
@@ -2936,37 +3119,6 @@ function SussySpt:initTabHeist()
     local function initTabOther()
         local otherTab = tbs.getTab(tab, "  Other")
         otherTab:clear()
-
-        otherTab:add_button("Refresh", function()
-            initTabOther()
-        end)
-
-        otherTab:add_separator()
-
-        otherTab:add_text("Drug Wars")
-
-        otherTab:add_text("Current cooldown: "..yu.format_seconds(stats.get_int(yu.mpx().."XM22JUGGALOWORKCDTIMER") - os.time() + 17))
-        otherTab:add_sameline()
-        otherTab:add_button("Remove Dax mission cooldown ", function()
-            stats.set_int(yu.mpx().."XM22JUGGALOWORKCDTIMER", os.time() - 17)
-            initTabOther()
-        end)
-
-        otherTab:add_text("Custom production delay ["..globals.get_int(262145+17576).."-135000]:")
-        otherTab:add_sameline()
-        otherTab:add_button("Set to 1", function()
-            globals.set_int(262145+17576, 1)
-            initTabOther()
-        end)
-        otherTab:add_sameline()
-        otherTab:add_button("Reset to default", function()
-            globals.set_int(262145+17576, 135000)
-            initTabOther()
-        end)
-
-        otherTab:add_separator()
-
-        otherTab:add_separator()
 
         local function getCrates(amount)
             if requireScript("gb_contraband_buy") then

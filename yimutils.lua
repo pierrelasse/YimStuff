@@ -289,7 +289,7 @@ return (function()
             checkboxstates = {}
         }
 
-        api.rendering.renderList = function(items, key, labelId, name)
+        api.rendering.renderList = function(items, key, labelId, name, sort)
             if items == nil or labelId == nil then
                 return {
                     changed = false,
@@ -297,11 +297,24 @@ return (function()
                     key = key
                 }
             end
+
             local newKey = key
-            if ImGui.BeginCombo((name or "").."##"..labelId, api.get_or_default(items, key, next(items))) then
-                for k, v in pairs(items) do
-                    if (ImGui.Selectable(v, key == v)) then
-                        newKey = k
+            local label = (name or "").."##"..labelId
+            local selectedItem = api.get_or_default(items, key, next(items))
+
+            if ImGui.BeginCombo(label, selectedItem) then
+                if sort ~= nil then
+                    for k, v in pairs(sort) do
+                        local v_ = api.get_or_default(items, v, next(items))
+                        if (ImGui.Selectable(v_, key == v_)) then
+                            newKey = v
+                        end
+                    end
+                else
+                    for k, v in pairs(items) do
+                        if (ImGui.Selectable(v, key == v)) then
+                            newKey = k
+                        end
                     end
                 end
                 ImGui.EndCombo()
