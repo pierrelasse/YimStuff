@@ -123,7 +123,7 @@ return (function()
 
         api.get_random_element_from_table = function(tbl)
             if type(tbl) ~= "table" then
-                return nil
+                return {}
             end
             local ctbl = {}
             local i = 0
@@ -132,6 +132,31 @@ return (function()
                 ctbl[i] = v
             end
             return ctbl[math.random(1, #ctbl)]
+        end
+
+        api.table_to_string = function(tbl)
+            local result = "{"
+            local isFirst = true
+
+            for k, v in pairs(tbl) do
+                if not isFirst then
+                    result = result .. ", "
+                end
+
+                if type(k) == "number" or type(k) == "string" then
+                    if type(v) == "table" then
+                        result = result .. k .. " = " .. api.table_to_string(v)
+                    elseif type(v) == "string" then
+                        result = result .. k .. ' = "' .. v .. '"'
+                    else
+                        result = result .. k .. " = " .. tostring(v)
+                    end
+                    isFirst = false
+                end
+            end
+
+            result = result .. "}"
+            return result
         end
 
         -- TODO: Add to docs & make this useful
@@ -250,6 +275,20 @@ return (function()
             for k, v in pairs(entities.get_all_peds_as_handles()) do
                 if PED.IS_PED_A_PLAYER(v) then
                     players[k] = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
+                end
+            end
+            return players
+        end
+
+        api.get_all_players_mi = function()
+            local players = {}
+            for k, v in pairs(entities.get_all_peds_as_handles()) do
+                if PED.IS_PED_A_PLAYER(v) then
+                    players[k] = {
+                        whatever = k,
+                        ped = v,
+                        player = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
+                    }
                 end
             end
             return players

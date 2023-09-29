@@ -27,7 +27,8 @@
         "TASK",
         "network",
         "NETWORK",
-        "MISC"
+        "MISC",
+        "FIRE"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

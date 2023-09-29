@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.6",
-    versionid = 270
+    version = "1.1.7",
+    versionid = 306
 }
 
 function SussySpt:new()
@@ -1570,7 +1570,7 @@ function SussySpt:initTabHBO()
                 end
                 yu.rendering.tooltip("This is good")
 
-                if ImGui.Button("Instant finish (solo only)") then
+                if ImGui.Button("Instant finish") then
                     yu.add_task(function()
                         if requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45450, 9)
@@ -1579,6 +1579,7 @@ function SussySpt:initTabHBO()
                         end
                     end)
                 end
+                yu.rendering.tooltip("This is really weird and only you get money i think")
 
                 ImGui.Spacing()
 
@@ -2724,7 +2725,7 @@ function SussySpt:initTabHBO()
                 end
                 yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
 
-                if ImGui.Button("Instant finish (solo only)") then
+                if ImGui.Button("Instant finish") then
                     yu.add_task(function()
                         if requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45451, 51338977)
@@ -3173,38 +3174,38 @@ function SussySpt:initTabMisc()
     local tab = tbs.getTab(SussySpt.tab, " Misc")
     tab:clear()
 
+    tab:add_imgui(function()
+        yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
+            globals.set_int(292539, yu.shc(state, 0, 60000))
+        end)
 
-    tab:add_separator()
+        yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
+            globals.set_int(292540, yu.shc(state, 4000, 99999))
+        end)
 
-    tab:add_text("Kosatka:")
+        yu.rendering.renderCheckbox("Snow", "misc_snow", function(state)
+            globals.set_int(266897, yu.shc(state, 1, 0))
+        end)
 
-    tab:add_text("  Remove missle cooldown ["..globals.get_int(262145 + 30394).."]:")
-    tab:add_sameline()
-    tab:add_button("Enable"..iml(), function()
-        globals.set_int(262145 + 30394, 0)
-    end)
-    tab:add_sameline()
-    tab:add_button("Disable"..iml(), function()
-        globals.set_int(262145 + 30394, 60000)
-    end)
+        if ImGui.Button("WWWWWWW") then
+            yu.add_task(function()
+                -- local mi = yu.get_random_element_from_table(yu.get_all_players_mi())
+                -- local entity = mi.entity
+                -- local ped = mi.ped
+                -- local player = mi.player
 
-    tab:add_text("  Set missle range to 99999 ["..globals.get_int(262145 + 30395).."]:")
-    tab:add_sameline()
-    tab:add_button("Enable"..iml(), function()
-        globals.set_int(262145 + 30395, 99999)
-    end)
-    tab:add_sameline()
-    tab:add_button("Disable"..iml(), function()
-        globals.set_int(262145 + 30395, 4000)
-    end)
+                -- log.info(PLAYER.GET_PLAYER_NAME(player).."> God:"..yesNoBool(PLAYER.GET_PLAYER_INVINCIBLE(player)))
+                -- local coords = ENTITY.GET_ENTITY_COORDS(ped)
+                -- PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), coords.x, coords.y, coords.z)
+                -- -- FIRE.ADD_EXPLOSION(coords.x, coords.y, coords.z, 9, 1, false, true, 0)
 
-    tab:add_text("Snow")
-
-    tab:add_button("Enable snow", function()
-        globals.set_int(262145 + 4752, 1)
-    end)
-    tab:add_button("Disable snow", function()
-        globals.set_int(262145 + 4752, 0)
+                for k, v in pairs(yu.get_all_players_mi()) do
+                    if ENTITY.DOES_ENTITY_EXIST(v.whatever) then
+                        log.info(PLAYER.GET_PLAYER_NAME(v.player).."> D: "..yu.table_to_string(v))
+                    end
+                end
+            end)
+        end
     end)
 end
 
