@@ -76,9 +76,13 @@ notify(type: number, message: string, [title: string])
     Param message: The message to be displayed
     Param title: The suffix of the title
 
-get_random_element_from_table(tbl: table)
+get_random_element_from_table(tbl: table) : any
     Param tbl: The table to obtain the random element from
     Returns: A random element from tbl
+
+table_to_string(tbl: table): string
+    Param tbl: The table to convert to a string
+    Returns: tbl as a string
 
 # Getters (and utils idk)
 internal_data() : table
