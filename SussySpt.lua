@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.5",
-    versionid = 262
+    version = "1.1.6",
+    versionid = 270
 }
 
 function SussySpt:new()
@@ -2347,6 +2347,28 @@ function SussySpt:initTabHBO()
             end
         end
 
+        local nightclubScript = "am_mp_nightclub"
+
+        local function collectSafeNow()
+            locals.set_int(nightclubScript, 732, 1)
+        end
+
+        local function ensureScriptAndCollectSafe()
+            if yu.is_script_running(nightclubScript) then
+                collectSafeNow()
+            else
+                -- script.run_in_fiber(function(fs)
+                --     SCRIPT.REQUEST_SCRIPT(nightclubScript)
+                --     repeat fs:yield() until SCRIPT.HAS_SCRIPT_LOADED(nightclubScript)
+                --     SYSTEM.START_NEW_SCRIPT_WITH_NAME_HASH(joaat(nightclubScript), 3650)
+                --     repeat fs:yield() until yu.is_script_running(nightclubScript)
+                --     collectSafeNow()
+                --     SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(nightclubScript)
+                -- end)
+                yu.notify(3, "You need to be in your nightclub for this!", "Not implemented yet")
+            end
+        end
+
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
@@ -2392,6 +2414,13 @@ function SussySpt:initTabHBO()
                     end)
                 end
                 yu.rendering.tooltip("This will decrease the popularity by 50 and will put $50k in the safe.")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Collect money") then
+                    yu.add_task(ensureScriptAndCollectSafe)
+                end
+                yu.rendering.tooltip("Experimental")
 
                 ImGui.EndGroup()
                 ImGui.BeginGroup()

@@ -26,7 +26,8 @@
         "CUTSCENE",
         "TASK",
         "network",
-        "NETWORK"
+        "NETWORK",
+        "MISC"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
