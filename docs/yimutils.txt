@@ -1,14 +1,14 @@
 # Utils
-shc(condition, [trueValue], [falseValue]) : any
+shc(condition: boolean, [trueValue], [falseValue]) : any
     Returns: trueValue if condition is true and falseValue if condition is not true
 
-format_num(num: number, [separator]) : string
+format_num(num: number, [separator: string]) : string
     Param num: The number to format
     Param separator: The used separator. Default: ","
     Returns: Formatted number as string
     Examle: format_num(1234) -> "1,234"
 
-boolstring(bool, [trueValue], [falseValue]) : string|any
+boolstring(bool: boolean, [trueValue], [falseValue]) : string|any
     Param trueValue: Default: "true"
     Param falseValue: Default: "false"
     Returns: If bool is true, it returns trueValue. Else falseValue
@@ -42,7 +42,7 @@ get_key_from_table(tbl: table, value, defaultValue) : any
     Param defaultValue: Returned when value with key key was not foudn
     Returns: The first key with the value value
 
-format_seconds(s, [format]) : string
+format_seconds(s: string, [format: string]) : string
     Param s: The duration in seconds to be formatted
     Param format: Optional format string. Default: "%02dH %02dM %02dS"
     Returns: A string representation of the duration in the specified format
@@ -65,16 +65,20 @@ loop(amount: number, cb: function)
     Param cb: The function to be executed
 
 # Notifications
-set_notification_title_prefix(title)
+set_notification_title_prefix(title: string)
     Param title: Prefix of every title used in notify(type, message, [title])
 
-notify(type, message, [title])
+notify(type: number, message: string, [title: string])
     Param type: Available input:
         1 | "info"
         2 | "warn" | "warning"
         3 | "error" | "severe"
     Param message: The message to be displayed
     Param title: The suffix of the title
+
+get_random_element_from_table(tbl: table)
+    Param tbl: The table to obtain the random element from
+    Returns: A random element from tbl
 
 # Getters (and utils idk)
 internal_data() : table
@@ -87,20 +91,20 @@ get_unique_number() : number
 playerindex() : ?
     Returns: 0 or something else i guess
 
-mpx([append]) : string
+mpx([append: string]) : string
     Param append: Can be set to automaticly append the text to the returned value
     Returns: ("MP0_" or "MP1_") + [append]
     Example usages:
         stats.get_int(yu.mpx().."SOME_STAT")
         stats.get_int(yu.mpx("SOME_STAT"))
 
-pid() : number?
+pid() : number
     Returns: The player's id
 
-ppid() : number?
+ppid() : number
     Returns: The player's ped id
 
-veh([pid]) : ?
+veh([pid: number]) : ?
     Param: Ped id of target player. Default: pid()
     Returns: The target player's vehicle if available
 
@@ -108,7 +112,7 @@ is_script_running_hash(hash) : boolean
     Param hash: The hash value of the script to check
     Returns: true if a script with the given hash is running, false otherwise
 
-is_script_running(name) : boolean
+is_script_running(name: string) : boolean
     Param name: The name of the script to check
     Returns: true if a script with the given name is running, false otherwise
 
@@ -127,7 +131,7 @@ key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : n
     Param keyup: Whether the callback should be executed on keydown or keyup
     Returns: Id of callback
 
-key_listener.remove_callback(id) : boolean
+key_listener.remove_callback(id: number) : boolean
     Param id: Id of callback to remove. Returned from add_callback(key: number, callback: function, [keydown: boolean])
     Returns: If removed successfully
 
