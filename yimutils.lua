@@ -231,6 +231,16 @@ return (function()
             -- end
             return nil
         end
+
+        api.get_all_players = function()
+            local players = {}
+            for k, v in pairs(entities.get_all_peds_as_handles()) do
+                if PED.IS_PED_A_PLAYER(v) then
+                    players[k] = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
+                end
+            end
+            return players
+        end
     end
 
     local function initKeyListener()

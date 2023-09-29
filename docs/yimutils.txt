@@ -115,6 +115,10 @@ is_script_running(name) : boolean
 xp_for_crew_rank() : table[number]
     Returns: A table starting with: 0,800,2100,3800,6100
 
+get_all_players() : table[number, number]
+    Returns: A table with the ped id or whatever and second the player id
+    Example usage: PLAYER.IS_PLAYER_DEAD(next(yu.get_all_players()))
+
 # Key Listener
 key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : number
     Param key: Id of the key to add the callback to.
