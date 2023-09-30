@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.7",
-    versionid = 306
+    version = "1.1.8",
+    versionid = 309
 }
 
 function SussySpt:new()
@@ -42,13 +42,12 @@ function SussySpt:new()
         end
     end)
 
-    SussySpt:initTabSelf()
     SussySpt:initTabHBO()
     -- SussySpt:initTabLua()
     SussySpt:initTabQA()
 
+    SussySpt:initTabSelf()
     SussySpt:initTabHeist()
-    SussySpt:initTabMisc()
     SussySpt:initTabCMM()
 
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
@@ -812,26 +811,37 @@ function SussySpt:initTabSelf()
 
                         ImGui.EndTabItem()
                     end
-
-                    -- if (ImGui.BeginTabItem("Vehicle")) then
-                    --     yu.rendering.renderCheckbox("F1 - Covers", "self_vehicle_f1covers", function(state)
-                    --         yu.add_task(function()
-                    --             local veh = yu.veh()
-                    --             if veh == nil then
-                    --                 yu.notify(3, "No vehicle found!", "F1 Covers")
-                    --             else
-                    --                 if state then
-                    --                 else
-                    --                 end
-                    --             end
-                    --         end)
-                    --     end)
-
-                    --     ImGui.EndTabItem()
-                    -- end
                 end
 
-                if (ImGui.BeginTabItem("Singleplayer")) then
+                if (ImGui.BeginTabItem("Misc")) then
+                    -- yu.rendering.renderCheckbox("F1 - Covers", "self_vehicle_f1covers", function(state)
+                    --     yu.add_task(function()
+                    --         local veh = yu.veh()
+                    --         if veh == nil then
+                    --             yu.notify(3, "No vehicle found!", "F1 Covers")
+                    --         else
+                    --             if state then
+                    --             else
+                    --             end
+                    --         end
+                    --     end)
+                    -- end)
+
+                    yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
+                        globals.set_int(292539, yu.shc(state, 0, 60000))
+                    end)
+
+                    yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
+                        globals.set_int(292540, yu.shc(state, 4000, 99999))
+                    end)
+
+                    yu.rendering.renderCheckbox("Snow", "misc_snow", function(state)
+                        globals.set_int(266897, yu.shc(state, 1, 0))
+                    end)
+
+                    ImGui.Separator()
+                    yu.rendering.bigText("Singleplayer")
+
                     for k, v in pairs(a.spCash) do
                         renderSPCash(k)
                     end
@@ -2936,6 +2946,33 @@ function SussySpt:initTabHBO()
         end)
     end
 
+    local function initOffice()
+        local function getCrates(amount)
+            if requireScript("gb_contraband_buy") then
+                locals.set_int("gb_contraband_buy", 604, 1)
+                locals.set_int("gb_contraband_buy", 600, amount)
+                locals.set_int("gb_contraband_buy", 790, 6)
+                locals.set_int("gb_contraband_buy", 791, 4)
+            end
+        end
+
+        addToRender(9, function()
+            if (ImGui.BeginTabItem("Office")) then
+                yu.rendering.bigText("Warehouse")
+
+                ImGui.Text("Get warehouse crate instantly:")
+                for _, i in ipairs({1, 2, 3, 5, 10, 15, 20, 25, 30, 35}) do
+                    ImGui.SameLine()
+                    if ImGui.Button(tostring(i)) then
+                        getCrates(i)
+                    end
+                end
+
+                ImGui.EndTabItem()
+            end
+        end)
+    end
+
     initCayo()
     initCasinoHeist()
     initCasino()
@@ -2944,6 +2981,7 @@ function SussySpt:initTabHBO()
     initAutoShop()
     initDrugWars()
     initAgency()
+    initOffice()
 
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
@@ -3146,67 +3184,7 @@ function SussySpt:initTabHeist()
         initTabPreps()
     end
 
-    local function initTabOther()
-        local otherTab = tbs.getTab(tab, "  Other")
-        otherTab:clear()
-
-        local function getCrates(amount)
-            if requireScript("gb_contraband_buy") then
-                locals.set_int("gb_contraband_buy", 604, 1)
-                locals.set_int("gb_contraband_buy", 600, amount)
-                locals.set_int("gb_contraband_buy", 790, 6)
-                locals.set_int("gb_contraband_buy", 791, 4)
-            end
-        end
-
-        otherTab:add_text("Get warehouse crate instantly:")
-        for _, i in ipairs({1, 2, 3, 5, 10, 15, 20, 25, 30, 35}) do
-            otherTab:add_sameline()
-            otherTab:add_button(i, function() getCrates(i) end)
-        end
-    end
-
     initTabDDay()
-    initTabOther()
-end
-
-function SussySpt:initTabMisc()
-    local tab = tbs.getTab(SussySpt.tab, " Misc")
-    tab:clear()
-
-    tab:add_imgui(function()
-        yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
-            globals.set_int(292539, yu.shc(state, 0, 60000))
-        end)
-
-        yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
-            globals.set_int(292540, yu.shc(state, 4000, 99999))
-        end)
-
-        yu.rendering.renderCheckbox("Snow", "misc_snow", function(state)
-            globals.set_int(266897, yu.shc(state, 1, 0))
-        end)
-
-        if ImGui.Button("WWWWWWW") then
-            yu.add_task(function()
-                -- local mi = yu.get_random_element_from_table(yu.get_all_players_mi())
-                -- local entity = mi.entity
-                -- local ped = mi.ped
-                -- local player = mi.player
-
-                -- log.info(PLAYER.GET_PLAYER_NAME(player).."> God:"..yesNoBool(PLAYER.GET_PLAYER_INVINCIBLE(player)))
-                -- local coords = ENTITY.GET_ENTITY_COORDS(ped)
-                -- PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), coords.x, coords.y, coords.z)
-                -- -- FIRE.ADD_EXPLOSION(coords.x, coords.y, coords.z, 9, 1, false, true, 0)
-
-                for k, v in pairs(yu.get_all_players_mi()) do
-                    if ENTITY.DOES_ENTITY_EXIST(v.whatever) then
-                        log.info(PLAYER.GET_PLAYER_NAME(v.player).."> D: "..yu.table_to_string(v))
-                    end
-                end
-            end)
-        end
-    end)
 end
 
 function SussySpt:initTabCMM()
@@ -3325,6 +3303,28 @@ function SussySpt:initTabCMM()
                 gui.show_message("Don't forget to register as CEO/Leader")
                 run_script("apparcadebusiness")
             end
+        end
+    end)
+
+    tab:add_imgui(function()
+        if ImGui.Button("WWWWWWW") then
+            yu.add_task(function()
+                -- local mi = yu.get_random_element_from_table(yu.get_all_players_mi())
+                -- local entity = mi.entity
+                -- local ped = mi.ped
+                -- local player = mi.player
+
+                -- log.info(PLAYER.GET_PLAYER_NAME(player).."> God:"..yesNoBool(PLAYER.GET_PLAYER_INVINCIBLE(player)))
+                -- local coords = ENTITY.GET_ENTITY_COORDS(ped)
+                -- PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), coords.x, coords.y, coords.z)
+                -- -- FIRE.ADD_EXPLOSION(coords.x, coords.y, coords.z, 9, 1, false, true, 0)
+
+                for k, v in pairs(yu.get_all_players_mi()) do
+                    if ENTITY.DOES_ENTITY_EXIST(v.whatever) then
+                        log.info(PLAYER.GET_PLAYER_NAME(v.player).."> D: "..yu.table_to_string(v))
+                    end
+                end
+            end)
         end
     end)
 end
