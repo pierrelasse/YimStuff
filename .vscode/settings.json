@@ -28,7 +28,9 @@
         "network",
         "NETWORK",
         "MISC",
-        "FIRE"
+        "FIRE",
+        "OBJECT",
+        "WEAPON"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
