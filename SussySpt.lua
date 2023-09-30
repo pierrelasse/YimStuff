@@ -1,7 +1,7 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.8",
+    version = "1.1.9",
     versionid = 309
 }
 
@@ -43,7 +43,6 @@ function SussySpt:new()
     end)
 
     SussySpt:initTabHBO()
-    -- SussySpt:initTabLua()
     SussySpt:initTabQA()
 
     SussySpt:initTabSelf()
@@ -84,6 +83,14 @@ function SussySpt:initRendering(tab)
     end)
     tab:add_text("Categories:")
     SussySpt.add_render(function()
+        ImGui.SameLine()
+
+        if ImGui.Button("Show all") then
+            yu.rendering.setCheckboxChecked("cat_self", true)
+            yu.rendering.setCheckboxChecked("cat_hbo", true)
+            yu.rendering.setCheckboxChecked("cat_qa", true)
+        end
+
         yu.rendering.renderCheckbox("Self", "cat_self")
         if SussySpt.in_online then
             yu.rendering.renderCheckbox("HBO", "cat_hbo")
