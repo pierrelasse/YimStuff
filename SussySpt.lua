@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.1.9",
-    versionid = 309
+    version = "1.2.0",
+    versionid = 310
 }
 
 function SussySpt:new()
@@ -977,14 +977,14 @@ function SussySpt:initTabHBO()
 
         ImGui.PushButtonRepeat(true)
 
-        if ImGui.Button(" + ##cuts_+"..index) then
-            tbl[index] = value + 1
+        if ImGui.Button(" - ##cuts_-"..index) then
+            tbl[index] = value - 1
         end
 
         ImGui.SameLine()
 
-        if ImGui.Button(" - ##cuts_-"..index) then
-            tbl[index] = value - 1
+        if ImGui.Button(" + ##cuts_+"..index) then
+            tbl[index] = value + 1
         end
 
         ImGui.PopButtonRepeat()
