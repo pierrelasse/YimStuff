@@ -2844,6 +2844,10 @@ function SussySpt:initTabHBO()
         end
         refreshStats()
 
+        SussySpt.registerRepeatingTask(function()
+            globals.set_int(293534, yu.shc(yu.rendering.isCheckboxChecked("hbo_agency_24mfinale"), 2400000, 1000000))
+        end)
+
         addToRender(8, function()
             if (ImGui.BeginTabItem("Agency")) then
                 ImGui.BeginGroup()
@@ -2908,11 +2912,7 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Extra")
 
-                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_24mfinale", function(state)
-                    yu.add_task(function()
-                        globals.set_int(293534, yu.shc(state, 2400000, 1000000))
-                    end)
-                end)
+                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_24mfinale")
                 yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
 
                 yu.rendering.renderCheckbox("Remove contracts & payphone hits cooldown", "hbo_agency_cphcd", function(state)
