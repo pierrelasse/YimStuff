@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.2",
-    versionid = 418
+    version = "1.2.3",
+    versionid = 451
 }
 
 function SussySpt:new()
@@ -87,10 +87,9 @@ function SussySpt:initRendering(tab)
         ImGui.SameLine()
 
         if ImGui.Button("Show all") then
-            yu.rendering.setCheckboxChecked("cat_self", true)
-            yu.rendering.setCheckboxChecked("cat_hbo", true)
-            yu.rendering.setCheckboxChecked("cat_qa", true)
-            yu.rendering.setCheckboxChecked("cat_players", true)
+            for k, v in pairs({"self", "hbo", "qa", "players"}) do
+                yu.rendering.setCheckboxChecked("cat_"..v, true)
+            end
         end
 
         yu.rendering.renderCheckbox("Self", "cat_self")
@@ -851,6 +850,12 @@ function SussySpt:initTabSelf()
                 SussySpt.invisible = true
             end
             log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
+        end
+    end)
+
+    yu.key_listener.add_callback(yu.keys["X"], function()
+        if not HUD.IS_PAUSE_MENU_ACTIVE() then
+            TASK.CLEAR_PED_TASKS_IMMEDIATELY(yu.ppid())
         end
     end)
 
@@ -3145,18 +3150,12 @@ function SussySpt:initTabPlayers()
     end
 
     SussySpt.add_render(function()
-        if yu.rendering.isCheckboxChecked("cat_players") then
+        if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_players") then
             if ImGui.Begin("Players") then
-                ImGui.Text("Info: Most of the stuff is permanently borrowed from fivem menus")
-
-                yu.rendering.bigText("Woo!! A playerlist next to a playerlist")
-
                 if SussySpt.playerNames ~= nil then
                     if selectedPlayer(false) == nil then
                         SussySpt.selectedPlayer = getPIndexByPPID(yu.ppid()) or next(SussySpt.players)
                     end
-
-                    ImGui.Text("> Len: "..(#SussySpt.playerNames))
 
                     ImGui.PushItemWidth(178)
                     local plr = yu.rendering.renderList(SussySpt.playerNames, SussySpt.selectedPlayer, "test_playerlist", "Players")
@@ -3173,6 +3172,8 @@ function SussySpt:initTabPlayers()
                     yu.add_task(refreshPlayerlist)
                 end
 
+                ImGui.Text("You <(ﾟヮﾟ<)")
+
                 if ImGui.Button("Goto") then
                     yu.add_task(function()
                         local player = selectedPlayer()
@@ -3182,20 +3183,51 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+                yu.rendering.tooltip("Teleport to the player")
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Silent kill") then
+                if ImGui.Button("Carry you") then
+                    yu.add_task(function()
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), player.ped, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Rly sht and clientside only")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Uncarry") then
+                    yu.add_task(function()
+                        ENTITY.DETACH_ENTITY(yu.ppid(), true, false)
+                    end)
+                end
+                yu.rendering.tooltip("Undos the thing above")
+
+                if ImGui.Button("Go airplane mode :)") then
+                    yu.add_task(function()
+                        STREAMING.REQUEST_ANIM_DICT("missfbi1")
+                        TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
+                    end)
+                end
+                yu.rendering.tooltip("You may need to press this two times because the anim was not loaded")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("MONEYYY") then
                     yu.add_task(function()
                         local player = selectedPlayer()
                         if player ~= nil then
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 4, 0.1, 0, 1, 0.0)
+                            OBJECT.CREATE_PICKUP(joaat("PICKUP_MONEY_DEP_BAG"), c.x, c.y, c.z, 0, 1, true, 0)
                         end
                     end)
                 end
+                yu.rendering.tooltip("It's in the you category because you get banned :)))))")
 
-                ImGui.SameLine()
+                ImGui.Text("Nice :D")
 
                 if ImGui.Button("Repair vehicle") then
                     yu.add_task(function()
@@ -3209,6 +3241,72 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+                yu.rendering.tooltip("Repair the player's vehicle")
+
+                if ImGui.Button("Spawn bodyguard") then
+                    script.run_in_fiber(function(runscript)
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            local modelHash = joaat("u_m_m_jesus_01")
+                            local weaponHash = 0x84D6FAFD -- weapon_bullpuprifle_mk2
+
+                            STREAMING.REQUEST_MODEL(modelHash)
+                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            local group = PLAYER.GET_PLAYER_GROUP(player.player)
+
+                            local ped = PED.CREATE_PED(26, modelHash, c.x + 1, c.y, c.z + 1, 0, true, true)
+
+                            PED.SET_PED_AS_GROUP_LEADER(player.ped, group)
+                            PED.SET_PED_AS_GROUP_MEMBER(ped, group)
+                            PED.SET_PED_NEVER_LEAVES_GROUP(ped, group)
+                            PED.SET_GROUP_FORMATION(group, 1)
+                            PED.SET_PED_CAN_TELEPORT_TO_GROUP_LEADER(ped, group, true)
+
+                            PED.SET_PED_MAX_HEALTH(ped, 4000)
+
+                            PED.SET_PED_COMBAT_ABILITY(ped, 100)
+                            PED.SET_PED_COMBAT_MOVEMENT(ped, 1)
+                            PED.SET_PED_COMBAT_RANGE(ped, 2)
+
+                            PED.SET_PED_CAN_SWITCH_WEAPON(ped, true)
+                            WEAPON.GIVE_WEAPON_TO_PED(ped, weaponHash, 9999, false, true)
+
+                            log.info("Spawn bodyguard done")
+
+                            runscript:sleep(2000)
+                            ENTITY.SET_PED_AS_NO_LONGER_NEEDED(ped)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("7 is max or else they attack you or smth")
+
+                ImGui.Text("Not nice :,(")
+
+                if ImGui.Button("Explode (big)") then
+                    yu.add_task(function()
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("They can see the explosion :O")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Explode (invisible)") then
+                    yu.add_task(function()
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 2, 0.3, false, true, 0.0)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Make the player die \"randomly\"")
 
                 if ImGui.Button("Trap player") then
                     yu.add_task(function()
@@ -3223,19 +3321,16 @@ function SussySpt:initTabPlayers()
                                 NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(obj)
                                 ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
                                 ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                ENTITY.SET_ENTITY_ALPHA(obj, 120, false)
                                 ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
                             end
-
-                            log.info("Trap player done")
                         end
                     end)
                 end
-                yu.rendering.tooltip("Super op!")
+                yu.rendering.tooltip("Funny af ngl")
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Cage player (big)") then
+                if ImGui.Button("Cage player") then
                     script.run_in_fiber(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
@@ -3262,40 +3357,43 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+                yu.rendering.tooltip("Bigger cage")
 
-                ImGui.SameLine()
-
-                if ImGui.Button("Cage player") then
+                if ImGui.Button("Trap in race tube") then
                     yu.add_task(function()
                         local player = selectedPlayer()
                         if player ~= nil then
-                            local modelHash = joaat("prop_gascage01")
+                            local modelHash = joaat("stt_prop_stunt_tube_crn_5d")
+
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z, true, false, true)
+                            ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
+                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Puts them in a big tube where they can move around\nOr in 2t1's words: Spawn a stunt tube around this player, trapping them inside with limited movement area. VIP users may also spawn an invisible tube.")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Trap in race tube (invis)") then
+                    yu.add_task(function()
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            local modelHash = joaat("stt_prop_stunt_tube_crn_5d")
 
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                             local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z, true, true, true)
+                            ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
+                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                            ENTITY.SET_ENTITY_ALPHA(obj, 0, false)
+                            ENTITY.IS_ENTITY_VISIBLE(obj, false)
                             ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
-
-                            log.info("Cage player done")
                         end
                     end)
                 end
-
-                if ImGui.Button("Carry you") then
-                    yu.add_task(function()
-                        local player = selectedPlayer()
-                        if player ~= nil then
-                            ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), player.ped, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
-                        end
-                    end)
-                end
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Uncarry") then
-                    yu.add_task(function()
-                        ENTITY.DETACH_ENTITY(yu.ppid(), true, false)
-                    end)
-                end
+                yu.rendering.tooltip("Same as above but it's invisible")
 
                 if ImGui.Button("Shake cam (and near players)") then
                     yu.add_task(function()
@@ -3306,6 +3404,7 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+                yu.rendering.tooltip("So you can't see anything when near (only for short time)")
 
                 if ImGui.Button("Ram with bus") then
                     script.run_in_fiber(function(runscript)
@@ -3319,6 +3418,9 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+                yu.rendering.tooltip("D0pamine fivem menu be like :D")
+
+                ImGui.SameLine()
 
                 if ImGui.Button("Spawn enemies") then
                     script.run_in_fiber(function(runscript)
@@ -3360,83 +3462,7 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
-
-                if ImGui.Button("Spawn bodyguard") then
-                    script.run_in_fiber(function(runscript)
-                        local player = selectedPlayer()
-                        if player ~= nil then
-                            local modelHash = joaat("u_m_m_jesus_01")
-                            local weaponHash = 0x84D6FAFD -- weapon_bullpuprifle_mk2
-
-                            STREAMING.REQUEST_MODEL(modelHash)
-                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
-
-                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            local group = PLAYER.GET_PLAYER_GROUP(player.player)
-
-                            local ped = PED.CREATE_PED(26, modelHash, c.x + 1, c.y, c.z + 1, 0, true, true)
-
-                            PED.SET_PED_AS_GROUP_LEADER(player.ped, group)
-                            PED.SET_PED_AS_GROUP_MEMBER(ped, group)
-                            PED.SET_PED_NEVER_LEAVES_GROUP(ped, group)
-                            PED.SET_GROUP_FORMATION(group, 1)
-                            PED.SET_PED_CAN_TELEPORT_TO_GROUP_LEADER(ped, group, true)
-
-                            PED.SET_PED_MAX_HEALTH(ped, 4000)
-
-                            PED.SET_PED_COMBAT_ABILITY(ped, 100)
-                            PED.SET_PED_COMBAT_MOVEMENT(ped, 1)
-                            PED.SET_PED_COMBAT_RANGE(ped, 2)
-
-                            PED.SET_PED_CAN_SWITCH_WEAPON(ped, true)
-                            WEAPON.GIVE_WEAPON_TO_PED(ped, weaponHash, 9999, false, true)
-
-                            log.info("Spawn bodyguard done")
-
-                            runscript:sleep(2000)
-                            ENTITY.SET_PED_AS_NO_LONGER_NEEDED(ped)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("7 is max or else they attack you or smth")
-
-                if ImGui.Button("Explode") then
-                    yu.add_task(function()
-                        local player = selectedPlayer()
-                        if player ~= nil then
-                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 2, 0.03, true, false, .1)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Money test") then
-                    script.run_in_fiber(function(runscript)
-                        local player = selectedPlayer()
-                        if player ~= nil then
-                            local modelHash = joaat("a_m_y_stbla_02")
-
-                            STREAMING.REQUEST_MODEL(modelHash)
-                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
-
-                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-
-                            local ped = PED.CREATE_PED(21, modelHash, c.x, c.y, c.z, 0, true, true)
-                            NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ped)
-                            PED.SET_PED_MONEY(ped, 2)
-                            PED.SET_PED_CAN_SWITCH_WEAPON(ped, true)
-                            WEAPON.GIVE_WEAPON_TO_PED(ped, 0x84D6FAFD, 9999, false, true)
-                            -- ENTITY.SET_ENTITY_HEALTH(ped, 1)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("airplane") then
-                    yu.add_task(function()
-                        STREAMING.REQUEST_ANIM_DICT("missfbi1")
-                        TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
-                    end)
-                end
+                yu.rendering.tooltip("D0pamine be like x2")
             end
             ImGui.End()
         end
