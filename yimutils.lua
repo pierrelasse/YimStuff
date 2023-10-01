@@ -99,6 +99,20 @@ return (function()
             end
         end
 
+        api.length = function(obj)
+            if type(obj) == "table" then
+                local i = 0
+                for k, v in pairs(obj) do
+                    i = i + 1
+                end
+                return i
+            else if type(obj) == "string" then
+                return string.len(obj)
+            end
+            return nil
+        end
+        api.len = api.length
+
         -- Notifications
         api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)

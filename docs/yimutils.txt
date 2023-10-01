@@ -64,6 +64,11 @@ loop(amount: number, cb: function)
     Param amount: How many cb should be executed
     Param cb: The function to be executed
 
+length(obj: table|string) : number
+    Aliases: len
+    Param obj: The object to retreive the length from
+    Returns: Length of obj
+
 # Notifications
 set_notification_title_prefix(title: string)
     Param title: Prefix of every title used in notify(type, message, [title])
