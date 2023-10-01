@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.1",
-    versionid = 417
+    version = "1.2.2",
+    versionid = 418
 }
 
 function SussySpt:new()
@@ -344,12 +344,6 @@ function SussySpt:initTabSelf()
                         else
                             SussySpt.enableVis()
                         end
-                    end)
-
-                    yu.rendering.renderCheckbox("Cam shaking", "self_camshaking", function(state)
-                        yu.add_task(function()
-                            CAM.STOP_GAMEPLAY_CAM_SHAKING(state)
-                        end)
                     end)
 
                     ImGui.EndTabItem()
@@ -1438,7 +1432,6 @@ function SussySpt:initTabHBO()
                         stats.set_int(yu.mpx().."H4CNF_WEP_DISRP", 3)
                         stats.set_int(yu.mpx().."H4CNF_ARM_DISRP", 3)
                         stats.set_int(yu.mpx().."H4CNF_HEL_DISRP", 3)
-                        yu.notify("Preperations completed :)", "Cayo Perico Heist")
                     end)
                 end
 
@@ -1609,7 +1602,7 @@ function SussySpt:initTabHBO()
 
                 if ImGui.Button("Apply##realtake") then
                     if requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
+                        locals.set_int("fm_mission_controller_2020", 43152, a.realtake)
                     end
                 end
 
@@ -2606,6 +2599,14 @@ function SussySpt:initTabHBO()
                     end
                 end
 
+                ImGui.SameLine()
+
+                if ImGui.Button("$15m fleeca cuts") then
+                    yu.add_task(function()
+
+                    end)
+                end
+
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
             end
@@ -2868,7 +2869,7 @@ function SussySpt:initTabHBO()
                             stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
 
                             for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_STRAND","FIXER_STORY_COOLDOWN"}) do
-                                stats.set_int(yu.mpx(k), -1)
+                                stats.set_int(yu.mpx(v), -1)
                             end
 
                             if a.vipcontract == -1 then
@@ -2896,7 +2897,7 @@ function SussySpt:initTabHBO()
                 if ImGui.Button("Complete all missions") then
                     yu.add_task(function()
                         for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
-                            stats.set_int(yu.mpx(k), -1)
+                            stats.set_int(yu.mpx(v), -1)
                         end
                     end)
                 end
@@ -3161,6 +3162,7 @@ function SussySpt:initTabPlayers()
                     local plr = yu.rendering.renderList(SussySpt.playerNames, SussySpt.selectedPlayer, "test_playerlist", "Players")
                     if plr.changed then
                         SussySpt.selectedPlayer = plr.key
+                        SussySpt.selectedPlayerName = plr.value
                     end
                     ImGui.PopItemWidth()
 

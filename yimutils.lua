@@ -361,6 +361,7 @@ return (function()
             end
 
             local newKey = key
+            local newValue = nil
             local label = (name or "").."##"..labelId
             local selectedItem = api.get_or_default(items, key, next(items))
 
@@ -370,12 +371,14 @@ return (function()
                         local v_ = api.get_or_default(items, v, next(items))
                         if (ImGui.Selectable(v_, key == v_)) then
                             newKey = v
+                            newValue = v_
                         end
                     end
                 else
                     for k, v in pairs(items) do
                         if (ImGui.Selectable(v, key == v)) then
                             newKey = k
+                            newValue = v
                         end
                     end
                 end
@@ -384,7 +387,8 @@ return (function()
             return {
                 changed = key ~= newKey,
                 oldKey = key,
-                key = newKey
+                key = newKey,
+                value = newValue
             }
         end
 
