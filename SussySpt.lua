@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.2.3",
-    versionid = 451
+    versionid = 472
 }
 
 function SussySpt:new()
@@ -3302,11 +3302,30 @@ function SussySpt:initTabPlayers()
                         local player = selectedPlayer()
                         if player ~= nil then
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 2, 0.3, false, true, 0.0)
+                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, i, 8, false, true, 0.0)
                         end
                     end)
                 end
                 yu.rendering.tooltip("Make the player die \"randomly\"")
+
+                -- if ImGui.Button("Kill everyone") then
+                --     script.run_in_fiber(function(runscript)
+                --         local player = selectedPlayer()
+                --         if player ~= nil then
+                --             log.info("Player:"..tostring(player.ped))
+                            
+                --             for k, v in pairs(yu.get_all_players_mi()) do
+                --                 if v.ped ~= player.ped and ENTITY.DOES_ENTITY_EXIST(v.ped) then
+                --                     local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                --                     log.info(player.ped.."<x>"..v.ped)
+                --                     FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 8, 10, false, true, 0.0)
+                --                     break
+                --                 end
+                --             end
+                --         end
+                --     end)
+                -- end
+                -- yu.rendering.tooltip("TODO")
 
                 if ImGui.Button("Trap player") then
                     yu.add_task(function()
