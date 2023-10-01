@@ -296,7 +296,7 @@ return (function()
         api.get_all_players_mi = function()
             local players = {}
             for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if PED.IS_PED_A_PLAYER(v) then
+                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v) and PED.IS_PED_A_PLAYER(v) then
                     players[k] = {
                         whatever = k,
                         ped = v,
