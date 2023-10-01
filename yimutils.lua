@@ -106,11 +106,11 @@ return (function()
                     i = i + 1
                 end
                 return i
-            else if type(obj) == "string" then
+            elseif type(obj) == "string" then
                 return string.len(obj)
             end
             return nil
-        end
+        end        
         api.len = api.length
 
         -- Notifications
@@ -168,9 +168,8 @@ return (function()
                     isFirst = false
                 end
             end
-
-            result = result .. "}"
-            return result
+            
+            return result.."}"
         end
 
         -- TODO: Add to docs & make this useful
