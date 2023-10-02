@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.2.5",
-    versionid = 514
+    versionid = 562
 }
 
 function SussySpt:new()
@@ -3179,15 +3179,66 @@ function SussySpt:initTabQA()
 end
 
 function SussySpt:initTabPlayers()
+    local playerList = nil
+
+    local function getPlayerSusLevel(player, disableExtraCheck)
+        if not disableExtraCheck and not ENTITY.DOES_ENTITY_EXIST(player.ped) then
+            return -1
+        end
+
+        local level = 0
+        local function add(n, force)
+            if (not force and n > 0) then
+                level = level + n
+            end
+        end
+
+        if ENTITY.GET_ENTITY_MAX_HEALTH(player.ped) < ENTITY.GET_ENTITY_HEALTH() then
+            add(100)
+        end
+
+        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+        local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+        local proofs = yu.get_entity_proofs(player.ped)
+
+        if interior == 0 and proofs.success then
+            local i = -1
+            for k, v in pairs(proofs) do
+                if v then
+                    i = i + 1
+                end
+            end
+            if i > 0 then
+                add(i)
+            end
+        end
+
+        return level
+    end
+
     local function refreshPlayerlist()
         if SussySpt.in_online then
-            SussySpt.players = yu.get_all_players_mi()
-            SussySpt.playerNames = {}
-            for k, v in pairs(SussySpt.players) do
-                local name = PLAYER.GET_PLAYER_NAME(v.player)
-                if name ~= nil and name ~= "**Invalid**" then
-                    SussySpt.playerNames[k] = name
+            SussySpt.players = SussySpt.players or {}
+
+            local players = yu.get_all_players_mi()
+            local newPlayers = {}
+            for k, v in pairs(players) do
+                if ENTITY.DOES_ENTITY_EXIST(v.ped) then
+                    local name = PLAYER.GET_PLAYER_NAME(v.player)
+                    if name ~= nil and name ~= "**Invalid**" then
+                        v.key = k
+                        v.name = name
+                        v.suslevel = (SussySpt.players[name] and SussySpt.players[name].susLevel) or 0
+                        newPlayers[name] = v
+                    end
                 end
+            end
+            SussySpt.players = newPlayers
+
+            playerList = {}
+            for k, v in pairs(SussySpt.players) do
+                local susLevel = getPlayerSusLevel(v, true)
+                playerList[k] = v.name -- yu.shc(susLevel > 0, "!"..susLevel.." ", "")..
             end
         end
     end
@@ -3212,15 +3263,6 @@ function SussySpt:initTabPlayers()
         runscript:sleep(2000)
 
         VEHICLE.DELETE_VEHICLE(veh)
-    end
-
-    local function getPIndexByPPID(ppid)
-        for k, v in pairs(SussySpt.players) do
-            if v.ped == ppid then
-                return k
-            end
-        end
-        return nil
     end
 
     local entities = {}
@@ -3250,15 +3292,16 @@ function SussySpt:initTabPlayers()
     SussySpt.add_render(function()
         if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_players") then
             if ImGui.Begin("Players") then
-                if SussySpt.playerNames ~= nil then
+                if playerList ~= nil then
                     if selectedPlayer(false) == nil then
-                        SussySpt.selectedPlayer = getPIndexByPPID(yu.ppid()) or next(SussySpt.players)
+                        SussySpt.selectedPlayer = PLAYER.GET_PLAYER_NAME(yu.pid())
                     end
 
                     ImGui.PushItemWidth(178)
-                    local plr = yu.rendering.renderList(SussySpt.playerNames, SussySpt.selectedPlayer, "test_playerlist", "Players")
+                    local plr = yu.rendering.renderList(playerList, SussySpt.selectedPlayer, "players_list", "Players")
                     if plr.changed then
                         SussySpt.selectedPlayer = plr.key
+                        log.info(plr.key)
                     end
                     ImGui.PopItemWidth()
 

@@ -113,28 +113,6 @@ return (function()
         end        
         api.len = api.length
 
-        -- Notifications
-        api.set_notification_title_prefix = function(title)
-            api.set_stat("NOTIFY_DEFTITLE", title)
-        end
-
-        api.notify = function(type, message, title)
-            local finalTitle
-            if api.get_stat("NOTIFY_DEFTITLE") ~= nil then
-                finalTitle = api.get_stat("NOTIFY_DEFTITLE")..(title or "")
-            else
-                finalTitle = title or "Some script"
-            end
-
-            if type == 1 or type == "info" then
-                gui.show_message(finalTitle, message)
-            elseif type == 2 or type == "warn" or type == "warning" then
-                gui.show_warning(finalTitle, message)
-            elseif type == 3 or type == "error" or type == "severe" then
-                gui.show_error(finalTitle, message)
-            end
-        end
-
         api.get_random_element_from_table = function(tbl)
             if type(tbl) ~= "table" then
                 return {}
@@ -170,6 +148,43 @@ return (function()
             end
             
             return result.."}"
+        end
+
+        -- Notifications
+        api.set_notification_title_prefix = function(title)
+            api.set_stat("NOTIFY_DEFTITLE", title)
+        end
+
+        api.notify = function(type, message, title)
+            local finalTitle
+            if api.get_stat("NOTIFY_DEFTITLE") ~= nil then
+                finalTitle = api.get_stat("NOTIFY_DEFTITLE")..(title or "")
+            else
+                finalTitle = title or "Some script"
+            end
+
+            if type == 1 or type == "info" then
+                gui.show_message(finalTitle, message)
+            elseif type == 2 or type == "warn" or type == "warning" then
+                gui.show_warning(finalTitle, message)
+            elseif type == 3 or type == "error" or type == "severe" then
+                gui.show_error(finalTitle, message)
+            end
+        end
+
+        api.get_entity_proofs = function(entity)
+            local s, bp, fp, ep, cp, mp, sp, p7p, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false, false, false, false)
+            return {
+                success = s,
+                bullet = bp,
+                fire = fp,
+                explosion = ep,
+                collision = cp,
+                melee = mp,
+                steam = sp,
+                p7 = p7p,
+                drown = dp
+            }
         end
 
         -- TODO: Add to docs & make this useful
@@ -482,20 +497,20 @@ return (function()
             local newKey = key
             local newValue = nil
             local label = (name or "").."##"..labelId
-            local selectedItem = api.get_or_default(items, key, next(items))
+            local selectedValue = api.get_or_default(items, key, next(items))
 
-            if ImGui.BeginCombo(label, selectedItem) then
+            if ImGui.BeginCombo(label, selectedValue) then
                 if sort ~= nil then
                     for k, v in pairs(sort) do
                         local v_ = api.get_or_default(items, v, next(items))
-                        if (ImGui.Selectable(v_, key == v_)) then
+                        if ImGui.Selectable(v_, false) then
                             newKey = v
                             newValue = v_
                         end
                     end
                 else
                     for k, v in pairs(items) do
-                        if (ImGui.Selectable(v, key == v)) then
+                        if ImGui.Selectable(v, false) then
                             newKey = k
                             newValue = v
                         end
