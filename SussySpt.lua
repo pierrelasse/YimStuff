@@ -99,15 +99,6 @@ function SussySpt:initRendering(tab)
 end
 
 function SussySpt:initUtils()
-    run_script = function(name)
-        script.run_in_fiber(function(runscript)
-            SCRIPT.REQUEST_SCRIPT(name)
-            repeat runscript:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
-            SYSTEM.START_NEW_SCRIPT(name, 5000)
-            SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
-        end)
-    end
-
     function requireScript(name)
         if yu.is_script_running(name) == false then
             yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
@@ -3727,123 +3718,68 @@ function SussySpt:initTabHeist()
 end
 
 function SussySpt:initTabCMM()
-    local tab = tbs.getTab(SussySpt.tab, " CMM & Funny")
+    local tab = tbs.getTab(SussySpt.tab, " CMM")
     tab:clear()
 
+    function run_script(name)
+        script.run_in_fiber(function(runscript)
+            SCRIPT.REQUEST_SCRIPT(name)
+            repeat runscript:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
+            SYSTEM.START_NEW_SCRIPT(name, 5000)
+            SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
+        end)
+    end
+
+    function smth()
+        return globals.get_int(1895156 + yu.playerindex(1) * 609 + 10 + 429 + 1)
+    end
+
     tab:add_text("(Computers Management Menu)")
-    tab:add_text("Works properly in session by invitations. in an open session does not work well")
-        tab:add_button("Show Mastercontrol computer", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("apparcadebusinesshub")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("apparcadebusinesshub")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader")
-                run_script("apparcadebusinesshub")
-            end
+    tab:add_text("I heard that it works the best in sessions where you are host")
+
+    for k, v in pairs({
+        ["apparcadebusiness"] = "Arcade",
+	    ["apparcadebusinesshub"] = "Arcade Mastercontrol",
+	    ["appbikerbusiness"] = "MC",
+	    ["appbroadcast"] = "",
+	    ["appbunkerbusiness"] = "Bunker",
+	    ["appbusinesshub"] = "Nightclub",
+	    ["appcamera"] = "",
+	    ["appchecklist"] = "",
+	    ["appcontacts"] = "",
+	    ["appcovertops"] = "",
+	    ["appemail"] = "",
+	    ["appextraction"] = "",
+	    ["apphackertruck"] = "Terrorbyte",
+	    ["apphs_sleep"] = "",
+	    ["appimportexport"] = "",
+	    ["appinternet"] = "",
+	    ["appjipmp"] = "",
+	    ["appmedia"] = "",
+	    ["appmpbossagency"] = "",
+	    ["appmpemail"] = "",
+	    ["appmpjoblistnew"] = "",
+	    ["apporganiser"] = "",
+	    ["apprepeatplay"] = "",
+	    ["appsecurohack"] = "",
+	    ["appsecuroserv"] = "",
+	    ["appsettings"] = "",
+	    ["appsidetask"] = "",
+	    ["appsmuggler"] = "Hanger",
+	    ["apptextmessage"] = "",
+	    ["apptrackify"] = "",
+	    ["appvlsi"] = "",
+	    ["appzit"] = "",
+        ["appfixersecurity"] = "Agency",
+        ["appAvengerOperations"] = "Avenger"
+    }) do
+        if v == "" then
+            v = k
         end
-    end)
-    tab:add_button("Show Nightclub computer", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("appbusinesshub")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("appbusinesshub")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader")
-                run_script("appbusinesshub")
-            end
-        end
-    end)
-    tab:add_button("Show Argentur computer", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("appfixersecurity")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                globals.set_int(1895156 + playerIndex * 609 + 10 + 429 + 1, 0)
-                gui.show_message("prompt", "Converted to CEO")
-                run_script("appfixersecurity")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader",
-                                 "It may also be a script detection error, known problem, no feedback required")
-                run_script("appfixersecurity")
-            end
-        end
-    end)
-    tab:add_button("Show Bunker computer", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("appbunkerbusiness")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("appbunkerbusiness")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader",
-                                 "It may also be a script detection error, known problem, no feedback required")
-                run_script("appbunkerbusiness")
-            end
-        end
-    end)
-    tab:add_button("Show Hangar computer", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("appsmuggler")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("appsmuggler")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader",
-                                 "It may also be a script detection error, known problem, no feedback required")
-                run_script("appsmuggler")
-            end
-        end
-    end)
-    tab:add_button("Show Terrorbyte dashboard", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("apphackertruck")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("apphackertruck")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader",
-                                 "It may also be a script detection error, known problem, no feedback required")
-                run_script("apphackertruck")
-            end
-        end
-    end)
-    tab:add_button("Show Avenger panel", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("appAvengerOperations")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 1 then
-                run_script("appAvengerOperations")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader",
-                                 "It may also be a script detection error, known problem, no feedback required")
-                run_script("appAvengerOperations")
-            end
-        end
-    end)
-    tab:add_button("Show Arcade computer (Only works in the arcade club or invite session)", function()
-        local playerIndex = globals.get_int(1574918)
-        if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) == 0 then
-            run_script("apparcadebusiness")
-        else
-            if globals.get_int(1895156 + playerIndex * 609 + 10 + 429 + 1) ==
-                1 then
-                run_script("apparcadebusiness")
-            else
-                gui.show_message("Don't forget to register as CEO/Leader")
-                run_script("apparcadebusiness")
-            end
-        end
-    end)
+        tab:add_button(v, function()
+            run_script(k)
+        end)
+    end
 end
 
 SussySpt:new()
