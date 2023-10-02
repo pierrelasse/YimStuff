@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.4",
-    versionid = 513
+    version = "1.2.5",
+    versionid = 514
 }
 
 function SussySpt:new()
@@ -395,7 +395,7 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
-                        local rpmNewValue, rpmChanged = ImGui.InputInt("RP multiplier", a.rpmultiplier, 0, 10000000)
+                        local rpmNewValue, rpmChanged = ImGui.InputInt("RP multiplier", a.rpmultiplier, 0, 140)
                         if rpmChanged then
                             a.rpmultiplier = rpmNewValue
                         end
@@ -920,12 +920,6 @@ function SussySpt:initTabSelf()
         end
     end)
 
-    yu.key_listener.add_callback(yu.keys["X"], function()
-        if not HUD.IS_PAUSE_MENU_ACTIVE() then
-            TASK.CLEAR_PED_TASKS_IMMEDIATELY(yu.ppid())
-        end
-    end)
-
     -- old
 
     local tab = tbs.getTab(SussySpt.tab, " Self")
@@ -1162,7 +1156,8 @@ function SussySpt:initTabHBO()
                 a.islandstorageamount = yu.get_key_from_table(a.islandstorageamounts, stats.get_int(yu.mpx("H4LOOT_"..islandstorageid.."_I_SCOPED")), 0)
             end
 
-            a.paintingsamount = yu.get_between_or_default(stats.get_int(yu.mpx("H4LOOT_PAINT_SCOPED")), 0, 7)
+            a.paintings = stats.get_int(yu.mpx("H4LOOT_PAINT_SCOPED")) > 0
+            yu.rendering.setCheckboxChecked("hbo_cayo_paintings", a.paintings)
 
             a.difficulty = stats.get_int(yu.mpx().."H4_PROGRESS")
             addUnknownValue(a.difficulties, a.difficulty)
@@ -1245,11 +1240,10 @@ function SussySpt:initTabHBO()
                     a.islandstorageamountchanged = true
                 end
 
-                local par, pavc = ImGui.SliderInt("Paintings amount", a.paintingsamount, 0, 7, a.paintingsamount.."##hbo_cayo_paintingsamount", 1)
-                if pavc then
-                    a.paintingsamount = par
-                    a.paintingsamountchanged = true
-                end
+                yu.rendering.renderCheckbox("Add paintings", "hbo_cayo_paintings", function(state)
+                    a.paintings = state
+                    a.paintingschanged = true
+                end)
 
                 local dr = yu.rendering.renderList(a.difficulties, a.difficulty, "hbo_cayo_d", "Difficulty")
                 if dr.changed then
@@ -1411,13 +1405,21 @@ function SussySpt:initTabHBO()
                         end
 
                         -- Paintings
-                        if a.paintingsamountchanged then
+                        if a.paintingschanged then
                             changes = yu.add(changes, 1)
-                            stats.set_int(yu.mpx("H4LOOT_PAINT"), a.paintingsamount)
-                            stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), a.paintingsamount)
-                            stats.set_int(yu.mpx("H4LOOT_PAINT_C"), 127)
-                            stats.set_int(yu.mpx("H4LOOT_PAINT_C_SCOPED"), 127)
-                            stats.set_int(yu.mpx("H4LOOT_PAINT_V"), 189500)
+                            -- stats.set_int(yu.mpx("H4LOOT_PAINT"), a.paintings)
+                            -- stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), a.paintings)
+                            -- stats.set_int(yu.mpx("H4LOOT_PAINT_C"), 127)
+                            -- stats.set_int(yu.mpx("H4LOOT_PAINT_C_SCOPED"), 127)
+                            -- stats.set_int(yu.mpx("H4LOOT_PAINT_V"), 189500)
+                            if a.paintings then
+                                stats.set_int(yu.mpx("H4LOOT_PAINT"), 127)
+                                stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), 127)
+                            else
+                                stats.set_int(yu.mpx("H4LOOT_PAINT"), 0)
+                                stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), 0)
+                            end
+                            stats.set_int(yu.mpx("H4LOOT_PAINT_V"), 343863)
                         end
 
                         -- Difficulty
