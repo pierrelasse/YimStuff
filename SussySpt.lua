@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.5",
-    versionid = 562
+    version = "1.2.6",
+    versionid = 568
 }
 
 function SussySpt:new()
@@ -55,6 +55,8 @@ function SussySpt:new()
     end)
 
     script.register_looped("sussyspt", function()
+        SussySpt.in_online = yu.is_script_running("freemode")
+
         if SussySpt.invisible == true then
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
         end
@@ -75,13 +77,6 @@ function SussySpt:initRendering(tab)
     SussySpt.refreshInOnline()
 
     tab:add_separator()
-    SussySpt.add_render(function()
-        if not SussySpt.in_online then
-            if ImGui.Button("Recheck if online") then
-                yu.add_task(SussySpt.refreshInOnline)
-            end
-        end
-    end)
     tab:add_text("Categories:")
     SussySpt.add_render(function()
         ImGui.SameLine()
@@ -335,6 +330,13 @@ function SussySpt:initTabSelf()
         }
     }
 
+    local parachuteHash = joaat("GADGET_PARACHUTE")
+    SussySpt.registerRepeatingTask(function()
+        if yu.rendering.isCheckboxChecked("self_refillparachute") then
+            WEAPON.GIVE_WEAPON_TO_PED(yu.ppid(), parachuteHash, 1, false, true)
+        end
+    end)
+
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_self") then
             if ImGui.Begin("Self") then
@@ -349,6 +351,8 @@ function SussySpt:initTabSelf()
                         end
                     end)
 
+                    yu.rendering.renderCheckbox("Refill parachute", "self_refillparachute")
+
                     ImGui.EndTabItem()
                 end
 
@@ -360,8 +364,8 @@ function SussySpt:initTabSelf()
 
                         if ImGui.Button("Reset mental state") then
                             yu.add_task(function()
-                                stats.set_float(yu.mpx("PLAYER_MENTAL_STATE"), 0.0)
-                                stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0.0)
+                                stats.set_float(yu.mpx("PLAYER_MENTAL_STATE"), .0)
+                                stats.set_float("MPPLY_PLAYER_MENTAL_STATE", .0)
                                 refresh()
                             end)
                         end
@@ -3151,7 +3155,7 @@ function SussySpt:initTabQA()
                         local veh = yu.veh()
                         if veh ~= nil then
                             VEHICLE.SET_VEHICLE_FIXED(veh)
-                            VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
+                            VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
                         end
                     end)
                 end
@@ -3238,8 +3242,11 @@ function SussySpt:initTabPlayers()
             playerList = {}
             for k, v in pairs(SussySpt.players) do
                 local susLevel = getPlayerSusLevel(v, true)
-                playerList[k] = v.name -- yu.shc(susLevel > 0, "!"..susLevel.." ", "")..
+                playerList[k] = yu.shc(susLevel > 0, susLevel.."! ", "")..v.name
             end
+        else
+            playerList = nil
+            SussySpt.players = nil
         end
     end
 
@@ -3331,7 +3338,7 @@ function SussySpt:initTabPlayers()
                     yu.add_task(function()
                         local player = selectedPlayer()
                         if player ~= nil then
-                            ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), player.ped, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+                            ENTITY.ATTACH_ENTITY_TO_ENTITY(yu.ppid(), player.ped, 0, .27, .15, .63, .5, .5, 180, false, false, false, false, 2, false)
                         end
                     end)
                 end
@@ -3385,7 +3392,7 @@ function SussySpt:initTabPlayers()
                             if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
                                 local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
                                 VEHICLE.SET_VEHICLE_FIXED(veh)
-                                VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, 0.0)
+                                VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
                             end
                         end
                     end)
@@ -3451,7 +3458,7 @@ function SussySpt:initTabPlayers()
                         local player = selectedPlayer()
                         if player ~= nil then
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, i, 8, false, true, 0.0)
+                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, i, 8, false, true, .0)
                         end
                     end)
                 end
@@ -3466,7 +3473,7 @@ function SussySpt:initTabPlayers()
                 --                 if v.ped ~= player.ped and ENTITY.DOES_ENTITY_EXIST(v.ped) then
                 --                     local c = ENTITY.GET_ENTITY_COORDS(v.ped)
                 --                     log.info(player.ped.."<x>"..v.ped)
-                --                     FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 8, 10, false, true, 0.0)
+                --                     FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 8, 10, false, true, .0)
                 --                     break
                 --                 end
                 --             end
@@ -3484,7 +3491,7 @@ function SussySpt:initTabPlayers()
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
 
                             for i = 0, 1 do
-                                local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - 0.7, true, false, false)
+                                local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
                                 registerEntity(obj)
                                 ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
                                 ENTITY.FREEZE_ENTITY_POSITION(obj, true)
@@ -3566,7 +3573,7 @@ function SussySpt:initTabPlayers()
                         local player = selectedPlayer()
                         if player ~= nil then
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 2, 0.0, false, true, 100000.0)
+                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 2, .0, false, true, 100000.0)
                         end
                     end)
                 end
