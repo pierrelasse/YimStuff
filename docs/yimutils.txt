@@ -132,6 +132,9 @@ get_all_players() : table[number, number]
     Returns: A table with the ped id or whatever and second the player id
     Example usage: PLAYER.IS_PLAYER_DEAD(next(yu.get_all_players()))
 
+get_all_weapons() : table[id: string, hash: hash]
+    Returns: A table with all weapon hashes
+
 # Key Listener
 key_listener.add_callback(key: number, callback: function, [keyup: boolean]) : number
     Param key: Id of the key to add the callback to.
