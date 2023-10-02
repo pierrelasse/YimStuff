@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.3",
-    versionid = 472
+    version = "1.2.4",
+    versionid = 513
 }
 
 function SussySpt:new()
@@ -186,7 +186,9 @@ function SussySpt:initTabSelf()
             [0] = "Michael",
             [1] = "Franklin",
             [2] = "Trevor"
-        }
+        },
+        rpmultiplierp = 262146,
+        rank = -1
     }
 
     local function refresh()
@@ -198,6 +200,8 @@ function SussySpt:initTabSelf()
         for k, v in pairs(a.spCharacters) do
             a.spCash[k] = stats.get_int("SP"..k.."_TOTAL_CASH")
         end
+
+        a.rpmultiplier = globals.get_float(a.rpmultiplierp)
     end
 
     refresh()
@@ -350,12 +354,18 @@ function SussySpt:initTabSelf()
 
                 if SussySpt.in_online then
                     if (ImGui.BeginTabItem("Stats")) then
-                        if ImGui.Button("Reset MentalState ["..a.mentalState.."]") then
+                        if ImGui.Button("Refresh") then
+                            yu.add_task(refresh)
+                        end
+
+                        if ImGui.Button("Reset mental state") then
                             yu.add_task(function()
+                                stats.set_float(yu.mpx("PLAYER_MENTAL_STATE"), 0.0)
                                 stats.set_float("MPPLY_PLAYER_MENTAL_STATE", 0.0)
                                 refresh()
                             end)
                         end
+                        yu.rendering.tooltip("Not really works")
 
                         yu.rendering.renderCheckbox("Badsport", "self_badsporet", function(state)
                             yu.add_task(function()
@@ -385,10 +395,67 @@ function SussySpt:initTabSelf()
                             end)
                         end
 
+                        local rpmNewValue, rpmChanged = ImGui.InputInt("RP multiplier", a.rpmultiplier, 0, 10000000)
+                        if rpmChanged then
+                            a.rpmultiplier = rpmNewValue
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Apply##rpmultiplier") then
+                            yu.add_task(function()
+                                globals.set_float(a.rpmultiplierp, a.rpmultiplier)
+                            end)
+                        end
+
+                        -- local rankNewValue, rankChanged = ImGui.InputInt("Rank", a.rank, a.rank, 8000, 8)
+                        -- if rankChanged then
+                        --     a.rank = rankNewValue
+                        -- end
+
+                        -- ImGui.SameLine()
+
+                        -- if ImGui.Button("Apply##rank") then
+                        --     yu.add_task(function()
+                        --         if a.rank >= 0 and a.rank <= 8000 then
+                        --             local newRP = globals.get_int(294329 + a.rank) + 100
+                        --             log.info(a.rank..": "..newRP)
+                        --             -- stats.set_int("MP"..yu.playerindex(2).."_CHAR_SET_RP_GIFT_ADMIN", newRP)
+                        --         else
+                        --             yu.notify(3, "Invalid rank ["..a.rank.."] 0-8000", "Rank correction")
+                        --         end
+                        --     end)
+                        -- end
+
+                        if ImGui.Button("Give RP") then
+                            script.run_in_fiber(function(runscript)
+                                -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
+                                PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
+                                -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
+                                log.info("ok")
+                                -- runscript:sleep(1000)
+                                -- PLAYER.SET_PLAYER_WANTED_LEVEL(yu.pid(), oldLvl, false)
+                            end)
+                        end
+                        yu.rendering.tooltip("Might be detected, idk")
+
                         ImGui.EndTabItem()
                     end
 
                     if (ImGui.BeginTabItem("Unlocks")) then
+                        if ImGui.Button("Max all stats") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."SCRIPT_INCREASE_DRIV", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_FLY", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_LUNG", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_SHO", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_STAM", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_STL", 100)
+                                stats.set_int(mpx.."SCRIPT_INCREASE_STRN", 100)
+                            end)
+                        end
+
                         if ImGui.Button("Unlock xmas liveries") then
                             yu.add_task(function()
                                 stats.set_int("MPPLY_XMASLIVERIES", -1)
@@ -2604,13 +2671,12 @@ function SussySpt:initTabHBO()
                     end
                 end
 
-                ImGui.SameLine()
+                -- ImGui.SameLine()
 
-                if ImGui.Button("$15m fleeca cuts") then
-                    yu.add_task(function()
-
-                    end)
-                end
+                -- if ImGui.Button("$15m fleeca cuts") then
+                --     yu.add_task(function()
+                --     end)
+                -- end
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
@@ -2850,7 +2916,9 @@ function SussySpt:initTabHBO()
         refreshStats()
 
         SussySpt.registerRepeatingTask(function()
-            globals.set_int(293534, yu.shc(yu.rendering.isCheckboxChecked("hbo_agency_24mfinale"), 2400000, 1000000))
+            if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
+                globals.set_int(294496, 2500000)
+            end
         end)
 
         addToRender(8, function()
@@ -2917,7 +2985,11 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Extra")
 
-                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_24mfinale")
+                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_smthmfinale", function(state)
+                    if not state then
+                        globals.set_int(294496, 1000000)
+                    end
+                end)
                 yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
 
                 yu.rendering.renderCheckbox("Remove contracts & payphone hits cooldown", "hbo_agency_cphcd", function(state)
@@ -3149,6 +3221,30 @@ function SussySpt:initTabPlayers()
         return nil
     end
 
+    local entities = {}
+    local function registerEntity(obj)
+        entities[yu.gun()] = obj
+        NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(obj)
+    end
+
+    local function markAllEntitiesAsRemoveable()
+        for k, v in pairs(entities) do
+            if ENTITY.DOES_ENTITY_EXIST(v) then
+                ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(v)
+            end
+        end
+        entities = {}
+    end
+
+    local function deleteAllEntities()
+        for k, v in pairs(entities) do
+            if ENTITY.DOES_ENTITY_EXIST(v) then
+                ENTITY.DELETE_ENTITY(v)
+            end
+        end
+        entities = {}
+    end
+
     SussySpt.add_render(function()
         if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_players") then
             if ImGui.Begin("Players") then
@@ -3161,7 +3257,6 @@ function SussySpt:initTabPlayers()
                     local plr = yu.rendering.renderList(SussySpt.playerNames, SussySpt.selectedPlayer, "test_playerlist", "Players")
                     if plr.changed then
                         SussySpt.selectedPlayer = plr.key
-                        SussySpt.selectedPlayerName = plr.value
                     end
                     ImGui.PopItemWidth()
 
@@ -3226,6 +3321,15 @@ function SussySpt:initTabPlayers()
                     end)
                 end
                 yu.rendering.tooltip("It's in the you category because you get banned :)))))")
+
+                if ImGui.Button("Mark all entities as unneeded") then
+                    yu.add_task(markAllEntitiesAsRemoveable)
+                end
+                yu.rendering.tooltip("This makes all entities (objects, peds, vehicles) that where spawned by you, removed when the game thinks so")
+
+                if ImGui.Button("Delete all entities") then
+                    yu.add_task(deleteAllEntities)
+                end
 
                 ImGui.Text("Nice :D")
 
@@ -3313,7 +3417,6 @@ function SussySpt:initTabPlayers()
                 --         local player = selectedPlayer()
                 --         if player ~= nil then
                 --             log.info("Player:"..tostring(player.ped))
-                            
                 --             for k, v in pairs(yu.get_all_players_mi()) do
                 --                 if v.ped ~= player.ped and ENTITY.DOES_ENTITY_EXIST(v.ped) then
                 --                     local c = ENTITY.GET_ENTITY_COORDS(v.ped)
@@ -3337,10 +3440,9 @@ function SussySpt:initTabPlayers()
 
                             for i = 0, 1 do
                                 local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - 0.7, true, false, false)
-                                NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(obj)
+                                registerEntity(obj)
                                 ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
                                 ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
                             end
                         end
                     end)
@@ -3404,11 +3506,11 @@ function SussySpt:initTabPlayers()
 
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                             local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z, true, true, true)
+                            registerEntity(obj)
                             ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
                             ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                             ENTITY.SET_ENTITY_ALPHA(obj, 0, false)
                             ENTITY.IS_ENTITY_VISIBLE(obj, false)
-                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
                         end
                     end)
                 end
@@ -3461,7 +3563,7 @@ function SussySpt:initTabPlayers()
 
                                 local ped = PED.CREATE_PED(21, modelHash, c.x + i, c.y - i, c.z, 0, true, true)
                                         -- and PED.CREATE_PED(21, modelHash, c.x - i, c.y + i, c.z, 0, true, true)
-                                NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ped)
+                                registerEntity(ped)
 
                                 PED.SET_PED_COMBAT_MOVEMENT(ped, 3)
                                 PED.SET_PED_COMBAT_RANGE(ped, 2)
@@ -3473,8 +3575,6 @@ function SussySpt:initTabPlayers()
                                 WEAPON.GIVE_WEAPON_TO_PED(ped, yu.get_random_element_from_table(weaponHashes), 9999, false, true)
 
                                 TASK.TASK_COMBAT_PED(ped, player.ped, 0, 16)
-
-                                ENTITY.SET_PED_AS_NO_LONGER_NEEDED(ped)
                             end
 
                             log.info("Spawn enemies done")
@@ -3482,6 +3582,17 @@ function SussySpt:initTabPlayers()
                     end)
                 end
                 yu.rendering.tooltip("D0pamine be like x2")
+
+                if ImGui.Button("Remove all weapons") then
+                    yu.add_task(function()
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            for k, v in pairs(yu.get_all_weapons()) do
+                                WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                            end
+                        end
+                    end)
+                end
             end
             ImGui.End()
         end
