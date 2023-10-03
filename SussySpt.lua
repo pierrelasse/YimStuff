@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.7",
-    versionid = 599
+    version = "1.2.8",
+    versionid = 601
 }
 
 function SussySpt:new()
@@ -865,17 +865,16 @@ function SussySpt:initTabSelf()
                         ImGui.Text("Works best when low ping / session host")
 
                         for k, v in pairs({
-                            ["apparcadebusiness"] = "Arcade",
-                            ["apparcadebusinesshub"] = "Arcade Mastercontrol",
-                            ["appbikerbusiness"] = "MC (The Open Road)",
-                            ["appbunkerbusiness"] = "Bunker",
+                            ["appsecuroserv"] = "SecuroServ (Office)",
                             ["appbusinesshub"] = "Nightclub",
-                            ["apphackertruck"] = "Terrorbyte",
-                            ["appinternet"] = "Internet",
-                            ["appsecuroserv"] = "Office (SecuroServ)",
-                            ["appsmuggler"] = "Hanger",
+                            ["appAvengerOperations"] = "Avenger Operations",
                             ["appfixersecurity"] = "Agency",
-                            ["appAvengerOperations"] = "Avenger"
+                            ["appinternet"] = "Internet (Phone)",
+                            ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
+                            ["appbunkerbusiness"] = "Bunker Business",
+                            ["apphackertruck"] = "Terrorbyte",
+                            ["appbikerbusiness"] = "The Open Road (MC)",
+                            ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
                         }) do
                             if ImGui.Button(v) then
                                 yu.add_task(function()
