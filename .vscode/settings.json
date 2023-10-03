@@ -30,7 +30,8 @@
         "MISC",
         "FIRE",
         "OBJECT",
-        "WEAPON"
+        "WEAPON",
+        "ImGuiTableFlags"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.6",
-    versionid = 568
+    version = "1.2.7",
+    versionid = 599
 }
 
 function SussySpt:new()
@@ -48,7 +48,6 @@ function SussySpt:new()
 
     SussySpt:initTabSelf()
     SussySpt:initTabHeist()
-    SussySpt:initTabCMM()
 
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
         log.info("[CHAT] "..PLAYER.GET_PLAYER_NAME(player_id)..": "..chat_message)
@@ -328,12 +327,21 @@ function SussySpt:initTabSelf()
         end
     end)
 
+    function run_script(name)
+        script.run_in_fiber(function(runscript)
+            SCRIPT.REQUEST_SCRIPT(name)
+            repeat runscript:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
+            SYSTEM.START_NEW_SCRIPT(name, 5000)
+            SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
+        end)
+    end
+
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_self") then
             if ImGui.Begin("Self") then
                 ImGui.BeginTabBar(a.tabBarId)
 
-                if (ImGui.BeginTabItem("General")) then
+                if ImGui.BeginTabItem("General") then
                     yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "self_invisible", function(state)
                         if state then
                             SussySpt.invisible = true
@@ -348,7 +356,7 @@ function SussySpt:initTabSelf()
                 end
 
                 if SussySpt.in_online then
-                    if (ImGui.BeginTabItem("Stats")) then
+                    if ImGui.BeginTabItem("Stats") then
                         if ImGui.Button("Refresh") then
                             yu.add_task(refresh)
                         end
@@ -437,7 +445,7 @@ function SussySpt:initTabSelf()
                         ImGui.EndTabItem()
                     end
 
-                    if (ImGui.BeginTabItem("Unlocks")) then
+                    if ImGui.BeginTabItem("Unlocks") then
                         if ImGui.Button("Max all stats") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
@@ -852,9 +860,35 @@ function SussySpt:initTabSelf()
 
                         ImGui.EndTabItem()
                     end
+
+                    if ImGui.BeginTabItem("CMM") then
+                        ImGui.Text("Works best when low ping / session host")
+
+                        for k, v in pairs({
+                            ["apparcadebusiness"] = "Arcade",
+                            ["apparcadebusinesshub"] = "Arcade Mastercontrol",
+                            ["appbikerbusiness"] = "MC (The Open Road)",
+                            ["appbunkerbusiness"] = "Bunker",
+                            ["appbusinesshub"] = "Nightclub",
+                            ["apphackertruck"] = "Terrorbyte",
+                            ["appinternet"] = "Internet",
+                            ["appsecuroserv"] = "Office (SecuroServ)",
+                            ["appsmuggler"] = "Hanger",
+                            ["appfixersecurity"] = "Agency",
+                            ["appAvengerOperations"] = "Avenger"
+                        }) do
+                            if ImGui.Button(v) then
+                                yu.add_task(function()
+                                    run_script(k)
+                                end)
+                            end
+                        end
+
+                        ImGui.EndTabItem()
+                    end
                 end
 
-                if (ImGui.BeginTabItem("Misc")) then
+                if ImGui.BeginTabItem("Misc") then
                     -- yu.rendering.renderCheckbox("F1 - Covers", "self_vehicle_f1covers", function(state)
                     --     yu.add_task(function()
                     --         local veh = yu.veh()
@@ -929,11 +963,18 @@ function SussySpt:initTabSelf()
         end)
         statsTab:add_separator()
 
+        statsTab:add_imgui(function()
+            ImGui.BeginGroup()
+        end)
         statsTab:add_text("Marked as:")
         statsTab:add_text("  - Is cheater: "..yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
         statsTab:add_text("  - Was i badsport: "..yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
         statsTab:add_text("  - Is high earner: "..yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
-        statsTab:add_separator()
+        statsTab:add_imgui(function()
+            ImGui.EndGroup()
+            ImGui.SameLine()
+            ImGui.BeginGroup()
+        end)
         statsTab:add_text("Reports:")
         statsTab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
         statsTab:add_text("  - Exploits: "..stats.get_int("MPPLY_EXPLOITS"))
@@ -951,7 +992,11 @@ function SussySpt:initTabSelf()
         statsTab:add_text("  - Bad crew emblem: "..stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
         statsTab:add_text("  - Friendly: "..stats.get_int("MPPLY_FRIENDLY"))
         statsTab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
-        statsTab:add_separator()
+        statsTab:add_imgui(function()
+            ImGui.EndGroup()
+            ImGui.SameLine()
+            ImGui.BeginGroup()
+        end)
         statsTab:add_text("Other:")
         statsTab:add_text("  - Earned Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_EVC")))
         statsTab:add_text("  - Spent Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_SVC")))
@@ -982,6 +1027,9 @@ function SussySpt:initTabSelf()
         statsTab:add_text("  - Longest Jump: "..stats.get_int(yu.mpx().."FARTHEST_JUMP_DIST"))
         statsTab:add_text("  - Longest Jump in Vehicle: "..stats.get_int(yu.mpx().."HIGHEST_JUMP_REACHED"))
         statsTab:add_text("  - Highest Hidraulic Jump: "..stats.get_int(yu.mpx().."LOW_HYDRAULIC_JUMP"))
+        statsTab:add_imgui(function()
+            ImGui.EndGroup()
+        end)
     end
 
     initTabStats()
@@ -2377,34 +2425,63 @@ function SussySpt:initTabHBO()
     local function initNightclub()
         local a = {
             storages = {
-                [286294 + 1] = "Sporting Goods (Gunrunning Bunker)",
-                [286294 + 2] = "South American Imports (M/C Cocaine Lockup)",
-                [286294 + 3] = "Pharmaceutical Research (M/C Methamphetamine Lab)",
-                [286294 + 4] = "Organic Produce (M/C Weed Farm)",
-                [286294 + 5] = "Printing & Copying (M/C Document Forgery Office)",
-                [286294 + 6] = "Cash Creation (M/C Counterfeit Cash Factory)",
-                [286294 + 7] = "Cargo and Shipments (CEO Office Special Cargo Warehouse or Smuggler's Hangar)"
-            }
+                [0] = {
+                    "Cargo and Shipments (CEO Office Special Cargo Warehouse or Smuggler's Hangar)",
+                    "Cargo and Shipments",
+                    50
+                },
+                [1] = {
+                    "Sporting Goods (Gunrunning Bunker)",
+                    "Sporting Goods",
+                    100
+                },
+                [2] = {
+                    "South American Imports (M/C Cocaine Lockup)",
+                    "S. A. Imports",
+                    10
+                },
+                [3] = {
+                    "Pharmaceutical Research (M/C Methamphetamine Lab)",
+                    "Pharmaceutical Research",
+                    20
+                },
+                [4] = {
+                    "Organic Produce (M/C Weed Farm)",
+                    "Organic Produce",
+                    80
+                },
+                [5] = {
+                    "Printing & Copying (M/C Document Forgery Office)",
+                    "Printing & Copying",
+                    60
+                },
+                [6] = {
+                    "Cash Creation (M/C Counterfeit Cash Factory)",
+                    "Cash Creation",
+                    40
+                },
+            },
+            storageflags =
+                ImGuiTableFlags.BordersV
+                + ImGuiTableFlags.BordersOuterH
+                + ImGuiTableFlags.RowBg
         }
 
         local function refresh()
             a.popularity = stats.get_int(yu.mpx().."CLUB_POPULARITY")
 
             a.storage = {}
+            local storageGlob = globals.get_int(286713)
             for k, v in pairs(a.storages) do
-                a.storage[k] = globals.get_int(k)
+                local stock = stats.get_int(yu.mpx("HUB_PROD_TOTAL_"..k))
+                a.storage[k] = {
+                    stock.."/"..v[3],
+                    "$"..yu.format_num(storageGlob * stock)
+                }
             end
         end
 
         refresh()
-
-        local function renderStorage(index)
-            local value = a.storage[index] or 0
-            local newValue, changed = ImGui.InputInt(a.storages[index], value, value / 2, value * 2)
-            if changed then
-                a.storage[index] = newValue
-            end
-        end
 
         local nightclubScript = "am_mp_nightclub"
 
@@ -2448,7 +2525,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Set") then
+                if ImGui.Button("Set##popularity") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."CLUB_POPULARITY", a.popularity)
                         refresh()
@@ -2458,7 +2535,7 @@ function SussySpt:initTabHBO()
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Refill") then
+                if ImGui.Button("Refill##popularity") then
                     yu.add_task(function()
                         stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
                         a.popularity = 1000
@@ -2485,11 +2562,34 @@ function SussySpt:initTabHBO()
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Storage")
 
-                ImGui.Text("This is garbe and completely useless.")
-                ImGui.Text("This will get removed or updated")
+                if ImGui.BeginTable("##storage_table", 4, 3905) then
+                    ImGui.TableSetupColumn("Goods")
+                    ImGui.TableSetupColumn("Stock")
+                    ImGui.TableSetupColumn("Stock price")
+                    ImGui.TableSetupColumn("Actions")
+                    ImGui.TableHeadersRow()
 
-                for k, v in pairs(a.storages) do
-                    renderStorage(k)
+                    local row = 0
+                    for k, v in pairs(a.storages) do
+                        local storage = a.storage[k]
+                        if storage ~= nil then
+                            ImGui.TableNextRow()
+                            ImGui.PushID(row)
+                            ImGui.TableSetColumnIndex(0)
+                            ImGui.TextWrapped(v[2])
+                            yu.rendering.tooltip(v[1])
+                            ImGui.TableSetColumnIndex(1)
+                            ImGui.Text(storage[1])
+                            ImGui.TableSetColumnIndex(2)
+                            ImGui.Text(storage[2])
+                            ImGui.TableSetColumnIndex(3)
+                            ImGui.SmallButton("Refill##storage")
+                            ImGui.PopID()
+                            row = row + 1
+                        end
+                    end
+
+                    ImGui.EndTable()
                 end
 
                 ImGui.EndGroup()
@@ -3715,71 +3815,6 @@ function SussySpt:initTabHeist()
     end
 
     initTabDDay()
-end
-
-function SussySpt:initTabCMM()
-    local tab = tbs.getTab(SussySpt.tab, " CMM")
-    tab:clear()
-
-    function run_script(name)
-        script.run_in_fiber(function(runscript)
-            SCRIPT.REQUEST_SCRIPT(name)
-            repeat runscript:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
-            SYSTEM.START_NEW_SCRIPT(name, 5000)
-            SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
-        end)
-    end
-
-    function smth()
-        return globals.get_int(1895156 + yu.playerindex(1) * 609 + 10 + 429 + 1)
-    end
-
-    tab:add_text("(Computers Management Menu)")
-    tab:add_text("I heard that it works the best in sessions where you are host")
-
-    for k, v in pairs({
-        ["apparcadebusiness"] = "Arcade",
-	    ["apparcadebusinesshub"] = "Arcade Mastercontrol",
-	    ["appbikerbusiness"] = "MC",
-	    ["appbroadcast"] = "",
-	    ["appbunkerbusiness"] = "Bunker",
-	    ["appbusinesshub"] = "Nightclub",
-	    ["appcamera"] = "",
-	    ["appchecklist"] = "",
-	    ["appcontacts"] = "",
-	    ["appcovertops"] = "",
-	    ["appemail"] = "",
-	    ["appextraction"] = "",
-	    ["apphackertruck"] = "Terrorbyte",
-	    ["apphs_sleep"] = "",
-	    ["appimportexport"] = "",
-	    ["appinternet"] = "",
-	    ["appjipmp"] = "",
-	    ["appmedia"] = "",
-	    ["appmpbossagency"] = "",
-	    ["appmpemail"] = "",
-	    ["appmpjoblistnew"] = "",
-	    ["apporganiser"] = "",
-	    ["apprepeatplay"] = "",
-	    ["appsecurohack"] = "",
-	    ["appsecuroserv"] = "",
-	    ["appsettings"] = "",
-	    ["appsidetask"] = "",
-	    ["appsmuggler"] = "Hanger",
-	    ["apptextmessage"] = "",
-	    ["apptrackify"] = "",
-	    ["appvlsi"] = "",
-	    ["appzit"] = "",
-        ["appfixersecurity"] = "Agency",
-        ["appAvengerOperations"] = "Avenger"
-    }) do
-        if v == "" then
-            v = k
-        end
-        tab:add_button(v, function()
-            run_script(k)
-        end)
-    end
 end
 
 SussySpt:new()
