@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.9",
-    versionid = 604
+    version = "1.2.8",
+    versionid = 605
 }
 
 function SussySpt:new()
@@ -909,17 +909,19 @@ function SussySpt:initTabSelf()
                     --     end)
                     -- end)
 
-                    yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
-                        globals.set_int(292539, yu.shc(state, 0, 60000))
-                    end)
+                    if SussySpt.in_online then
+                        yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
+                            globals.set_int(292539, yu.shc(state, 0, 60000))
+                        end)
 
-                    yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
-                        globals.set_int(292540, yu.shc(state, 4000, 99999))
-                    end)
+                        yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
+                            globals.set_int(292540, yu.shc(state, 4000, 99999))
+                        end)
 
-                    yu.rendering.renderCheckbox("Snow", "misc_snow", function(state)
-                        globals.set_int(266897, yu.shc(state, 1, 0))
-                    end)
+                        yu.rendering.renderCheckbox("Snow", "misc_snow", function(state)
+                            globals.set_int(266897, yu.shc(state, 1, 0))
+                        end)
+                    end
 
                     ImGui.Separator()
                     yu.rendering.bigText("Singleplayer")
@@ -935,6 +937,41 @@ function SussySpt:initTabSelf()
                             end
                         end)
                     end
+
+                    ImGui.EndTabItem()
+                end
+
+                if SussySpt.in_online and ImGui.BeginTabItem("Money") then
+                    local om1sMoneyMade = yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0)
+                    if om1sMoneyMade > 0 then
+                        ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade).."##1m1sloopmm")
+                    end
+                    yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
+                        if state then
+                            script.run_in_fiber(function(runscript)
+                                while true do
+                                    if not SussySpt.in_online or not yu.rendering.isCheckboxChecked("self_money_1m1sloop") then
+                                        log.info("Self->Money: $1M/1s loop was cancelled")
+                                        break
+                                    end
+
+                                    local i = 4536533
+                                    globals.set_int(i + 1, 2147483646)
+                                    globals.set_int(i + 7, 2147483647)
+                                    globals.set_int(i + 6, 0)
+                                    globals.set_int(i + 5, 0)
+                                    globals.set_int(i + 3, 0x615762F1)
+                                    globals.set_int(i + 2, 1000000)
+                                    globals.set_int(i, 1)
+
+                                    yu.set_stat("SELF_MONEY_1M1SLOOP_MM", yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0) + 1000000)
+
+                                    runscript:sleep(1000)
+                                end
+                            end)
+                        end
+                    end)
+                    yu.rendering.tooltip("This is a pure copy from SilentNight! DC: silentsalo")
 
                     ImGui.EndTabItem()
                 end
