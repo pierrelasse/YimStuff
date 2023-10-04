@@ -31,7 +31,9 @@
         "FIRE",
         "OBJECT",
         "WEAPON",
-        "ImGuiTableFlags"
+        "ImGuiTableFlags",
+        "NETSHOPPING",
+        "MONEY"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

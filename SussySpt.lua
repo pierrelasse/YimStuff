@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.8",
-    versionid = 601
+    version = "1.2.9",
+    versionid = 604
 }
 
 function SussySpt:new()
@@ -567,7 +567,6 @@ function SussySpt:initTabSelf()
                         if ImGui.Button("CEO & MC money clutter") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
-
                                 for k, v in pairs({
                                     ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
                                     ["LIFETIME_BIKER_BUY_UNDERTA"]=1000,["LIFETIME_BIKER_SELL_COMPLET"]=1000,["LIFETIME_BIKER_SELL_UNDERTA"]=1000,["LIFETIME_BIKER_BUY_COMPLET1"]=1000,["LIFETIME_BIKER_BUY_UNDERTA1"]=1000,
@@ -734,7 +733,6 @@ function SussySpt:initTabSelf()
                         if ImGui.Button("Unlock bunker research (temp?)") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
-
                                 for j = 0, 63 do
                                     stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j)
                                     stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j)
@@ -746,7 +744,6 @@ function SussySpt:initTabSelf()
                                     stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j)
                                     stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j)
                                 end
-
                                 local bitSize = 8
                                 for j = 0, 64 / bitSize - 1 do
                                     stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
@@ -852,7 +849,18 @@ function SussySpt:initTabSelf()
                                 yu.notify(1, "Success!")
                             end)
                         end
-                        yu.rendering.tooltip("This will probably get you ratelimited")
+
+                        if ImGui.Button("Unlock gunvan guns") then
+                            yu.add_task(function()
+                                globals.set_int(296276, 0)
+                                globals.set_int(296242, -22923932) -- Railgun
+                                globals.set_int(296243, 1171102963) -- Stungun
+                                globals.set_int(296244, -1355376991) -- Up-n-Atomizer
+                                globals.set_int(296245, -1238556825) -- Widowmaker
+                                globals.set_int(296246, 1198256469) -- Hellbringer
+                                globals.set_int(296247, -1786099057) -- Bat
+                            end)
+                        end
 
                         ImGui.Separator()
 
@@ -2504,6 +2512,13 @@ function SussySpt:initTabHBO()
             end
         end
 
+        local function refillStorage(k)
+            yu.add_task(function()
+                stats.set_int(yu.mpx("HUB_PROD_TOTAL_"..k), a.storages[k][3])
+                refresh()
+            end)
+        end
+
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
@@ -2582,7 +2597,9 @@ function SussySpt:initTabHBO()
                             ImGui.TableSetColumnIndex(2)
                             ImGui.Text(storage[2])
                             ImGui.TableSetColumnIndex(3)
-                            ImGui.SmallButton("Refill##storage")
+                            if ImGui.SmallButton("Refill##storage") then
+                                refillStorage(k)
+                            end
                             ImGui.PopID()
                             row = row + 1
                         end
@@ -3265,6 +3282,17 @@ function SussySpt:initTabQA()
                         globals.set_int(2672524 + 3690, 1)
                     end
                     yu.rendering.tooltip("Give bullshark testosterone.\nYou will receive less damage and do more damage.")
+
+                    if ImGui.Button("Deposit wallet") then
+                        yu.add_task(function()
+                            local ch = yu.playerindex()
+                            NETSHOPPING._NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(
+                                ch,
+                                MONEY.NETWORK_GET_VC_WALLET_BALANCE(ch)
+                            )
+                        end)
+                    end
+                    yu.rendering.tooltip("Puts all your money in the bank")
                 end
             end
             ImGui.End()
