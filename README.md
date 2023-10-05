@@ -8,7 +8,9 @@ It also offers a key listener, a notification system, and utils for lua like boo
 
 ### How to use in your script????
 Add `yu = require "yimutils"` to the top of your script to use yimutils.<br />
+Alternatively you can put the content of yimutils.lua at the top of your script.
 Then you can do `yu.` and like use it idk.<br />
+
 You can find [the docs here](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.txt).
 
 ## Lua Utils
