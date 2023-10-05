@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.8",
-    versionid = 605
+    version = "1.2.9",
+    versionid = 620
 }
 
 function SussySpt:new()
@@ -93,6 +93,7 @@ function SussySpt:initRendering(tab)
         yu.rendering.renderCheckbox("Quick actions", "cat_qa")
         if SussySpt.in_online then
             yu.rendering.renderCheckbox("Players", "cat_players")
+            yu.rendering.tooltip("This is a beta feature and way not done yet")
         end
     end)
 end
@@ -368,7 +369,6 @@ function SussySpt:initTabSelf()
                                 refresh()
                             end)
                         end
-                        yu.rendering.tooltip("Not really works")
 
                         yu.rendering.renderCheckbox("Badsport", "self_badsporet", function(state)
                             yu.add_task(function()
@@ -402,6 +402,7 @@ function SussySpt:initTabSelf()
                         if rpmChanged then
                             a.rpmultiplier = rpmNewValue
                         end
+                        yu.rendering.tooltip("Max is 140")
 
                         ImGui.SameLine()
 
@@ -430,17 +431,16 @@ function SussySpt:initTabSelf()
                         --     end)
                         -- end
 
-                        if ImGui.Button("Give RP") then
-                            script.run_in_fiber(function(runscript)
-                                -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
-                                PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
-                                -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
-                                log.info("ok")
-                                -- runscript:sleep(1000)
-                                -- PLAYER.SET_PLAYER_WANTED_LEVEL(yu.pid(), oldLvl, false)
-                            end)
-                        end
-                        yu.rendering.tooltip("Might be detected, idk")
+                        -- if ImGui.Button("Give RP") then
+                        --     script.run_in_fiber(function(runscript)
+                        --         -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
+                        --         PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
+                        --         -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
+                        --         log.info("ok")
+                        --         -- runscript:sleep(1000)
+                        --         -- PLAYER.SET_PLAYER_WANTED_LEVEL(yu.pid(), oldLvl, false)
+                        --     end)
+                        -- end
 
                         ImGui.EndTabItem()
                     end
@@ -449,13 +449,11 @@ function SussySpt:initTabSelf()
                         if ImGui.Button("Max all stats") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
-                                stats.set_int(mpx.."SCRIPT_INCREASE_DRIV", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_FLY", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_LUNG", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_SHO", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_STAM", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_STL", 100)
-                                stats.set_int(mpx.."SCRIPT_INCREASE_STRN", 100)
+                                for k, v in pairs({"SCRIPT_INCREASE_DRIV","SCRIPT_INCREASE_FLY",
+                                    "SCRIPT_INCREASE_LUNG","SCRIPT_INCREASE_SHO","SCRIPT_INCREASE_STAM",
+                                    "SCRIPT_INCREASE_STL","SCRIPT_INCREASE_STRN"}) do
+                                    stats.set_int(mpx..v, 100)
+                                end
                             end)
                         end
 
@@ -496,7 +494,7 @@ function SussySpt:initTabSelf()
                         end
                         yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
 
-                        if ImGui.Button("Unlock all shooting range rewards") then
+                        if ImGui.Button("Unlock shooting range") then
                             yu.add_task(function()
                                 stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
                                 stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
@@ -511,7 +509,7 @@ function SussySpt:initTabSelf()
                                 stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
                             end)
                         end
-                        yu.rendering.tooltip("Bunker thing")
+                        yu.rendering.tooltip("Bunker thingy")
 
                         if ImGui.Button("Unlock trade prices for arenawar vehicles") then
                             yu.add_task(function()
@@ -531,19 +529,16 @@ function SussySpt:initTabSelf()
                                 end
                             end)
                         end
-                        yu.rendering.tooltip("Only available in arena war car workstation")
 
                         if ImGui.Button("Unlock fast run and reload") then
                             yu.add_task(function()
                                 for i = 1, 3 do
                                     stats.set_int(yu.mpx().."CHAR_ABILITY_"..i.."_UNLCK", -1)
-                                end
-                                for i = 1, 3 do
                                     stats.set_int(yu.mpx().."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
                                 end
                             end)
                         end
-                        yu.rendering.tooltip("Makes you run faster and reload weapons faster")
+                        yu.rendering.tooltip("Makes you run and reload weapons faster")
 
                         if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
                             yu.add_task(function()
@@ -552,7 +547,6 @@ function SussySpt:initTabSelf()
                                 globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
                             end)
                         end
-                        yu.rendering.tooltip("RGB GAMER colors")
 
                         if ImGui.Button("Unlock all tattos") then
                             yu.add_task(function()
@@ -610,16 +604,16 @@ function SussySpt:initTabSelf()
 
                         if ImGui.Button("Skip yacht missions") then
                             yu.add_task(function()
-                                stats.set_int(yu.mpx().."YACHT_MISSION_PROG", 0)
-                                stats.set_int(yu.mpx().."YACHT_MISSION_FLOW", 21845)
-                                stats.set_int(yu.mpx().."CASINO_DECORATION_GIFT_1", -1)
+                                stats.set_int(yu.mpx("YACHT_MISSION_PROG"), 0)
+                                stats.set_int(yu.mpx("YACHT_MISSION_FLOW"), 21845)
+                                stats.set_int(yu.mpx("CASINO_DECORATION_GIFT_1"), -1)
                             end)
                         end
 
                         if ImGui.Button("Skip ULP missions") then
                             yu.add_task(function()
-                                stats.set_int(yu.mpx().."ULP_MISSION_PROGRESS", 127)
-                                stats.set_int(yu.mpx().."ULP_MISSION_CURRENT", 0)
+                                stats.set_int(yu.mpx("ULP_MISSION_PROGRESS"), 127)
+                                stats.set_int(yu.mpx("ULP_MISSION_CURRENT"), 0)
                             end)
                         end
 
@@ -723,7 +717,7 @@ function SussySpt:initTabSelf()
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
                                 stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
-                                if (stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5) then
+                                if stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5 then
                                     stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
                                 end
                                 stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
@@ -896,19 +890,6 @@ function SussySpt:initTabSelf()
                 end
 
                 if ImGui.BeginTabItem("Misc") then
-                    -- yu.rendering.renderCheckbox("F1 - Covers", "self_vehicle_f1covers", function(state)
-                    --     yu.add_task(function()
-                    --         local veh = yu.veh()
-                    --         if veh == nil then
-                    --             yu.notify(3, "No vehicle found!", "F1 Covers")
-                    --         else
-                    --             if state then
-                    --             else
-                    --             end
-                    --         end
-                    --     end)
-                    -- end)
-
                     if SussySpt.in_online then
                         yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
                             globals.set_int(292539, yu.shc(state, 0, 60000))
@@ -944,7 +925,7 @@ function SussySpt:initTabSelf()
                 if SussySpt.in_online and ImGui.BeginTabItem("Money") then
                     local om1sMoneyMade = yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0)
                     if om1sMoneyMade > 0 then
-                        ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade).."##1m1sloopmm")
+                        ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade))
                     end
                     yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
                         if state then
@@ -995,88 +976,86 @@ function SussySpt:initTabSelf()
 
     -- old
 
-    local tab = tbs.getTab(SussySpt.tab, " Self")
-    tab:clear()
+    local tab = tbs.getTab(SussySpt.tab, " Stats")
 
-    local function initTabStats()
-        local statsTab = tbs.getTab(tab, "  Stats", "self")
-        statsTab:clear()
+    local function refreshStats()
+        tab:clear()
 
-        statsTab:add_button("Refresh", function()
-            initTabStats()
+        tab:add_button("Refresh", function()
+            refreshStats()
         end)
-        statsTab:add_separator()
+        tab:add_separator()
 
-        statsTab:add_imgui(function()
+        tab:add_imgui(function()
             ImGui.BeginGroup()
         end)
-        statsTab:add_text("Marked as:")
-        statsTab:add_text("  - Is cheater: "..yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
-        statsTab:add_text("  - Was i badsport: "..yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
-        statsTab:add_text("  - Is high earner: "..yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
-        statsTab:add_imgui(function()
+        tab:add_text("Marked as:")
+        tab:add_text("  - Is cheater: "..yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
+        tab:add_text("  - Was i badsport: "..yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
+        tab:add_text("  - Is high earner: "..yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
+        tab:add_imgui(function()
             ImGui.EndGroup()
             ImGui.SameLine()
             ImGui.BeginGroup()
         end)
-        statsTab:add_text("Reports:")
-        statsTab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
-        statsTab:add_text("  - Exploits: "..stats.get_int("MPPLY_EXPLOITS"))
-        statsTab:add_text("  - Game exploits: "..stats.get_int("MPPLY_GAME_EXPLOITS"))
-        statsTab:add_text("  - Text chat > Annoying me: "..stats.get_int("MPPLY_TC_ANNOYINGME"))
-        statsTab:add_text("  - Text chat > Hate Speech: "..stats.get_int("MPPLY_TC_HATE"))
-        statsTab:add_text("  - Voice chat > Annoying me: "..stats.get_int("MPPLY_VC_ANNOYINGME"))
-        statsTab:add_text("  - Voice chat > Hate Speech: "..stats.get_int("MPPLY_VC_HATE"))
-        statsTab:add_text("  - Offensive language: "..stats.get_int("MPPLY_OFFENSIVE_LANGUAGE"))
-        statsTab:add_text("  - Offensive tagplate: "..stats.get_int("MPPLY_OFFENSIVE_TAGPLATE"))
-        statsTab:add_text("  - Offensive content: "..stats.get_int("MPPLY_OFFENSIVE_UGC"))
-        statsTab:add_text("  - Bad crew name: "..stats.get_int("MPPLY_BAD_CREW_NAME"))
-        statsTab:add_text("  - Bad crew motto: "..stats.get_int("MPPLY_BAD_CREW_MOTTO"))
-        statsTab:add_text("  - Bad crew status: "..stats.get_int("MPPLY_BAD_CREW_STATUS"))
-        statsTab:add_text("  - Bad crew emblem: "..stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
-        statsTab:add_text("  - Friendly: "..stats.get_int("MPPLY_FRIENDLY"))
-        statsTab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
-        statsTab:add_imgui(function()
+        tab:add_text("Reports:")
+        tab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
+        tab:add_text("  - Exploits: "..stats.get_int("MPPLY_EXPLOITS"))
+        tab:add_text("  - Game exploits: "..stats.get_int("MPPLY_GAME_EXPLOITS"))
+        tab:add_text("  - Text chat > Annoying me: "..stats.get_int("MPPLY_TC_ANNOYINGME"))
+        tab:add_text("  - Text chat > Hate Speech: "..stats.get_int("MPPLY_TC_HATE"))
+        tab:add_text("  - Voice chat > Annoying me: "..stats.get_int("MPPLY_VC_ANNOYINGME"))
+        tab:add_text("  - Voice chat > Hate Speech: "..stats.get_int("MPPLY_VC_HATE"))
+        tab:add_text("  - Offensive language: "..stats.get_int("MPPLY_OFFENSIVE_LANGUAGE"))
+        tab:add_text("  - Offensive tagplate: "..stats.get_int("MPPLY_OFFENSIVE_TAGPLATE"))
+        tab:add_text("  - Offensive content: "..stats.get_int("MPPLY_OFFENSIVE_UGC"))
+        tab:add_text("  - Bad crew name: "..stats.get_int("MPPLY_BAD_CREW_NAME"))
+        tab:add_text("  - Bad crew motto: "..stats.get_int("MPPLY_BAD_CREW_MOTTO"))
+        tab:add_text("  - Bad crew status: "..stats.get_int("MPPLY_BAD_CREW_STATUS"))
+        tab:add_text("  - Bad crew emblem: "..stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
+        tab:add_text("  - Friendly: "..stats.get_int("MPPLY_FRIENDLY"))
+        tab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
+        tab:add_imgui(function()
             ImGui.EndGroup()
             ImGui.SameLine()
             ImGui.BeginGroup()
         end)
-        statsTab:add_text("Other:")
-        statsTab:add_text("  - Earned Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_EVC")))
-        statsTab:add_text("  - Spent Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_SVC")))
-        statsTab:add_text("  - Players Killed: "..stats.get_int("MPPLY_KILLS_PLAYERS"))
-        statsTab:add_text("  - Deatsh per player: "..stats.get_int("MPPLY_DEATHS_PLAYER"))
-        statsTab:add_text("  - PvP K/D Ratio: "..stats.get_int("MPPLY_KILL_DEATH_RATIO"))
-        statsTab:add_text("  - Deathmatches Published: "..stats.get_int("MPPLY_AWD_FM_CR_DM_MADE"))
-        statsTab:add_text("  - Races Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
-        statsTab:add_text("  - Screenshots Published: "..stats.get_int("MPPLY_NUM_CAPTURES_CREATED"))
-        statsTab:add_text("  - LTS Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
-        statsTab:add_text("  - Persons who have played your misions: "..stats.get_int("MPPLY_AWD_FM_CR_PLAYED_BY_PEEP"))
-        statsTab:add_text("  - Likes to missions: "..stats.get_int("MPPLY_AWD_FM_CR_MISSION_SCORE"))
-        statsTab:add_text("  - Traveled (metters): "..stats.get_int("MPPLY_CHAR_DIST_TRAVELLED"))
-        statsTab:add_text("  - Swiming: "..stats.get_int(yu.mpx().."DIST_SWIMMING"))
-        statsTab:add_text("  - Walking: "..stats.get_int(yu.mpx().."DIST_WALKING"))
-        statsTab:add_text("  - Running: "..stats.get_int(yu.mpx().."DIST_RUNNING"))
-        statsTab:add_text("  - Highest fall without dying: "..stats.get_int(yu.mpx().."LONGEST_SURVIVED_FREEFALL"))
-        statsTab:add_text("  - Driving Cars: "..stats.get_int(yu.mpx().."DIST_CAR"))
-        statsTab:add_text("  - Driving motorbikes: "..stats.get_int(yu.mpx().."DIST_BIKE"))
-        statsTab:add_text("  - Flying Helicopters: "..stats.get_int(yu.mpx().."DIST_HELI"))
-        statsTab:add_text("  - Flying Planes: "..stats.get_int(yu.mpx().."DIST_PLANE"))
-        statsTab:add_text("  - Driving Botes: "..stats.get_int(yu.mpx().."DIST_BOAT"))
-        statsTab:add_text("  - Driving ATVs: "..stats.get_int(yu.mpx().."DIST_QUADBIKE"))
-        statsTab:add_text("  - Driving Bicycles: "..stats.get_int(yu.mpx().."DIST_BICYCLE"))
-        statsTab:add_text("  - Longest Front Willie: "..stats.get_int(yu.mpx().."LONGEST_STOPPIE_DIST"))
-        statsTab:add_text("  - Longest Willie: "..stats.get_int(yu.mpx().."LONGEST_WHEELIE_DIST"))
-        statsTab:add_text("  - Largest driving without crashing: "..stats.get_int(yu.mpx().."LONGEST_DRIVE_NOCRASH"))
-        statsTab:add_text("  - Longest Jump: "..stats.get_int(yu.mpx().."FARTHEST_JUMP_DIST"))
-        statsTab:add_text("  - Longest Jump in Vehicle: "..stats.get_int(yu.mpx().."HIGHEST_JUMP_REACHED"))
-        statsTab:add_text("  - Highest Hidraulic Jump: "..stats.get_int(yu.mpx().."LOW_HYDRAULIC_JUMP"))
-        statsTab:add_imgui(function()
+        tab:add_text("Other:")
+        tab:add_text("  - Earned Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_EVC")))
+        tab:add_text("  - Spent Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_SVC")))
+        tab:add_text("  - Players Killed: "..stats.get_int("MPPLY_KILLS_PLAYERS"))
+        tab:add_text("  - Deatsh per player: "..stats.get_int("MPPLY_DEATHS_PLAYER"))
+        tab:add_text("  - PvP K/D Ratio: "..stats.get_int("MPPLY_KILL_DEATH_RATIO"))
+        tab:add_text("  - Deathmatches Published: "..stats.get_int("MPPLY_AWD_FM_CR_DM_MADE"))
+        tab:add_text("  - Races Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
+        tab:add_text("  - Screenshots Published: "..stats.get_int("MPPLY_NUM_CAPTURES_CREATED"))
+        tab:add_text("  - LTS Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
+        tab:add_text("  - Persons who have played your misions: "..stats.get_int("MPPLY_AWD_FM_CR_PLAYED_BY_PEEP"))
+        tab:add_text("  - Likes to missions: "..stats.get_int("MPPLY_AWD_FM_CR_MISSION_SCORE"))
+        tab:add_text("  - Traveled (metters): "..stats.get_int("MPPLY_CHAR_DIST_TRAVELLED"))
+        tab:add_text("  - Swiming: "..stats.get_int(yu.mpx().."DIST_SWIMMING"))
+        tab:add_text("  - Walking: "..stats.get_int(yu.mpx().."DIST_WALKING"))
+        tab:add_text("  - Running: "..stats.get_int(yu.mpx().."DIST_RUNNING"))
+        tab:add_text("  - Highest fall without dying: "..stats.get_int(yu.mpx().."LONGEST_SURVIVED_FREEFALL"))
+        tab:add_text("  - Driving Cars: "..stats.get_int(yu.mpx().."DIST_CAR"))
+        tab:add_text("  - Driving motorbikes: "..stats.get_int(yu.mpx().."DIST_BIKE"))
+        tab:add_text("  - Flying Helicopters: "..stats.get_int(yu.mpx().."DIST_HELI"))
+        tab:add_text("  - Flying Planes: "..stats.get_int(yu.mpx().."DIST_PLANE"))
+        tab:add_text("  - Driving Botes: "..stats.get_int(yu.mpx().."DIST_BOAT"))
+        tab:add_text("  - Driving ATVs: "..stats.get_int(yu.mpx().."DIST_QUADBIKE"))
+        tab:add_text("  - Driving Bicycles: "..stats.get_int(yu.mpx().."DIST_BICYCLE"))
+        tab:add_text("  - Longest Front Willie: "..stats.get_int(yu.mpx().."LONGEST_STOPPIE_DIST"))
+        tab:add_text("  - Longest Willie: "..stats.get_int(yu.mpx().."LONGEST_WHEELIE_DIST"))
+        tab:add_text("  - Largest driving without crashing: "..stats.get_int(yu.mpx().."LONGEST_DRIVE_NOCRASH"))
+        tab:add_text("  - Longest Jump: "..stats.get_int(yu.mpx().."FARTHEST_JUMP_DIST"))
+        tab:add_text("  - Longest Jump in Vehicle: "..stats.get_int(yu.mpx().."HIGHEST_JUMP_REACHED"))
+        tab:add_text("  - Highest Hidraulic Jump: "..stats.get_int(yu.mpx().."LOW_HYDRAULIC_JUMP"))
+        tab:add_imgui(function()
             ImGui.EndGroup()
         end)
     end
 
-    initTabStats()
+    refreshStats()
 end
 
 function SussySpt:initTabHBO()
@@ -1220,7 +1199,7 @@ function SussySpt:initTabHBO()
         end
 
         local function refreshStats()
-            a.primarytarget = stats.get_int(yu.mpx().."H4CNF_TARGET")
+            a.primarytarget = stats.get_int(yu.mpx("H4CNF_TARGET"))
             addUnknownValue(a.primarytargets, a.primarytarget)
 
             a.compoundstorage = getStorage("C")
@@ -3320,13 +3299,18 @@ function SussySpt:initTabQA()
                     end
                     yu.rendering.tooltip("Give bullshark testosterone.\nYou will receive less damage and do more damage.")
 
+                    ImGui.SameLine()
+
                     if ImGui.Button("Deposit wallet") then
                         yu.add_task(function()
                             local ch = yu.playerindex()
-                            NETSHOPPING._NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(
-                                ch,
-                                MONEY.NETWORK_GET_VC_WALLET_BALANCE(ch)
-                            )
+                            local amount = MONEY.NETWORK_GET_VC_WALLET_BALANCE(ch)
+                            if amount > 0 then
+                                NETSHOPPING.NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(
+                                    ch,
+                                    amount
+                                )
+                            end
                         end)
                     end
                     yu.rendering.tooltip("Puts all your money in the bank")
@@ -3453,7 +3437,7 @@ function SussySpt:initTabPlayers()
 
     SussySpt.add_render(function()
         if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_players") then
-            if ImGui.Begin("Players") then
+            if ImGui.Begin("Players (Beta)") then
                 if playerList ~= nil then
                     if selectedPlayer(false) == nil then
                         SussySpt.selectedPlayer = PLAYER.GET_PLAYER_NAME(yu.pid())
@@ -3800,6 +3784,27 @@ function SussySpt:initTabPlayers()
                         end
                     end)
                 end
+
+                if ImGui.Button("Crash test 1") then
+                    script.run_in_fiber(function(runscript)
+                        local player = selectedPlayer()
+                        if player ~= nil then
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            local vehicle = VEHICLE.CREATE_VEHICLE(941494461, c.x, c.y, c.z, 0.0, true, true)
+                            registerEntity(vehicle)
+                            ENTITY.SET_ENTITY_VISIBLE(vehicle, false, 0)
+                            PED.SET_PED_INTO_VEHICLE(player.ped, vehicle, -1)
+                            VEHICLE.VEHICLE_SET_PARACHUTE_MODEL_OVERRIDE(vehicle, 1338692320)
+                            runscript:sleep(500)
+                            VEHICLE.SET_VEHICLE_PARACHUTE_ACTIVE(vehicle, true)
+                            runscript:sleep(1000)
+                            ENTITY.FREEZE_ENTITY_POSITION(vehicle, true)
+                            runscript:sleep(5000)
+                            ENTITY.DELETE_ENTITY(vehicle)
+                            log.info("Done?")
+                        end
+                    end)
+                end
             end
             ImGui.End()
         end
@@ -3838,11 +3843,7 @@ function SussySpt:initTabHeist()
             prepsTab:add_separator()
 
             prepsTab:add_text("Select Doomsday Act:")
-            for k, v in pairs({
-                [1] = "Data Breaches",
-                [2] = "Bogdan Problem",
-                [3] = "Doomsday Scenario"
-            }) do
+            for k, v in pairs({"Data Breaches","Bogdan Problem","Doomsday Scenario"}) do
                 prepsTab:add_button(v, function()
                     if k == 1 then
                         stats.set_int(yu.mpx().."GANGOPS_FLOW_MISSION_PROG", 503)
