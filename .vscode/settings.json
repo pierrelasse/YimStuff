@@ -33,7 +33,9 @@
         "WEAPON",
         "ImGuiTableFlags",
         "NETSHOPPING",
-        "MONEY"
+        "MONEY",
+        "ImGuiWindowFlags",
+        "ImGuiCol"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

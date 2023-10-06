@@ -68,7 +68,7 @@ return (function()
             return string.format(format or "%02dH %02dM %02dS", hours, minutes, seconds)
         end
 
-        api.copy_table = function(tbl)
+        api.copy_table = function(tbl) -- TODO: Copy also value table?
             local newTable = {}
             for k, v in pairs(tbl) do
                 newTable[k] = v
@@ -552,9 +552,10 @@ return (function()
         end
 
         api.rendering.bigText = function(text)
-            ImGui.SetWindowFontScale(1.22)
+            -- local defaultScale = api.get_stat("DEFAULT_WINDOW_FONT_SCALE", 1)
+            -- ImGui.SetWindowFontScale(defaultScale + .22)
             ImGui.Text(text)
-            ImGui.SetWindowFontScale(1)
+            -- ImGui.SetWindowFontScale(defaultScale)
         end
 
         api.rendering.tooltip = function(text)
