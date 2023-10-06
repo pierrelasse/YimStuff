@@ -552,10 +552,10 @@ return (function()
         end
 
         api.rendering.bigText = function(text)
-            -- local defaultScale = api.get_stat("DEFAULT_WINDOW_FONT_SCALE", 1)
-            -- ImGui.SetWindowFontScale(defaultScale + .22)
+            local defaultScale = api.get_stat("DEFAULT_WINDOW_FONT_SCALE", 1)
+            ImGui.SetWindowFontScale(defaultScale + .22)
             ImGui.Text(text)
-            -- ImGui.SetWindowFontScale(defaultScale)
+            ImGui.SetWindowFontScale(defaultScale)
         end
 
         api.rendering.tooltip = function(text)
