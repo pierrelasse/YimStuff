@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.2.9",
-    versionid = 735
+    versionid = 835
 }
 
 function SussySpt:new()
@@ -15,7 +15,7 @@ function SussySpt:new()
     SussySpt.rendering = {
         themes = {
             ["Nightly"] = {
-                [ImGuiCol] = {
+                ImGuiCol = {
                     TitleBg = {9, 27, 46, 1.0},
                     TitleBgActive = {9, 27, 46, 1.0},
                     WindowBg = {0, 19, 37, .98},
@@ -54,7 +54,6 @@ function SussySpt:new()
 
     local function render_tab(v)
         if not (type(v.should_display) == "function" and v.should_display() == false) and ImGui.BeginTabItem(v.name) then
-            
             if yu.len(v.sub) > 0 then
                 ImGui.BeginTabBar("##tabbar_"..v.id)
                 for k1, v1 in pairs(v.sub) do
@@ -75,32 +74,42 @@ function SussySpt:new()
     end
 
     SussySpt.render = function()
-        local current_theme = SussySpt.rendering.get_theme()
-        local need_pop = 0
-        if type(current_theme) == "table" then
-            for k, v in pairs(current_theme) do
-                if type(k) == "table" and type(v) == "table" then
-                    for k1, v1 in pairs(v) do
-                        ImGui.PushStyleColor(k[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
-                        need_pop = need_pop + 1
-                    end
-                end
-            end
+        for k, v in pairs(SussySpt.rendercb) do
+            v()
         end
 
-        if ImGui.Begin("SussySpt") then
-            ImGui.BeginTabBar("##tabbar")
-            for k, v in pairs(SussySpt.rendering.tabs) do
-                render_tab(v)
-            end
-            ImGui.EndTabBar()
-        end
-        ImGui.End()
+        -- local current_theme = SussySpt.rendering.get_theme()
+        -- local pops = {}
+        -- if type(current_theme) == "table" then
+        --     for k, v in pairs(current_theme) do
+        --         if type(k) == "string" and type(v) == "table" then
+        --             for k1, v1 in pairs(v) do
+        --                 if k == "ImGuiCol" then
+        --                     ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
+        --                     pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
+        --                 end
+        --             end
+        --         end
+        --     end
+        -- end
 
-        yu.loop(need_pop, function()
-            ImGui.PopStyleColor()
-        end)
+        -- if ImGui.Begin("SussySpt") then
+        --     ImGui.BeginTabBar("##tabbar")
+        --     for k, v in pairs(SussySpt.rendering.tabs) do
+        --         render_tab(v)
+        --     end
+        --     ImGui.EndTabBar()
+        -- end
+        -- ImGui.End()
+
+        -- for k, v in pairs(pops) do
+        --     yu.loop(v, function()
+        --         ImGui[k]()
+        --     end)
+        -- end
     end
+
+    ImGui.GetStyle().WindowRounding = 6
 
     SussySpt.repeating_tasks = {}
 
@@ -117,59 +126,8 @@ function SussySpt:new()
     SussySpt.tick = function()
     end
 
-
-
-    -- script.register_looped("sussyspt", SussySpt.tick)
-    -- tab:add_imgui(SussySpt.render)
-
-
-    SussySpt.rendering.add_tab(function()
-        return SussySpt.rendering.new_tab("Self", function()
-            
-        end)
-    end)
-
-    SussySpt.rendering.add_tab(function()
-        local data = SussySpt.rendering.new_tab("Online")
-
-        -- data.should_display = function()
-        --     return SussySpt.in_online
-        -- end
-
-        -- data.sub.players = (function()
-        --     local searchtext = ""
-
-        --     return SussySpt.rendering.new_tab("Players##a", function()
-        --         -- ImGui.Text("Select a player")
-                
-        --         -- ImGui.BeginGroup()
-
-        --         -- if ImGui.BeginListBox("a") then
-        --         --     if ImGui.Selectable("player1", false) then
-        --         --     end
-
-        --         --     ImGui.EndListBox()
-        --         -- end
-
-        --         -- ImGui.EndGroup()
-        --         -- ImGui.BeginGroup()
-        --         -- ImGui.EndGroup()
-
-        --         -- local srtext, srselected = ImGui.InputText("Search", searchtext)
-        --     end)
-        -- end)()
-
-        data.sub.he = SussySpt.rendering.new_tab("HeistEditor", function()
-            ImGui.Text("lol")
-        end)
-
-        return data
-    end)
-
     SussySpt:initUtils()
 
-
-    
     tab:add_text("Version: "..SussySpt.version)
     tab:add_text("Version id: "..SussySpt.versionid)
     tab:add_text("Made by pierrelasse.")
@@ -182,12 +140,6 @@ function SussySpt:new()
         end
     end
 
-    tab:add_imgui(function()
-        for k, v in pairs(SussySpt.rendercb) do
-            v()
-        end
-    end)
-
     SussySpt.repeatingTasks = {}
     SussySpt.registerRepeatingTask = function(cb)
         local id = #SussySpt.repeatingTasks + 1
@@ -198,7 +150,7 @@ function SussySpt:new()
         SussySpt.repeatingTasks[id] = nil
     end
 
-    SussySpt:initRendering(tab)
+    SussySpt:initRendering()
 
     SussySpt:initTabHBO()
     SussySpt:initTabQA()
@@ -223,16 +175,158 @@ function SussySpt:new()
         end
     end)
 
+    SussySpt.rendering.add_tab(function()
+        local data = SussySpt.rendering.new_tab("Online")
+
+        -- data.should_display = function()
+        --     return SussySpt.in_online
+        -- end
+
+        data.sub.players = (function()
+            local a = {
+                playerlistwidth = 187,
+                searchtext = "",
+                playersmi = {},
+                playerelements = {},
+                selectedplayer = nil,
+                selectedplayerinfo = {},
+                refreshtick = 0
+            }
+
+            local function refreshPlayerlist(runscript)
+                if not SussySpt.in_online then
+                    a.playersmi = {}
+                    a.playerelements = a.playersmi
+                    a.selectedplayer = nil
+                    return
+                end
+                a.playersmi = yu.get_all_players_mi()
+                a.playerelements = {}
+
+                for k, v in pairs(a.playersmi) do
+                    local name = PLAYER.GET_PLAYER_NAME(v.player)
+                    if name ~= nil and name ~= "**Invalid**" then
+                        if string.match(name, a.searchtext) then
+                            a.playersmi[k].name = name
+                            a.playerelements[k] = name
+                            a.selectedplayerinfo.health = "Health: "..ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        end
+                    end
+                end
+            end
+
+            -- SussySpt.register_repeating_task(function()
+            --     a.refreshtick = a.refreshtick + 1
+            --     if a.refreshtick > 20 then
+            --         a.refreshtick = 0
+            --         script.run_in_fiber(refreshPlayerlist)
+            --     end
+            -- end)
+
+            return SussySpt.rendering.new_tab("Players", function()
+                ImGui.BeginGroup()
+                ImGui.PushItemWidth(a.playerlistwidth)
+                if ImGui.BeginListBox("##playerlist") then
+                    for k, v in pairs(a.playerelements) do
+                        if ImGui.Selectable(v, false) then
+                            a.selectedplayer = k
+                        end
+                    end
+
+                    ImGui.EndListBox()
+                end
+                ImGui.PopItemWidth()
+
+                ImGui.Text("Search")
+                ImGui.PushItemWidth(a.playerlistwidth)
+                local srtext, srselected = ImGui.InputText("##search", a.searchtext, 32)
+                a.searchtext = string.lower(srtext)
+                ImGui.PopItemWidth()
+
+                ImGui.EndGroup()
+
+                if a.selectedplayer ~= nil then
+                    local player = a.playersmi[a.selectedplayer]
+                    ImGui.SameLine()
+
+                    ImGui.BeginGroup()
+
+                    ImGui.BeginGroup()
+                    ImGui.Text("Selected Player")
+                    ImGui.Text("Name: "..player.name)
+                    ImGui.Text(a.selectedplayerinfo.health)
+                    ImGui.Text("Distance: -1m")
+                    yu.rendering.renderCheckbox("Spectate", "online_players_spectate")
+                    ImGui.EndGroup()
+
+                    ImGui.SameLine()
+
+                    ImGui.BeginGroup()
+
+                    if ImGui.TreeNodeEx("Utils") then
+                        if ImGui.Button("Heal") then
+                        end
+
+                        if ImGui.Button("Goto") then
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Bring") then
+                        end
+
+                        if ImGui.Button("Steal outfit") then
+                        end
+
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Trolls") then
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Utils2") then
+                        if ImGui.Button("Heal") then
+                        end
+
+                        if ImGui.Button("Goto") then
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Bring") then
+                        end
+
+                        if ImGui.Button("Steal outfit") then
+                        end
+
+                        ImGui.TreePop()
+                    end
+
+                    ImGui.EndGroup()
+
+                    ImGui.EndGroup()
+                end
+            end)
+        end)()
+
+        return data
+    end)
+
+    script.register_looped("sussyspt", SussySpt.tick)
+    SussySpt.tab:add_imgui(SussySpt.render)
+
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(SussySpt.in_online, "Yep", "fm script no run so no?"), "Loaded!")
 end
 
-function SussySpt:initRendering(tab)
+function SussySpt:initRendering()
+    local tab = SussySpt.tab
     SussySpt.pushStyle = function()end
     SussySpt.popStyle = function()end
 
     tab:add_separator()
     tab:add_text("Categories:")
-    SussySpt.add_render(function()
+    tab:add_imgui(function()
         ImGui.SameLine()
 
         if ImGui.Button("Show all") then
@@ -1212,7 +1306,7 @@ function SussySpt:initTabSelf()
         end)
     end
 
-    refreshStats()
+    -- refreshStats()
 end
 
 function SussySpt:initTabHBO()
@@ -4053,69 +4147,69 @@ end
 
 SussySpt:new()
 
-function SussySpt:uhhh()
-    local function twcr(c)
-        return c/255
-    end
+-- function SussySpt:uhhh()
+--     local function twcr(c)
+--         return c/255
+--     end
 
-    local selected = {
-        {0, 0, 0, 0},
-        {0, 0, 0, 0},
-        {0, 0, 0, 0},
-        {0, 0, 0, 0}
-    }
+--     local selected = {
+--         {0, 0, 0, 0},
+--         {0, 0, 0, 0},
+--         {0, 0, 0, 0},
+--         {0, 0, 0, 0}
+--     }
 
-    for k, v in pairs(selected) do
-        for k1, v1 in pairs(v) do
-            if math.random(0, 2) == 0 then
-                v[k1] = 1
-            else
-                v[k1] = 0
-            end
-        end
-    end
+--     for k, v in pairs(selected) do
+--         for k1, v1 in pairs(v) do
+--             if math.random(0, 2) == 0 then
+--                 v[k1] = 1
+--             else
+--                 v[k1] = 0
+--             end
+--         end
+--     end
 
-    SussySpt.add_render(function()
-        ImGui.PushStyleColor(ImGuiCol.TitleBg, twcr(9), twcr(27), twcr(46), 1.0)
-        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, twcr(9), twcr(27), twcr(46), 1.0)
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, twcr(0), twcr(19), twcr(37), 1.0)
-        local isOpen = ImGui.Begin("Test lool")
-        ImGui.PopStyleColor()
-        ImGui.PopStyleColor()
-        ImGui.PopStyleColor()
+--     SussySpt.add_render(function()
+--         ImGui.PushStyleColor(ImGuiCol.TitleBg, twcr(9), twcr(27), twcr(46), 1.0)
+--         ImGui.PushStyleColor(ImGuiCol.TitleBgActive, twcr(9), twcr(27), twcr(46), 1.0)
+--         ImGui.PushStyleColor(ImGuiCol.WindowBg, twcr(0), twcr(19), twcr(37), 1.0)
+--         local isOpen = ImGui.Begin("Test lool")
+--         ImGui.PopStyleColor()
+--         ImGui.PopStyleColor()
+--         ImGui.PopStyleColor()
 
-        if isOpen then
-            for y = 0, 3 do
-                for x = 0, 3 do
-                    if x > 0 then
-                        ImGui.SameLine()
-                    end
-                    ImGui.PushID(y * 4 + x)
-                    local color = yu.shc(selected[y + 1][x + 1] ~= 0, {30, 143, 123}, {55, 55, 55})
-                    ImGui.PushStyleColor(ImGuiCol.Text, twcr(color[1]), twcr(color[2]), twcr(color[3]), 1.0)
-                    if ImGui.Selectable("kekw", false, 0, 50, 50) then
-                        selected[y + 1][x + 1] = selected[y + 1][x + 1] == 0 and 1 or 0
-                        if x > 0 then
-                            selected[y + 1][x] = selected[y + 1][x] == 0 and 1 or 0
-                        end
-                        if x < 3 then
-                            selected[y + 1][x + 2] = selected[y + 1][x + 2] == 0 and 1 or 0
-                        end
-                        if y > 0 then
-                            selected[y][x + 1] = selected[y][x + 1] == 0 and 1 or 0
-                        end
-                        if y < 3 then
-                            selected[y + 2][x + 1] = selected[y + 2][x + 1] == 0 and 1 or 0
-                        end
-                    end
-                    ImGui.PopStyleColor()
-                    ImGui.PopID()
-                end
-            end
+--         if isOpen then
+--             for y = 0, 3 do
+--                 for x = 0, 3 do
+--                     if x > 0 then
+--                         ImGui.SameLine()
+--                     end
+--                     ImGui.PushID(y * 4 + x)
+--                     local color = yu.shc(selected[y + 1][x + 1] ~= 0, {30, 143, 123}, {55, 55, 55})
+--                     ImGui.PushStyleColor(ImGuiCol.Text, twcr(color[1]), twcr(color[2]), twcr(color[3]), 1.0)
+--                     if ImGui.Selectable("kekw", false, 0, 50, 50) then
+--                         selected[y + 1][x + 1] = selected[y + 1][x + 1] == 0 and 1 or 0
+--                         if x > 0 then
+--                             selected[y + 1][x] = selected[y + 1][x] == 0 and 1 or 0
+--                         end
+--                         if x < 3 then
+--                             selected[y + 1][x + 2] = selected[y + 1][x + 2] == 0 and 1 or 0
+--                         end
+--                         if y > 0 then
+--                             selected[y][x + 1] = selected[y][x + 1] == 0 and 1 or 0
+--                         end
+--                         if y < 3 then
+--                             selected[y + 2][x + 1] = selected[y + 2][x + 1] == 0 and 1 or 0
+--                         end
+--                     end
+--                     ImGui.PopStyleColor()
+--                     ImGui.PopID()
+--                 end
+--             end
 
-            ImGui.End()
-        end
-    end)
-end
+--             ImGui.End()
+--         end
+--     end)
+-- end
 
-SussySpt:uhhh()
+-- SussySpt:uhhh()
