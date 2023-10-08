@@ -369,7 +369,7 @@ return (function()
         api.get_all_players = function()
             local players = {}
             for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v) and PED.IS_PED_A_PLAYER(v) then
+                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v, false) and PED.IS_PED_A_PLAYER(v) then
                     players[k] = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
                 end
             end
@@ -379,7 +379,7 @@ return (function()
         api.get_all_players_mi = function()
             local players = {}
             for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v) and PED.IS_PED_A_PLAYER(v) then
+                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v, false) and PED.IS_PED_A_PLAYER(v) then
                     players[k] = {
                         whatever = k,
                         ped = v,
