@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.3.0",
-    versionid = 930
+    version = "1.3.1",
+    versionid = 949
 }
 
 function SussySpt:new()
@@ -125,7 +125,23 @@ function SussySpt:new()
         SussySpt.repeating_tasks[id] = nil
     end
 
+    SussySpt.disable_controls = 0
+    SussySpt.push_disable_controls = function(a)
+        if a ~= false then
+            SussySpt.disable_controls = 20
+        end
+    end
+
     SussySpt.tick = function()
+        if SussySpt.disable_controls > 0 then
+            SussySpt.disable_controls = SussySpt.disable_controls - 1
+
+            for i = 0, 2 do
+                for i2 = 0, 360 do
+                    PAD.DISABLE_CONTROL_ACTION(i, i2, true)
+                end
+            end
+        end
     end
 
     SussySpt:initUtils()
@@ -186,8 +202,15 @@ function SussySpt:new()
 
         local function networkent(ent)
             NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
-            NETWORK.SET_NETWORK_ID_CAN_MIGRATE(ent)
             return ent
+        end
+
+        local function networkobj(obj)
+            networkent(obj)
+            local id = NETWORK.OBJ_TO_NET(obj)
+            NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
+            NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
+            NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
         end
 
         data.sub.players = (function()
@@ -240,11 +263,12 @@ function SussySpt:new()
                 updatePlayerElements()
             end
 
-            for k, v in pairs({menu_event.PlayerLeave, menu_event.PlayerJoin}) do
+            for k, v in pairs({menu_event.PlayerLeave,menu_event.PlayerJoin,menu_event.PlayerMgrShutdown}) do
                 event.register_handler(v, function()
                     yu.rif(refreshPlayerList)
                 end)
             end
+            yu.rif(refreshPlayerList)
 
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
@@ -265,6 +289,7 @@ function SussySpt:new()
                 ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
                 local srtext, srselected = ImGui.InputText("##search", a.searchtext, 32)
+                SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.searchtext ~= srtext then
                     a.searchtext = srtext
                     updatePlayerElements()
@@ -300,6 +325,13 @@ function SussySpt:new()
                         end
                         yu.rendering.tooltip("Teleport yourself to the player")
 
+                        if ImGui.Button("Bring") then
+                            yu.rif(function()
+                                local c =ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                network.set_player_coords(player.player, c.x, c.y, c.z)
+                            end)
+                        end
+
                         if ImGui.Button("Repair vehicle") then
                             yu.rif(function()
                                 if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
@@ -307,6 +339,24 @@ function SussySpt:new()
                                     VEHICLE.SET_VEHICLE_FIXED(veh)
                                     VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
                                 end
+                            end)
+                        end
+
+                        if ImGui.Button("Kill him") then
+                            yu.rif(function()
+                                local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
+                                local oc = PED.GET_PED_BONE_COORDS(player.ped, 57005, .0, .0, .2)
+                                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
+                                    oc.x, oc.y, oc.z,
+                                    dc.x, dc.y, dc.z,
+                                    10000,
+                                    true,
+                                    joaat("WEAPON_REVOLVER_MK2"),
+                                    0,
+                                    false,
+                                    true,
+                                    24000.0
+                                )
                             end)
                         end
 
@@ -337,7 +387,7 @@ function SussySpt:new()
                                     1,
                                     true,
                                     joaat("WEAPON_STUNGUN"),
-                                    player.ped,
+                                    0,
                                     true,
                                     false,
                                     24000.0
@@ -361,7 +411,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Invisible") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, i, 8, false, true, .0)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 3, 8, false, true, .0)
                             end)
                         end
                         yu.rendering.tooltip("\"Random\" death")
@@ -387,7 +437,7 @@ function SussySpt:new()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     for i = 0, 1 do
                                         local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
-                                        networkent(obj)
+                                        networkobj(obj)
                                         ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                     end
@@ -407,6 +457,7 @@ function SussySpt:new()
 
                                     local createObject = function(offsetX, offsetY, heading)
                                         local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                        networkobj(obj)
                                         ENTITY.SET_ENTITY_HEADING(obj, heading)
                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                         ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
@@ -421,6 +472,7 @@ function SussySpt:new()
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                    networkobj(obj)
                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                     ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
@@ -433,6 +485,7 @@ function SussySpt:new()
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                    networkobj(obj)
                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                     ENTITY.SET_ENTITY_VISIBLE(obj, false)
@@ -457,13 +510,15 @@ function SussySpt:new()
                                     STREAMING.REQUEST_MODEL(hash)
                                     repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
                                     local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
-                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
                                     networkent(veh)
                                     VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
                                     runscript:sleep(100)
-                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 120.0)
+                                    for i = 0, 10 do
+                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                                        runscript:sleep(100)
+                                    end
                                     ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
-                                    runscript:sleep(2000)
                                     VEHICLE.DELETE_VEHICLE(veh)
                                 end
                             end)
@@ -526,6 +581,7 @@ function SussySpt:new()
                 ImGui.PushItemWidth(a.awidth)
 
                 local model_text, model_selected = ImGui.InputText("Model", a.model, 32)
+                SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.model ~= model_text then
                     a.model = model_text
                     a.invalidmodel = nil
@@ -555,7 +611,7 @@ function SussySpt:new()
                             STREAMING.REQUEST_MODEL(hash)
                             repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
-                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
                                 ENTITY.DELETE_ENTITY(a.entity)
                             end
 
@@ -574,7 +630,9 @@ function SussySpt:new()
 
                             if a.entity then
                                 ENTITY.FREEZE_ENTITY_POSITION(a.entity, yu.rendering.isCheckboxChecked("world_objspawner_freeze"))
-                                OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
+                                if yu.rendering.isCheckboxChecked("world_objspawner_groundplace") then
+                                    OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
+                                end
                             else
                                 temp_text({"Error while spawning entity", 255, 0, 0}, 2500)
                             end
@@ -589,7 +647,7 @@ function SussySpt:new()
 
                     if ImGui.Button("Delete##last_spawned") then
                         yu.rif(function(runscript)
-                            if ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                            if ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
                                 ENTITY.DELETE_ENTITY(a.entity)
                             end
                         end)
@@ -604,17 +662,18 @@ function SussySpt:new()
 
                 if ImGui.TreeNodeEx("Spawn options") then
                     yu.rendering.renderCheckbox("Frozen", "world_objspawner_freeze", function(state)
-                        yu.rif(function(runscript)
-                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                        yu.rif(function()
+                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
                                 ENTITY.FREEZE_ENTITY_POSITION(a.entity, state)
                             end
                         end)
                     end)
 
                     yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
+                    yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
                     yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
-                        yu.rif(function(runscript)
-                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                        yu.rif(function()
+                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
                                 ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
                             end
                         end)
