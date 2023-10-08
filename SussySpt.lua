@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.2.9",
-    versionid = 835
+    version = "1.3.0",
+    versionid = 928
 }
 
 function SussySpt:new()
@@ -18,7 +18,7 @@ function SussySpt:new()
                 ImGuiCol = {
                     TitleBg = {9, 27, 46, 1.0},
                     TitleBgActive = {9, 27, 46, 1.0},
-                    WindowBg = {0, 19, 37, .98},
+                    WindowBg = {0, 19, 37, .86},
                     Tab = {10, 30, 46, 1.0},
                     TabActive = {14, 60, 90, 1.0},
                     TabHovered = {52, 64, 71, 1.0},
@@ -29,8 +29,10 @@ function SussySpt:new()
         tabs = {}
     }
 
+    SussySpt.rendering.theme = next(SussySpt.rendering.themes)
+
     SussySpt.rendering.get_theme = function()
-        return SussySpt.rendering.themes[next(SussySpt.rendering.themes)]
+        return SussySpt.rendering.themes[SussySpt.rendering.theme]
     end
 
     SussySpt.rendering.new_tab = function(name, render)
@@ -78,35 +80,35 @@ function SussySpt:new()
             v()
         end
 
-        -- local current_theme = SussySpt.rendering.get_theme()
-        -- local pops = {}
-        -- if type(current_theme) == "table" then
-        --     for k, v in pairs(current_theme) do
-        --         if type(k) == "string" and type(v) == "table" then
-        --             for k1, v1 in pairs(v) do
-        --                 if k == "ImGuiCol" then
-        --                     ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
-        --                     pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
-        --                 end
-        --             end
-        --         end
-        --     end
-        -- end
+        local current_theme = SussySpt.rendering.get_theme()
+        local pops = {}
+        if type(current_theme) == "table" then
+            for k, v in pairs(current_theme) do
+                if type(k) == "string" and type(v) == "table" then
+                    for k1, v1 in pairs(v) do
+                        if k == "ImGuiCol" then
+                            ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
+                            pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
+                        end
+                    end
+                end
+            end
+        end
 
-        -- if ImGui.Begin("SussySpt") then
-        --     ImGui.BeginTabBar("##tabbar")
-        --     for k, v in pairs(SussySpt.rendering.tabs) do
-        --         render_tab(v)
-        --     end
-        --     ImGui.EndTabBar()
-        -- end
-        -- ImGui.End()
+        if ImGui.Begin("SussySpt v"..SussySpt.version) then
+            ImGui.BeginTabBar("##tabbar")
+            for k, v in pairs(SussySpt.rendering.tabs) do
+                render_tab(v)
+            end
+            ImGui.EndTabBar()
+        end
+        ImGui.End()
 
-        -- for k, v in pairs(pops) do
-        --     yu.loop(v, function()
-        --         ImGui[k]()
-        --     end)
-        -- end
+        for k, v in pairs(pops) do
+            yu.loop(v, function()
+                ImGui[k]()
+            end)
+        end
     end
 
     ImGui.GetStyle().WindowRounding = 6
@@ -178,9 +180,15 @@ function SussySpt:new()
     SussySpt.rendering.add_tab(function()
         local data = SussySpt.rendering.new_tab("Online")
 
-        -- data.should_display = function()
-        --     return SussySpt.in_online
-        -- end
+        data.should_display = function()
+            return SussySpt.in_online
+        end
+
+        local function networkent(ent)
+            NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
+            NETWORK.SET_NETWORK_ID_CAN_MIGRATE(ent)
+            return ent
+        end
 
         data.sub.players = (function()
             local a = {
@@ -190,11 +198,30 @@ function SussySpt:new()
                 playerelements = {},
                 selectedplayer = nil,
                 selectedplayerinfo = {},
-                refreshtick = 0
+                refreshtick = 0,
+                ramoptions = {
+                    ["bus"] = "Bus",
+                    ["adder"] = "Adder",
+                    ["monster"] = "Monster",
+                    ["freight"] = "Train",
+                    ["bulldozer"] = "Bulldozer (very cool)",
+                    ["dump"] = "Dump (big)",
+                    ["cutter"] = "Cutter"
+                },
+                ramoption = "bus"
             }
 
-            local function refreshPlayerlist(runscript)
-                if not SussySpt.in_online then
+            local function updatePlayerElements()
+                a.playerelements = {}
+                for k, v in pairs(a.playersmi) do
+                    if string.match(string.lower(v.name), string.lower(a.searchtext)) then
+                        a.playerelements[k] = v.name
+                    end
+                end
+            end
+
+            local function refreshPlayerList()
+                if not SussySpt.in_online or DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                     a.playersmi = {}
                     a.playerelements = a.playersmi
                     a.selectedplayer = nil
@@ -206,30 +233,28 @@ function SussySpt:new()
                 for k, v in pairs(a.playersmi) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
                     if name ~= nil and name ~= "**Invalid**" then
-                        if string.match(name, a.searchtext) then
-                            a.playersmi[k].name = name
-                            a.playerelements[k] = name
-                            a.selectedplayerinfo.health = "Health: "..ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
-                        end
+                        a.playersmi[k].name = name
                     end
                 end
+
+                updatePlayerElements()
             end
 
-            -- SussySpt.register_repeating_task(function()
-            --     a.refreshtick = a.refreshtick + 1
-            --     if a.refreshtick > 20 then
-            --         a.refreshtick = 0
-            --         script.run_in_fiber(refreshPlayerlist)
-            --     end
-            -- end)
+            for k, v in pairs({menu_event.PlayerLeave, menu_event.PlayerJoin}) do
+                event.register_handler(v, function()
+                    yu.rif(refreshPlayerList)
+                end)
+            end
 
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
+                ImGui.Text("Players")
+
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
                     for k, v in pairs(a.playerelements) do
                         if ImGui.Selectable(v, false) then
-                            a.selectedplayer = k
+                            a.selectedplayer = a.playersmi[k].name
                         end
                     end
 
@@ -240,70 +265,207 @@ function SussySpt:new()
                 ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
                 local srtext, srselected = ImGui.InputText("##search", a.searchtext, 32)
-                a.searchtext = string.lower(srtext)
+                if a.searchtext ~= srtext then
+                    a.searchtext = srtext
+                    updatePlayerElements()
+                end
                 ImGui.PopItemWidth()
+
+                if ImGui.SmallButton("Refresh list") then
+                    yu.rif(refreshPlayerList)
+                end
 
                 ImGui.EndGroup()
 
                 if a.selectedplayer ~= nil then
-                    local player = a.playersmi[a.selectedplayer]
+                    local player
+                    for k, v in pairs(a.playersmi) do
+                        if v.name == a.selectedplayer then
+                            player = v
+                            break
+                        end
+                    end
                     ImGui.SameLine()
 
                     ImGui.BeginGroup()
 
-                    ImGui.BeginGroup()
-                    ImGui.Text("Selected Player")
-                    ImGui.Text("Name: "..player.name)
-                    ImGui.Text(a.selectedplayerinfo.health)
-                    ImGui.Text("Distance: -1m")
-                    yu.rendering.renderCheckbox("Spectate", "online_players_spectate")
-                    ImGui.EndGroup()
-
-                    ImGui.SameLine()
-
-                    ImGui.BeginGroup()
+                    ImGui.Text("Selected player: "..player.name)
 
                     if ImGui.TreeNodeEx("Utils") then
-                        if ImGui.Button("Heal") then
-                        end
-
                         if ImGui.Button("Goto") then
+                            yu.rif(function()
+                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
+                            end)
+                        end
+                        yu.rendering.tooltip("Teleport yourself to the player")
+
+                        if ImGui.Button("Repair vehicle") then
+                            yu.rif(function()
+                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
+                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
+                                    VEHICLE.SET_VEHICLE_FIXED(veh)
+                                    VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
+                                end
+                            end)
                         end
 
+                        yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
+                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            if state then
+                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                            else
+                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                            end
+                        end)
+
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Trolling") then
+                        if ImGui.Button("Clear ped tasks") then
+                            yu.rif(function()
+                                TASK.CLEAR_PED_TASKS_IMMEDIATELY(player.ped)
+                            end)
+                        end
+                        yu.rendering.tooltip("Immediately stops the player from whatever it's doing (animation/walking/etc.).")
+
+                        if ImGui.Button("Disable vehicle engine") then
+                            yu.rif(function()
+                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, false) then
+                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, true)
+                                    VEHICLE.BRING_VEHICLE_TO_HALT(veh, 6.0, 5, true)
+                                end
+                            end)
+                        end
+
+                        ImGui.Text("Explode:")
                         ImGui.SameLine()
-
-                        if ImGui.Button("Bring") then
+                        if ImGui.SmallButton("Invisible") then
+                            yu.rif(function()
+                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, i, 8, false, true, .0)
+                            end)
                         end
-
-                        if ImGui.Button("Steal outfit") then
-                        end
-
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Trolls") then
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Utils2") then
-                        if ImGui.Button("Heal") then
-                        end
-
-                        if ImGui.Button("Goto") then
-                        end
-
+                        yu.rendering.tooltip("\"Random\" death")
                         ImGui.SameLine()
-
-                        if ImGui.Button("Bring") then
+                        if ImGui.SmallButton("Normal") then
+                            yu.rif(function()
+                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100.0, true, false, 0.0)
+                            end)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.SmallButton("Huge") then
+                            yu.rif(function()
+                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                            end)
                         end
 
-                        if ImGui.Button("Steal outfit") then
+                        if ImGui.TreeNodeEx("Trap") then
+                            if ImGui.Button("Normal") then
+                                yu.rif(function()
+                                    local modelHash = joaat("prop_gold_cont_01b")
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    for i = 0, 1 do
+                                        local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
+                                        networkent(obj)
+                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
+                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.Button("Cage") then
+                                yu.rif(function(runscript)
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local x = tonumber(string.format('%.2f', c.x))
+                                    local y = tonumber(string.format('%.2f', c.y))
+                                    local z = tonumber(string.format('%.2f', c.z))
+
+                                    local modelHash = joaat("prop_fnclink_05crnr1")
+                                    STREAMING.REQUEST_MODEL(modelHash)
+                                    repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+
+                                    local createObject = function(offsetX, offsetY, heading)
+                                        local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                        ENTITY.SET_ENTITY_HEADING(obj, heading)
+                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                    end
+
+                                    createObject(-1.70, -1.70, -90.0)
+                                    createObject(1.70, 1.70, 90.0)
+                                end)
+                            end
+
+                            if ImGui.Button("Race tube") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                    ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
+                                    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Invisible race tube") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                    ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
+                                    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                    ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                end)
+                            end
+
+                            ImGui.TreePop()
+                        end
+
+                        ImGui.PushItemWidth(137)
+                        local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
+                        if ror.changed then
+                            a.ramoption = ror.key
+                        end
+                        ImGui.PopItemWidth()
+                        ImGui.SameLine()
+                        if ImGui.Button("Ram") then
+                            yu.rif(function(runscript)
+                                local hash = joaat(a.ramoption)
+                                if STREAMING.IS_MODEL_VALID(hash) then
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -10.0, 0)
+                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                    networkent(veh)
+                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 120.0)
+                                    ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                    runscript:sleep(2000)
+                                    VEHICLE.DELETE_VEHICLE(veh)
+                                end
+                            end)
+                        end
+
+                        if ImGui.Button("Remove all weapons") then
+                            yu.rif(function()
+                                for k, v in pairs(yu.get_all_weapons()) do
+                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                                end
+                            end)
                         end
 
                         ImGui.TreePop()
                     end
-
-                    ImGui.EndGroup()
 
                     ImGui.EndGroup()
                 end
@@ -311,6 +473,160 @@ function SussySpt:new()
         end)()
 
         return data
+    end)
+
+    SussySpt.rendering.add_tab(function()
+        local data = SussySpt.rendering.new_tab("World")
+
+        data.sub.objspawner = (function()
+            local a = {
+                model = "",
+                awidth = 195
+            }
+
+            yu.rendering.setCheckboxChecked("world_objspawner_deleteprev", true)
+            yu.rendering.setCheckboxChecked("world_objspawner_missionent", true)
+
+            local function temp_text(infotext, duration)
+                yu.rif(function(runscript)
+                    a.infotext = infotext
+                    local id = yu.gun()
+                    a.infotextid = id
+                    runscript:sleep(duration)
+                    if a.infotextid == id then
+                        a.infotext = nil
+                    end
+                end)
+            end
+
+            return SussySpt.rendering.new_tab("Object Spawner", function()
+                -- ImGui.BeginGroup()
+
+                -- ImGui.Text("Spawned entities")
+
+                -- ImGui.EndGroup()
+                -- ImGui.SameLine()
+                ImGui.BeginGroup()
+
+                ImGui.Text("Spawner")
+
+                ImGui.PushItemWidth(a.awidth)
+
+                local model_text, model_selected = ImGui.InputText("Model", a.model, 32)
+                if a.model ~= model_text then
+                    a.model = model_text
+                    a.invalidmodel = nil
+                end
+
+                if a.invalidmodel then
+                    yu.rendering.coloredtext("Invalid model!", 255, 25, 25)
+                elseif a.blocked then
+                    yu.rendering.coloredtext("Spawning...", 108, 149, 218)
+                end
+
+                if a.infotext ~= nil then
+                    yu.rendering.coloredtext(a.infotext[1], a.infotext[2], a.infotext[3], a.infotext[4])
+                end
+
+                ImGui.PopItemWidth()
+
+                if not a.blocked and ImGui.Button("Spawn") then
+                    yu.rif(function(runscript)
+                        a.blocked = true
+
+                        local hash = joaat(a.model)
+
+                        if not STREAMING.IS_MODEL_VALID(hash) then
+                            a.invalidmodel = true
+                        else
+                            STREAMING.REQUEST_MODEL(hash)
+                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                                ENTITY.DELETE_ENTITY(a.entity)
+                            end
+
+                            local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                            a.entity = OBJECT.CREATE_OBJECT_NO_OFFSET(
+                                hash,
+                                c.x,
+                                c.y,
+                                c.z,
+                                true,
+                                yu.rendering.isCheckboxChecked("world_objspawner_missionent") ~= false,
+                                true
+                            )
+
+                            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+
+                            if a.entity then
+                                ENTITY.FREEZE_ENTITY_POSITION(a.entity, yu.rendering.isCheckboxChecked("world_objspawner_freeze"))
+                                OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
+                            else
+                                temp_text({"Error while spawning entity", 255, 0, 0}, 2500)
+                            end
+                        end
+
+                        a.blocked = nil
+                    end)
+                end
+
+                if a.entity ~= nil then
+                    ImGui.SameLine()
+
+                    if ImGui.Button("Delete##last_spawned") then
+                        yu.rif(function(runscript)
+                            if ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                                ENTITY.DELETE_ENTITY(a.entity)
+                            end
+                        end)
+                    end
+                end
+
+                ImGui.EndGroup()
+                ImGui.SameLine()
+                ImGui.BeginGroup()
+
+                ImGui.Text("Options")
+
+                if ImGui.TreeNodeEx("Spawn options") then
+                    yu.rendering.renderCheckbox("Frozen", "world_objspawner_freeze", function(state)
+                        yu.rif(function(runscript)
+                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                                ENTITY.FREEZE_ENTITY_POSITION(a.entity, state)
+                            end
+                        end)
+                    end)
+
+                    yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
+                    yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
+                        yu.rif(function(runscript)
+                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity) then
+                                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
+                            end
+                        end)
+                    end)
+
+                    ImGui.TreePop()
+                end
+
+                ImGui.EndGroup()
+            end)
+        end)()
+
+        return data
+    end)
+
+    SussySpt.rendering.add_tab(function()
+        return SussySpt.rendering.new_tab("Info", function()
+            ImGui.Text("Made by pierrelasse.")
+            ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/yimstuff")
+            ImGui.Spacing()
+            ImGui.Text("SussySpt version: "..SussySpt.version)
+            ImGui.Text("SussySpt version id: "..SussySpt.versionid)
+            ImGui.Spacing()
+            ImGui.Text("Theme: "..SussySpt.rendering.theme)
+        end)
     end)
 
     script.register_looped("sussyspt", SussySpt.tick)
@@ -578,7 +894,7 @@ function SussySpt:initTabSelf()
     end)
 
     function run_script(name)
-        script.run_in_fiber(function(runscript)
+        yu.rif(function(runscript)
             SCRIPT.REQUEST_SCRIPT(name)
             repeat runscript:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
             SYSTEM.START_NEW_SCRIPT(name, 5000)
@@ -682,7 +998,7 @@ function SussySpt:initTabSelf()
                         -- end
 
                         -- if ImGui.Button("Give RP") then
-                        --     script.run_in_fiber(function(runscript)
+                        --     yu.rif(function(runscript)
                         --         -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
                         --         PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
                         --         -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
@@ -1179,7 +1495,7 @@ function SussySpt:initTabSelf()
                     end
                     yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
                         if state then
-                            script.run_in_fiber(function(runscript)
+                            yu.rif(function(runscript)
                                 while true do
                                     if not SussySpt.in_online or not yu.rendering.isCheckboxChecked("self_money_1m1sloop") then
                                         log.info("Self->Money: $1M/1s loop was cancelled")
@@ -2767,7 +3083,7 @@ function SussySpt:initTabHBO()
             if yu.is_script_running(nightclubScript) then
                 collectSafeNow()
             else
-                -- script.run_in_fiber(function(fs)
+                -- yu.rif(function(fs)
                 --     SCRIPT.REQUEST_SCRIPT(nightclubScript)
                 --     repeat fs:yield() until SCRIPT.HAS_SCRIPT_LOADED(nightclubScript)
                 --     SYSTEM.START_NEW_SCRIPT_WITH_NAME_HASH(joaat(nightclubScript), 3650)
@@ -3694,7 +4010,7 @@ function SussySpt:initTabPlayers()
             return false
         end
 
-        script.run_in_fiber(function(runscript)
+        yu.rif(function(runscript)
             local veh = VEHICLE.CREATE_VEHICLE(joaat("rcbandito"), x, y, z, 0.0, true, true)
             registerEntity(veh)
             ENTITY.SET_ENTITY_VISIBLE(veh, false, false)
@@ -3802,7 +4118,7 @@ function SussySpt:initTabPlayers()
                 yu.rendering.tooltip("Repair the player's vehicle")
 
                 if ImGui.Button("Spawn bodyguard") then
-                    script.run_in_fiber(function(runscript)
+                    yu.rif(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
                             local modelHash = joaat("u_m_m_jesus_01")
@@ -3867,7 +4183,7 @@ function SussySpt:initTabPlayers()
                 yu.rendering.tooltip("Make the player die \"randomly\"")
 
                 -- if ImGui.Button("Kill everyone") then
-                --     script.run_in_fiber(function(runscript)
+                --     yu.rif(function(runscript)
                 --         local player = selectedPlayer()
                 --         if player ~= nil then
                 --             log.info("Player:"..tostring(player.ped))
@@ -3905,7 +4221,7 @@ function SussySpt:initTabPlayers()
                 ImGui.SameLine()
 
                 if ImGui.Button("Cage player") then
-                    script.run_in_fiber(function(runscript)
+                    yu.rif(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
                             local crdz = ENTITY.GET_ENTITY_COORDS(player.ped)
@@ -3981,7 +4297,7 @@ function SussySpt:initTabPlayers()
                 yu.rendering.tooltip("So you can't see anything when near (only for short time)")
 
                 if ImGui.Button("Ram with bus") then
-                    script.run_in_fiber(function(runscript)
+                    yu.rif(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
                             local modelHash = joaat("bus")
@@ -3997,7 +4313,7 @@ function SussySpt:initTabPlayers()
                 ImGui.SameLine()
 
                 if ImGui.Button("Spawn enemies") then
-                    script.run_in_fiber(function(runscript)
+                    yu.rif(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
                             local modelHash = joaat("a_f_m_fatcult_01")
@@ -4048,7 +4364,7 @@ function SussySpt:initTabPlayers()
                 end
 
                 if ImGui.Button("Crash test 1") then
-                    script.run_in_fiber(function(runscript)
+                    yu.rif(function(runscript)
                         local player = selectedPlayer()
                         if player ~= nil then
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
