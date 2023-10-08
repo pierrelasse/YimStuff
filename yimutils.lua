@@ -92,7 +92,7 @@ return (function()
             if type(amount) ~= "number" or type(cb) ~= "function" or amount <= 0 then
                 return nil
             end
-            i = 0
+            local i = 0
             while i < amount do
                 i = i + 1
                 cb()
@@ -110,7 +110,7 @@ return (function()
                 return string.len(obj)
             end
             return nil
-        end        
+        end
         api.len = api.length
 
         api.get_random_element_from_table = function(tbl)
@@ -146,7 +146,7 @@ return (function()
                     isFirst = false
                 end
             end
-            
+
             return result.."}"
         end
 
@@ -187,6 +187,15 @@ return (function()
             }
         end
 
+        api.request_entity_control_once = function(entity)
+            if not NETWORK.NETWORK_IS_IN_SESSION() or NETWORK.NETWORK_HAS_CONTROL_OF_ENTITY(entity) then
+                return true
+            end
+
+            NETWORK.SET_NETWORK_ID_CAN_MIGRATE(NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(entity), true)
+            return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
+        end
+
         -- TODO: Add to docs & make this useful
         api.get_closest_player = function(radius)
             -- local players = {}
@@ -210,6 +219,61 @@ return (function()
             --     return closestPlayer
             -- end
             return nil
+        end
+
+        api.deg_to_rad = function(deg)
+            return (3.14159265359 / 180) * deg
+        end
+
+        api.rotation_to_direction = function(rotation)
+            local x = api.deg_to_rad(rotation.x)
+            local z = api.deg_to_rad(rotation.z)
+            local num = math.abs(math.cos(x))
+            return {
+                x = -math.sin(z) * num,
+                y = math.cos(z) * num,
+                z = math.sin(x)
+            }
+        end
+
+        api.raycast = function(ent)
+            local cam_coords = CAM.GET_GAMEPLAY_CAM_COORD()
+            local rot = CAM.GET_GAMEPLAY_CAM_ROT(2)
+            local dir = api.rotation_to_direction(rot)
+
+            local ray = SHAPETEST.START_EXPENSIVE_SYNCHRONOUS_SHAPE_TEST_LOS_PROBE(
+                cam_coords.x,
+                cam_coords.y,
+                cam_coords.z,
+                cam_coords.x + dir.x * 1000,
+                cam_coords.y + dir.y * 1000,
+                cam_coords.z + dir.z * 1000,
+                -1,
+                0,
+                7
+            )
+
+            local hit, end_coords, surface_normal = SHAPETEST.GET_SHAPE_TEST_RESULT(ray, nil, nil, nil, ent)
+
+            return {
+                hit = hit,
+                coords = end_coords,
+                surface_normal = surface_normal
+            }
+        end
+
+        api.imcolor = function(r, g, b, alpha, max)
+            if max == nil then
+                max = 255
+            end
+            if alpha ~= nil then
+                alpha = alpha / max
+            end
+            return (r or max) / max, (g or max) / max, (b or max) / max, alpha or max
+        end
+
+        api.rif = function(cb)
+            script.run_in_fiber(cb)
         end
     end
 
@@ -263,7 +327,7 @@ return (function()
 
         api.playerindex = function(method)
             if method == 1 then
-                return globals.get_int(1574918) 
+                return globals.get_int(1574918)
             elseif method == 2 then
                 return globals.get_int(1574907)
             end
@@ -562,6 +626,11 @@ return (function()
             if ImGui.IsItemHovered() then
                 ImGui.SetTooltip(text)
             end
+        end
+
+        api.rendering.coloredtext = function(text, r, g, b, alpha)
+            r, g, b, alpha = api.imcolor(r, g, b, alpha)
+            ImGui.TextColored(r, g, b, alpha, text)
         end
     end
 
