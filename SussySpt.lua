@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.0",
-    versionid = 928
+    versionid = 930
 }
 
 function SussySpt:new()
@@ -327,12 +327,23 @@ function SussySpt:new()
                     end
 
                     if ImGui.TreeNodeEx("Trolling") then
-                        if ImGui.Button("Clear ped tasks") then
+                        if ImGui.Button("Taze") then
                             yu.rif(function()
-                                TASK.CLEAR_PED_TASKS_IMMEDIATELY(player.ped)
+                                local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
+                                local oc = PED.GET_PED_BONE_COORDS(player.ped, 57005, .0, .0, .2)
+                                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
+                                    oc.x, oc.y, oc.z,
+                                    dc.x, dc.y, dc.z,
+                                    1,
+                                    true,
+                                    joaat("WEAPON_STUNGUN"),
+                                    player.ped,
+                                    true,
+                                    false,
+                                    24000.0
+                                )
                             end)
                         end
-                        yu.rendering.tooltip("Immediately stops the player from whatever it's doing (animation/walking/etc.).")
 
                         if ImGui.Button("Disable vehicle engine") then
                             yu.rif(function()
@@ -445,9 +456,11 @@ function SussySpt:new()
                                 if STREAMING.IS_MODEL_VALID(hash) then
                                     STREAMING.REQUEST_MODEL(hash)
                                     repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -10.0, 0)
+                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
                                     local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
                                     networkent(veh)
+                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
+                                    runscript:sleep(100)
                                     VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 120.0)
                                     ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
                                     runscript:sleep(2000)
