@@ -487,8 +487,7 @@ return (function()
                 ["parachute"] = 0xFBAB5776,
                 ["electric_fence"] = 0x711D4738,
                 ["plunger"] = 0x2D4239F,
-                ["cattleprod"] = 0x84D676D4,
-                ["unarmed"] = 0xA2719263
+                ["cattleprod"] = 0x84D676D4
             }
         end
     end
