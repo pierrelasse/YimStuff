@@ -631,6 +631,28 @@ return (function()
             r, g, b, alpha = api.imcolor(r, g, b, alpha)
             ImGui.TextColored(r, g, b, alpha, text)
         end
+
+        api.rendering.input = function(input_type, data)
+            if type(data) ~= "table" then
+                return nil
+            end
+
+            if input_type == "text" then
+                local text, changed = ImGui.InputText(data.label, data.text or "", data.maxlength or 32)
+                return {
+                    text = text,
+                    changed = changed
+                }
+            elseif input_type == "int" then
+                local value, changed = ImGui.InputInt(data.label, data.value or 0, data.min or -2147483648, data.max or 2147483648)
+                return {
+                    value = value,
+                    changed = changed
+                }
+            end
+
+            return nil
+        end
     end
 
     local function initTasks()
@@ -658,6 +680,31 @@ return (function()
         end
         function string.endswith(str, ending)
             return (str == nil or ending == nil or ending == "") or str:sub(-#ending) == ending
+        end
+        function string.replace(str, what, with)
+            if type(str) == "string" and type(what) == "string" and type(with) == "string" then
+                return string.gsub(str, what, with)
+            end
+        end
+        function string.uppercase(str)
+            if type(str) == "string" then
+                return string.upper(str)
+            end
+        end
+        function string.lowercase(str)
+            if type(str) == "string" then
+                return string.lower(str)
+            end
+        end
+        function string.contains(str, value)
+            if type(str) == "string" and type(value) == "string" then
+                return string.find(str, value)
+            end
+        end
+        function string.containsregex(str, pattern)
+            if type(str) == "string" then
+                return string.match(str, pattern)
+            end
         end
     end
 
