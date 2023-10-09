@@ -95,7 +95,7 @@ return (function()
             local i = 0
             while i < amount do
                 i = i + 1
-                cb()
+                cb(i)
             end
         end
 
@@ -346,10 +346,10 @@ return (function()
             return PLAYER.PLAYER_PED_ID()
         end
 
-        api.veh = function(pid)
-            local pid_ = pid or api.ppid()
-            if PED.IS_PED_IN_ANY_VEHICLE(pid_, 0) then
-                return PED.GET_VEHICLE_PED_IS_IN(pid_, false);
+        api.veh = function(ped)
+            local ped_ = ped or api.ppid()
+            if PED.IS_PED_IN_ANY_VEHICLE(ped_, 0) then
+                return PED.GET_VEHICLE_PED_IS_IN(ped_, false)
             end
         end
 
