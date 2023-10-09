@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.1",
-    versionid = 949
+    versionid = 1018
 }
 
 function SussySpt:new()
@@ -18,11 +18,18 @@ function SussySpt:new()
                 ImGuiCol = {
                     TitleBg = {9, 27, 46, 1.0},
                     TitleBgActive = {9, 27, 46, 1.0},
-                    WindowBg = {0, 19, 37, .86},
+                    WindowBg = {0, 19, 37, .95},
                     Tab = {10, 30, 46, 1.0},
                     TabActive = {14, 60, 90, 1.0},
                     TabHovered = {52, 64, 71, 1.0},
-                    Button = {3, 45, 79, 1.0}
+                    Button = {3, 45, 79, 1.0},
+                    FrameBg = {35, 38, 53, 1.0},
+                    HeaderActive = {54, 55, 66, 1.0},
+                    HeaderHovered = {62, 63, 73, 1.0},
+                },
+                ImGuiStyleVar = {
+                    WindowRounding = {4},
+                    FrameRounding = {2}
                 }
             }
         },
@@ -89,6 +96,13 @@ function SussySpt:new()
                         if k == "ImGuiCol" then
                             ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
                             pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
+                        elseif k == "ImGuiStyleVar" then
+                            if v1[2] == nil then
+                                ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
+                            else
+                                ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
+                            end
+                            pops.PopStyleVar = (pops.PopStyleVar or 0) + 1
                         end
                     end
                 end
@@ -105,13 +119,9 @@ function SussySpt:new()
         ImGui.End()
 
         for k, v in pairs(pops) do
-            yu.loop(v, function()
-                ImGui[k]()
-            end)
+            ImGui[k](v)
         end
     end
-
-    ImGui.GetStyle().WindowRounding = 6
 
     SussySpt.repeating_tasks = {}
 
@@ -231,7 +241,8 @@ function SussySpt:new()
                     ["dump"] = "Dump (big)",
                     ["cutter"] = "Cutter"
                 },
-                ramoption = "bus"
+                ramoption = "bus",
+                givecustomweaponammo = 999
             }
 
             local function updatePlayerElements()
@@ -269,6 +280,13 @@ function SussySpt:new()
                 end)
             end
             yu.rif(refreshPlayerList)
+
+            local function weaponFromInput(s)
+                if type(s) == "string" then
+                    return joaat("WEAPON_"..s:uppercase():replace(" ", "_"))
+                end
+                return nil
+            end
 
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
@@ -324,6 +342,8 @@ function SussySpt:new()
                             end)
                         end
                         yu.rendering.tooltip("Teleport yourself to the player")
+
+                        ImGui.SameLine()
 
                         if ImGui.Button("Bring") then
                             yu.rif(function()
@@ -496,7 +516,7 @@ function SussySpt:new()
                             ImGui.TreePop()
                         end
 
-                        ImGui.PushItemWidth(137)
+                        ImGui.PushItemWidth(237)
                         local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
                         if ror.changed then
                             a.ramoption = ror.key
@@ -524,10 +544,60 @@ function SussySpt:new()
                             end)
                         end
 
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Weapons") then
                         if ImGui.Button("Remove all weapons") then
                             yu.rif(function()
+                                WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
                                 for k, v in pairs(yu.get_all_weapons()) do
                                     WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                                end
+                            end)
+                        end
+
+                        ImGui.PushItemWidth(120)
+                        local gcwr = yu.rendering.input("text", {
+                            label = "##gcw",
+                            text = a.givecustomweapontext
+                        })
+                        SussySpt.push_disable_controls(ImGui.IsItemActive())
+                        ImGui.PopItemWidth()
+                        if gcwr ~= nil and gcwr.changed then
+                            a.givecustomweapontext = gcwr.text
+                        end
+
+                        ImGui.SameLine()
+
+                        ImGui.PushItemWidth(79)
+                        local gcwar = yu.rendering.input("int", {
+                            label = "##gcwa",
+                            value = a.givecustomweaponammo,
+                            min = 0,
+                            max = 99999
+                        })
+                        SussySpt.push_disable_controls(ImGui.IsItemActive())
+                        ImGui.PopItemWidth()
+                        if gcwar ~= nil and gcwar.changed then
+                            a.givecustomweaponammo = gcwar.value
+                        end
+
+                        ImGui.SameLine()
+                        if ImGui.Button("Give") then
+                            yu.rif(function()
+                                local hash = weaponFromInput(a.givecustomweapontext)
+                                if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
+                                    WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
+                                end
+                            end)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.Button("Remove") then
+                            yu.rif(function(rs)
+                                local hash = weaponFromInput(a.givecustomweapontext)
+                                if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
+                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
                                 end
                             end)
                         end
