@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.1",
-    versionid = 1018
+    versionid = 1052
 }
 
 function SussySpt:new()
@@ -288,6 +288,12 @@ function SussySpt:new()
                 return nil
             end
 
+            SussySpt.register_repeating_task(function()
+                if SussySpt.in_online and a.splayer ~= nil and yu.rendering.isCheckboxChecked("online_player_firing") then
+                    PLAYER.DISABLE_PLAYER_FIRING(a.splayer.player, true)
+                end
+            end)
+
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
                 ImGui.Text("Players")
@@ -322,9 +328,11 @@ function SussySpt:new()
 
                 if a.selectedplayer ~= nil then
                     local player
+                    a.splayer = nil
                     for k, v in pairs(a.playersmi) do
                         if v.name == a.selectedplayer then
                             player = v
+                            a.splayer = player
                             break
                         end
                     end
@@ -334,7 +342,7 @@ function SussySpt:new()
 
                     ImGui.Text("Selected player: "..player.name)
 
-                    if ImGui.TreeNodeEx("Utils") then
+                    if ImGui.TreeNodeEx("General") then
                         if ImGui.Button("Goto") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
@@ -347,22 +355,12 @@ function SussySpt:new()
 
                         if ImGui.Button("Bring") then
                             yu.rif(function()
-                                local c =ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
                                 network.set_player_coords(player.player, c.x, c.y, c.z)
                             end)
                         end
 
-                        if ImGui.Button("Repair vehicle") then
-                            yu.rif(function()
-                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
-                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
-                                    VEHICLE.SET_VEHICLE_FIXED(veh)
-                                    VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
-                                end
-                            end)
-                        end
-
-                        if ImGui.Button("Kill him") then
+                        if ImGui.Button("Kill") then
                             yu.rif(function()
                                 local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
                                 local oc = PED.GET_PED_BONE_COORDS(player.ped, 57005, .0, .0, .2)
@@ -379,6 +377,7 @@ function SussySpt:new()
                                 )
                             end)
                         end
+                        yu.rendering.tooltip("Should super good but sadly it doesn't work well :/")
 
                         yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                             local c = ENTITY.GET_ENTITY_COORDS(player.ped)
@@ -412,17 +411,6 @@ function SussySpt:new()
                                     false,
                                     24000.0
                                 )
-                            end)
-                        end
-
-                        if ImGui.Button("Disable vehicle engine") then
-                            yu.rif(function()
-                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, false) then
-                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
-                                    yu.request_entity_control_once(veh)
-                                    VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, true)
-                                    VEHICLE.BRING_VEHICLE_TO_HALT(veh, 6.0, 5, true)
-                                end
                             end)
                         end
 
@@ -602,6 +590,157 @@ function SussySpt:new()
                             end)
                         end
 
+                        yu.rendering.renderCheckbox("Disable firing", "online_player_firing")
+                        yu.rendering.tooltip("Trash")
+
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Vehicle") then
+                        ImGui.Text("Most of the things don't work well/not at all")
+
+                        yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
+                                end
+                            end)
+                        end)
+
+                        if ImGui.SmallButton("Repair") then
+                            yu.rif(function()
+                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
+                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
+                                    VEHICLE.SET_VEHICLE_FIXED(veh)
+                                    VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
+                                end
+                            end)
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Delete") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, true, true)
+                                    VEHICLE.DELETE_VEHICLE(veh)
+                                    ENTITY.DELETE_ENTITY(veh)
+                                end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Halt") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.BRING_VEHICLE_TO_HALT(veh, 30, 1, true)
+                                end
+                            end)
+                        end
+                        yu.rendering.tooltip("Makes the vehicle halt.\nThe vehicle can start driving right after it.")
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Engine off") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
+                                end
+                            end)
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Kill engine") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
+                                end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Launch") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
+                                end
+                            end)
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Boost") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 79)
+                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 10, 0, 0, 2, 0, 0, 0, false, true, true, false, true)
+                                end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Burst tires") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
+                                    yu.loop(8, function(i)
+                                        VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
+                                    end)
+                                end
+                            end)
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Smash windows") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil then
+                                    yu.request_entity_control_once(veh)
+                                    yu.loop(8, function(i)
+                                        VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
+                                    end)
+                                end
+                            end)
+                        end
+
+                        if ImGui.TreeNodeEx("Doors") then
+                            if ImGui.SmallButton("Unlock (you)") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Unlock (all)") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
+                                    end
+                                end)
+                            end
+
+                            ImGui.TreePop()
+                        end
+
                         ImGui.TreePop()
                     end
 
@@ -752,6 +891,19 @@ function SussySpt:new()
                     ImGui.TreePop()
                 end
 
+                ImGui.EndGroup()
+            end)
+        end)()
+
+        data.sub.vehicles = (function()
+            return SussySpt.rendering.new_tab("Nearby vehicles", function()
+                ImGui.Text("Coming soon :D")
+                ImGui.BeginGroup()
+                ImGui.Text("Nearby vehicles")
+                ImGui.EndGroup()
+                ImGui.SameLine()
+                ImGui.Text("Vehicle options")
+                ImGui.BeginGroup()
                 ImGui.EndGroup()
             end)
         end)()
