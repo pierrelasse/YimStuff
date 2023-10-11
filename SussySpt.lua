@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.3.1",
-    versionid = 1056
+    version = "1.3.2",
+    versionid = 1068
 }
 
 function SussySpt:new()
@@ -376,10 +376,10 @@ function SussySpt:new()
                                 MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
                                     oc.x, oc.y, oc.z,
                                     dc.x, dc.y, dc.z,
-                                    10000,
+                                    100,
                                     true,
                                     joaat("WEAPON_REVOLVER_MK2"),
-                                    0,
+                                    player.ped,
                                     false,
                                     true,
                                     24000.0
@@ -430,7 +430,7 @@ function SussySpt:new()
                                     1,
                                     true,
                                     joaat("WEAPON_STUNGUN"),
-                                    0,
+                                    player.ped,
                                     true,
                                     false,
                                     24000.0
@@ -443,7 +443,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Invisible") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 3, 8, false, true, .0)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
                             end)
                         end
                         yu.rendering.tooltip("\"Random\" death")
@@ -451,7 +451,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Normal") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100.0, true, false, 0.0)
+                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                             end)
                         end
                         ImGui.SameLine()
@@ -1966,7 +1966,7 @@ function SussySpt:initTabHBO()
     end
 
     local function renderCutsSlider(tbl, index)
-        local value = tbl[index] or 0
+        local value = tbl[index] or 85
         local text = yu.shc(index == -2, "Non-host self cut", "Player "..index.."'s cut")
         local newValue, changed = ImGui.DragInt(text, value, .2, 0, 250, "%d%%", 5)
         if changed then
@@ -3941,7 +3941,7 @@ function SussySpt:initTabHBO()
 
         SussySpt.registerRepeatingTask(function()
             if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
-                globals.set_int(294496, 2500000)
+                globals.set_int(294496, 2000000)
             end
         end)
 
@@ -4009,7 +4009,7 @@ function SussySpt:initTabHBO()
 
                 yu.rendering.bigText("Extra")
 
-                yu.rendering.renderCheckbox("$2.4 finale", "hbo_agency_smthmfinale", function(state)
+                yu.rendering.renderCheckbox("$2M finale", "hbo_agency_smthmfinale", function(state)
                     if not state then
                         globals.set_int(294496, 1000000)
                     end
@@ -4189,6 +4189,16 @@ function SussySpt:initTabQA()
                     end)
                 end
                 yu.rendering.tooltip("Makes the player stop what it's doing")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("RI2") then
+                    yu.rif(function()
+				        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
+                    end)
+                end
+                yu.rendering.tooltip("Other way of refreshing the interior")
 
                 if SussySpt.in_online then
                     if ImGui.Button("Instant BST") then
