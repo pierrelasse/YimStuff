@@ -1993,9 +1993,9 @@ function SussySpt:initTabHBO()
     local function initCayo()
         local a = {
             primarytargets = {
-                [0] = "Sinsimito Tequila $900K|990K",
-                [1] = "Ruby Necklace $1M|1,1M",
-                [2] = "Bearer Bonds $1,1M|1,12M",
+                [0] = "Sinsimito Tequila $630K",
+                [1] = "Ruby Necklace $700K",
+                [2] = "Bearer Bonds $770K",
                 [4] = "Minimadrazzo Files $1,1M|1,21M",
                 [3] = "Pink Diamond $1,3M|1,43M",
                 [5] = "Panther Statue $1,9M|2,09M",
@@ -2697,7 +2697,7 @@ function SussySpt:initTabHBO()
                 [1] = "Best"
             },
             drivers = {
-                [1] = "Karim Deniz (5%)",
+                [1] = "Karim Denz (5%)",
                 [4] = "Zach Nelson (6%)",
                 [2] = "Taliana Martinez (7%)",
                 [3] = "Eddie Toh (9%)",
