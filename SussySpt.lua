@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.1",
-    versionid = 1052
+    versionid = 1056
 }
 
 function SussySpt:new()
@@ -360,6 +360,15 @@ function SussySpt:new()
                             end)
                         end
 
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Set waypoint to") then
+                            yu.rif(function()
+                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                HUD.SET_NEW_WAYPOINT(c.x, c.y)
+                            end)
+                        end
+
                         if ImGui.Button("Kill") then
                             yu.rif(function()
                                 local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
@@ -380,16 +389,31 @@ function SussySpt:new()
                         yu.rendering.tooltip("Should super good but sadly it doesn't work well :/")
 
                         yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
-                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            if state then
-                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                            else
-                                STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+
+                            for k, v in pairs(yu.get_all_players_mi()) do
+                                if state and v.ped == player.ped then
+                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                                else
+                                    if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
+                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
+                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                                    end
+                                end
                             end
+                            if not state then
+                                NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
+                            end
+
+                            -- local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                            -- if state then
+                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                            -- else
+                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
+                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                            -- end
                         end)
 
                         ImGui.TreePop()
@@ -1314,6 +1338,16 @@ function SussySpt:initTabSelf()
                                     "SCRIPT_INCREASE_STL","SCRIPT_INCREASE_STRN"}) do
                                     stats.set_int(mpx..v, 100)
                                 end
+                            end)
+                        end
+
+                        if ImGui.Button("Unlock all achievements") then
+                            yu.rif(function()
+                                yu.loop(59, function(i)
+                                    if not PLAYER.HAS_ACHIEVEMENT_BEEN_PASSED(i) then
+                                        PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
+                                    end
+                                end)
                             end)
                         end
 
