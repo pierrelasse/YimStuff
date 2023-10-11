@@ -193,7 +193,7 @@ return (function()
             end
 
             NETWORK.SET_NETWORK_ID_CAN_MIGRATE(NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(entity), true)
-            return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity)
+            return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity) == true
         end
 
         -- TODO: Add to docs & make this useful
