@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.3.2",
-    versionid = 1068
+    version = "1.3.3",
+    versionid = 1183
 }
 
 function SussySpt:new()
@@ -14,7 +14,7 @@ function SussySpt:new()
     SussySpt.in_online = false
     SussySpt.rendering = {
         themes = {
-            ["Nightly"] = {
+            Nightly = {
                 ImGuiCol = {
                     TitleBg = {9, 27, 46, 1.0},
                     TitleBgActive = {9, 27, 46, 1.0},
@@ -31,12 +31,29 @@ function SussySpt:new()
                     WindowRounding = {4},
                     FrameRounding = {2}
                 }
+            },
+            Kiddions = {
+                parent = "Nightly",
+                ImGuiCol = {
+                    TitleBg = {21, 74, 93, .87},
+                    TitleBgActive = {21, 74, 93, .87},
+                    WindowBg = {24, 78, 98, .87},
+                    Tab = {0, 0, 0, 0.0},
+                    TabActive = {243, 212, 109, 1.0},
+                    TabHovered = {243, 212, 109, 1.0},
+                    Button = {234, 207, 116, .8},
+                    FrameBg = {13, 57, 73, 1.0}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding = {0},
+                    FrameRounding = {0}
+                }
             }
         },
         tabs = {}
     }
 
-    SussySpt.rendering.theme = next(SussySpt.rendering.themes)
+    SussySpt.rendering.theme = "Nightly"
 
     SussySpt.rendering.get_theme = function()
         return SussySpt.rendering.themes[SussySpt.rendering.theme]
@@ -87,10 +104,17 @@ function SussySpt:new()
             v()
         end
 
-        local current_theme = SussySpt.rendering.get_theme()
         local pops = {}
-        if type(current_theme) == "table" then
-            for k, v in pairs(current_theme) do
+        local function pushTheme(theme)
+            if type(theme) ~= "table" then
+                return
+            end
+
+            if theme.parent ~= nil then
+                pushTheme(SussySpt.rendering.themes[theme.parent])
+            end
+
+            for k, v in pairs(theme) do
                 if type(k) == "string" and type(v) == "table" then
                     for k1, v1 in pairs(v) do
                         if k == "ImGuiCol" then
@@ -108,6 +132,7 @@ function SussySpt:new()
                 end
             end
         end
+        pushTheme(SussySpt.rendering.get_theme())
 
         if ImGui.Begin("SussySpt v"..SussySpt.version) then
             ImGui.BeginTabBar("##tabbar")
@@ -244,18 +269,25 @@ function SussySpt:new()
                 ramoption = "bus",
                 givecustomweaponammo = 999
             }
+            SussySpt.online_players_a = a
 
             local function updatePlayerElements()
                 a.playerelements = {}
+                local emptystr = ""
                 for k, v in pairs(a.playersmi) do
-                    if string.match(string.lower(v.name), string.lower(a.searchtext)) then
-                        a.playerelements[k] = v.name
+                    if type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase()) then
+                        local name = v.name
+                        local info = yu.shc(network.is_player_flagged_as_modder(v.player), "M", emptystr)
+                        if info ~= emptystr then
+                            name = name.." ["..info.."]"
+                        end
+                        a.playerelements[k] = name
                     end
                 end
             end
 
             local function refreshPlayerList()
-                if not SussySpt.in_online or DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                     a.playersmi = {}
                     a.playerelements = a.playersmi
                     a.selectedplayer = nil
@@ -286,6 +318,29 @@ function SussySpt:new()
                     return joaat("WEAPON_"..s:uppercase():replace(" ", "_"))
                 end
                 return nil
+            end
+
+            local function shootPlayer(rs, ped, weaponHash, damage, speed)
+                if not WEAPON.IS_WEAPON_VALID(weaponHash) then
+                    return
+                end
+
+                WEAPON.REQUEST_WEAPON_ASSET(weaponHash, 31, 0)
+                repeat rs:yield() until WEAPON.HAS_WEAPON_ASSET_LOADED(weaponHash)
+
+                local c1 = PED.GET_PED_BONE_COORDS(ped, 39317, 0, 0, 0)
+                local c2 = PED.GET_PED_BONE_COORDS(ped, 11816, 0, 0, 0)
+                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
+                    c2.x, c2.y, c2.z,
+                    c1.x, c1.y, c1.z,
+                    damage or 1,
+                    true,
+                    weaponHash,
+                    ped,
+                    false,
+                    true,
+                    speed or 24000
+                )
             end
 
             SussySpt.register_repeating_task(function()
@@ -370,50 +425,28 @@ function SussySpt:new()
                         end
 
                         if ImGui.Button("Kill") then
-                            yu.rif(function()
-                                local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
-                                local oc = PED.GET_PED_BONE_COORDS(player.ped, 57005, .0, .0, .2)
-                                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-                                    oc.x, oc.y, oc.z,
-                                    dc.x, dc.y, dc.z,
-                                    100,
-                                    true,
-                                    joaat("WEAPON_REVOLVER_MK2"),
-                                    player.ped,
-                                    false,
-                                    true,
-                                    24000.0
-                                )
+                            yu.rif(function(rs)
+                                shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 10000)
                             end)
                         end
                         yu.rendering.tooltip("Should super good but sadly it doesn't work well :/")
 
                         yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
-
-                            for k, v in pairs(yu.get_all_players_mi()) do
-                                if state and v.ped == player.ped then
-                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                                else
-                                    if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
-                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
-                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                            yu.rif(function()
+                                for k, v in pairs(a.playersmi) do
+                                    if v.ped ~= player.ped then
+                                        if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
+                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
+                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                                        end
                                     end
                                 end
-                            end
-                            if not state then
-                                NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
-                            end
-
-                            -- local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                            -- if state then
-                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                            -- else
-                            --     STREAMING.REQUEST_COLLISION_AT_COORD(c.x, c.y, c.z)
-                            --     NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
-                            -- end
+                                if state then
+                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                                else
+                                    NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
+                                end
+                            end)
                         end)
 
                         ImGui.TreePop()
@@ -421,20 +454,8 @@ function SussySpt:new()
 
                     if ImGui.TreeNodeEx("Trolling") then
                         if ImGui.Button("Taze") then
-                            yu.rif(function()
-                                local dc = PED.GET_PED_BONE_COORDS(player.ped, 0, .0, .0, .0)
-                                local oc = PED.GET_PED_BONE_COORDS(player.ped, 57005, .0, .0, .2)
-                                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-                                    oc.x, oc.y, oc.z,
-                                    dc.x, dc.y, dc.z,
-                                    1,
-                                    true,
-                                    joaat("WEAPON_STUNGUN"),
-                                    player.ped,
-                                    true,
-                                    false,
-                                    24000.0
-                                )
+                            yu.rif(function(rs)
+                                shootPlayer(rs, player.ped, joaat("WEAPON_STUNGUN"), 2)
                             end)
                         end
 
@@ -649,9 +670,12 @@ function SussySpt:new()
                                 local veh = yu.veh(player.ped)
                                 if veh ~= nil then
                                     yu.request_entity_control_once(veh)
-                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, true, true)
+                                    VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
+                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
                                     VEHICLE.DELETE_VEHICLE(veh)
-                                    ENTITY.DELETE_ENTITY(veh)
+                                    if ENTITY.DOES_ENTITY_EXIST(veh) then
+                                        ENTITY.DELETE_ENTITY(veh)
+                                    end
                                 end
                             end)
                         end
@@ -936,7 +960,9 @@ function SussySpt:new()
     end)
 
     SussySpt.rendering.add_tab(function()
-        return SussySpt.rendering.new_tab("Info", function()
+        local data = SussySpt.rendering.new_tab("Config")
+
+        data.sub.info = SussySpt.rendering.new_tab("Info", function()
             ImGui.Text("Made by pierrelasse.")
             ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/yimstuff")
             ImGui.Spacing()
@@ -945,10 +971,68 @@ function SussySpt:new()
             ImGui.Spacing()
             ImGui.Text("Theme: "..SussySpt.rendering.theme)
         end)
+
+        data.sub.theme = (function()
+            return SussySpt.rendering.new_tab("Theme", function()
+
+                if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
+                    for k, v in pairs(SussySpt.rendering.themes) do
+                        if ImGui.Selectable(k, false) then
+                            SussySpt.rendering.theme = k
+                        end
+                    end
+                    ImGui.EndCombo()
+                end
+            end)
+        end)()
+
+        return data
     end)
 
     script.register_looped("sussyspt", SussySpt.tick)
     SussySpt.tab:add_imgui(SussySpt.render)
+
+    yu.rif(function(rs)
+        local function drawLine(ped, index1, index2)
+            local c1 = PED.GET_PED_BONE_COORDS(ped, index1, 0, 0, 0)
+            local c2 = PED.GET_PED_BONE_COORDS(ped, index2, 0, 0, 0)
+            GRAPHICS.DRAW_LINE(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z, 255, 0, 0, 255)
+        end
+
+        while not DLC.GET_IS_LOADING_SCREEN_ACTIVE() do
+            rs:yield()
+            if not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                for k, v in pairs(SussySpt.online_players_a.playersmi) do
+                    local ped = v.ped
+                    local c = ENTITY.GET_ENTITY_COORDS(ped)
+                    local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
+                    if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z) then
+                        -- Head Bones
+                        drawLine(ped, 31086, 39317) -- Head, Neck
+                        -- Left Arm Bones
+                        drawLine(ped, 10706, 45509) -- Left Clavicle, Left Upper Arm
+                        drawLine(ped, 45509, 61163) -- Left Upper Arm, Left Forearm
+                        drawLine(ped, 61163, 18905) -- Left Forearm, Left Hand
+                        -- Right Arm Bones
+                        drawLine(ped, 10706, 40269) -- Right Clavicle, Right Upper Arm
+                        drawLine(ped, 40269, 28252) -- Right Upper Arm, Right Forearm
+                        drawLine(ped, 28252, 57005) -- Right Forearm, Right Hand
+                        -- Body Bones
+                        drawLine(ped, 11816, 10706) -- Pelvis, Left Clavicle
+                        -- Left Leg Bones
+                        drawLine(ped, 11816, 58271) -- Pelvis, Left Thigh
+                        drawLine(ped, 58271, 63931) -- Left Thigh, Left Calf
+                        drawLine(ped, 63931, 14201) -- Left Calf, Left Foot
+                        -- Right Leg Bones
+                        drawLine(ped, 11816, 51826) -- Pelvis, Right Thigh
+                        drawLine(ped, 51826, 36864) -- Right Thigh, Right Calf
+                        drawLine(ped, 36864, 52301) -- Right Calf, Right Foot
+                    end
+                end
+            end
+        end
+    end)
 
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(SussySpt.in_online, "Yep", "fm script no run so no?"), "Loaded!")
 end
@@ -4195,7 +4279,7 @@ function SussySpt:initTabQA()
                 if ImGui.Button("RI2") then
                     yu.rif(function()
 				        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
+                        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
                     end)
                 end
                 yu.rendering.tooltip("Other way of refreshing the interior")
