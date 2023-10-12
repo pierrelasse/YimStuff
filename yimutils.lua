@@ -127,26 +127,26 @@ return (function()
         end
 
         api.table_to_string = function(tbl)
+            if type(tbl) ~= "table" then
+                return nil
+            end
             local result = "{"
-            local isFirst = true
-
+            local first = true
             for k, v in pairs(tbl) do
-                if not isFirst then
+                if not first then
                     result = result .. ", "
                 end
-
                 if type(k) == "number" or type(k) == "string" then
                     if type(v) == "table" then
-                        result = result .. k .. " = " .. api.table_to_string(v)
+                        result = result..k.." = "..api.table_to_string(v)
                     elseif type(v) == "string" then
-                        result = result .. k .. ' = "' .. v .. '"'
+                        result = result..k..' = "'..v..'"'
                     else
-                        result = result .. k .. " = " .. tostring(v)
+                        result = result..k.." = "..tostring(v)
                     end
-                    isFirst = false
+                    first = false
                 end
             end
-
             return result.."}"
         end
 
