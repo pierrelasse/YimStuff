@@ -1,8 +1,8 @@
 yu = require "yimutils"
 
 SussySpt = {
-    version = "1.3.3",
-    versionid = 1183
+    version = "1.3.4",
+    versionid = 1201
 }
 
 function SussySpt:new()
@@ -181,9 +181,6 @@ function SussySpt:new()
 
     SussySpt:initUtils()
 
-    tab:add_text("Version: "..SussySpt.version)
-    tab:add_text("Version id: "..SussySpt.versionid)
-    tab:add_text("Made by pierrelasse.")
     tab:add_text("github.com/pierrelasse/YimStuff")
 
     SussySpt.rendercb = {}
@@ -194,14 +191,6 @@ function SussySpt:new()
     end
 
     SussySpt.repeatingTasks = {}
-    SussySpt.registerRepeatingTask = function(cb)
-        local id = #SussySpt.repeatingTasks + 1
-        SussySpt.repeatingTasks[id] = cb
-        return id
-    end
-    SussySpt.unregisterRepeatingTask = function(id)
-        SussySpt.repeatingTasks[id] = nil
-    end
 
     SussySpt:initRendering()
 
@@ -212,8 +201,37 @@ function SussySpt:new()
     SussySpt:initTabSelf()
     SussySpt:initTabHeist()
 
+    SussySpt.chatlog = {
+        messages = {},
+        rebuildLog = function()
+            local text = ""
+            local newline = ""
+            local doTimestamp = yu.rendering.isCheckboxChecked("online_chatlog_log_timestamp")
+            for k, v in pairs(SussySpt.chatlog.messages) do
+                local timestamp = ""
+                text = text..newline..(doTimestamp and ("["..v[4].."] ") or "")..v[2]..": "..v[3]
+                newline = "\n"
+            end
+
+            SussySpt.chatlog.text = text
+        end
+    }
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
-        log.info("[CHAT] "..PLAYER.GET_PLAYER_NAME(player_id)..": "..chat_message)
+        if yu.rendering.isCheckboxChecked("online_chatlog_enabled") then
+            local name = PLAYER.GET_PLAYER_NAME(player_id)
+            SussySpt.chatlog.messages[yu.gun()] = {
+                player_id,
+                name,
+                chat_message,
+                os.date("%H:%M:%S")
+            }
+
+            if yu.rendering.isCheckboxChecked("online_chatlog_console") then
+                log.info("[CHAT] "..name..": "..chat_message)
+            end
+
+            SussySpt.chatlog.rebuildLog()
+        end
     end)
 
     script.register_looped("sussyspt2", function()
@@ -221,10 +239,6 @@ function SussySpt:new()
 
         if SussySpt.invisible == true then
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
-        end
-
-        for k, v in pairs(SussySpt.repeatingTasks) do
-            v()
         end
     end)
 
@@ -797,6 +811,27 @@ function SussySpt:new()
             end)
         end)()
 
+        data.sub.chatlog = (function()
+            yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
+            yu.rendering.setCheckboxChecked("online_chatlog_console", true)
+            yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
+
+            return SussySpt.rendering.new_tab("Chatlog", function()
+                if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
+                    ImGui.Spacing()
+                    yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
+                end
+
+                if SussySpt.chatlog.text ~= nil and ImGui.TreeNodeEx("Logs") then
+                    yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
+
+                    ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+
+                    ImGui.TreePop()
+                end
+            end)
+        end)()
+
         return data
     end)
 
@@ -1289,7 +1324,7 @@ function SussySpt:initTabSelf()
     }
 
     local parachuteHash = joaat("GADGET_PARACHUTE")
-    SussySpt.registerRepeatingTask(function()
+    SussySpt.register_repeating_task(function()
         if yu.rendering.isCheckboxChecked("self_refillparachute") then
             WEAPON.GIVE_WEAPON_TO_PED(yu.ppid(), parachuteHash, 1, false, true)
         end
@@ -3386,7 +3421,7 @@ function SussySpt:initTabHBO()
 
         local slots_random_results_table = 1344
 
-        SussySpt.registerRepeatingTask(function()
+        SussySpt.register_repeating_task(function()
             if yu.is_script_running("casino_slots") then
                 local needsRun = false
 
@@ -4023,7 +4058,7 @@ function SussySpt:initTabHBO()
         end
         refreshStats()
 
-        SussySpt.registerRepeatingTask(function()
+        SussySpt.register_repeating_task(function()
             if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
                 globals.set_int(294496, 2000000)
             end
