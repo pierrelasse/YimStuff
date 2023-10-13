@@ -275,6 +275,13 @@ return (function()
         api.rif = function(cb)
             script.run_in_fiber(cb)
         end
+
+        api.does_entity_exist = function(ent)
+            if type(ent) ~= "number" or ent == 0 then
+                return false
+            end
+            return ENTITY.DOES_ENTITY_EXIST(ent, false) == true
+        end
     end
 
     local function initStats()
@@ -369,7 +376,7 @@ return (function()
         api.get_all_players = function()
             local players = {}
             for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v, false) and PED.IS_PED_A_PLAYER(v) then
+                if v ~= nil and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
                     players[k] = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
                 end
             end
@@ -379,7 +386,7 @@ return (function()
         api.get_all_players_mi = function()
             local players = {}
             for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and ENTITY.DOES_ENTITY_EXIST(v, false) and PED.IS_PED_A_PLAYER(v) then
+                if v ~= nil and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
                     players[k] = {
                         whatever = k,
                         ped = v,
