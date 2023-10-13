@@ -608,6 +608,8 @@ return (function()
             end
 
             data.rendering.checkboxstates[id] = d
+
+            return d.state
         end
 
         api.rendering.isCheckboxChecked = function(id)
@@ -704,6 +706,26 @@ return (function()
         function string.containsregex(str, pattern)
             if type(str) == "string" then
                 return string.match(str, pattern)
+            end
+        end
+        function string.length(str)
+            if type(str) == "string" then
+                return string.len(str)
+            end
+        end
+        function string.split(str, delimiter)
+            if type(str) == "string" then
+                return api.splitText(str, delimiter)
+            end
+        end
+
+        function table.length(tbl)
+            if type(tbl) == "table" then
+                local i = 0
+                for k, v in pairs(tbl) do
+                    i = i + 1
+                end
+                return i
             end
         end
     end
