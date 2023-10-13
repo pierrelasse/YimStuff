@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.4",
-    versionid = 1201
+    versionid = 1210
 }
 
 function SussySpt:new()
@@ -286,16 +286,28 @@ function SussySpt:new()
             SussySpt.online_players_a = a
 
             local function updatePlayerElements()
-                a.playerelements = {}
                 local emptystr = ""
+                local selfppid = yu.ppid()
+                local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
                 for k, v in pairs(a.playersmi) do
                     if type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase()) then
+                        a.playersmi[k].display = true
                         local name = v.name
-                        local info = yu.shc(network.is_player_flagged_as_modder(v.player), "M", emptystr)
+                        local info =
+                            yu.shc(network.is_player_flagged_as_modder(v.player), "M", emptystr)
+                            ..yu.shc(v.ped == selfppid, "Y", emptystr)
                         if info ~= emptystr then
                             name = name.." ["..info.."]"
                         end
-                        a.playerelements[k] = name
+                        a.playersmi[k].displayname = name
+
+                        local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                        a.playersmi[k].tooltip =
+                            "Health: "..ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                            .."\n".."Distance: "..MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
+                            .."\n".."Ped: "..v.ped.." Player: "..v.player
+                    else
+                        a.playersmi[k].display = false
                     end
                 end
             end
@@ -303,12 +315,10 @@ function SussySpt:new()
             local function refreshPlayerList()
                 if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                     a.playersmi = {}
-                    a.playerelements = a.playersmi
                     a.selectedplayer = nil
                     return
                 end
                 a.playersmi = yu.get_all_players_mi()
-                a.playerelements = {}
 
                 for k, v in pairs(a.playersmi) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
@@ -357,21 +367,18 @@ function SussySpt:new()
                 )
             end
 
-            SussySpt.register_repeating_task(function()
-                if SussySpt.in_online and a.splayer ~= nil and yu.rendering.isCheckboxChecked("online_player_firing") then
-                    PLAYER.DISABLE_PLAYER_FIRING(a.splayer.player, true)
-                end
-            end)
-
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
                 ImGui.Text("Players")
 
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
-                    for k, v in pairs(a.playerelements) do
-                        if ImGui.Selectable(v, false) then
-                            a.selectedplayer = a.playersmi[k].name
+                    for k, v in pairs(a.playersmi) do
+                        if v.display then
+                            if ImGui.Selectable(v.displayname, false) then
+                                a.selectedplayer = v.name
+                            end
+                            yu.rendering.tooltip(v.tooltip)
                         end
                     end
 
@@ -604,6 +611,8 @@ function SussySpt:new()
                             end)
                         end
 
+                        ImGui.Spacing()
+
                         ImGui.PushItemWidth(120)
                         local gcwr = yu.rendering.input("text", {
                             label = "##gcw",
@@ -641,7 +650,7 @@ function SussySpt:new()
                         end
                         ImGui.SameLine()
                         if ImGui.Button("Remove") then
-                            yu.rif(function(rs)
+                            yu.rif(function()
                                 local hash = weaponFromInput(a.givecustomweapontext)
                                 if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
                                     WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
@@ -649,15 +658,10 @@ function SussySpt:new()
                             end)
                         end
 
-                        yu.rendering.renderCheckbox("Disable firing", "online_player_firing")
-                        yu.rendering.tooltip("Trash")
-
                         ImGui.TreePop()
                     end
 
                     if ImGui.TreeNodeEx("Vehicle") then
-                        ImGui.Text("Most of the things don't work well/not at all")
-
                         yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
@@ -666,6 +670,7 @@ function SussySpt:new()
                                 end
                             end)
                         end)
+                        yu.rendering.tooltip("Sets the vehicle in godmode")
 
                         if ImGui.SmallButton("Repair") then
                             yu.rif(function()
@@ -682,8 +687,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Delete") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
                                     ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
                                     VEHICLE.DELETE_VEHICLE(veh)
@@ -697,8 +701,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Halt") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     VEHICLE.BRING_VEHICLE_TO_HALT(veh, 30, 1, true)
                                 end
                             end)
@@ -710,7 +713,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Engine off") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     yu.request_entity_control_once(veh)
                                     VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
                                 end
@@ -722,8 +725,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Kill engine") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
                                 end
                             end)
@@ -732,8 +734,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Launch") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
                                 end
                             end)
@@ -744,8 +745,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Boost") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 79)
                                     ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 10, 0, 0, 2, 0, 0, 0, false, true, true, false, true)
                                 end
@@ -755,8 +755,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Burst tires") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
                                     yu.loop(8, function(i)
                                         VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
@@ -770,8 +769,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Smash windows") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    yu.request_entity_control_once(veh)
+                                if veh ~= nil and entities.take_control_of(veh) then
                                     yu.loop(8, function(i)
                                         VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
                                     end)
