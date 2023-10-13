@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.4",
-    versionid = 1218
+    versionid = 1219
 }
 
 function SussySpt:new()
@@ -837,6 +837,7 @@ function SussySpt:new()
                     yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
 
                     ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
 
                     ImGui.TreePop()
                 end
