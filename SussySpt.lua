@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.4",
-    versionid = 1210
+    versionid = 1213
 }
 
 function SussySpt:new()
@@ -378,7 +378,9 @@ function SussySpt:new()
                             if ImGui.Selectable(v.displayname, false) then
                                 a.selectedplayer = v.name
                             end
-                            yu.rendering.tooltip(v.tooltip)
+                            if v.tooltip ~= nil then
+                                yu.rendering.tooltip(v.tooltip)
+                            end
                         end
                     end
 
@@ -392,7 +394,7 @@ function SussySpt:new()
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.searchtext ~= srtext then
                     a.searchtext = srtext
-                    updatePlayerElements()
+                    yu.rif(updatePlayerElements)
                 end
                 ImGui.PopItemWidth()
 
@@ -1021,6 +1023,8 @@ function SussySpt:new()
 
         return data
     end)
+
+    ImGui.SetTabItemClosed("##tabbar", "Config")
 
     script.register_looped("sussyspt", SussySpt.tick)
     SussySpt.tab:add_imgui(SussySpt.render)
@@ -4917,70 +4921,3 @@ function SussySpt:initTabHeist()
 end
 
 SussySpt:new()
-
--- function SussySpt:uhhh()
---     local function twcr(c)
---         return c/255
---     end
-
---     local selected = {
---         {0, 0, 0, 0},
---         {0, 0, 0, 0},
---         {0, 0, 0, 0},
---         {0, 0, 0, 0}
---     }
-
---     for k, v in pairs(selected) do
---         for k1, v1 in pairs(v) do
---             if math.random(0, 2) == 0 then
---                 v[k1] = 1
---             else
---                 v[k1] = 0
---             end
---         end
---     end
-
---     SussySpt.add_render(function()
---         ImGui.PushStyleColor(ImGuiCol.TitleBg, twcr(9), twcr(27), twcr(46), 1.0)
---         ImGui.PushStyleColor(ImGuiCol.TitleBgActive, twcr(9), twcr(27), twcr(46), 1.0)
---         ImGui.PushStyleColor(ImGuiCol.WindowBg, twcr(0), twcr(19), twcr(37), 1.0)
---         local isOpen = ImGui.Begin("Test lool")
---         ImGui.PopStyleColor()
---         ImGui.PopStyleColor()
---         ImGui.PopStyleColor()
-
---         if isOpen then
---             for y = 0, 3 do
---                 for x = 0, 3 do
---                     if x > 0 then
---                         ImGui.SameLine()
---                     end
---                     ImGui.PushID(y * 4 + x)
---                     local color = yu.shc(selected[y + 1][x + 1] ~= 0, {30, 143, 123}, {55, 55, 55})
---                     ImGui.PushStyleColor(ImGuiCol.Text, twcr(color[1]), twcr(color[2]), twcr(color[3]), 1.0)
---                     if ImGui.Selectable("kekw", false, 0, 50, 50) then
---                         selected[y + 1][x + 1] = selected[y + 1][x + 1] == 0 and 1 or 0
---                         if x > 0 then
---                             selected[y + 1][x] = selected[y + 1][x] == 0 and 1 or 0
---                         end
---                         if x < 3 then
---                             selected[y + 1][x + 2] = selected[y + 1][x + 2] == 0 and 1 or 0
---                         end
---                         if y > 0 then
---                             selected[y][x + 1] = selected[y][x + 1] == 0 and 1 or 0
---                         end
---                         if y < 3 then
---                             selected[y + 2][x + 1] = selected[y + 2][x + 1] == 0 and 1 or 0
---                         end
---                     end
---                     ImGui.PopStyleColor()
---                     ImGui.PopID()
---                 end
---             end
-
---             ImGui.End()
---         end
---     end)
--- end
-
--- SussySpt:uhhh()
