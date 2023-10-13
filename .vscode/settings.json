@@ -38,7 +38,9 @@
         "ImGuiCol",
         "SHAPETEST",
         "DLC",
-        "ImGuiStyleVar"
+        "ImGuiStyleVar",
+        "GRAPHICS",
+        "ImGuiInputTextFlags"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
