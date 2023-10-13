@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.4",
-    versionid = 1213
+    versionid = 1218
 }
 
 function SussySpt:new()
@@ -700,6 +700,17 @@ function SussySpt:new()
                             end)
                         end
 
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Explode") then
+                            yu.rif(function()
+                                local veh = yu.veh(player.ped)
+                                if veh ~= nil and entities.take_control_of(veh) then
+                                    VEHICLE.EXPLODE_VEHICLE(veh, true, false)
+                                end
+                            end)
+                        end
+
                         if ImGui.SmallButton("Halt") then
                             yu.rif(function()
                                 local veh = yu.veh(player.ped)
@@ -1023,8 +1034,6 @@ function SussySpt:new()
 
         return data
     end)
-
-    ImGui.SetTabItemClosed("##tabbar", "Config")
 
     script.register_looped("sussyspt", SussySpt.tick)
     SussySpt.tab:add_imgui(SussySpt.render)
