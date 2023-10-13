@@ -693,7 +693,7 @@ function SussySpt:new()
                                     VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
                                     ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
                                     VEHICLE.DELETE_VEHICLE(veh)
-                                    if ENTITY.DOES_ENTITY_EXIST(veh) then
+                                    if yu.does_entity_exist(veh) then
                                         ENTITY.DELETE_ENTITY(veh)
                                     end
                                 end
@@ -914,7 +914,7 @@ function SussySpt:new()
                             STREAMING.REQUEST_MODEL(hash)
                             repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
-                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
+                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and yu.does_entity_exist(a.entity) then
                                 ENTITY.DELETE_ENTITY(a.entity)
                             end
 
@@ -950,7 +950,7 @@ function SussySpt:new()
 
                     if ImGui.Button("Delete##last_spawned") then
                         yu.rif(function(runscript)
-                            if ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
+                            if yu.does_entity_exist(a.entity) then
                                 ENTITY.DELETE_ENTITY(a.entity)
                             end
                         end)
@@ -966,7 +966,7 @@ function SussySpt:new()
                 if ImGui.TreeNodeEx("Spawn options") then
                     yu.rendering.renderCheckbox("Frozen", "world_objspawner_freeze", function(state)
                         yu.rif(function()
-                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
+                            if a.entity ~= nil and yu.does_entity_exist(a.entity) then
                                 ENTITY.FREEZE_ENTITY_POSITION(a.entity, state)
                             end
                         end)
@@ -976,7 +976,7 @@ function SussySpt:new()
                     yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
                     yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
                         yu.rif(function()
-                            if a.entity ~= nil and ENTITY.DOES_ENTITY_EXIST(a.entity, false) then
+                            if a.entity ~= nil and yu.does_entity_exist(a.entity) then
                                 ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
                             end
                         end)
@@ -4363,7 +4363,7 @@ function SussySpt:initTabPlayers()
     local playerList = nil
 
     local function getPlayerSusLevel(player, disableExtraCheck)
-        if not disableExtraCheck and not ENTITY.DOES_ENTITY_EXIST(player.ped) then
+        if not disableExtraCheck and not yu.does_entity_exist(player.ped) then
             return -1
         end
 
@@ -4404,7 +4404,7 @@ function SussySpt:initTabPlayers()
             local players = yu.get_all_players_mi()
             local newPlayers = {}
             for k, v in pairs(players) do
-                if ENTITY.DOES_ENTITY_EXIST(v.ped) then
+                if yu.does_entity_exist(v.ped) then
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
                     if name ~= nil and name ~= "**Invalid**" then
                         v.key = k
@@ -4429,7 +4429,7 @@ function SussySpt:initTabPlayers()
 
     local function selectedPlayer(isAsync)
         local player = SussySpt.players[SussySpt.selectedPlayer]
-        if player and ((isAsync ~= false and ENTITY.DOES_ENTITY_EXIST(player.ped)) or true) then
+        if player and ((isAsync ~= false and yu.does_entity_exist(player.ped)) or true) then
             return player
         end
         return nil
@@ -4457,7 +4457,7 @@ function SussySpt:initTabPlayers()
 
     local function markAllEntitiesAsRemoveable()
         for k, v in pairs(entities) do
-            if ENTITY.DOES_ENTITY_EXIST(v) then
+            if yu.does_entity_exist(v) then
                 ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(v)
             end
         end
@@ -4466,7 +4466,7 @@ function SussySpt:initTabPlayers()
 
     local function deleteAllEntities()
         for k, v in pairs(entities) do
-            if ENTITY.DOES_ENTITY_EXIST(v) then
+            if yu.does_entity_exist(v) then
                 ENTITY.DELETE_ENTITY(v)
             end
         end
@@ -4474,7 +4474,7 @@ function SussySpt:initTabPlayers()
     end
 
     local function teleportPlayerToCoords(player, x, y, z)
-        if not ENTITY.DOES_ENTITY_EXIST(player) or ENTITY.IS_ENTITY_DEAD(player, true) then
+        if not yu.does_entity_exist(player) or ENTITY.IS_ENTITY_DEAD(player, true) then
             return false
         end
 
@@ -4656,7 +4656,7 @@ function SussySpt:initTabPlayers()
                 --         if player ~= nil then
                 --             log.info("Player:"..tostring(player.ped))
                 --             for k, v in pairs(yu.get_all_players_mi()) do
-                --                 if v.ped ~= player.ped and ENTITY.DOES_ENTITY_EXIST(v.ped) then
+                --                 if v.ped ~= player.ped and yu.does_entity_exist(v.ped) then
                 --                     local c = ENTITY.GET_ENTITY_COORDS(v.ped)
                 --                     log.info(player.ped.."<x>"..v.ped)
                 --                     FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 8, 10, false, true, .0)
