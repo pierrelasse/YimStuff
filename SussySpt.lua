@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1221
+    versionid = 1224
 }
 
 function SussySpt:new()
@@ -288,23 +288,51 @@ function SussySpt:new()
                 local emptystr = ""
                 local selfppid = yu.ppid()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
+
                 for k, v in pairs(a.playersmi) do
                     if type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase()) then
                         a.playersmi[k].display = true
-                        local name = v.name
-                        local info =
-                            yu.shc(network.is_player_flagged_as_modder(v.player), "M", emptystr)
-                            ..yu.shc(v.ped == selfppid, "Y", emptystr)
-                        if info ~= emptystr then
-                            name = name.." ["..info.."]"
-                        end
-                        a.playersmi[k].displayname = name
+                        local displayName = v.name
+
+                        local info = {
+                            self = {
+                                v.ped == selfppid,
+                                "S",
+                                "This is you!"
+                            },
+                            modder = {
+                                network.is_player_flagged_as_modder(v.player),
+                                "M",
+                                "This player was detected as a modder"
+                            }
+                        }
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
-                        a.playersmi[k].tooltip =
-                            "Health: "..ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
-                            .."\n".."Distance: "..MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
-                            .."\n".."Ped: "..v.ped.." Player: "..v.player
+
+                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
+                        local maxHealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
+                        local tooltip =
+                            "Health: "..health.."/"..maxHealth
+                            .."\nDistance: "..distance
+                            .."\nPed: "..v.ped.." Player: "..v.player
+
+
+                        local infoChar = emptystr
+
+                        for k, v in pairs(info) do
+                            if v[1] == true then
+                                infoChar = infoChar..v[2]
+                                tooltip = tooltip.."\n"..v[2]..": "..v[3]
+                            end
+                        end
+
+                        if infoChar ~= emptystr then
+                            displayName = displayName.." ["..infoChar.."]"
+                        end
+
+                        a.playersmi[k].displayname = displayName
+                        a.playersmi[k].tooltip = tooltip
                     else
                         a.playersmi[k].display = false
                     end
@@ -389,10 +417,10 @@ function SussySpt:new()
 
                 ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
-                local srtext, srselected = ImGui.InputText("##search", a.searchtext, 32)
+                local searchtext, _ = ImGui.InputText("##search", a.searchtext, 32)
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.searchtext ~= srtext then
-                    a.searchtext = srtext
+                if a.searchtext ~= searchtext then
+                    a.searchtext = searchtext
                     yu.rif(updatePlayerElements)
                 end
                 ImGui.PopItemWidth()
@@ -486,7 +514,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Invisible") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                FIRE.ADD_OWNED_EXPLOSION(0, c.x, c.y, c.z, 72, 80, false, true, 0)
                             end)
                         end
                         yu.rendering.tooltip("\"Random\" death")
@@ -494,14 +522,14 @@ function SussySpt:new()
                         if ImGui.SmallButton("Normal") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                FIRE.ADD_OWNED_EXPLOSION(0, c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                             end)
                         end
                         ImGui.SameLine()
                         if ImGui.SmallButton("Huge") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                FIRE.ADD_OWNED_EXPLOSION(0, c.x, c.y, c.z, 82, 20, true, false, 1)
                             end)
                         end
 
@@ -1486,7 +1514,7 @@ function SussySpt:initTabSelf()
                             yu.add_task(function()
                                 stats.set_int("MPPLY_XMASLIVERIES", -1)
                                 for i = 1, 20 do
-                                    stats.set_int("MPPLY_XMASLIVERIES" .. i, -1)
+                                    stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
                                 end
                             end)
                         end
@@ -1511,9 +1539,9 @@ function SussySpt:initTabSelf()
                             yu.add_task(function()
                                 stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
                                 for i = 0, 9 do
-                                    stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_" .. i , -1)
-                                    stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_" .. i, -1)
-                                    stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_" .. i, true)
+                                    stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_"..i , -1)
+                                    stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_"..i, -1)
+                                    stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_"..i, true)
                                 end
                             end)
                         end
