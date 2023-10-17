@@ -173,15 +173,15 @@ return (function()
         end
 
         api.get_entity_proofs = function(entity)
-            local s, bp, fp, ep, cp, mp, sp, p7p, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false, false, false, false)
-            local data =  {
+            local s, bp, fp, ep, cp, mp, sp, p7, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false, false, false, false)
+            local data = {
                 bullet = bp,
                 fire = fp,
                 explosion = ep,
                 collision = cp,
                 melee = mp,
                 steam = sp,
-                p7 = p7p,
+                p7 = p7,
                 drown = dp,
                 anytrue = false
             }
@@ -194,7 +194,18 @@ return (function()
             end
 
             data.success = s
-            
+
+            data.translated = {
+                ["Bullet"] = bp,
+                ["Fire"] = fp,
+                ["Explosion"] = ep,
+                ["Collision"] = cp,
+                ["Melee"] = mp,
+                ["Steam"] = sp,
+                ["P7"] = p7,
+                ["Drown"] = dp
+            }
+
             return data
         end
 
