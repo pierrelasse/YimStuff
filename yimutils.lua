@@ -747,6 +747,16 @@ return (function()
                 return api.splitText(str, delimiter)
             end
         end
+        function string.strip(str)
+            if type(str) == "string" then
+                return str:gsub("%s+", " ")
+            end
+        end
+        function string.trim(str)
+            if type(str) == "string" then
+                return str:gsub("^%s*(.-)%s*$", "%1")
+            end
+        end
 
         function table.length(tbl)
             if type(tbl) == "table" then

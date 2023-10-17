@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1233
+    versionid = 1254
 }
 
 function SussySpt:new()
@@ -389,18 +389,17 @@ function SussySpt:new()
                 WEAPON.REQUEST_WEAPON_ASSET(weaponHash, 31, 0)
                 repeat rs:yield() until WEAPON.HAS_WEAPON_ASSET_LOADED(weaponHash)
 
-                local c1 = PED.GET_PED_BONE_COORDS(ped, 39317, 0, 0, 0)
-                local c2 = PED.GET_PED_BONE_COORDS(ped, 11816, 0, 0, 0)
+                local c = ENTITY.GET_ENTITY_COORDS(ped)
                 MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-                    c2.x, c2.y, c2.z,
-                    c1.x, c1.y, c1.z,
+                    c.x, c.y, c.z - .5,
+                    c.x, c.y, c.z + .5,
                     damage or 1,
                     true,
                     weaponHash,
-                    ped,
-                    false,
+                    ped or yu.ppid(),
                     true,
-                    speed or 24000
+                    false,
+                    speed or -1
                 )
             end
 
@@ -451,399 +450,190 @@ function SussySpt:new()
                             break
                         end
                     end
-                    ImGui.SameLine()
 
-                    ImGui.BeginGroup()
-
-                    ImGui.Text("Selected player: "..player.name)
-
-                    if ImGui.TreeNodeEx("General") then
-                        if ImGui.Button("Goto") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
-                            end)
-                        end
-                        yu.rendering.tooltip("Teleport yourself to the player")
-
+                    if player ~= nil then
                         ImGui.SameLine()
 
-                        if ImGui.Button("Bring") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                                network.set_player_coords(player.player, c.x, c.y, c.z)
-                            end)
-                        end
+                        ImGui.BeginGroup()
 
-                        ImGui.SameLine()
+                        ImGui.Text("Selected player: "..player.name)
 
-                        if ImGui.Button("Set waypoint to") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                HUD.SET_NEW_WAYPOINT(c.x, c.y)
-                            end)
-                        end
+                        if ImGui.TreeNodeEx("General") then
+                            if ImGui.Button("Goto") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
+                                end)
+                            end
+                            yu.rendering.tooltip("Teleport yourself to the player")
 
-                        if ImGui.Button("Kill") then
-                            yu.rif(function(rs)
-                                shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 10000)
-                            end)
-                        end
-                        yu.rendering.tooltip("Should super good but sadly it doesn't work well :/")
+                            ImGui.SameLine()
 
-                        yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
-                            yu.rif(function()
-                                for k, v in pairs(a.playersmi) do
-                                    if v.ped ~= player.ped then
-                                        if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
-                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
-                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                            if ImGui.Button("Bring") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                    network.set_player_coords(player.player, c.x, c.y, c.z)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Set waypoint to") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    HUD.SET_NEW_WAYPOINT(c.x, c.y)
+                                end)
+                            end
+
+                            if ImGui.Button("Kill") then
+                                yu.rif(function(rs)
+                                    shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 5000)
+                                end)
+                            end
+                            yu.rendering.tooltip("Weird stuff")
+
+                            yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
+                                yu.rif(function()
+                                    for k, v in pairs(a.playersmi) do
+                                        if v.ped ~= player.ped then
+                                            if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
+                                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
+                                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                                            end
                                         end
                                     end
-                                end
-                                if state then
-                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                                else
-                                    NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
-                                end
-                            end)
-                        end)
-
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Trolling") then
-                        if ImGui.Button("Taze") then
-                            yu.rif(function(rs)
-                                shootPlayer(rs, player.ped, joaat("WEAPON_STUNGUN"), 2)
-                            end)
-                        end
-
-                        ImGui.Text("Explode:")
-                        ImGui.SameLine()
-                        if ImGui.SmallButton("Invisible") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
-                            end)
-                        end
-                        yu.rendering.tooltip("\"Random\" death")
-                        ImGui.SameLine()
-                        if ImGui.SmallButton("Normal") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
-                            end)
-                        end
-                        ImGui.SameLine()
-                        if ImGui.SmallButton("Huge") then
-                            yu.rif(function()
-                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
-                            end)
-                        end
-
-                        if ImGui.TreeNodeEx("Trap") then
-                            if ImGui.Button("Normal") then
-                                yu.rif(function()
-                                    local modelHash = joaat("prop_gold_cont_01b")
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    for i = 0, 1 do
-                                        local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
-                                        networkobj(obj)
-                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
-                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                    if state then
+                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                                    else
+                                        NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
                                     end
+                                end)
+                            end)
+
+                            ImGui.TreePop()
+                        end
+
+                        if ImGui.TreeNodeEx("Trolling") then
+                            if ImGui.Button("Taze") then
+                                yu.rif(function(rs)
+                                    shootPlayer(rs, player.ped, joaat("WEAPON_STUNGUN"), 2)
                                 end)
                             end
 
-                            if ImGui.Button("Cage") then
-                                yu.rif(function(runscript)
+                            ImGui.Text("Explode:")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Invisible") then
+                                yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local x = tonumber(string.format('%.2f', c.x))
-                                    local y = tonumber(string.format('%.2f', c.y))
-                                    local z = tonumber(string.format('%.2f', c.z))
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                end)
+                            end
+                            yu.rendering.tooltip("\"Random\" death")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Normal") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Huge") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                end)
+                            end
 
-                                    local modelHash = joaat("prop_fnclink_05crnr1")
-                                    STREAMING.REQUEST_MODEL(modelHash)
-                                    repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+                            if ImGui.TreeNodeEx("Trap") then
+                                if ImGui.Button("Normal") then
+                                    yu.rif(function()
+                                        local modelHash = joaat("prop_gold_cont_01b")
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        for i = 0, 1 do
+                                            local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
+                                            networkobj(obj)
+                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
+                                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                        end
+                                    end)
+                                end
 
-                                    local createObject = function(offsetX, offsetY, heading)
-                                        local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                if ImGui.Button("Cage") then
+                                    yu.rif(function(runscript)
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        local x = tonumber(string.format('%.2f', c.x))
+                                        local y = tonumber(string.format('%.2f', c.y))
+                                        local z = tonumber(string.format('%.2f', c.z))
+
+                                        local modelHash = joaat("prop_fnclink_05crnr1")
+                                        STREAMING.REQUEST_MODEL(modelHash)
+                                        repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+
+                                        local createObject = function(offsetX, offsetY, heading)
+                                            local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                            networkobj(obj)
+                                            ENTITY.SET_ENTITY_HEADING(obj, heading)
+                                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                        end
+
+                                        createObject(-1.70, -1.70, -90.0)
+                                        createObject(1.70, 1.70, 90.0)
+                                    end)
+                                end
+
+                                if ImGui.Button("Race tube") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
                                         networkobj(obj)
-                                        ENTITY.SET_ENTITY_HEADING(obj, heading)
+                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                         ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
-                                    end
+                                    end)
+                                end
 
-                                    createObject(-1.70, -1.70, -90.0)
-                                    createObject(1.70, 1.70, 90.0)
-                                end)
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Invisible race tube") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                        networkobj(obj)
+                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
+                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                        ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                    end)
+                                end
+
+                                ImGui.TreePop()
                             end
 
-                            if ImGui.Button("Race tube") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
-                                    networkobj(obj)
-                                    ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
-                                    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
-                                end)
+                            ImGui.PushItemWidth(237)
+                            local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
+                            if ror.changed then
+                                a.ramoption = ror.key
                             end
-
+                            ImGui.PopItemWidth()
                             ImGui.SameLine()
-
-                            if ImGui.Button("Invisible race tube") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
-                                    networkobj(obj)
-                                    ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
-                                    ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                    ENTITY.SET_ENTITY_VISIBLE(obj, false)
-                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
-                                end)
-                            end
-
-                            ImGui.TreePop()
-                        end
-
-                        ImGui.PushItemWidth(237)
-                        local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
-                        if ror.changed then
-                            a.ramoption = ror.key
-                        end
-                        ImGui.PopItemWidth()
-                        ImGui.SameLine()
-                        if ImGui.Button("Ram") then
-                            yu.rif(function(runscript)
-                                local hash = joaat(a.ramoption)
-                                if STREAMING.IS_MODEL_VALID(hash) then
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
-                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
-                                    networkent(veh)
-                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
-                                    runscript:sleep(100)
-                                    for i = 0, 10 do
-                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                            if ImGui.Button("Ram") then
+                                yu.rif(function(runscript)
+                                    local hash = joaat(a.ramoption)
+                                    if STREAMING.IS_MODEL_VALID(hash) then
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                        local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
+                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                        networkent(veh)
+                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
                                         runscript:sleep(100)
-                                    end
-                                    ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
-                                    VEHICLE.DELETE_VEHICLE(veh)
-                                end
-                            end)
-                        end
-
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Weapons") then
-                        if ImGui.Button("Remove all weapons") then
-                            yu.rif(function()
-                                WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
-                                for k, v in pairs(yu.get_all_weapons()) do
-                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
-                                end
-                            end)
-                        end
-
-                        ImGui.Spacing()
-
-                        ImGui.PushItemWidth(120)
-                        local gcwr = yu.rendering.input("text", {
-                            label = "##gcw",
-                            text = a.givecustomweapontext
-                        })
-                        SussySpt.push_disable_controls(ImGui.IsItemActive())
-                        ImGui.PopItemWidth()
-                        if gcwr ~= nil and gcwr.changed then
-                            a.givecustomweapontext = gcwr.text
-                        end
-
-                        ImGui.SameLine()
-
-                        ImGui.PushItemWidth(79)
-                        local gcwar = yu.rendering.input("int", {
-                            label = "##gcwa",
-                            value = a.givecustomweaponammo,
-                            min = 0,
-                            max = 99999
-                        })
-                        SussySpt.push_disable_controls(ImGui.IsItemActive())
-                        ImGui.PopItemWidth()
-                        if gcwar ~= nil and gcwar.changed then
-                            a.givecustomweaponammo = gcwar.value
-                        end
-
-                        ImGui.SameLine()
-                        if ImGui.Button("Give") then
-                            yu.rif(function()
-                                local hash = weaponFromInput(a.givecustomweapontext)
-                                if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
-                                    WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
-                                end
-                            end)
-                        end
-                        ImGui.SameLine()
-                        if ImGui.Button("Remove") then
-                            yu.rif(function()
-                                local hash = weaponFromInput(a.givecustomweapontext)
-                                if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
-                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
-                                end
-                            end)
-                        end
-
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Vehicle") then
-                        yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil then
-                                    ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
-                                end
-                            end)
-                        end)
-                        yu.rendering.tooltip("Sets the vehicle in godmode")
-
-                        if ImGui.SmallButton("Repair") then
-                            yu.rif(function()
-                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
-                                    local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
-                                    VEHICLE.SET_VEHICLE_FIXED(veh)
-                                    VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
-                                end
-                            end)
-                        end
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Delete") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
-                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
-                                    VEHICLE.DELETE_VEHICLE(veh)
-                                    if yu.does_entity_exist(veh) then
-                                        ENTITY.DELETE_ENTITY(veh)
-                                    end
-                                end
-                            end)
-                        end
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Explode") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.EXPLODE_VEHICLE(veh, true, false)
-                                end
-                            end)
-                        end
-
-                        if ImGui.SmallButton("Halt") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.BRING_VEHICLE_TO_HALT(veh, 30, 1, true)
-                                end
-                            end)
-                        end
-                        yu.rendering.tooltip("Makes the vehicle halt.\nThe vehicle can start driving right after it.")
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Engine off") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    yu.request_entity_control_once(veh)
-                                    VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
-                                end
-                            end)
-                        end
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Kill engine") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
-                                end
-                            end)
-                        end
-
-                        if ImGui.SmallButton("Launch") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
-                                end
-                            end)
-                        end
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Boost") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 79)
-                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 10, 0, 0, 2, 0, 0, 0, false, true, true, false, true)
-                                end
-                            end)
-                        end
-
-                        if ImGui.SmallButton("Burst tires") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
-                                    yu.loop(8, function(i)
-                                        VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
-                                    end)
-                                end
-                            end)
-                        end
-
-                        ImGui.SameLine()
-
-                        if ImGui.SmallButton("Smash windows") then
-                            yu.rif(function()
-                                local veh = yu.veh(player.ped)
-                                if veh ~= nil and entities.take_control_of(veh) then
-                                    yu.loop(8, function(i)
-                                        VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
-                                    end)
-                                end
-                            end)
-                        end
-
-                        if ImGui.TreeNodeEx("Doors") then
-                            if ImGui.SmallButton("Unlock (you)") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
-                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Unlock (all)") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
-                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
+                                        for i = 0, 10 do
+                                            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                                            runscript:sleep(100)
+                                        end
+                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                        VEHICLE.DELETE_VEHICLE(veh)
                                     end
                                 end)
                             end
@@ -851,7 +641,219 @@ function SussySpt:new()
                             ImGui.TreePop()
                         end
 
-                        ImGui.TreePop()
+                        if ImGui.TreeNodeEx("Weapons") then
+                            if ImGui.Button("Remove all weapons") then
+                                yu.rif(function()
+                                    WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
+                                    for k, v in pairs(yu.get_all_weapons()) do
+                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                                    end
+                                end)
+                            end
+
+                            ImGui.Spacing()
+
+                            ImGui.PushItemWidth(120)
+                            local gcwr = yu.rendering.input("text", {
+                                label = "##gcw",
+                                text = a.givecustomweapontext
+                            })
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+                            ImGui.PopItemWidth()
+                            if gcwr ~= nil and gcwr.changed then
+                                a.givecustomweapontext = gcwr.text
+                            end
+
+                            ImGui.SameLine()
+
+                            ImGui.PushItemWidth(79)
+                            local gcwar = yu.rendering.input("int", {
+                                label = "##gcwa",
+                                value = a.givecustomweaponammo,
+                                min = 0,
+                                max = 99999
+                            })
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+                            ImGui.PopItemWidth()
+                            if gcwar ~= nil and gcwar.changed then
+                                a.givecustomweaponammo = gcwar.value
+                            end
+
+                            ImGui.SameLine()
+                            if ImGui.Button("Give") then
+                                yu.rif(function()
+                                    local hash = weaponFromInput(a.givecustomweapontext)
+                                    if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
+                                        WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
+                                    end
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.Button("Remove") then
+                                yu.rif(function()
+                                    local hash = weaponFromInput(a.givecustomweapontext)
+                                    if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
+                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
+                                    end
+                                end)
+                            end
+
+                            ImGui.TreePop()
+                        end
+
+                        if ImGui.TreeNodeEx("Vehicle") then
+                            yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
+                                    end
+                                end)
+                            end)
+                            yu.rendering.tooltip("Sets the vehicle in godmode")
+
+                            if ImGui.SmallButton("Repair") then
+                                yu.rif(function()
+                                    if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
+                                        local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
+                                        VEHICLE.SET_VEHICLE_FIXED(veh)
+                                        VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Delete") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
+                                        ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
+                                        VEHICLE.DELETE_VEHICLE(veh)
+                                        if yu.does_entity_exist(veh) then
+                                            ENTITY.DELETE_ENTITY(veh)
+                                        end
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Explode") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.EXPLODE_VEHICLE(veh, true, false)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Halt") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.BRING_VEHICLE_TO_HALT(veh, 30, 1, true)
+                                    end
+                                end)
+                            end
+                            yu.rendering.tooltip("Makes the vehicle halt.\nThe vehicle can start driving right after it.")
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Engine off") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        yu.request_entity_control_once(veh)
+                                        VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Kill engine") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Launch") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Boost") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 79)
+                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 10, 0, 0, 2, 0, 0, 0, false, true, true, false, true)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Burst tires") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
+                                        yu.loop(8, function(i)
+                                            VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
+                                        end)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Smash windows") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        yu.loop(8, function(i)
+                                            VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
+                                        end)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.TreeNodeEx("Doors") then
+                                if ImGui.SmallButton("Unlock (you)") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil then
+                                            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Unlock (all)") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil then
+                                            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.TreePop()
+                            end
+
+                            ImGui.TreePop()
+                        end
                     end
 
                     ImGui.EndGroup()
