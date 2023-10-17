@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1230
+    versionid = 1232
 }
 
 function SussySpt:new()
@@ -277,7 +277,8 @@ function SussySpt:new()
                     ["freight"] = "Train",
                     ["bulldozer"] = "Bulldozer (very cool)",
                     ["dump"] = "Dump (big)",
-                    ["cutter"] = "Cutter"
+                    ["cutter"] = "Cutter",
+                    ["firetruk"] = "Firetruk"
                 },
                 ramoption = "bus",
                 givecustomweaponammo = 999
@@ -1142,10 +1143,6 @@ function SussySpt:initRendering()
             yu.rendering.renderCheckbox("HBO", "cat_hbo")
         end
         yu.rendering.renderCheckbox("Quick actions", "cat_qa")
-        if SussySpt.in_online then
-            yu.rendering.renderCheckbox("Players", "cat_players")
-            yu.rendering.tooltip("This is a beta feature and way not done yet")
-        end
     end)
 end
 
