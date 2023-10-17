@@ -44,9 +44,5 @@
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
-    ],
-    "files.associations": {
-        "*.embeddedhtml": "html",
-        "cmath": "cpp"
-    }
+    ]
 }
