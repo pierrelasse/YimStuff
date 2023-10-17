@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1224
+    versionid = 1230
 }
 
 function SussySpt:new()
@@ -317,13 +317,22 @@ function SussySpt:new()
                             .."\nDistance: "..distance
                             .."\nPed: "..v.ped.." Player: "..v.player
 
+                        local proofs = yu.get_entity_proofs(v.ped)
+                        if proofs.success and proofs.anytrue then
+                            tooltip = tooltip.."\nProofs: "
+                            for k1, v1 in pairs(proofs.translated) do
+                                if v1 then
+                                    tooltip = tooltip.." "..k1
+                                end
+                            end
+                        end
 
                         local infoChar = emptystr
 
-                        for k, v in pairs(info) do
-                            if v[1] == true then
-                                infoChar = infoChar..v[2]
-                                tooltip = tooltip.."\n"..v[2]..": "..v[3]
+                        for k1, v1 in pairs(info) do
+                            if v1[1] == true then
+                                infoChar = infoChar..v1[2]
+                                tooltip = tooltip.."\n"..v1[2]..": "..v1[3]
                             end
                         end
 
@@ -332,7 +341,7 @@ function SussySpt:new()
                         end
 
                         a.playersmi[k].displayname = displayName
-                        a.playersmi[k].tooltip = tooltip
+                        a.playersmi[k].tooltip = tooltip:replace("  ", " ")
                     else
                         a.playersmi[k].display = false
                     end
@@ -514,7 +523,7 @@ function SussySpt:new()
                         if ImGui.SmallButton("Invisible") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_OWNED_EXPLOSION(0, c.x, c.y, c.z, 72, 80, false, true, 0)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
                             end)
                         end
                         yu.rendering.tooltip("\"Random\" death")
@@ -522,14 +531,14 @@ function SussySpt:new()
                         if ImGui.SmallButton("Normal") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_OWNED_EXPLOSION(0, c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                             end)
                         end
                         ImGui.SameLine()
                         if ImGui.SmallButton("Huge") then
                             yu.rif(function()
                                 local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                FIRE.ADD_OWNED_EXPLOSION(0, c.x, c.y, c.z, 82, 20, true, false, 1)
+                                FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
                             end)
                         end
 
