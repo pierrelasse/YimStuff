@@ -174,8 +174,7 @@ return (function()
 
         api.get_entity_proofs = function(entity)
             local s, bp, fp, ep, cp, mp, sp, p7p, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false, false, false, false)
-            return {
-                success = s,
+            local data =  {
                 bullet = bp,
                 fire = fp,
                 explosion = ep,
@@ -183,8 +182,20 @@ return (function()
                 melee = mp,
                 steam = sp,
                 p7 = p7p,
-                drown = dp
+                drown = dp,
+                anytrue = false
             }
+
+            for k, v in pairs(data) do
+                if v then
+                    data.anytrue = true
+                    break
+                end
+            end
+
+            data.success = s
+            
+            return data
         end
 
         api.request_entity_control_once = function(entity)
