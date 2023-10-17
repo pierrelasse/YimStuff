@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1232
+    versionid = 1233
 }
 
 function SussySpt:new()
@@ -99,12 +99,12 @@ function SussySpt:new()
         return c / 255
     end
 
+    SussySpt.render_pops = {}
     SussySpt.render = function()
         for k, v in pairs(SussySpt.rendercb) do
             v()
         end
 
-        local pops = {}
         local function pushTheme(theme)
             if type(theme) ~= "table" then
                 return
@@ -119,14 +119,14 @@ function SussySpt:new()
                     for k1, v1 in pairs(v) do
                         if k == "ImGuiCol" then
                             ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
-                            pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
+                            SussySpt.render_pops.PopStyleColor = (SussySpt.render_pops.PopStyleColor or 0) + 1
                         elseif k == "ImGuiStyleVar" then
                             if v1[2] == nil then
                                 ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
                             else
                                 ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
                             end
-                            pops.PopStyleVar = (pops.PopStyleVar or 0) + 1
+                            SussySpt.render_pops.PopStyleVar = (SussySpt.render_pops.PopStyleVar or 0) + 1
                         end
                     end
                 end
@@ -143,7 +143,7 @@ function SussySpt:new()
         end
         ImGui.End()
 
-        for k, v in pairs(pops) do
+        for k, v in pairs(SussySpt.render_pops) do
             ImGui[k](v)
         end
     end
