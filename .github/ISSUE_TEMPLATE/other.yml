@@ -5,5 +5,7 @@ labels: other
 body:
 - type: textarea
   attributes:
-    label: Your text
-    description: :D
+    label: Issue
+    description: What's the issue?
+  validations:
+    required: true
