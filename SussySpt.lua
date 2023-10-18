@@ -304,18 +304,26 @@ function SussySpt:new()
                                 network.is_player_flagged_as_modder(v.player),
                                 "M",
                                 "This player was detected as a modder"
+                            },
+                            vehicle = {
+                                yu.veh(v.ped) ~= nil,
+                                "V",
+                                "The player is in a vehicle"
                             }
                         }
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
-                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
-                        local maxHealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        local armor = PED.GET_PED_ARMOUR(v.ped)
                         local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
+                        local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local tooltip =
-                            "Health: "..health.."/"..maxHealth
-                            .."\nDistance: "..distance
+                            "Health: "..health
+                            .."\nArmor: "..string.format("%.0f", armor)
+                            .."\nDistance: "..string.format("%.2f", distance).."m"
                             .."\nPed: "..v.ped.." Player: "..v.player
+                            .."\nRoad: "..road
 
                         local proofs = yu.get_entity_proofs(v.ped)
                         if proofs.success and proofs.anytrue then
@@ -486,10 +494,17 @@ function SussySpt:new()
 
                             if ImGui.Button("Kill") then
                                 yu.rif(function(rs)
-                                    shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 5000)
+                                    -- shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 5000)
+                                    PED.EXPLODE_PED_HEAD(player.ped, joaat("WEAPON_HEAVYSNIPER"))
                                 end)
                             end
                             yu.rendering.tooltip("Weird stuff")
+
+                            if ImGui.Button("Clear ped tasks") then
+                                yu.rif(function()
+                                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(player.ped)
+                                end)
+                            end
 
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                                 yu.rif(function()
@@ -540,6 +555,13 @@ function SussySpt:new()
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Car") then
+                                yu.rif(function()
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
                                 end)
                             end
 

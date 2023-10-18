@@ -40,7 +40,8 @@
         "DLC",
         "ImGuiStyleVar",
         "GRAPHICS",
-        "ImGuiInputTextFlags"
+        "ImGuiInputTextFlags",
+        "PATHFIND"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
