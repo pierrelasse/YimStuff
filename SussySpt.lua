@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1257
+    versionid = 1258
 }
 
 function SussySpt:new()
@@ -217,7 +217,7 @@ function SussySpt:new()
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
         if yu.rendering.isCheckboxChecked("online_chatlog_enabled") then
             local name = PLAYER.GET_PLAYER_NAME(player_id)
-            SussySpt.chatlog.messages[os.time()] = {
+            SussySpt.chatlog.messages[#SussySpt.chatlog.messages + 1] = {
                 player_id,
                 name,
                 chat_message,
