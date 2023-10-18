@@ -659,6 +659,12 @@ return (function()
         end
 
         api.rendering.coloredtext = function(text, r, g, b, alpha)
+            if type(r) == "table" then
+                g = r[2] or 0
+                b = r[3] or 0
+                alpha = r[4] or 255
+                r = r[1] or 0
+            end
             r, g, b, alpha = api.imcolor(r, g, b, alpha)
             ImGui.TextColored(r, g, b, alpha, text)
         end
@@ -765,6 +771,13 @@ return (function()
                     i = i + 1
                 end
                 return i
+            end
+        end
+        function table.unpck(tbl, endIndex, startIndex)
+            startIndex = startIndex or 1
+            endIndex = endIndex or #tbl
+            if startIndex <= endIndex then
+                return tbl[startIndex], table.unpck(tbl, endIndex, startIndex + 1)
             end
         end
     end
