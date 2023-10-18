@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1314
+    versionid = 1317
 }
 
 function SussySpt:new()
@@ -903,9 +903,12 @@ function SussySpt:new()
                                     if STREAMING.HAS_MODEL_LOADED(hash) then
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                         OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                    else
+                                        STREAMING.REQUEST_MODEL(hash)
                                     end
                                 end)
                             end
+                            yu.rendering.tooltip("This is good to make someone else a bit of money and rp")
 
                             ImGui.TreePop()
                         end
