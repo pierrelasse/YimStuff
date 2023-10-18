@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1298
+    versionid = 1300
 }
 
 function SussySpt:new()
@@ -537,7 +537,7 @@ function SussySpt:new()
                             if ImGui.SmallButton("Invisible") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 72, 80, false, true, 0)
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
                                 end)
                             end
                             yu.rendering.tooltip("\"Random\" death")
@@ -545,21 +545,21 @@ function SussySpt:new()
                             if ImGui.SmallButton("Normal") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                                 end)
                             end
                             ImGui.SameLine()
                             if ImGui.SmallButton("Huge") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 82, 20, true, false, 1)
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
                                 end)
                             end
                             ImGui.SameLine()
                             if ImGui.SmallButton("Car") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 7, 1, true, false, 0)
+                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
                                 end)
                             end
 
