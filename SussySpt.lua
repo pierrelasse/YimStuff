@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1328
+    versionid = 1331
 }
 
 function SussySpt:new()
@@ -307,6 +307,9 @@ function SussySpt:new()
                         a.playersmi[k].display = true
                         local displayName = v.name
 
+                        local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                        local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+
                         local info = {
                             self = {
                                 v.ped == selfppid,
@@ -322,10 +325,13 @@ function SussySpt:new()
                                 yu.veh(v.ped) ~= nil,
                                 "V",
                                 "The player is in a vehicle"
+                            },
+                            interior = {
+                                interior ~= 0,
+                                "I",
+                                "The player is in a interior. Id: "..interior
                             }
                         }
-
-                        local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
                         local health = ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
                         local armor = PED.GET_PED_ARMOUR(v.ped)
