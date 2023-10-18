@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1254
+    versionid = 1255
 }
 
 function SussySpt:new()
@@ -207,7 +207,6 @@ function SussySpt:new()
             local newline = ""
             local doTimestamp = yu.rendering.isCheckboxChecked("online_chatlog_log_timestamp")
             for k, v in pairs(SussySpt.chatlog.messages) do
-                local timestamp = ""
                 text = text..newline..(doTimestamp and ("["..v[4].."] ") or "")..v[2]..": "..v[3]
                 newline = "\n"
             end
@@ -218,7 +217,7 @@ function SussySpt:new()
     event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
         if yu.rendering.isCheckboxChecked("online_chatlog_enabled") then
             local name = PLAYER.GET_PLAYER_NAME(player_id)
-            SussySpt.chatlog.messages[yu.gun()] = {
+            SussySpt.chatlog.messages[os.time()] = {
                 player_id,
                 name,
                 chat_message,
