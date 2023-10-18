@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1255
+    versionid = 1257
 }
 
 function SussySpt:new()
@@ -262,7 +262,7 @@ function SussySpt:new()
 
         data.sub.players = (function()
             local a = {
-                playerlistwidth = 187,
+                playerlistwidth = 211,
                 searchtext = "",
                 playersmi = {},
                 playerelements = {},
@@ -489,20 +489,6 @@ function SussySpt:new()
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     HUD.SET_NEW_WAYPOINT(c.x, c.y)
-                                end)
-                            end
-
-                            if ImGui.Button("Kill") then
-                                yu.rif(function(rs)
-                                    -- shootPlayer(rs, player.ped, joaat("WEAPON_HEAVYSNIPER"), 5000)
-                                    PED.EXPLODE_PED_HEAD(player.ped, joaat("WEAPON_HEAVYSNIPER"))
-                                end)
-                            end
-                            yu.rendering.tooltip("Weird stuff")
-
-                            if ImGui.Button("Clear ped tasks") then
-                                yu.rif(function()
-                                    TASK.CLEAR_PED_TASKS_IMMEDIATELY(player.ped)
                                 end)
                             end
 
