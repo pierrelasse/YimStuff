@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1296
+    versionid = 1298
 }
 
 function SussySpt:new()
@@ -874,28 +874,24 @@ function SussySpt:new()
                                 end)
                             end
 
-                            if ImGui.TreeNodeEx("Doors") then
-                                if ImGui.SmallButton("Unlock (you)") then
-                                    yu.rif(function()
-                                        local veh = yu.veh(player.ped)
-                                        if veh ~= nil then
-                                            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
-                                        end
-                                    end)
-                                end
-
-                                ImGui.SameLine()
-
-                                if ImGui.SmallButton("Unlock (all)") then
-                                    yu.rif(function()
-                                        local veh = yu.veh(player.ped)
-                                        if veh ~= nil then
-                                            VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
-                                        end
-                                    end)
-                                end
-
-                                ImGui.TreePop()
+                            ImGui.Text("Doors:")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Unlock (you)") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
+                                    end
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Unlock (all)") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
+                                    end
+                                end)
                             end
 
                             ImGui.TreePop()
