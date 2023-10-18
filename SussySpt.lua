@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1300
+    versionid = 1314
 }
 
 function SussySpt:new()
@@ -651,7 +651,6 @@ function SussySpt:new()
                                             VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
                                             runscript:sleep(100)
                                         end
-                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
                                         VEHICLE.DELETE_VEHICLE(veh)
                                     end
                                 end)
@@ -890,6 +889,20 @@ function SussySpt:new()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil then
                                         VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
+                                    end
+                                end)
+                            end
+
+                            ImGui.TreePop()
+                        end
+
+                        if ImGui.TreeNodeEx("Online") then
+                            if ImGui.SmallButton("Spawn action figure") then
+                                yu.rif(function()
+                                    local hash = joaat("vw_prop_vw_colle_prbubble")
+                                    if STREAMING.HAS_MODEL_LOADED(hash) then
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
                                     end
                                 end)
                             end
