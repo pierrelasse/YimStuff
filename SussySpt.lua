@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1317
+    versionid = 1328
 }
 
 function SussySpt:new()
@@ -280,7 +280,20 @@ function SussySpt:new()
                     ["firetruk"] = "Firetruk"
                 },
                 ramoption = "bus",
-                givecustomweaponammo = 999
+                givecustomweaponammo = 999,
+                pickupoptions = {
+                    ["Casino Playing Card"] = "vw_prop_vw_lux_card_01a",
+                    ["Action Figure - Boxeddoll (Not falling)"] = "bkr_prop_coke_boxeddoll",
+                    ["Action Figure - Sasquatch"] = "vw_prop_vw_colle_sasquatch",
+                    ["Action Figure - Beast"] = "vw_prop_vw_colle_beast",
+                    ["Action Figure - Green guy"] = "vw_prop_vw_colle_rsrgeneric",
+                    ["Action Figure - Other green guy"] = "vw_prop_vw_colle_rsrcomm",
+                    ["Action Figure - Pogo"] = "vw_prop_vw_colle_pogo",
+                    ["Action Figure - UWU"] = "vw_prop_vw_colle_prbubble",
+                    ["Action Figure - Imporage"] = "vw_prop_vw_colle_imporage",
+                    ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
+                },
+                pickupoption = "Action Figure - UWU"
             }
             SussySpt.online_players_a = a
 
@@ -897,18 +910,58 @@ function SussySpt:new()
                         end
 
                         if ImGui.TreeNodeEx("Online") then
-                            if ImGui.SmallButton("Spawn action figure") then
-                                yu.rif(function()
-                                    local hash = joaat("vw_prop_vw_colle_prbubble")
-                                    if STREAMING.HAS_MODEL_LOADED(hash) then
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                    else
-                                        STREAMING.REQUEST_MODEL(hash)
+                            ImGui.PushItemWidth(243)
+                            if ImGui.BeginCombo("##online_player_pickups", a.pickupoption) then
+                                for k, v in pairs(a.pickupoptions) do
+                                    if ImGui.Selectable(k, false) then
+                                        a.pickupoption = k
+                                    end
+                                end
+                                ImGui.EndCombo()
+                            end
+                            ImGui.PopItemWidth()
+
+                            ImGui.SameLine()
+
+                            ImGui.PushItemWidth(61)
+                            local pvr = yu.rendering.input("int", {
+                                label = "##pv",
+                                value = a.pickupvalue,
+                                min = 0,
+                                max = 10000
+                            })
+                            yu.rendering.tooltip("The pickup's value. Used for money etc.\nUSE WITH CAUTION!")
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+                            ImGui.PopItemWidth()
+                            if pvr ~= nil and pvr.changed then
+                                a.pickupvalue = pvr.value
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Give pickup") then
+                                yu.rif(function(rs)
+                                    local value = a.pickupoptions[a.pickupoption]
+                                    if type(value) == "string" then
+                                        local hash = joaat(value)
+                                        if STREAMING.IS_MODEL_VALID(hash) then
+                                            STREAMING.REQUEST_MODEL(hash)
+                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                        end
+
+                                    elseif type(value) == "table" then
+                                        local hash = joaat(value[1])
+                                        if STREAMING.IS_MODEL_VALID(hash) then
+                                            STREAMING.REQUEST_MODEL(hash)
+                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            OBJECT.CREATE_AMBIENT_PICKUP(joaat(value[2]), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                        end
                                     end
                                 end)
                             end
-                            yu.rendering.tooltip("This is good to make someone else a bit of money and rp")
 
                             ImGui.TreePop()
                         end
@@ -969,12 +1022,6 @@ function SussySpt:new()
             end
 
             return SussySpt.rendering.new_tab("Object Spawner", function()
-                -- ImGui.BeginGroup()
-
-                -- ImGui.Text("Spawned entities")
-
-                -- ImGui.EndGroup()
-                -- ImGui.SameLine()
                 ImGui.BeginGroup()
 
                 ImGui.Text("Spawner")
