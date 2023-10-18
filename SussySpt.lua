@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1258
+    versionid = 1296
 }
 
 function SussySpt:new()
@@ -469,7 +469,7 @@ function SussySpt:new()
                             if ImGui.Button("Goto") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z)
+                                    PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
                                 end)
                             end
                             yu.rendering.tooltip("Teleport yourself to the player")
@@ -482,6 +482,7 @@ function SussySpt:new()
                                     network.set_player_coords(player.player, c.x, c.y, c.z)
                                 end)
                             end
+                            yu.rendering.tooltip("Bring the player to you")
 
                             ImGui.SameLine()
 
@@ -491,6 +492,17 @@ function SussySpt:new()
                                     HUD.SET_NEW_WAYPOINT(c.x, c.y)
                                 end)
                             end
+                            yu.rendering.tooltip("Sets a waypoint to them")
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Tp to waypoint") then
+                                yu.rif(function()
+                                    local c = HUD.GET_BLIP_COORDS(8) -- radar_waypoint
+                                    network.set_player_coords(player.player, c.x, c.y, c.z)
+                                end)
+                            end
+                            yu.rendering.tooltip("Does not work well / teleports them under the map")
 
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                                 yu.rif(function()
@@ -525,7 +537,7 @@ function SussySpt:new()
                             if ImGui.SmallButton("Invisible") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 72, 80, false, true, 0)
                                 end)
                             end
                             yu.rendering.tooltip("\"Random\" death")
@@ -533,21 +545,21 @@ function SussySpt:new()
                             if ImGui.SmallButton("Normal") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                                 end)
                             end
                             ImGui.SameLine()
                             if ImGui.SmallButton("Huge") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 82, 20, true, false, 1)
                                 end)
                             end
                             ImGui.SameLine()
                             if ImGui.SmallButton("Car") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
+                                    FIRE.ADD_OWNED_EXPLOSION(player.ped, c.x, c.y, c.z, 7, 1, true, false, 0)
                                 end)
                             end
 
@@ -669,6 +681,7 @@ function SussySpt:new()
                             ImGui.PopItemWidth()
                             if gcwr ~= nil and gcwr.changed then
                                 a.givecustomweapontext = gcwr.text
+                                a.weaponinfo = nil
                             end
 
                             ImGui.SameLine()
@@ -689,20 +702,46 @@ function SussySpt:new()
                             ImGui.SameLine()
                             if ImGui.Button("Give") then
                                 yu.rif(function()
-                                    local hash = weaponFromInput(a.givecustomweapontext)
-                                    if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
-                                        WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
+                                    if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
+                                        a.weaponinfo = 1
+                                    else
+                                        local hash = weaponFromInput(a.givecustomweapontext)
+                                        if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
+                                            a.weaponinfo = 2
+                                        else
+                                            WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
+                                            a.weaponinfo = 3
+                                        end
                                     end
                                 end)
                             end
                             ImGui.SameLine()
                             if ImGui.Button("Remove") then
                                 yu.rif(function()
-                                    local hash = weaponFromInput(a.givecustomweapontext)
-                                    if WEAPON.GET_WEAPONTYPE_MODEL(hash) ~= 0 then
-                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
+                                    if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
+                                        a.weaponinfo = 1
+                                    else
+                                        local hash = weaponFromInput(a.givecustomweapontext)
+                                        if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
+                                            a.weaponinfo = 2
+                                        else
+                                            WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
+                                            a.weaponinfo = 4
+                                        end
                                     end
                                 end)
+                            end
+
+                            if a.weaponinfo ~= nil then
+                                if a.weaponinfo == 1 then
+                                    yu.rendering.coloredtext("A weapon id is required", 255, 25, 25)
+                                elseif a.weaponinfo == 2 then
+                                    yu.rendering.coloredtext("Invalid weapon id", 255, 25, 25)
+                                elseif a.weaponinfo == 3 then
+                                    yu.rendering.coloredtext("Weapon given successfully", 41, 250, 41)
+                                elseif a.weaponinfo == 4 then
+                                    yu.rendering.coloredtext("Weapon removed successfully", 41, 250, 41)
+                                end
                             end
 
                             ImGui.TreePop()
@@ -896,7 +935,7 @@ function SussySpt:new()
     SussySpt.rendering.add_tab(function()
         local data = SussySpt.rendering.new_tab("World")
 
-        data.sub.objspawner = (function()
+        data.sub.a_objspawner = (function()
             local a = {
                 model = "",
                 awidth = 195
@@ -1036,7 +1075,7 @@ function SussySpt:new()
             end)
         end)()
 
-        data.sub.vehicles = (function()
+        data.sub.b_vehicles = (function()
             return SussySpt.rendering.new_tab("Nearby vehicles", function()
                 ImGui.Text("Coming soon :D")
                 ImGui.BeginGroup()
@@ -1046,6 +1085,50 @@ function SussySpt:new()
                 ImGui.Text("Vehicle options")
                 ImGui.BeginGroup()
                 ImGui.EndGroup()
+            end)
+        end)()
+
+        data.sub.c_particlespawner = (function()
+            local a = {
+                awidth = 280,
+                dict = "core",
+                effect = "ent_sht_petrol_fire"
+            }
+
+            return SussySpt.rendering.new_tab("Particle Spawner", function()
+                ImGui.PushItemWidth(a.awidth)
+
+                local dict, _ = ImGui.InputText("Dict", a.dict, 32)
+                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                if a.dict ~= dict then
+                    a.dict = dict
+                end
+
+                local effect, _ = ImGui.InputText("Effect", a.effect, 32)
+                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                if a.effect ~= effect then
+                    a.effect = effect
+                end
+
+                ImGui.PopItemWidth()
+
+                if a.blocked ~= true and ImGui.Button("Spawn") then
+                    yu.rif(function(rs)
+                        a.blocked = true
+
+                        STREAMING.REQUEST_NAMED_PTFX_ASSET(a.dict)
+                        repeat rs:yield() until STREAMING.HAS_NAMED_PTFX_ASSET_LOADED(a.dict)
+                        GRAPHICS.USE_PARTICLE_FX_ASSET(a.dict)
+
+                        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                        local x, y, z = c.x, c.y, c.z
+                        GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, 1, 1, 1)
+
+                        STREAMING.REMOVE_PTFX_ASSET()
+
+                        a.blocked = nil
+                    end)
+                end
             end)
         end)()
 
