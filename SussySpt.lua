@@ -1,12 +1,16 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1356,
+    versionid = 1393,
 
     doInit = true,
     doDebug = false,
+    debuglog = {},
     debug = function(s)
-        if SussySpt.doDebug and type(s) == "string" then
-            log.debug(s)
+        if type(s) == "string" then
+            if SussySpt.doDebug then
+                log.debug(s)
+            end
+            SussySpt.debuglog[#SussySpt.debuglog + 1] = s
         end
     end
 }
@@ -336,7 +340,10 @@ function SussySpt:init()
                     ["Action Figure - Imporage"] = "vw_prop_vw_colle_imporage",
                     ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
                 },
-                pickupoption = "Action Figure - UWU"
+                pickupoption = "Action Figure - UWU",
+                pickupamount = 1,
+                cashamount = 1,
+                cashvalue = 100
             }
             SussySpt.online_players_a = a
 
@@ -1001,9 +1008,7 @@ function SussySpt:init()
                             ImGui.PushItemWidth(35)
                             local par = yu.rendering.input("int", {
                                 label = "##pa",
-                                value = a.pickupamount,
-                                min = 0,
-                                max = 15
+                                value = a.pickupamount
                             })
                             yu.rendering.tooltip("How many times the pickup should get spawned")
                             SussySpt.push_disable_controls(ImGui.IsItemActive())
@@ -1029,7 +1034,44 @@ function SussySpt:init()
                                                 rs:sleep(10)
                                             end)
                                         end
-                                        a.givepickupblocked = nil
+                                    end
+                                    a.givepickupblocked = nil
+                                end)
+                            end
+
+                            ImGui.PushItemWidth(78)
+
+                            local car = yu.rendering.input("int", {
+                                label = "##ca",
+                                value = a.cashamount
+                            })
+                            yu.rendering.tooltip("How much cash to spawn")
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+                            if car ~= nil and car.changed then
+                                a.cashamount = car.value
+                            end
+
+                            ImGui.SameLine()
+
+                            local cvr = yu.rendering.input("int", {
+                                label = "##cv",
+                                value = a.cashvalue
+                            })
+                            yu.rendering.tooltip("How much money per cash")
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+                            if cvr ~= nil and cvr.changed then
+                                a.cashvalue = cvr.value
+                            end
+
+                            ImGui.PopItemWidth()
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Spawn cash") then
+                                yu.rif(function()
+                                    if yu.is_num_between(a.cashamount, 0, 10000) then
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        OBJECT.CREATE_MONEY_PICKUPS(c.x, c.y, c.z, a.cashvalue, a.cashamount, 2628187989)
                                     end
                                 end)
                             end
