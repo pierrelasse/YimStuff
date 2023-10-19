@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1428,
+    versionid = 1429,
 
     doInit = true,
     doDebug = false,
@@ -514,7 +514,7 @@ function SussySpt:init()
                         if SussySpt.last_ped_handles and SussySpt.last_ped_handles ~= handles then
                             local time = os.time()
                             if time - lastAutoRefresh >= 1 then
-                                updatePlayerElements()
+                                refreshPlayerList()
                                 lastAutoRefresh = time
                             end
                         end
