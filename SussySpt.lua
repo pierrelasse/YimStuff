@@ -1,15 +1,30 @@
-yu = require "yimutils"
-
 SussySpt = {
-    version = "1.3.5",
-    versionid = 1337
+    version = "1.3.6",
+    versionid = 1351,
+
+    doInit = true,
+    doDebug = false,
+    debug = function(s)
+        if SussySpt.doDebug and type(s) == "string" then
+            log.debug(s)
+        end
+    end
 }
 
-function SussySpt:new()
+SussySpt.debug("Loading yimutils")
+yu = require("yimutils")
+
+function SussySpt:init()
+    if not SussySpt.doInit then
+        return
+    end
+    SussySpt.doInit = nil
+
+    SussySpt.debug("Starting SussySpt v"..SussySpt.version.."["..SussySpt.versionid.."]")
+
     yu.set_notification_title_prefix("[SussySpt] ")
 
     SussySpt.tab = gui.get_tab("SussySpt")
-    local tab = SussySpt.tab
 
     SussySpt.in_online = false
     SussySpt.rendering = {
@@ -76,6 +91,7 @@ function SussySpt:new()
     end
 
     SussySpt.rendering.new_tab = function(name, render)
+        SussySpt.debug("Requested new tab with name '"..name.."'")
         return {
             name = name,
             render = render,
@@ -195,27 +211,34 @@ function SussySpt:new()
         end
     end
 
+    SussySpt.debug("Calling SussySpt:initUtils()")
     SussySpt:initUtils()
-
-    tab:add_text("github.com/pierrelasse/YimStuff")
 
     SussySpt.rendercb = {}
     SussySpt.add_render = function(cb)
         if cb ~= nil then
-            SussySpt.rendercb[yu.gun()] = cb
+            local id = yu.gun()
+            SussySpt.debug("Added render cb with id "..id)
+            SussySpt.rendercb[id] = cb
         end
     end
 
     SussySpt.repeatingTasks = {}
 
+    SussySpt.debug("Calling SussySpt:initRendering()")
     SussySpt:initRendering()
 
+    SussySpt.debug("Calling SussySpt:initTabHBO()")
     SussySpt:initTabHBO()
+    SussySpt.debug("Calling SussySpt:initTabQA()")
     SussySpt:initTabQA()
 
+    SussySpt.debug("Calling SussySpt:initTabSelf()")
     SussySpt:initTabSelf()
+    SussySpt.debug("Calling SussySpt:initTabHeist()")
     SussySpt:initTabHeist()
 
+    SussySpt.debug("Initializing chatlog")
     SussySpt.chatlog = {
         messages = {},
         rebuildLog = function()
@@ -248,6 +271,7 @@ function SussySpt:new()
         end
     end)
 
+    SussySpt.debug("Registering 'sussyspt2' loop")
     script.register_looped("sussyspt2", function()
         SussySpt.in_online = yu.is_script_running("freemode")
 
@@ -264,16 +288,19 @@ function SussySpt:new()
         end
 
         local function networkent(ent)
-            NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
-            return ent
+            if ent and ent ~= 0 and ENTITY.DOES_ENTITY_EXIST(ent) then
+                NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
+                return ent
+            end
         end
 
         local function networkobj(obj)
-            networkent(obj)
-            local id = NETWORK.OBJ_TO_NET(obj)
-            NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
-            NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
-            NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
+            if networkent(obj) ~= nil then
+                local id = NETWORK.OBJ_TO_NET(obj)
+                NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
+                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
+                NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
+            end
         end
 
         data.sub.players = (function()
@@ -324,7 +351,7 @@ function SussySpt:new()
                         local displayName = v.name
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
-                        
+
                         local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
                         local vehicle = yu.veh(v.ped)
                         local vehicleName
@@ -567,7 +594,7 @@ function SussySpt:new()
                         end
 
                         if ImGui.TreeNodeEx("Trolling") then
-                            if ImGui.Button("Taze") then
+                            if ImGui.SmallButton("Taze") then
                                 yu.rif(function(rs)
                                     shootPlayer(rs, player.ped, joaat("WEAPON_STUNGUN"), 2)
                                 end)
@@ -605,7 +632,7 @@ function SussySpt:new()
                             end
 
                             if ImGui.TreeNodeEx("Trap") then
-                                if ImGui.Button("Normal") then
+                                if ImGui.SmallButton("Normal") then
                                     yu.rif(function()
                                         local modelHash = joaat("prop_gold_cont_01b")
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
@@ -617,8 +644,8 @@ function SussySpt:new()
                                         end
                                     end)
                                 end
-
-                                if ImGui.Button("Cage") then
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Cage") then
                                     yu.rif(function(runscript)
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                         local x = tonumber(string.format('%.2f', c.x))
@@ -642,7 +669,7 @@ function SussySpt:new()
                                     end)
                                 end
 
-                                if ImGui.Button("Race tube") then
+                                if ImGui.SmallButton("Race tube") then
                                     yu.rif(function()
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                         local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
@@ -652,10 +679,8 @@ function SussySpt:new()
                                         ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
                                     end)
                                 end
-
                                 ImGui.SameLine()
-
-                                if ImGui.Button("Invisible race tube") then
+                                if ImGui.SmallButton("Invisible race tube") then
                                     yu.rif(function()
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                         local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
@@ -693,6 +718,25 @@ function SussySpt:new()
                                             runscript:sleep(100)
                                         end
                                         VEHICLE.DELETE_VEHICLE(veh)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Spawn cargoplane") then
+                                yu.rif(function(rs)
+                                    local hash = joaat("cargoplane")
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                    if networkent(veh) then
+                                        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
+                                        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
+                                        ENTITY.SET_ENTITY_COLLISION(veh, false, true)
+                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                        rs:sleep(2)
+                                        ENTITY.SET_ENTITY_COLLISION(veh, true, true)
                                     end
                                 end)
                             end
@@ -1255,9 +1299,12 @@ function SussySpt:new()
         return data
     end)
 
+    SussySpt.debug("Registered 'sussyspt' loop")
     script.register_looped("sussyspt", SussySpt.tick)
+    SussySpt.debug("Adding render callback ")
     SussySpt.tab:add_imgui(SussySpt.render)
 
+    SussySpt.debug("Creating esp thread")
     yu.rif(function(rs)
         local function drawLine(ped, index1, index2)
             local c1 = PED.GET_PED_BONE_COORDS(ped, index1, 0, 0, 0)
@@ -1300,6 +1347,7 @@ function SussySpt:new()
         end
     end)
 
+    SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(SussySpt.in_online, "Yep", "fm script no run so no?"), "Loaded!")
 end
 
@@ -4563,4 +4611,4 @@ function SussySpt:initTabHeist()
     initTabDDay()
 end
 
-SussySpt:new()
+SussySpt:init()
