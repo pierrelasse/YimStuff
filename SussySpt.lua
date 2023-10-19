@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1420,
+    versionid = 1428,
 
     doInit = true,
     doDebug = false,
@@ -422,12 +422,7 @@ function SussySpt:init()
                             "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"..
                             "\nArmor: "..string.format("%.0f", armor)..
                             "\nDistance: "..string.format("%.2f", distance).."m"..
-                            "\nPed: "..v.ped.." Player: "..v.player..
                             "\nRoad: "..road
-
-                        if blip ~= 0 then
-                            tooltip = tooltip.."\nBlip handle: "..blip
-                        end
 
                         local proofs = yu.get_entity_proofs(v.ped)
                         if proofs.success and proofs.anytrue then
@@ -441,15 +436,28 @@ function SussySpt:init()
 
                         local infoChar = emptystr
 
+                        local needInfoHeader = true
                         for k1, v1 in pairs(info) do
                             if v1[1] == true then
+                                if needInfoHeader then
+                                    tooltip = tooltip.."\nWeird chars behind name:"
+                                    needInfoHeader = false
+                                end
+
                                 infoChar = infoChar..v1[2]
-                                tooltip = tooltip.."\n"..v1[2]..": "..v1[3]
+                                tooltip = tooltip.."\n  - "..v1[2]..": "..v1[3]
                             end
                         end
 
                         if infoChar ~= emptystr then
                             displayName = displayName.." ["..infoChar.."]"
+                        end
+
+                        tooltip = tooltip.."\n\nFor nerds:"..
+                            "\n  - Ped: "..v.ped.." Player: "..v.player
+
+                        if blip ~= 0 then
+                            tooltip = tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(blip)
                         end
 
                         v.displayname = displayName
