@@ -1,10 +1,10 @@
 
 If you have questions, you can contact me on discord `dcistdreck` or create an issue / discussion.
 
-**YimUtils & SussySpt are made for <a href="https://github.com/YimMenu/YimMenu">YimMenu</a>.**<br />
-    Feel free to create an issue to report a bug, suggest a feature, or something else idk.
+**Yimutils & SussySpt are made for [YimMenu](https://github.com/YimMenu/YimMenu).**<br />
+Feel free to create an issue to report a bug, suggest a feature, or something else idk.
 
-#### More info:
+#### More info
 - [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md)
 - [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md)
 
@@ -15,8 +15,5 @@ If you have questions, you can contact me on discord `dcistdreck` or create an i
 
 <br /><hr />
 
-<center>
-
-[Credits](https://github.com/pierrelasse/YimStuff/blob/master/CREDITS.md) | ["License"](https://github.com/pierrelasse/YimStuff/blob/master/LICENSE)
-
-</center>
+- [Credits](https://github.com/pierrelasse/YimStuff/blob/master/CREDITS.md)
+- [License](https://github.com/pierrelasse/YimStuff/blob/master/LICENSE)
