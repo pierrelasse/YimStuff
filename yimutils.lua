@@ -153,6 +153,13 @@ return (function()
             return result.."}"
         end
 
+        api.calculate_percentage = function(a, b)
+            if b == 0 then
+                return b
+            end
+            return (a / b) * 100
+        end
+
         -- Notifications
         api.set_notification_title_prefix = function(title)
             api.set_stat("NOTIFY_DEFTITLE", title)
