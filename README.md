@@ -2,13 +2,11 @@
 The repo for yimutils and SussySpt.<br />
 Everything here is made to work with [YimMenu](https://github.com/YimMenu/YimMenu).
 
-If you have questions, you can contact me on [discord](https://discord.com/login) `dcistdreck` or create an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose) / [discussion](https://github.com/pierrelasse/YimStuff/discussions/new/choose).
-
-
 ## Table of contents
 - [Quick installation](https://github.com/pierrelasse/YimStuff#quick-installation)
 - [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md)
 - [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md)
+- [Feedback](https://github.com/pierrelasse/YimStuff#feedback)
 - [Other](https://github.com/pierrelasse/YimStuff#other)
 
 
@@ -17,7 +15,10 @@ If you have questions, you can contact me on [discord](https://discord.com/login
 - Go to `Settings->Lua Scripts` and press `Reload All`
 - Enjoy
 
-<br />
+## Feedback
+If you encounter a bug or have a feature request, please create an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).<br />
+You have a question? Feel free to start a [discussion](https://github.com/pierrelasse/YimStuff/discussions/new/choose).<br />
+You can optionally contact me on discord `dcistdreck`.
 
 ## Other
 [Credits](https://github.com/pierrelasse/YimStuff/blob/master/CREDITS.md)
