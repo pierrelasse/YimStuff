@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1429,
+    versionid = 1437,
 
     doInit = true,
     doDebug = false,
@@ -506,19 +506,10 @@ function SussySpt:init()
                 )
             end
 
-            local lastAutoRefresh = 0
             yu.rif(function(rs)
                 while true do
                     if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                        local handles = entities.get_all_peds_as_handles()
-                        if SussySpt.last_ped_handles and SussySpt.last_ped_handles ~= handles then
-                            local time = os.time()
-                            if time - lastAutoRefresh >= 1 then
-                                refreshPlayerList()
-                                lastAutoRefresh = time
-                            end
-                        end
-                        SussySpt.last_ped_handles = handles
+                        refreshPlayerList()
                     end
                     rs:sleep(500)
                 end
@@ -1294,6 +1285,28 @@ function SussySpt:init()
                 ImGui.Text("Vehicle options")
                 ImGui.BeginGroup()
                 ImGui.EndGroup()
+
+                for i = 0, 10 do
+                    ImGui.Text(i..":")
+                    ImGui.SameLine()
+                    if ImGui.SmallButton("Open##"..i) then
+                        yu.rif(function()
+                            local veh = yu.veh(yu.ppid())
+                            if veh ~= nil then
+                                VEHICLE.SET_VEHICLE_DOOR_OPEN(veh, i, false, true)
+                            end
+                        end)
+                    end
+                    ImGui.SameLine()
+                    if ImGui.SmallButton("Closed##"..i) then
+                        yu.rif(function()
+                            local veh = yu.veh(yu.ppid())
+                            if veh ~= nil then
+                                VEHICLE.SET_VEHICLE_DOOR_SHUT(veh, i, true)
+                            end
+                        end)
+                    end
+                end
             end)
         end)()
 
@@ -1552,6 +1565,7 @@ function SussySpt:initTabSelf()
 
     refresh()
 
+    local makingVehicleInivs = false
     SussySpt.ensureVis = function(state, id, veh)
         if state ~= true and state ~= false then
             return nil
@@ -1559,8 +1573,14 @@ function SussySpt:initTabSelf()
         if id ~= nil then
             ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
         end
-        if veh ~= nil then
-            ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
+        if not makingVehicleInivs then
+            yu.rif(function()
+                makingVehicleInivs = true
+                if veh ~= nil and entities.take_control_of(veh) then
+                    ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
+                end
+                makingVehicleInivs = false
+            end)
         end
     end
 
