@@ -18,7 +18,8 @@ Everything here is made to work with [YimMenu](https://github.com/YimMenu/YimMen
 ## Feedback
 If you encounter a bug or have a feature request, please create an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).<br />
 You have a question? Feel free to start a [discussion](https://github.com/pierrelasse/YimStuff/discussions/new/choose).<br />
-You can optionally contact me on discord `dcistdreck`.
+You can optionally contact me on discord `dcistdreck`.<br />
+If you like the project and want to let me and others know, you can star the repo!
 
 ## Other
 [Credits](https://github.com/pierrelasse/YimStuff/blob/master/CREDITS.md)
