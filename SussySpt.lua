@@ -1,28 +1,16 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1412,
+    versionid = 1420,
 
     doInit = true,
     doDebug = false,
-    debuglog = {
-        messages = {},
-        rebuildLog = function()
-            local text = ""
-            local newline = ""
-            for k, v in pairs(SussySpt.debuglog.messages) do
-                text = text..newline..v
-                newline = "\n"
-            end
-            SussySpt.debuglog.text = text
-        end
-    },
+    debugtext = "",
     debug = function(s)
         if type(s) == "string" then
             if SussySpt.doDebug then
                 log.debug(s)
             end
-            SussySpt.debuglog.messages[#SussySpt.debuglog.messages + 1] = s
-            SussySpt.debuglog.rebuildLog()
+            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
         end
     end
 }
@@ -358,23 +346,44 @@ function SussySpt:init()
             SussySpt.online_players_a = a
 
             local function updatePlayerElements()
-                local emptystr = ""
-                local selfppid = yu.ppid()
-                local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
-
                 for k, v in pairs(a.playersmi) do
                     if type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase()) then
                         a.playersmi[k].display = true
-                        local displayName = v.name
+                    else
+                        a.playersmi[k].display = false
+                    end
+                end
+            end
+
+            local function refreshPlayerList()
+                a.playersmi = {}
+
+                if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                    a.selectedplayer = nil
+                    return
+                end
+
+                local selfppid = yu.ppid()
+                local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
+                local emptystr = ""
+
+                for k, v in pairs(yu.get_all_players_mi()) do
+                    local name = PLAYER.GET_PLAYER_NAME(v.player)
+
+                    if name ~= nil and name ~= "**Invalid**" then
+                        local displayName = name
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
                         local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+
                         local vehicle = yu.veh(v.ped)
                         local vehicleName
                         if vehicle ~= nil then
                             vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
                         end
+
+                        local blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
                         local info = {
                             self = {
@@ -395,7 +404,12 @@ function SussySpt:init()
                             interior = {
                                 interior ~= 0,
                                 "I",
-                                "The player is in a interior. Id: "..interior
+                                "The player is in an interior (might be bugged). Id: "..interior
+                            },
+                            noblip = {
+                                v.ped ~= selfppid and blip == 0,
+                                "B",
+                                "The player has no blip. In interior/not spawned yet?"
                             }
                         }
 
@@ -405,11 +419,15 @@ function SussySpt:init()
                         local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                         local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local tooltip =
-                            "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
-                            .."\nArmor: "..string.format("%.0f", armor)
-                            .."\nDistance: "..string.format("%.2f", distance).."m"
-                            .."\nPed: "..v.ped.." Player: "..v.player
-                            .."\nRoad: "..road
+                            "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"..
+                            "\nArmor: "..string.format("%.0f", armor)..
+                            "\nDistance: "..string.format("%.2f", distance).."m"..
+                            "\nPed: "..v.ped.." Player: "..v.player..
+                            "\nRoad: "..road
+
+                        if blip ~= 0 then
+                            tooltip = tooltip.."\nBlip handle: "..blip
+                        end
 
                         local proofs = yu.get_entity_proofs(v.ped)
                         if proofs.success and proofs.anytrue then
@@ -434,27 +452,13 @@ function SussySpt:init()
                             displayName = displayName.." ["..infoChar.."]"
                         end
 
-                        a.playersmi[k].displayname = displayName
-                        a.playersmi[k].tooltip = tooltip:replace("  ", " ")
-                    else
-                        a.playersmi[k].display = false
-                    end
-                end
-            end
-
-            local function refreshPlayerList()
-                a.playersmi = {}
-                if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                    a.selectedplayer = nil
-                    return
-                end
-                for k, v in pairs(yu.get_all_players_mi()) do
-                    local name = PLAYER.GET_PLAYER_NAME(v.player)
-                    if name ~= nil and name ~= "**Invalid**" then
+                        v.displayname = displayName
+                        v.tooltip = tooltip:replace("  ", " ")
                         v.name = name
                         a.playersmi[name] = v
                     end
                 end
+
                 updatePlayerElements()
             end
 
@@ -1344,8 +1348,8 @@ function SussySpt:init()
             ImGui.Spacing()
             ImGui.Text("Theme: "..SussySpt.rendering.theme)
             ImGui.Spacing()
-            if ImGui.TreeNodeEx("Debug log") then
-                ImGui.InputTextMultiline("##debug_log", SussySpt.debuglog.text, SussySpt.debuglog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+            if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
+                ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
                 ImGui.TreePop()
             end
         end)
