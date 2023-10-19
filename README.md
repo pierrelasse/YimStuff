@@ -6,10 +6,10 @@ If you have questions, you can contact me on [discord](https://discord.com/login
 
 
 ## Table of contents
-- [Quick installation](https://github.com/pierrelasse/YimStuff/tree/master#quick-installation)
+- [Quick installation](https://github.com/pierrelasse/YimStuff#quick-installation)
 - [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md)
 - [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md)
-- [Other](https://github.com/pierrelasse/YimStuff/tree/master#quick-installation)
+- [Other](https://github.com/pierrelasse/YimStuff#other)
 
 
 ## Quick installation
