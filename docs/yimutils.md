@@ -1,4 +1,4 @@
-# Currently outdated
+# Some of the info below might be outdated
 
 # YimUtils
 YimUtils is some sort of a libary for script developers to easily code without having to worry about things like mpx or if a script is running or other basic stuff.<br />
