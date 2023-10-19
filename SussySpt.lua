@@ -290,7 +290,7 @@ function SussySpt:init()
         end
 
         local function networkent(ent)
-            if ent and ent ~= 0 and ENTITY.DOES_ENTITY_EXIST(ent) then
+            if ent and ent ~= 0 and yu.does_entity_exist(ent) then
                 NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
                 return ent
             end
