@@ -33,6 +33,9 @@ return (function()
         end
 
         api.is_num_between = function(num, min, max)
+            if type(num) ~= "number" or type(min) ~= number or type(max) ~= "number" then
+                return false
+            end
             return num >= min and num <= max
         end
 
@@ -681,7 +684,7 @@ return (function()
                     changed = changed
                 }
             elseif input_type == "int" then
-                local value, changed = ImGui.InputInt(data.label, data.value or 0, data.min or -2147483648, data.max or 2147483648)
+                local value, changed = ImGui.InputInt(data.label, 1, data.step or 0, data.step_fast or 0)
                 return {
                     value = value,
                     changed = changed
