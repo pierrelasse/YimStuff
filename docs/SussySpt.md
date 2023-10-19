@@ -1,3 +1,4 @@
+# Currently outdated
 
 # SussySpt
 SussySpt (weird name idk) is currently in development and features are getting added constantly.
