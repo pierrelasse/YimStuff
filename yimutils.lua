@@ -684,7 +684,7 @@ return (function()
                     changed = changed
                 }
             elseif input_type == "int" then
-                local value, changed = ImGui.InputInt(data.label, 1, data.step or 0, data.step_fast or 0)
+                local value, changed = ImGui.InputInt(data.label, data.value, data.step or 0, data.step_fast or 0)
                 return {
                     value = value,
                     changed = changed
