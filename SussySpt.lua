@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1351,
+    versionid = 1356,
 
     doInit = true,
     doDebug = false,
@@ -15,7 +15,7 @@ SussySpt.debug("Loading yimutils")
 yu = require("yimutils")
 
 function SussySpt:init()
-    if not SussySpt.doInit then
+    if SussySpt.doInit ~= true then
         return
     end
     SussySpt.doInit = nil
@@ -534,7 +534,7 @@ function SussySpt:init()
                         ImGui.Text("Selected player: "..player.name)
 
                         if ImGui.TreeNodeEx("General") then
-                            if ImGui.Button("Goto") then
+                            if ImGui.SmallButton("Goto") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
@@ -544,7 +544,7 @@ function SussySpt:init()
 
                             ImGui.SameLine()
 
-                            if ImGui.Button("Bring") then
+                            if ImGui.SmallButton("Bring") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
                                     network.set_player_coords(player.player, c.x, c.y, c.z)
@@ -554,7 +554,7 @@ function SussySpt:init()
 
                             ImGui.SameLine()
 
-                            if ImGui.Button("Set waypoint to") then
+                            if ImGui.SmallButton("Set waypoint") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                     HUD.SET_NEW_WAYPOINT(c.x, c.y)
@@ -564,10 +564,13 @@ function SussySpt:init()
 
                             ImGui.SameLine()
 
-                            if ImGui.Button("Tp to waypoint") then
+                            if ImGui.SmallButton("Waypoint") then
                                 yu.rif(function()
-                                    local c = HUD.GET_BLIP_COORDS(8) -- radar_waypoint
-                                    network.set_player_coords(player.player, c.x, c.y, c.z)
+                                    local blip = 8 -- radar_waypoint
+                                    if HUD.DOES_BLIP_EXIST(blip) then
+                                        local c = HUD.GET_BLIP_COORDS(blip)
+                                        network.set_player_coords(player.player, c.x, c.y, c.z)
+                                    end
                                 end)
                             end
                             yu.rendering.tooltip("Does not work well / teleports them under the map")
@@ -995,42 +998,38 @@ function SussySpt:init()
 
                             ImGui.SameLine()
 
-                            ImGui.PushItemWidth(61)
-                            local pvr = yu.rendering.input("int", {
-                                label = "##pv",
-                                value = a.pickupvalue,
+                            ImGui.PushItemWidth(35)
+                            local par = yu.rendering.input("int", {
+                                label = "##pa",
+                                value = a.pickupamount,
                                 min = 0,
-                                max = 10000
+                                max = 15
                             })
-                            yu.rendering.tooltip("The pickup's value. Used for money etc.\nUSE WITH CAUTION!")
+                            yu.rendering.tooltip("How many times the pickup should get spawned")
                             SussySpt.push_disable_controls(ImGui.IsItemActive())
                             ImGui.PopItemWidth()
-                            if pvr ~= nil and pvr.changed then
-                                a.pickupvalue = pvr.value
+                            if par ~= nil and par.changed then
+                                a.pickupamount = par.value
                             end
 
                             ImGui.SameLine()
 
-                            if ImGui.Button("Give pickup") then
+                            if not a.givepickupblocked and ImGui.Button("Give pickup") then
+                                a.givepickupblocked = true
                                 yu.rif(function(rs)
                                     local value = a.pickupoptions[a.pickupoption]
-                                    if type(value) == "string" then
+                                    if yu.is_num_between(a.pickupamount, 0, 15) and type(value) == "string" then
                                         local hash = joaat(value)
                                         if STREAMING.IS_MODEL_VALID(hash) then
                                             STREAMING.REQUEST_MODEL(hash)
                                             repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                            OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                            yu.loop(a.pickupamount, function()
+                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                                rs:sleep(10)
+                                            end)
                                         end
-
-                                    elseif type(value) == "table" then
-                                        local hash = joaat(value[1])
-                                        if STREAMING.IS_MODEL_VALID(hash) then
-                                            STREAMING.REQUEST_MODEL(hash)
-                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                            OBJECT.CREATE_AMBIENT_PICKUP(joaat(value[2]), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                        end
+                                        a.givepickupblocked = nil
                                     end
                                 end)
                             end
