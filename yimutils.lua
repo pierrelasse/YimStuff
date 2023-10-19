@@ -112,7 +112,7 @@ return (function()
             elseif type(obj) == "string" then
                 return string.len(obj)
             end
-            return nil
+            return 0
         end
         api.len = api.length
 
@@ -609,6 +609,7 @@ return (function()
                             newKey = v
                             newValue = v_
                         end
+                        api.rendering.tooltip(k)
                     end
                 else
                     for k, v in pairs(items) do
@@ -616,6 +617,7 @@ return (function()
                             newKey = k
                             newValue = v
                         end
+                        api.rendering.tooltip(k)
                     end
                 end
                 ImGui.EndCombo()
