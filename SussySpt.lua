@@ -1,16 +1,28 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1393,
+    versionid = 1403,
 
     doInit = true,
     doDebug = false,
-    debuglog = {},
+    debuglog = {
+        messages = {},
+        rebuildLog = function()
+            local text = ""
+            local newline = ""
+            for k, v in pairs(SussySpt.debuglog.messages) do
+                text = text..newline..v
+                newline = "\n"
+            end
+            SussySpt.debuglog.text = text
+        end
+    },
     debug = function(s)
         if type(s) == "string" then
             if SussySpt.doDebug then
                 log.debug(s)
             end
-            SussySpt.debuglog[#SussySpt.debuglog + 1] = s
+            SussySpt.debuglog.messages[#SussySpt.debuglog.messages + 1] = s
+            SussySpt.debuglog.rebuildLog()
         end
     end
 }
@@ -307,7 +319,7 @@ function SussySpt:init()
             end
         end
 
-        data.sub.players = (function()
+        data.sub.a_players = (function()
             local a = {
                 playerlistwidth = 211,
                 searchtext = "",
@@ -389,12 +401,13 @@ function SussySpt:init()
                             }
                         }
 
-                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped).."/"..ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
+                        local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
                         local armor = PED.GET_PED_ARMOUR(v.ped)
                         local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                         local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local tooltip =
-                            "Health: "..health
+                            "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
                             .."\nArmor: "..string.format("%.0f", armor)
                             .."\nDistance: "..string.format("%.2f", distance).."m"
                             .."\nPed: "..v.ped.." Player: "..v.player
@@ -1017,26 +1030,27 @@ function SussySpt:init()
                                 a.pickupamount = par.value
                             end
 
-                            ImGui.SameLine()
-
-                            if not a.givepickupblocked and ImGui.Button("Give pickup") then
-                                a.givepickupblocked = true
-                                yu.rif(function(rs)
-                                    local value = a.pickupoptions[a.pickupoption]
-                                    if yu.is_num_between(a.pickupamount, 0, 15) and type(value) == "string" then
-                                        local hash = joaat(value)
-                                        if STREAMING.IS_MODEL_VALID(hash) then
-                                            STREAMING.REQUEST_MODEL(hash)
-                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                            yu.loop(a.pickupamount, function()
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                                OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                                rs:sleep(10)
-                                            end)
+                            if not a.givepickupblocked then
+                                ImGui.SameLine()
+                                if ImGui.Button("Give pickup") then
+                                    a.givepickupblocked = true
+                                    yu.rif(function(rs)
+                                        local value = a.pickupoptions[a.pickupoption]
+                                        if yu.is_num_between(a.pickupamount, 0, 15) and type(value) == "string" then
+                                            local hash = joaat(value)
+                                            if STREAMING.IS_MODEL_VALID(hash) then
+                                                STREAMING.REQUEST_MODEL(hash)
+                                                repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                                yu.loop(a.pickupamount, function()
+                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                                    rs:sleep(10)
+                                                end)
+                                            end
                                         end
-                                    end
-                                    a.givepickupblocked = nil
-                                end)
+                                        a.givepickupblocked = nil
+                                    end)
+                                end
                             end
 
                             ImGui.PushItemWidth(78)
@@ -1085,7 +1099,7 @@ function SussySpt:init()
             end)
         end)()
 
-        data.sub.chatlog = (function()
+        data.sub.b_chatlog = (function()
             yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
             yu.rendering.setCheckboxChecked("online_chatlog_console", true)
             yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
@@ -1312,12 +1326,17 @@ function SussySpt:init()
 
         data.sub.a_info = SussySpt.rendering.new_tab("Info", function()
             ImGui.Text("Made by pierrelasse.")
-            ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/yimstuff")
+            ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
             ImGui.Spacing()
             ImGui.Text("SussySpt version: "..SussySpt.version)
             ImGui.Text("SussySpt version id: "..SussySpt.versionid)
             ImGui.Spacing()
             ImGui.Text("Theme: "..SussySpt.rendering.theme)
+            ImGui.Spacing()
+            if ImGui.TreeNodeEx("Debug log") then
+                ImGui.InputTextMultiline("##debug_log", SussySpt.debuglog.text, SussySpt.debuglog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                ImGui.TreePop()
+            end
         end)
 
         data.sub.b_theme = SussySpt.rendering.new_tab("Theme", function()
@@ -4009,7 +4028,7 @@ function SussySpt:initTabHBO()
                 if ImGui.Button("Skip drill##fleeca") then
                     yu.add_task(function()
                         if requireScript("fm_mission_controller") then
-                            locals.set_int("fm_mission_controller", 10061 + 11, 100)
+                            locals.set_int("fm_mission_controller", 10072, 100)
                         end
                     end)
                 end
