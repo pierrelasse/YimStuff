@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1403,
+    versionid = 1412,
 
     doInit = true,
     doDebug = false,
@@ -36,7 +36,7 @@ function SussySpt:init()
     end
     SussySpt.doInit = nil
 
-    SussySpt.debug("Starting SussySpt v"..SussySpt.version.."["..SussySpt.versionid.."]")
+    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."]")
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
@@ -200,7 +200,7 @@ function SussySpt:init()
 
     SussySpt.register_repeating_task = function(cb)
         local id = #SussySpt.repeating_tasks + 1
-        SussySpt.repeatingTasks[id] = cb
+        SussySpt.repeating_tasks[id] = cb
         return id
     end
 
@@ -238,8 +238,6 @@ function SussySpt:init()
             SussySpt.rendercb[id] = cb
         end
     end
-
-    SussySpt.repeatingTasks = {}
 
     SussySpt.debug("Calling SussySpt:initRendering()")
     SussySpt:initRendering()
@@ -445,20 +443,18 @@ function SussySpt:init()
             end
 
             local function refreshPlayerList()
+                a.playersmi = {}
                 if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                    a.playersmi = {}
                     a.selectedplayer = nil
                     return
                 end
-                a.playersmi = yu.get_all_players_mi()
-
-                for k, v in pairs(a.playersmi) do
+                for k, v in pairs(yu.get_all_players_mi()) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
                     if name ~= nil and name ~= "**Invalid**" then
-                        a.playersmi[k].name = name
+                        v.name = name
+                        a.playersmi[name] = v
                     end
                 end
-
                 updatePlayerElements()
             end
 
@@ -498,9 +494,27 @@ function SussySpt:init()
                 )
             end
 
+            local lastAutoRefresh = 0
+            yu.rif(function(rs)
+                while true do
+                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                        local handles = entities.get_all_peds_as_handles()
+                        if SussySpt.last_ped_handles and SussySpt.last_ped_handles ~= handles then
+                            local time = os.time()
+                            if time - lastAutoRefresh >= 1 then
+                                updatePlayerElements()
+                                lastAutoRefresh = time
+                            end
+                        end
+                        SussySpt.last_ped_handles = handles
+                    end
+                    rs:sleep(500)
+                end
+            end)
+
             return SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
-                ImGui.Text("Players")
+                ImGui.Text("Players ("..yu.len(a.playersmi)..")")
 
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
@@ -528,10 +542,6 @@ function SussySpt:init()
                     yu.rif(updatePlayerElements)
                 end
                 ImGui.PopItemWidth()
-
-                if ImGui.SmallButton("Refresh list") then
-                    yu.rif(refreshPlayerList)
-                end
 
                 ImGui.EndGroup()
 
@@ -1011,6 +1021,7 @@ function SussySpt:init()
                                     if ImGui.Selectable(k, false) then
                                         a.pickupoption = k
                                     end
+                                    yu.rendering.tooltip(v)
                                 end
                                 ImGui.EndCombo()
                             end
@@ -1408,7 +1419,7 @@ function SussySpt:init()
     end)
 
     SussySpt.debug("Loaded successfully!")
-    yu.notify(1, "Loaded successfully! In freemode: "..yu.boolstring(SussySpt.in_online, "Yep", "fm script no run so no?"), "Loaded!")
+    yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
 end
 
 function SussySpt:initRendering()
