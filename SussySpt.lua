@@ -2,7 +2,7 @@ yu = require "yimutils"
 
 SussySpt = {
     version = "1.3.5",
-    versionid = 1331
+    versionid = 1337
 }
 
 function SussySpt:new()
@@ -47,6 +47,22 @@ function SussySpt:new()
                 ImGuiStyleVar = {
                     WindowRounding = {0},
                     FrameRounding = {0}
+                }
+            },
+            Dark = {
+                ImGuiCol = {
+                    TitleBg = {18, 18, 18, .97},
+                    TitleBgActive = {21, 21, 22, .97},
+                    WindowBg = {18, 18, 18, .97},
+                    Tab = {42, 42, 42, .8},
+                    TabActive = {134, 134, 134, 1},
+                    TabHovered = {147, 147, 147, 1},
+                    Button = {42, 42, 42, .8},
+                    FrameBg = {32, 32, 32, 1}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding = {8},
+                    FrameRounding = {5}
                 }
             }
         },
@@ -308,7 +324,13 @@ function SussySpt:new()
                         local displayName = v.name
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                        
                         local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+                        local vehicle = yu.veh(v.ped)
+                        local vehicleName
+                        if vehicle ~= nil then
+                            vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+                        end
 
                         local info = {
                             self = {
@@ -322,9 +344,9 @@ function SussySpt:new()
                                 "This player was detected as a modder"
                             },
                             vehicle = {
-                                yu.veh(v.ped) ~= nil,
+                                vehicle ~= nil,
                                 "V",
-                                "The player is in a vehicle"
+                                "The player is in a vehicle. "..(vehicleName or "")
                             },
                             interior = {
                                 interior ~= 0,
@@ -1214,6 +1236,7 @@ function SussySpt:new()
         end)
 
         data.sub.b_theme = SussySpt.rendering.new_tab("Theme", function()
+            ImGui.PushItemWidth(265)
             if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
                 for k, v in pairs(SussySpt.rendering.themes) do
                     if ImGui.Selectable(k, false) then
@@ -1222,6 +1245,7 @@ function SussySpt:new()
                 end
                 ImGui.EndCombo()
             end
+            ImGui.PopItemWidth()
         end)
 
         data.sub.c_esp = SussySpt.rendering.new_tab("Weird ESP", function()
@@ -2190,89 +2214,6 @@ function SussySpt:initTabSelf()
             log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
         end
     end)
-
-    -- old
-
-    local tab = tbs.getTab(SussySpt.tab, " Stats")
-
-    local function refreshStats()
-        tab:clear()
-
-        tab:add_button("Refresh", function()
-            refreshStats()
-        end)
-        tab:add_separator()
-
-        tab:add_imgui(function()
-            ImGui.BeginGroup()
-        end)
-        tab:add_text("Marked as:")
-        tab:add_text("  - Is cheater: "..yesNoBool(stats.get_bool("MPPLY_IS_CHEATER")))
-        tab:add_text("  - Was i badsport: "..yesNoBool(stats.get_bool("MPPLY_WAS_I_BAD_SPORT")))
-        tab:add_text("  - Is high earner: "..yesNoBool(stats.get_bool("MPPLY_IS_HIGH_EARNER")))
-        tab:add_imgui(function()
-            ImGui.EndGroup()
-            ImGui.SameLine()
-            ImGui.BeginGroup()
-        end)
-        tab:add_text("Reports:")
-        tab:add_text("  - Griefing: "..stats.get_int("MPPLY_GRIEFING"))
-        tab:add_text("  - Exploits: "..stats.get_int("MPPLY_EXPLOITS"))
-        tab:add_text("  - Game exploits: "..stats.get_int("MPPLY_GAME_EXPLOITS"))
-        tab:add_text("  - Text chat > Annoying me: "..stats.get_int("MPPLY_TC_ANNOYINGME"))
-        tab:add_text("  - Text chat > Hate Speech: "..stats.get_int("MPPLY_TC_HATE"))
-        tab:add_text("  - Voice chat > Annoying me: "..stats.get_int("MPPLY_VC_ANNOYINGME"))
-        tab:add_text("  - Voice chat > Hate Speech: "..stats.get_int("MPPLY_VC_HATE"))
-        tab:add_text("  - Offensive language: "..stats.get_int("MPPLY_OFFENSIVE_LANGUAGE"))
-        tab:add_text("  - Offensive tagplate: "..stats.get_int("MPPLY_OFFENSIVE_TAGPLATE"))
-        tab:add_text("  - Offensive content: "..stats.get_int("MPPLY_OFFENSIVE_UGC"))
-        tab:add_text("  - Bad crew name: "..stats.get_int("MPPLY_BAD_CREW_NAME"))
-        tab:add_text("  - Bad crew motto: "..stats.get_int("MPPLY_BAD_CREW_MOTTO"))
-        tab:add_text("  - Bad crew status: "..stats.get_int("MPPLY_BAD_CREW_STATUS"))
-        tab:add_text("  - Bad crew emblem: "..stats.get_int("MPPLY_BAD_CREW_EMBLEM"))
-        tab:add_text("  - Friendly: "..stats.get_int("MPPLY_FRIENDLY"))
-        tab:add_text("  - Helpful: "..stats.get_int("MPPLY_HELPFUL"))
-        tab:add_imgui(function()
-            ImGui.EndGroup()
-            ImGui.SameLine()
-            ImGui.BeginGroup()
-        end)
-        tab:add_text("Other:")
-        tab:add_text("  - Earned Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_EVC")))
-        tab:add_text("  - Spent Money: "..yu.format_num(stats.get_int("MPPLY_TOTAL_SVC")))
-        tab:add_text("  - Players Killed: "..stats.get_int("MPPLY_KILLS_PLAYERS"))
-        tab:add_text("  - Deatsh per player: "..stats.get_int("MPPLY_DEATHS_PLAYER"))
-        tab:add_text("  - PvP K/D Ratio: "..stats.get_int("MPPLY_KILL_DEATH_RATIO"))
-        tab:add_text("  - Deathmatches Published: "..stats.get_int("MPPLY_AWD_FM_CR_DM_MADE"))
-        tab:add_text("  - Races Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
-        tab:add_text("  - Screenshots Published: "..stats.get_int("MPPLY_NUM_CAPTURES_CREATED"))
-        tab:add_text("  - LTS Published: "..stats.get_int("MPPLY_AWD_FM_CR_RACES_MADE"))
-        tab:add_text("  - Persons who have played your misions: "..stats.get_int("MPPLY_AWD_FM_CR_PLAYED_BY_PEEP"))
-        tab:add_text("  - Likes to missions: "..stats.get_int("MPPLY_AWD_FM_CR_MISSION_SCORE"))
-        tab:add_text("  - Traveled (metters): "..stats.get_int("MPPLY_CHAR_DIST_TRAVELLED"))
-        tab:add_text("  - Swiming: "..stats.get_int(yu.mpx().."DIST_SWIMMING"))
-        tab:add_text("  - Walking: "..stats.get_int(yu.mpx().."DIST_WALKING"))
-        tab:add_text("  - Running: "..stats.get_int(yu.mpx().."DIST_RUNNING"))
-        tab:add_text("  - Highest fall without dying: "..stats.get_int(yu.mpx().."LONGEST_SURVIVED_FREEFALL"))
-        tab:add_text("  - Driving Cars: "..stats.get_int(yu.mpx().."DIST_CAR"))
-        tab:add_text("  - Driving motorbikes: "..stats.get_int(yu.mpx().."DIST_BIKE"))
-        tab:add_text("  - Flying Helicopters: "..stats.get_int(yu.mpx().."DIST_HELI"))
-        tab:add_text("  - Flying Planes: "..stats.get_int(yu.mpx().."DIST_PLANE"))
-        tab:add_text("  - Driving Botes: "..stats.get_int(yu.mpx().."DIST_BOAT"))
-        tab:add_text("  - Driving ATVs: "..stats.get_int(yu.mpx().."DIST_QUADBIKE"))
-        tab:add_text("  - Driving Bicycles: "..stats.get_int(yu.mpx().."DIST_BICYCLE"))
-        tab:add_text("  - Longest Front Willie: "..stats.get_int(yu.mpx().."LONGEST_STOPPIE_DIST"))
-        tab:add_text("  - Longest Willie: "..stats.get_int(yu.mpx().."LONGEST_WHEELIE_DIST"))
-        tab:add_text("  - Largest driving without crashing: "..stats.get_int(yu.mpx().."LONGEST_DRIVE_NOCRASH"))
-        tab:add_text("  - Longest Jump: "..stats.get_int(yu.mpx().."FARTHEST_JUMP_DIST"))
-        tab:add_text("  - Longest Jump in Vehicle: "..stats.get_int(yu.mpx().."HIGHEST_JUMP_REACHED"))
-        tab:add_text("  - Highest Hidraulic Jump: "..stats.get_int(yu.mpx().."LOW_HYDRAULIC_JUMP"))
-        tab:add_imgui(function()
-            ImGui.EndGroup()
-        end)
-    end
-
-    -- refreshStats()
 end
 
 function SussySpt:initTabHBO()
