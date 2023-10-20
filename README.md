@@ -4,11 +4,10 @@ Everything here is made to work with [YimMenu](https://github.com/YimMenu/YimMen
 
 ## Table of contents
 - [Quick installation](https://github.com/pierrelasse/YimStuff#quick-installation)
-- [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md)
-- [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md)
+- [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md) (Yimutils is for devs)
+- [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md) (SussySpt is for users)
 - [Feedback](https://github.com/pierrelasse/YimStuff#feedback)
 - [Other](https://github.com/pierrelasse/YimStuff#other)
-
 
 ## Quick installation
 - Download [yimutils.lua](https://github.com/pierrelasse/YimStuff/releases/download/Latest/yimutils.lua) and optionally [SussySpt.lua](https://github.com/pierrelasse/YimStuff/releases/download/Latest/SussySpt.lua) too and put them into your scripts folder `%appdata%/YimMenu/scripts`
