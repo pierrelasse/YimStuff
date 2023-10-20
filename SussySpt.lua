@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1476,
+    versionid = 1487,
 
     doInit = true,
     doDebug = false,
@@ -304,7 +304,6 @@ function SussySpt:init()
 
         do
             local a = {
-                pauseautoupdate = 0,
                 playerlistwidth = 211,
                 searchtext = "",
                 players = {},
@@ -353,16 +352,16 @@ function SussySpt:init()
 
             local function refreshPlayerList()
                 a.players = {}
-                a.pauseautoupdate = 10000
-                local playersmi = yu.get_all_players_mi()
-                if playersmi == nil then
+                local players = yu.get_all_players_mi()
+                if type(players) ~= "table" then
+                    log.error("Could not find any players")
                     return
                 end
 
                 local selfppid = yu.ppid()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
-                for k, v in pairs(playersmi) do
+                for k, v in pairs(players) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
                     if type(name) == "string" and name ~= "**Invalid**" then
                         local displayName = name
@@ -372,7 +371,7 @@ function SussySpt:init()
                         local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
 
                         local vehicle = yu.veh(v.ped)
-                        local vehicleName
+                        local vehicleName = "???"
                         if vehicle ~= nil then
                             vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
                         end
@@ -393,7 +392,7 @@ function SussySpt:init()
                             vehicle = {
                                 vehicle ~= nil,
                                 "V",
-                                "The player is in a vehicle. "..(vehicleName or "")
+                                "The player is in a vehicle. "..vehicleName
                             },
                             interior = {
                                 interior ~= 0,
@@ -460,17 +459,9 @@ function SussySpt:init()
                         a.players[name] = v
                     end
                 end
-                a.pauseautoupdate = 0
 
                 updatePlayerElements()
             end
-
-            for k, v in pairs({menu_event.PlayerLeave,menu_event.PlayerJoin,menu_event.PlayerMgrShutdown}) do
-                event.register_handler(v, function()
-                    yu.rif(refreshPlayerList)
-                end)
-            end
-            yu.rif(refreshPlayerList)
 
             local function weaponFromInput(s)
                 if type(s) == "string" then
@@ -501,21 +492,15 @@ function SussySpt:init()
                 )
             end
 
-            yu.rendering.setCheckboxChecked("online_players_autoupdate", true)
-
             yu.rif(function(rs)
                 while true do
-                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() and yu.rendering.isCheckboxChecked("online_players_autoupdate") then
+                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                         refreshPlayerList()
                     else
                         a.selectedplayer = nil
                         a.players = {}
                     end
-                    if a.pauseautoupdate > 0 then
-                        log.info("Fatal: Could not update playerlist")
-                    end
-                    rs:sleep(500 + a.pauseautoupdate)
-                    a.pauseautoupdate = 0
+                    rs:sleep(500)
                 end
             end)
 
@@ -539,12 +524,6 @@ function SussySpt:init()
                     ImGui.EndListBox()
                 end
                 ImGui.PopItemWidth()
-
-                if not yu.rendering.renderCheckbox("Want random crashes?", "online_players_autoupdate") then
-                    if ImGui.SmallButton("Update playerlist") then
-                        yu.rif(refreshPlayerList)
-                    end
-                end
 
                 ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
