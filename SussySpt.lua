@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1487,
+    versionid = 1503,
 
     doInit = true,
     doDebug = false,
@@ -91,15 +91,15 @@ function SussySpt:init()
                     TitleBgActive = {21, 8, 47, .81},
                     WindowBg = {21, 8, 47, .82},
                     Tab = {41, 25, 80, .5},
-                    TabActive = {55, 29, 124, .81},
-                    TabHovered = {51, 35, 90, .85},
-                    Button = {94, 57, 186, .8},
+                    TabActive = {55, 29, 124, .5},
+                    TabHovered = {51, 35, 90, .55},
+                    Button = {94, 57, 186, .3},
                     FrameBg = {41, 25, 80, .67},
                     FrameBgHovered = {41, 35, 90, .67}
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {16},
-                    FrameRounding = {5}
+                    FrameRounding = {3}
                 }
             }
         },
@@ -368,22 +368,26 @@ function SussySpt:init()
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
-                        local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
-
                         local vehicle = yu.veh(v.ped)
                         local vehicleName = "???"
                         if vehicle ~= nil then
                             vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
                         end
 
+                        local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
+
+                        local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+
                         local blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
+                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
+                        local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                        local armor = PED.GET_PED_ARMOUR(v.ped)
+                        local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
+                        local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
+                        local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+
                         local info = {
-                            self = {
-                                v.ped == selfppid,
-                                "S",
-                                "This is you!"
-                            },
                             modder = {
                                 network.is_player_flagged_as_modder(v.player),
                                 "M",
@@ -393,6 +397,21 @@ function SussySpt:init()
                                 vehicle ~= nil,
                                 "V",
                                 "The player is in a vehicle. "..vehicleName
+                            },
+                            speed = {
+                                speed > 0,
+                                "S",
+                                "Moving with "..string.format("%.2f", speed).."km/h"
+                            },
+                            nocollision = {
+                                collisionDisabled == true and distance < 100 and vehicle == nil,
+                                "C",
+                                "The player doesn't seem to have collision"
+                            },
+                            noped = {
+                                type(v.ped) ~= "number" or v.ped == 0,
+                                "P",
+                                "No character (ped) was found"
                             },
                             interior = {
                                 interior ~= 0,
@@ -406,11 +425,6 @@ function SussySpt:init()
                             }
                         }
 
-                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
-                        local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
-                        local armor = PED.GET_PED_ARMOUR(v.ped)
-                        local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
-                        local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local tooltip =
                             "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"..
                             "\nArmor: "..string.format("%.0f", armor)..
