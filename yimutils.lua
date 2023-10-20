@@ -408,27 +408,21 @@ return (function()
 
         api.get_all_players = function()
             local players = {}
-            for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
-                    players[k] = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
+            local handles = entities.get_all_peds_as_handles()
+            if type(handles) == "table" then
+                for k, v in pairs(handles) do
+                    if k and v and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
+                        players[k] = {
+                            whatever = k,
+                            ped = v,
+                            player = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
+                        }
+                    end
                 end
             end
             return players
         end
-
-        api.get_all_players_mi = function()
-            local players = {}
-            for k, v in pairs(entities.get_all_peds_as_handles()) do
-                if v ~= nil and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
-                    players[k] = {
-                        whatever = k,
-                        ped = v,
-                        player = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(v)
-                    }
-                end
-            end
-            return players
-        end
+        api.get_all_players_mi = api.get_all_players
 
         api.get_all_weapons = function()
             return {
