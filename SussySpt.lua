@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1463,
+    versionid = 1464,
 
     doInit = true,
     doDebug = false,
@@ -214,6 +214,12 @@ function SussySpt:init()
     end
 
     SussySpt.tick = function()
+        SussySpt.in_online = yu.is_script_running("freemode")
+
+        if SussySpt.invisible == true then
+            SussySpt.ensureVis(false, yu.ppid(), yu.veh())
+        end
+
         if SussySpt.disable_controls > 0 then
             SussySpt.disable_controls = SussySpt.disable_controls - 1
 
@@ -270,15 +276,6 @@ function SussySpt:init()
             end
 
             SussySpt.chatlog.rebuildLog()
-        end
-    end)
-
-    SussySpt.debug("Registering 'sussyspt2' loop")
-    script.register_looped("sussyspt2", function()
-        SussySpt.in_online = yu.is_script_running("freemode")
-
-        if SussySpt.invisible == true then
-            SussySpt.ensureVis(false, yu.ppid(), yu.veh())
         end
     end)
 
