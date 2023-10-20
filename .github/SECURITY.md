@@ -6,4 +6,4 @@ I guess the newest version :D
 
 ## Reporting a Vulnerability
 
-Make issue :D
+Contact me on discord (`dcistdreck`) so we can work out a private space to talk about the problems i guess.
