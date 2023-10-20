@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1437,
+    versionid = 1463,
 
     doInit = true,
     doDebug = false,
@@ -20,6 +20,7 @@ yu = require("yimutils")
 
 function SussySpt:init()
     if SussySpt.doInit ~= true then
+        SussySpt.debug("SussySpt:init() was called after initialization")
         return
     end
     SussySpt.doInit = nil
@@ -83,15 +84,33 @@ function SussySpt:init()
                     WindowRounding = {8},
                     FrameRounding = {5}
                 }
+            },
+            Purple = {
+                ImGuiCol = {
+                    TitleBg = {11, 5, 37, .75},
+                    TitleBgActive = {21, 8, 47, .81},
+                    WindowBg = {21, 8, 47, .82},
+                    Tab = {41, 25, 80, .5},
+                    TabActive = {55, 29, 124, .81},
+                    TabHovered = {51, 35, 90, .85},
+                    Button = {94, 57, 186, .8},
+                    FrameBg = {41, 25, 80, .67},
+                    FrameBgHovered = {41, 35, 90, .67}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding = {16},
+                    FrameRounding = {5}
+                }
             }
         },
         tabs = {}
     }
 
     SussySpt.rendering.theme = "Nightly"
+    SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
 
     SussySpt.rendering.get_theme = function()
-        return SussySpt.rendering.themes[SussySpt.rendering.theme]
+        return SussySpt.rendering.themes[SussySpt.rendering.theme] or {}
     end
 
     SussySpt.rendering.new_tab = function(name, render)
@@ -103,15 +122,6 @@ function SussySpt:init()
             sub = {},
             id = yu.gun()
         }
-    end
-
-    SussySpt.rendering.add_tab = function(cb)
-        if type(cb) == "function" then
-            local data = cb()
-            if type(data) == "table" then
-                SussySpt.rendering.tabs[#SussySpt.rendering.tabs + 1] = data
-            end
-        end
     end
 
     local function render_tab(v)
@@ -227,18 +237,8 @@ function SussySpt:init()
         end
     end
 
-    SussySpt.debug("Calling SussySpt:initRendering()")
-    SussySpt:initRendering()
-
-    SussySpt.debug("Calling SussySpt:initTabHBO()")
-    SussySpt:initTabHBO()
-    SussySpt.debug("Calling SussySpt:initTabQA()")
-    SussySpt:initTabQA()
-
-    SussySpt.debug("Calling SussySpt:initTabSelf()")
-    SussySpt:initTabSelf()
-    SussySpt.debug("Calling SussySpt:initTabHeist()")
-    SussySpt:initTabHeist()
+    SussySpt.debug("Calling SussySpt:initCategories()")
+    SussySpt:initCategories()
 
     SussySpt.debug("Initializing chatlog")
     SussySpt.chatlog = {
@@ -282,10 +282,10 @@ function SussySpt:init()
         end
     end)
 
-    SussySpt.rendering.add_tab(function()
-        local data = SussySpt.rendering.new_tab("Online")
+    do
+        local tab = SussySpt.rendering.new_tab("Online")
 
-        data.should_display = function()
+        tab.should_display = function()
             return SussySpt.in_online
         end
 
@@ -305,7 +305,7 @@ function SussySpt:init()
             end
         end
 
-        data.sub.a_players = (function()
+        do
             local a = {
                 playerlistwidth = 211,
                 searchtext = "",
@@ -404,7 +404,7 @@ function SussySpt:init()
                             interior = {
                                 interior ~= 0,
                                 "I",
-                                "The player is in an interior (might be bugged). Id: "..interior
+                                "The player might be in an interior. Interior id: "..interior
                             },
                             noblip = {
                                 v.ped ~= selfppid and blip == 0,
@@ -515,7 +515,7 @@ function SussySpt:init()
                 end
             end)
 
-            return SussySpt.rendering.new_tab("Players", function()
+            tab.sub[1] = SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
                 ImGui.Text("Players ("..yu.len(a.playersmi)..")")
 
@@ -1111,9 +1111,9 @@ function SussySpt:init()
                     ImGui.EndGroup()
                 end
             end)
-        end)()
+        end
 
-        data.sub.b_chatlog = (function()
+        tab.sub[2] = (function()
             yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
             yu.rendering.setCheckboxChecked("online_chatlog_console", true)
             yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
@@ -1135,13 +1135,13 @@ function SussySpt:init()
             end)
         end)()
 
-        return data
-    end)
+        SussySpt.rendering.tabs[1] = tab
+    end
 
-    SussySpt.rendering.add_tab(function()
-        local data = SussySpt.rendering.new_tab("World")
+    do
+        local tab = SussySpt.rendering.new_tab("World")
 
-        data.sub.a_objspawner = (function()
+        tab.sub[1] = (function()
             local a = {
                 model = "",
                 awidth = 195
@@ -1275,7 +1275,7 @@ function SussySpt:init()
             end)
         end)()
 
-        data.sub.b_vehicles = (function()
+        tab.sub[2] = (function()
             return SussySpt.rendering.new_tab("Nearby vehicles", function()
                 ImGui.Text("Coming soon :D")
                 ImGui.BeginGroup()
@@ -1310,7 +1310,7 @@ function SussySpt:init()
             end)
         end)()
 
-        data.sub.c_particlespawner = (function()
+        tab.sub[3] = (function()
             local a = {
                 awidth = 280,
                 dict = "core",
@@ -1354,13 +1354,13 @@ function SussySpt:init()
             end)
         end)()
 
-        return data
-    end)
+        SussySpt.rendering.tabs[2] = tab
+    end
 
-    SussySpt.rendering.add_tab(function()
-        local data = SussySpt.rendering.new_tab("Config")
+    do
+        local tab = SussySpt.rendering.new_tab("Config")
 
-        data.sub.a_info = SussySpt.rendering.new_tab("Info", function()
+        tab.sub[1] = SussySpt.rendering.new_tab("Info", function()
             ImGui.Text("Made by pierrelasse.")
             ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
             ImGui.Spacing()
@@ -1375,7 +1375,7 @@ function SussySpt:init()
             end
         end)
 
-        data.sub.b_theme = SussySpt.rendering.new_tab("Theme", function()
+        tab.sub[2] = SussySpt.rendering.new_tab("Theme", function()
             ImGui.PushItemWidth(265)
             if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
                 for k, v in pairs(SussySpt.rendering.themes) do
@@ -1388,12 +1388,12 @@ function SussySpt:init()
             ImGui.PopItemWidth()
         end)
 
-        data.sub.c_esp = SussySpt.rendering.new_tab("Weird ESP", function()
+        tab.sub[3] = SussySpt.rendering.new_tab("Weird ESP", function()
             yu.rendering.renderCheckbox("Very cool skeleton esp enabled", "config_esp_enabled")
         end)
 
-        return data
-    end)
+        SussySpt.rendering.tabs[3] = tab
+    end
 
     SussySpt.debug("Registered 'sussyspt' loop")
     script.register_looped("sussyspt", SussySpt.tick)
@@ -1447,18 +1447,27 @@ function SussySpt:init()
     yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
 end
 
-function SussySpt:initRendering()
+function SussySpt:initCategories()
     local tab = SussySpt.tab
-    SussySpt.pushStyle = function()end
-    SussySpt.popStyle = function()end
+    SussySpt.pushStyle = function() end
+    SussySpt.popStyle = SussySpt.pushStyle
 
-    tab:add_separator()
-    tab:add_text("Categories:")
+    SussySpt.debug("Calling SussySpt:initTabHBO()")
+    SussySpt:initTabHBO()
+    SussySpt.debug("Calling SussySpt:initTabQA()")
+    SussySpt:initTabQA()
+
+    SussySpt.debug("Calling SussySpt:initTabSelf()")
+    SussySpt:initTabSelf()
+    SussySpt.debug("Calling SussySpt:initTabHeist()")
+    SussySpt:initTabHeist()
+
+    tab:add_text("Categories")
     tab:add_imgui(function()
         ImGui.SameLine()
 
-        if ImGui.Button("Show all") then
-            for k, v in pairs({"self", "hbo", "qa", "players"}) do
+        if ImGui.SmallButton("Show all") then
+            for k, v in pairs({"self", "hbo", "qa"}) do
                 yu.rendering.setCheckboxChecked("cat_"..v, true)
             end
         end
