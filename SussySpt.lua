@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1466,
+    versionid = 1476,
 
     doInit = true,
     doDebug = false,
@@ -307,7 +307,7 @@ function SussySpt:init()
                 pauseautoupdate = 0,
                 playerlistwidth = 211,
                 searchtext = "",
-                playersmi = {},
+                players = {},
                 playerelements = {},
                 selectedplayer = nil,
                 selectedplayerinfo = {},
@@ -344,33 +344,27 @@ function SussySpt:init()
             SussySpt.online_players_a = a
 
             local function updatePlayerElements()
-                for k, v in pairs(a.playersmi) do
+                for k, v in pairs(a.players) do
                     v.display = type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase())
                 end
             end
 
-            local function refreshPlayerList()
-                a.playersmi = {}
+            local emptystr = ""
 
-                if DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                    a.selectedplayer = nil
+            local function refreshPlayerList()
+                a.players = {}
+                a.pauseautoupdate = 10000
+                local playersmi = yu.get_all_players_mi()
+                if playersmi == nil then
                     return
                 end
 
                 local selfppid = yu.ppid()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
-                local emptystr = ""
 
-                local playersmi = yu.get_all_players_mi()
-                if playersmi == nil then
-                    log.error("FATAL: Pausing playerlist autoupdate due to failing to get a list of all players")
-                    a.pauseautoupdate = 10000
-                    return
-                end
                 for k, v in pairs(playersmi) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
-
-                    if name ~= nil and name ~= "**Invalid**" then
+                    if type(name) == "string" and name ~= "**Invalid**" then
                         local displayName = name
 
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
@@ -463,9 +457,10 @@ function SussySpt:init()
                         v.displayname = displayName
                         v.tooltip = tooltip:replace("  ", " ")
                         v.name = name
-                        a.playersmi[name] = v
+                        a.players[name] = v
                     end
                 end
+                a.pauseautoupdate = 0
 
                 updatePlayerElements()
             end
@@ -506,10 +501,18 @@ function SussySpt:init()
                 )
             end
 
+            yu.rendering.setCheckboxChecked("online_players_autoupdate", true)
+
             yu.rif(function(rs)
                 while true do
-                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() and yu.rendering.isCheckboxChecked("online_players_autoupdate") then
                         refreshPlayerList()
+                    else
+                        a.selectedplayer = nil
+                        a.players = {}
+                    end
+                    if a.pauseautoupdate > 0 then
+                        log.info("Fatal: Could not update playerlist")
                     end
                     rs:sleep(500 + a.pauseautoupdate)
                     a.pauseautoupdate = 0
@@ -518,11 +521,11 @@ function SussySpt:init()
 
             tab.sub[1] = SussySpt.rendering.new_tab("Players", function()
                 ImGui.BeginGroup()
-                ImGui.Text("Players ("..yu.len(a.playersmi)..")")
+                ImGui.Text("Players ("..yu.len(a.players)..")")
 
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
-                    for k, v in pairs(a.playersmi) do
+                    for k, v in pairs(a.players) do
                         if v.display then
                             if ImGui.Selectable(v.displayname, false) then
                                 a.selectedplayer = v.name
@@ -536,6 +539,12 @@ function SussySpt:init()
                     ImGui.EndListBox()
                 end
                 ImGui.PopItemWidth()
+
+                if not yu.rendering.renderCheckbox("Want random crashes?", "online_players_autoupdate") then
+                    if ImGui.SmallButton("Update playerlist") then
+                        yu.rif(refreshPlayerList)
+                    end
+                end
 
                 ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
@@ -552,7 +561,7 @@ function SussySpt:init()
                 if a.selectedplayer ~= nil then
                     local player
                     a.splayer = nil
-                    for k, v in pairs(a.playersmi) do
+                    for k, v in pairs(a.players) do
                         if v.name == a.selectedplayer then
                             player = v
                             a.splayer = player
@@ -566,6 +575,7 @@ function SussySpt:init()
                         ImGui.BeginGroup()
 
                         ImGui.Text("Selected player: "..player.name)
+                        yu.rendering.tooltip(player.tooltip)
 
                         if ImGui.TreeNodeEx("General") then
                             if ImGui.SmallButton("Goto") then
@@ -611,7 +621,7 @@ function SussySpt:init()
 
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                                 yu.rif(function()
-                                    for k, v in pairs(a.playersmi) do
+                                    for k, v in pairs(a.players) do
                                         if v.ped ~= player.ped then
                                             if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
                                                 NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
@@ -995,25 +1005,15 @@ function SussySpt:init()
                                 end)
                             end
 
-                            ImGui.Text("Doors:")
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Unlock (you)") then
+                            if ImGui.SmallButton("Kick from vehicle") then
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil then
-                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_PLAYER(veh, yu.pid(), false)
+                                        TASK.TASK_LEAVE_VEHICLE(player.ped, veh, 0)
                                     end
                                 end)
                             end
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Unlock (all)") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
-                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED_FOR_ALL_PLAYERS(veh, false)
-                                    end
-                                end)
-                            end
+                            yu.rendering.tooltip("Meh meh does not work really")
 
                             ImGui.TreePop()
                         end
@@ -1410,7 +1410,7 @@ function SussySpt:init()
             rs:yield()
             if yu.rendering.isCheckboxChecked("config_esp_enabled") and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                 local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                for k, v in pairs(SussySpt.online_players_a.playersmi) do
+                for k, v in pairs(SussySpt.online_players_a.players) do
                     local ped = v.ped
                     local c = ENTITY.GET_ENTITY_COORDS(ped)
                     local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
