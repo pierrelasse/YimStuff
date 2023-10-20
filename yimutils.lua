@@ -312,7 +312,8 @@ return (function()
             if type(ent) ~= "number" or ent == 0 then
                 return false
             end
-            return ENTITY.DOES_ENTITY_EXIST(ent, false) == true
+            local success, result = pcall(ENTITY.DOES_ENTITY_EXIST, ent)
+            return success and result == true
         end
     end
 
