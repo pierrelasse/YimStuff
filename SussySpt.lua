@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1464,
+    versionid = 1466,
 
     doInit = true,
     doDebug = false,
@@ -304,6 +304,7 @@ function SussySpt:init()
 
         do
             local a = {
+                pauseautoupdate = 0,
                 playerlistwidth = 211,
                 searchtext = "",
                 playersmi = {},
@@ -344,11 +345,7 @@ function SussySpt:init()
 
             local function updatePlayerElements()
                 for k, v in pairs(a.playersmi) do
-                    if type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase()) then
-                        a.playersmi[k].display = true
-                    else
-                        a.playersmi[k].display = false
-                    end
+                    v.display = type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase())
                 end
             end
 
@@ -364,7 +361,13 @@ function SussySpt:init()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
                 local emptystr = ""
 
-                for k, v in pairs(yu.get_all_players_mi()) do
+                local playersmi = yu.get_all_players_mi()
+                if playersmi == nil then
+                    log.error("FATAL: Pausing playerlist autoupdate due to failing to get a list of all players")
+                    a.pauseautoupdate = 10000
+                    return
+                end
+                for k, v in pairs(playersmi) do
                     local name = PLAYER.GET_PLAYER_NAME(v.player)
 
                     if name ~= nil and name ~= "**Invalid**" then
@@ -508,7 +511,8 @@ function SussySpt:init()
                     if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                         refreshPlayerList()
                     end
-                    rs:sleep(500)
+                    rs:sleep(500 + a.pauseautoupdate)
+                    a.pauseautoupdate = 0
                 end
             end)
 
@@ -1365,14 +1369,6 @@ function SussySpt:init()
             ImGui.Text("SussySpt version id: "..SussySpt.versionid)
             ImGui.Spacing()
             ImGui.Text("Theme: "..SussySpt.rendering.theme)
-            ImGui.Spacing()
-            if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
-                ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
-                ImGui.TreePop()
-            end
-        end)
-
-        tab.sub[2] = SussySpt.rendering.new_tab("Theme", function()
             ImGui.PushItemWidth(265)
             if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
                 for k, v in pairs(SussySpt.rendering.themes) do
@@ -1383,6 +1379,11 @@ function SussySpt:init()
                 ImGui.EndCombo()
             end
             ImGui.PopItemWidth()
+            ImGui.Spacing()
+            if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
+                ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                ImGui.TreePop()
+            end
         end)
 
         tab.sub[3] = SussySpt.rendering.new_tab("Weird ESP", function()
