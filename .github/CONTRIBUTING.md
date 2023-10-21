@@ -28,3 +28,35 @@ Please provide a clear and concise description of your pull request, explaining 
 ## Contacting
 
 If you have questions, need clarifications, or want to discuss anything privately, you can contact me on Discord (`dcistdreck`).
+
+
+# Lua Coding Standards
+By following these guidelines, you can help maintain code consistency and quality within the project.
+
+## Naming Style
+- Global Variable: `thisIsAVariable`
+- Local Variable: `thisIsAVariable`
+- Global Function: `thisIsAFunction`
+- Local Function: `thisIsAFunction`
+- Yimutils API Function: `this_is_a_function`
+
+## Formatting Style
+
+### Indents
+Use 4 spaces for indentation in your Lua code.
+
+```lua
+function exampleFunction()
+    if condition then
+        -- Four spaces of indentation
+        print("Indented text")
+    end
+end
+```
+
+### Merging Strings
+When concatenating strings using the `..` operator, avoid spaces before and after it to save space and maintain a clean code appearance:
+
+```lua
+local concatenatedString = "string1".."string2"
+```
