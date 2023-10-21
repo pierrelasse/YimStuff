@@ -407,6 +407,21 @@ return (function()
         end
 
         api.get_all_players = function()
+            local players = {}
+            for i = 0, 32 do
+                local name = PLAYER.GET_PLAYER_NAME(i)
+                if type(name) == "string" and name ~= "**Invalid**" then
+                    players[name] = {
+                        player = i,
+                        ped = PLAYER.GET_PLAYER_PED(i),
+                        name = name
+                    }
+                end
+            end
+            return players
+        end
+
+        api.get_all_players_2 = function()
             local handles = entities.get_all_peds_as_handles()
             if handles ~= nil then
                 local players = {}
@@ -422,7 +437,6 @@ return (function()
                 return players
             end
         end
-        api.get_all_players_mi = api.get_all_players
 
         api.get_all_weapons = function()
             return {
