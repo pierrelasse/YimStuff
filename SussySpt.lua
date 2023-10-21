@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1507,
+    versionid = 1512,
 
     doInit = true,
     doDebug = false,
@@ -352,7 +352,7 @@ function SussySpt:init()
 
             local function refreshPlayerList()
                 a.players = {}
-                local players = yu.get_all_players_mi()
+                local players = yu.get_all_players()
                 if type(players) ~= "table" then
                     log.error("Could not find any players")
                     return
@@ -3213,7 +3213,7 @@ function SussySpt:initTabHBO()
         local cooldowns = {}
         local function updateCooldowns()
             for k, v in pairs({"H3_COMPLETEDPOSIX", "MPPLY_H3_COOLDOWN"}) do
-                cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx()..v) - os.time())
+                cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx(v)) - os.time())
             end
         end
         updateCooldowns()
