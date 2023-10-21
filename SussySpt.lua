@@ -3940,6 +3940,7 @@ function SussySpt:initTabHBO()
 
     local function initApartment()
         local a = {
+            heistpointer = 1937645,
             heists = {
                 "Fleeca $5M",
                 "Fleeca $10M",
@@ -3978,7 +3979,7 @@ function SussySpt:initTabHBO()
         }
 
         local function refresh()
-            a.heist = yu.get_key_from_table(a.heistsids, globals.get_int(1934636 + 3008 + 1), 1)
+            a.heist = yu.get_key_from_table(a.heistsids, globals.get_int(a.heistpointer), 1)
             a.heistchanged = false
         end
 
@@ -4007,10 +4008,10 @@ function SussySpt:initTabHBO()
                         -- Heist
                         if a.heistchanged then
                             changes = yu.add(changes, 1)
-                            globals.set_int(1934636 + 3008 + 1, a.heistsids[a.heist])
+                            globals.set_int(a.heistpointer, a.heistsids[a.heist])
                         end
 
-                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Diamond Casino Heist")
+                        yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Apartment Heists")
                         for k, v in pairs(a) do
                             if tostring(k):endswith("changed") then
                                 a[k] = nil
