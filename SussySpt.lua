@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1506,
+    versionid = 1507,
 
     doInit = true,
     doDebug = false,
@@ -945,7 +945,7 @@ function SussySpt:init()
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil and entities.take_control_of(veh) then
-                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
+                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
                                     end
                                 end)
                             end
@@ -3452,13 +3452,11 @@ function SussySpt:initTabHBO()
 
                 if ImGui.Button("Reset heist") then
                     yu.add_task(function()
-                        stats.set_int(yu.mpx().."H4_MISSIONS", 0)
-                        stats.set_int(yu.mpx().."H4_PROGRESS", 0)
-                        stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
-                        stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 0)
-                        stats.set_int(yu.mpx().."H4CNF_BS_GEN", 0)
-                        stats.set_int(yu.mpx().."H3OPT_POI", 0)
-                        stats.set_int(yu.mpx().."H3OPT_ACCESSPOINTS", 0)
+                        local mpx = yu.mpx()
+                        stats.set_int(mpx.."H3OPT_BITSET1", 0)
+                        stats.set_int(mpx.."H3OPT_BITSET0", 0)
+                        stats.set_int(mpx.."H3OPT_POI", 0)
+                        stats.set_int(mpx.."H3OPT_ACCESSPOINTS", 0)
                     end)
                 end
 
@@ -3486,9 +3484,9 @@ function SussySpt:initTabHBO()
                 if ImGui.Button("Apply##cuts") then
                     for k, v in pairs(a.cuts) do
                         if k == -2 then
-                            globals.set_int(2722097, v)
+                            globals.set_int(2691426, v)
                         else
-                            globals.set_int(1969064 + k, v)
+                            globals.set_int(1974021 + k, v)
                         end
                     end
                 end
