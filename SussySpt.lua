@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1503,
+    versionid = 1506,
 
     doInit = true,
     doDebug = false,
@@ -209,7 +209,7 @@ function SussySpt:init()
     SussySpt.disable_controls = 0
     SussySpt.push_disable_controls = function(a)
         if a ~= false then
-            SussySpt.disable_controls = 20
+            SussySpt.disable_controls = 4
         end
     end
 
@@ -908,17 +908,6 @@ function SussySpt:init()
                                 end)
                             end
 
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Explode") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.EXPLODE_VEHICLE(veh, true, false)
-                                    end
-                                end)
-                            end
-
                             if ImGui.SmallButton("Halt") then
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
@@ -967,8 +956,7 @@ function SussySpt:init()
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 79)
-                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 4, 10, 0, 0, 2, 0, 0, 0, false, true, true, false, true)
+                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, VEHICLE.GET_VEHICLE_ESTIMATED_MAX_SPEED(veh))
                                     end
                                 end)
                             end
