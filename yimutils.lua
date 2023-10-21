@@ -408,9 +408,9 @@ return (function()
 
         api.get_all_players = function()
             local handles = entities.get_all_peds_as_handles()
-            if type(handles) == "userdata" then
+            if handles ~= nil then
                 local players = {}
-                for k, v in pairs(handles) do
+                for k, v in ipairs(handles) do
                     if k and v and api.does_entity_exist(v) and PED.IS_PED_A_PLAYER(v) then
                         players[k] = {
                             whatever = k,
