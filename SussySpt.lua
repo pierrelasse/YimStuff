@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1512,
+    versionid = 1529,
 
     doInit = true,
     doDebug = false,
@@ -386,6 +386,7 @@ function SussySpt:init()
                         local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                         local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+                        local weaponHash = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
 
                         local info = {
                             modder = {
@@ -397,11 +398,6 @@ function SussySpt:init()
                                 vehicle ~= nil,
                                 "V",
                                 "The player is in a vehicle. "..vehicleName
-                            },
-                            speed = {
-                                speed > 0,
-                                "S",
-                                "Moving with "..string.format("%.2f", speed).."km/h"
                             },
                             nocollision = {
                                 collisionDisabled == true and distance < 100 and vehicle == nil,
@@ -425,11 +421,23 @@ function SussySpt:init()
                             }
                         }
 
-                        local tooltip =
-                            "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"..
-                            "\nArmor: "..string.format("%.0f", armor)..
+                        local tooltip = "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
+
+                        if armor > 0 then
+                            tooltip = tooltip.."\nArmor: "..string.format("%.0f", armor)
+                        end
+
+                        tooltip = tooltip..
                             "\nDistance: "..string.format("%.2f", distance).."m"..
                             "\nRoad: "..road
+
+                        if speed > 0 then
+                            tooltip = tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
+                        end
+
+                        if weaponHash ~= 0 then
+                            tooltip = tooltip.."\nIs holding a weapon."
+                        end
 
                         local proofs = yu.get_entity_proofs(v.ped)
                         if proofs.success and proofs.anytrue then
@@ -799,7 +807,8 @@ function SussySpt:init()
                             ImGui.PushItemWidth(120)
                             local gcwr = yu.rendering.input("text", {
                                 label = "##gcw",
-                                text = a.givecustomweapontext
+                                text = a.givecustomweapontext,
+                                hint = "ex. pistol"
                             })
                             SussySpt.push_disable_controls(ImGui.IsItemActive())
                             ImGui.PopItemWidth()
@@ -1151,7 +1160,7 @@ function SussySpt:init()
 
                 ImGui.PushItemWidth(a.awidth)
 
-                local model_text, model_selected = ImGui.InputText("Model", a.model, 32)
+                local model_text, _ = ImGui.InputTextWithHint("Model", "ex. stt_prop_stunt_bowling_pin", a.model, 32)
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.model ~= model_text then
                     a.model = model_text
@@ -1259,14 +1268,14 @@ function SussySpt:init()
 
         tab.sub[2] = (function()
             return SussySpt.rendering.new_tab("Nearby vehicles", function()
-                ImGui.Text("Coming soon :D")
-                ImGui.BeginGroup()
-                ImGui.Text("Nearby vehicles")
-                ImGui.EndGroup()
-                ImGui.SameLine()
-                ImGui.Text("Vehicle options")
-                ImGui.BeginGroup()
-                ImGui.EndGroup()
+                -- ImGui.Text("Coming soon :D")
+                -- ImGui.BeginGroup()
+                -- ImGui.Text("Nearby vehicles")
+                -- ImGui.EndGroup()
+                -- ImGui.SameLine()
+                -- ImGui.Text("Vehicle options")
+                -- ImGui.BeginGroup()
+                -- ImGui.EndGroup()
 
                 for i = 0, 10 do
                     ImGui.Text(i..":")
@@ -1302,13 +1311,13 @@ function SussySpt:init()
             return SussySpt.rendering.new_tab("Particle Spawner", function()
                 ImGui.PushItemWidth(a.awidth)
 
-                local dict, _ = ImGui.InputText("Dict", a.dict, 32)
+                local dict, _ = ImGui.InputTextWithHint("Dict", "ex. core", a.dict, 32)
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.dict ~= dict then
                     a.dict = dict
                 end
 
-                local effect, _ = ImGui.InputText("Effect", a.effect, 32)
+                local effect, _ = ImGui.InputTextWithHint("Effect", "ex. ent_sht_petrol_fire", a.effect, 32)
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.effect ~= effect then
                     a.effect = effect
@@ -1355,6 +1364,7 @@ function SussySpt:init()
                 for k, v in pairs(SussySpt.rendering.themes) do
                     if ImGui.Selectable(k, false) then
                         SussySpt.rendering.theme = k
+                        SussySpt.debug("Set theme to '"..k.."'")
                     end
                 end
                 ImGui.EndCombo()
