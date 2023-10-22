@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1529,
+    versionid = 1547,
 
     doInit = true,
     doDebug = false,
@@ -307,10 +307,8 @@ function SussySpt:init()
                 playerlistwidth = 211,
                 searchtext = "",
                 players = {},
-                playerelements = {},
                 selectedplayer = nil,
                 selectedplayerinfo = {},
-                refreshtick = 0,
                 ramoptions = {
                     ["bus"] = "Bus",
                     ["adder"] = "Adder",
@@ -342,19 +340,18 @@ function SussySpt:init()
             }
             SussySpt.online_players_a = a
 
-            local function updatePlayerElements()
+            local function updatePlayerlistElements()
                 for k, v in pairs(a.players) do
-                    v.display = type(v.name) == "string" and v.name:lowercase():contains(a.searchtext:lowercase())
+                    v.display = k:contains(a.searchtext:lowercase())
                 end
             end
 
             local emptystr = ""
 
-            local function refreshPlayerList()
+            local function refreshPlayerlist()
                 a.players = {}
                 local players = yu.get_all_players()
                 if type(players) ~= "table" then
-                    log.error("Could not find any players")
                     return
                 end
 
@@ -362,23 +359,34 @@ function SussySpt:init()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
                 for k, v in pairs(players) do
-                    local name = PLAYER.GET_PLAYER_NAME(v.player)
-                    if type(name) == "string" and name ~= "**Invalid**" then
-                        local displayName = name
+                    v.noped = type(v.ped) ~= "number" or v.ped == 0
+                    v.tooltip = emptystr
 
+                    v.info = {
+                        modder = {
+                            network.is_player_flagged_as_modder(v.player),
+                            "M",
+                            "This player was detected as a modder"
+                        },
+                        noped = {
+                            v.noped,
+                            "P",
+                            "No character (ped) was found"
+                        }
+                    }
+
+                    if not v.noped then
                         local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
                         local vehicle = yu.veh(v.ped)
-                        local vehicleName = "???"
-                        if vehicle ~= nil then
-                            vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-                        end
+                        local vehicleName =
+                            vehicle == nil
+                            and "???"
+                            or VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
 
                         local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
 
                         local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
-
-                        local blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
                         local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
                         local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
@@ -388,101 +396,90 @@ function SussySpt:init()
                         local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
                         local weaponHash = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
 
-                        local info = {
-                            modder = {
-                                network.is_player_flagged_as_modder(v.player),
-                                "M",
-                                "This player was detected as a modder"
-                            },
-                            vehicle = {
-                                vehicle ~= nil,
-                                "V",
-                                "The player is in a vehicle. "..vehicleName
-                            },
-                            nocollision = {
-                                collisionDisabled == true and distance < 100 and vehicle == nil,
-                                "C",
-                                "The player doesn't seem to have collision"
-                            },
-                            noped = {
-                                type(v.ped) ~= "number" or v.ped == 0,
-                                "P",
-                                "No character (ped) was found"
-                            },
-                            interior = {
-                                interior ~= 0,
-                                "I",
-                                "The player might be in an interior. Interior id: "..interior
-                            },
-                            noblip = {
-                                v.ped ~= selfppid and blip == 0,
-                                "B",
-                                "The player has no blip. In interior/not spawned yet?"
-                            }
+                        v.info.interior = {
+                            interior ~= 0,
+                            "I",
+                            "The player might be in an interior. Interior id: "..interior
+                        }
+                        v.info.vehicle = {
+                            vehicle ~= nil,
+                            "V",
+                            "The player is in a vehicle. "..vehicleName
+                        }
+                        v.info.nocollision = {
+                            collisionDisabled == true and distance < 100 and vehicle == nil,
+                            "C",
+                            "The player doesn't seem to have collision"
                         }
 
-                        local tooltip = "Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
+                        v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
 
                         if armor > 0 then
-                            tooltip = tooltip.."\nArmor: "..string.format("%.0f", armor)
+                            v.tooltip = v.tooltip.."\nArmor: "..string.format("%.0f", armor)
                         end
 
-                        tooltip = tooltip..
-                            "\nDistance: "..string.format("%.2f", distance).."m"..
-                            "\nRoad: "..road
+                        if distance > 0 then
+                            v.tooltip = v.tooltip.."\nDistance: "..string.format("%.2f", distance).."m"
+                            v.tooltip = v.tooltip.."\nRoad: "..road
+                        end
 
                         if speed > 0 then
-                            tooltip = tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
+                            v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
                         end
 
                         if weaponHash ~= 0 then
-                            tooltip = tooltip.."\nIs holding a weapon."
+                            v.tooltip = v.tooltip.."\nIs holding a weapon."
                         end
 
-                        local proofs = yu.get_entity_proofs(v.ped)
-                        if proofs.success and proofs.anytrue then
-                            tooltip = tooltip.."\nProofs: "
-                            for k1, v1 in pairs(proofs.translated) do
+                        v.proofs = yu.get_entity_proofs(v.ped)
+                        if v.proofs.success and v.proofs.anytrue then
+                            v.tooltip = v.tooltip.."\nProofs: "
+                            for k1, v1 in pairs(v.proofs.translated) do
                                 if v1 then
-                                    tooltip = tooltip.." "..k1
+                                    v.tooltip = v.tooltip.." "..k1
                                 end
                             end
                         end
-
-                        local infoChar = emptystr
-
-                        local needInfoHeader = true
-                        for k1, v1 in pairs(info) do
-                            if v1[1] == true then
-                                if needInfoHeader then
-                                    tooltip = tooltip.."\nWeird chars behind name:"
-                                    needInfoHeader = false
-                                end
-
-                                infoChar = infoChar..v1[2]
-                                tooltip = tooltip.."\n  - "..v1[2]..": "..v1[3]
-                            end
-                        end
-
-                        if infoChar ~= emptystr then
-                            displayName = displayName.." ["..infoChar.."]"
-                        end
-
-                        tooltip = tooltip.."\n\nFor nerds:"..
-                            "\n  - Ped: "..v.ped.." Player: "..v.player
-
-                        if blip ~= 0 then
-                            tooltip = tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(blip)
-                        end
-
-                        v.displayname = displayName
-                        v.tooltip = tooltip:replace("  ", " ")
-                        v.name = name
-                        a.players[name] = v
                     end
+
+                    v.infoChar = emptystr
+                    local doInfoHeader = true
+                    for k1, v1 in pairs(v.info) do
+                        if v1[1] == true then
+                            if doInfoHeader then
+                                v.tooltip = v.tooltip.."\nWeird chars behind name:"
+                                doInfoHeader = false
+                            end
+                            v.infoChar = v.infoChar..v1[2]
+                            v.tooltip = v.tooltip.."\n  - "..v1[2]..": "..v1[3]
+                        end
+                    end
+                    v.displayName = doInfoHeader and v.name or v.name.." ["..v.infoChar.."]"
+
+                    v.tooltip = v.tooltip
+                        .."\n\nFor nerds:"
+                        .."\n  - Player: "..v.player
+
+                    if not v.noped then
+                        v.tooltip = v.tooltip.."\n  - Ped: "..v.ped
+
+                        local blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
+                        if blip ~= 0 then
+                            v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(blip)
+                        elseif v.ped ~= selfppid then
+                            v.info.noblip = {
+                                true,
+                                "B",
+                                "The player has no blip. In interior/not spawned yet?"
+                            }
+                        end
+                    end
+
+                    v.tooltip = v.tooltip:replace("  ", " ")
+                    a.players[k:lowercase()] = v
                 end
 
-                updatePlayerElements()
+                updatePlayerlistElements()
             end
 
             local function weaponFromInput(s)
@@ -517,7 +514,7 @@ function SussySpt:init()
             yu.rif(function(rs)
                 while true do
                     if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                        refreshPlayerList()
+                        refreshPlayerlist()
                     else
                         a.selectedplayer = nil
                         a.players = {}
@@ -533,8 +530,8 @@ function SussySpt:init()
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
                     for k, v in pairs(a.players) do
-                        if v.display then
-                            if ImGui.Selectable(v.displayname, false) then
+                        if v.display ~= false then
+                            if ImGui.Selectable(v.displayName, false) then
                                 a.selectedplayer = v.name
                             end
                             if v.tooltip ~= nil then
@@ -553,7 +550,7 @@ function SussySpt:init()
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.searchtext ~= searchtext then
                     a.searchtext = searchtext
-                    yu.rif(updatePlayerElements)
+                    yu.rif(updatePlayerlistElements)
                 end
                 ImGui.PopItemWidth()
 
