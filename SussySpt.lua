@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1578,
+    versionid = 1590,
 
     doInit = true,
     doDebug = false,
@@ -289,6 +289,8 @@ function SussySpt:init()
         local function networkent(ent)
             if ent and ent ~= 0 and yu.does_entity_exist(ent) then
                 NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
+                local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(ent)
+                NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
                 return ent
             end
         end
@@ -407,7 +409,6 @@ function SussySpt:init()
                         local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                         local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
-                        local weaponHash = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
                         v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
                         v.info.interior = {
@@ -452,10 +453,6 @@ function SussySpt:init()
                             v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
                         end
 
-                        if weaponHash ~= 0 then
-                            v.tooltip = v.tooltip.."\nIs holding a weapon."
-                        end
-
                         v.proofs = yu.get_entity_proofs(v.ped)
                         if v.proofs.success and v.proofs.anytrue then
                             v.tooltip = v.tooltip.."\nProofs: "
@@ -472,7 +469,10 @@ function SussySpt:init()
                     for k1, v1 in pairs(v.info) do
                         if v1[1] == true then
                             if doInfoHeader then
-                                v.tooltip = v.tooltip.."\n\nWeird chars behind name:"
+                                if not v.noped then
+                                    v.tooltip = v.tooltip.."\n\n"
+                                end
+                                v.tooltip = v.tooltip.."Weird chars behind name:"
                                 doInfoHeader = false
                             end
                             v.infoChar = v.infoChar..v1[2]
@@ -664,6 +664,101 @@ function SussySpt:init()
                                 end)
                             end
 
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Spawn cargoplane") then
+                                yu.rif(function(rs)
+                                    local hash = joaat("cargoplane")
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                    if networkent(veh) then
+                                        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
+                                        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
+                                        ENTITY.SET_ENTITY_COLLISION(veh, false, true)
+                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                        rs:sleep(2)
+                                        ENTITY.SET_ENTITY_COLLISION(veh, true, true)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Launch") then
+                                yu.rif(function(rs)
+                                    local hash = joaat("mule5")
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, 1, -3)
+                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped))
+                                    networkent(veh)
+                                    ENTITY.SET_ENTITY_VISIBLE(veh, true, 0)
+                                    ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
+                                    rs:sleep(250)
+                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 1000, 0, 0, 0, 0, true, true, true, false, true)
+                                    rs:sleep(2500)
+                                    ENTITY.DELETE_ENTITY(veh)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Stumble") then
+                                yu.rif(function(rs)
+                                    local hash = joaat("prop_roofvent_06a")
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    c.z = c.z - 2.4
+
+                                    local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
+                                    ENTITY.SET_ENTITY_VISIBLE(obj, true, 0)
+                                    ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
+
+                                    local pos = {
+                                        x = 0,
+                                        y = 0,
+                                        z = 0
+                                    }
+                                    local objects = {}
+                                    for i = 1, 4 do
+                                        local angle = (i / 4) * 360
+                                        pos.z = angle
+                                        pos.x = pos.x * 1.25
+                                        pos.y = pos.y * 1.25
+                                        pos.z = pos.z * 1.25
+                                        pos.x = pos.x + c.x
+                                        pos.y = pos.y + c.y
+                                        pos.z = pos.z + c.z
+                                        objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
+                                        ENTITY.SET_ENTITY_VISIBLE(objects[i], true, 0)
+                                        ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
+                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(objects[i])
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Blackscreen") then
+                                yu.rif(function()
+                                    local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
+                                    network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), 1, 4, handle, handle, handle, handle, 1, 1})
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Cutscene loop") then
+                                yu.rif(function()
+                                    local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
+                                    network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), math.random(0, 114), 4, handle, handle, handle, handle, 1, 1})
+                                end)
+                            end
+
                             ImGui.Text("Explode:")
                             do
                                 ImGui.SameLine()
@@ -790,25 +885,6 @@ function SussySpt:init()
                                 end
                             end
 
-                            if ImGui.SmallButton("Spawn cargoplane") then
-                                yu.rif(function(rs)
-                                    local hash = joaat("cargoplane")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
-                                    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
-                                    if networkent(veh) then
-                                        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
-                                        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
-                                        ENTITY.SET_ENTITY_COLLISION(veh, false, true)
-                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
-                                        rs:sleep(2)
-                                        ENTITY.SET_ENTITY_COLLISION(veh, true, true)
-                                    end
-                                end)
-                            end
-
                             do
                                 ImGui.PushItemWidth(237)
                                 local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
@@ -857,6 +933,20 @@ function SussySpt:init()
                                     for k, v in pairs(yu.get_all_weapons()) do
                                         WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
                                     end
+                                end)
+                            end
+
+                            ImGui.Text("Parachute:")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Give##give_parachute") then
+                                yu.rif(function()
+                                    WEAPON.GIVE_WEAPON_TO_PED(player.ped, joaat("GADGET_PARACHUTE"), 1, false, false)
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Remove##remove_parachute") then
+                                yu.rif(function()
+                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, joaat("GADGET_PARACHUTE"))
                                 end)
                             end
 
@@ -979,11 +1069,10 @@ function SussySpt:init()
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.BRING_VEHICLE_TO_HALT(veh, 30, 1, true)
+                                        VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
                                     end
                                 end)
                             end
-                            yu.rendering.tooltip("Makes the vehicle halt.\nThe vehicle can start driving right after it.")
 
                             ImGui.SameLine()
 
@@ -1024,6 +1113,17 @@ function SussySpt:init()
                                     local veh = yu.veh(player.ped)
                                     if veh ~= nil and entities.take_control_of(veh) then
                                         VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, VEHICLE.GET_VEHICLE_ESTIMATED_MAX_SPEED(veh))
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Halt") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
                                     end
                                 end)
                             end
@@ -1267,6 +1367,7 @@ function SussySpt:init()
                             STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
 
                             if a.entity then
+                                ENTITY.SET_ENTITY_LOD_DIST(a.entity, 0xFFFF)
                                 ENTITY.FREEZE_ENTITY_POSITION(a.entity, yu.rendering.isCheckboxChecked("world_objspawner_freeze"))
                                 if yu.rendering.isCheckboxChecked("world_objspawner_groundplace") then
                                     OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
@@ -1432,6 +1533,13 @@ function SussySpt:init()
             if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
                 ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
                 ImGui.TreePop()
+            end
+            ImGui.Spacing()
+            if ImGui.Button("Go airplane mode :)") then
+                yu.add_task(function()
+                    STREAMING.REQUEST_ANIM_DICT("missfbi1")
+                    TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
+                end)
             end
         end)
 
