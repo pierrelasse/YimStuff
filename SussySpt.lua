@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1576,
+    versionid = 1578,
 
     doInit = true,
     doDebug = false,
@@ -564,9 +564,8 @@ function SussySpt:init()
                 end
                 ImGui.PopItemWidth()
 
-                ImGui.Text("Search")
                 ImGui.PushItemWidth(a.playerlistwidth)
-                local searchtext, _ = ImGui.InputText("##search", a.searchtext, 32)
+                local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
                 SussySpt.push_disable_controls(ImGui.IsItemActive())
                 if a.searchtext ~= searchtext then
                     a.searchtext = searchtext
