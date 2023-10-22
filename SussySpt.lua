@@ -532,12 +532,11 @@ function SussySpt:init()
 
             yu.rif(function(rs)
                 while true do
-                    if SussySpt.in_online and a.doupdates > 0 and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                        a.doupdates = a.doupdates - 1
-                        refreshPlayerlist()
-                    else
+                    if not SussySpt.in_online or DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                         a.selectedplayer = nil
                         a.players = {}
+                    elseif a.doupdates > 0 then
+                        refreshPlayerlist()
                     end
                     rs:sleep(500)
                 end
