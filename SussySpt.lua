@@ -1,6 +1,6 @@
 SussySpt = {
-    version = "1.3.6",
-    versionid = 1558,
+    version = "1.3.7",
+    versionid = 1559,
 
     doInit = true,
     doDebug = false,
