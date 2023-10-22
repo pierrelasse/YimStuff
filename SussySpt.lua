@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1575,
+    versionid = 1576,
 
     doInit = true,
     doDebug = false,
@@ -535,7 +535,6 @@ function SussySpt:init()
                     if SussySpt.in_online and a.doupdates > 0 and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                         a.doupdates = a.doupdates - 1
                         refreshPlayerlist()
-                        log.info("Updated!")
                     else
                         a.selectedplayer = nil
                         a.players = {}
