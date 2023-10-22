@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1559,
+    versionid = 1575,
 
     doInit = true,
     doDebug = false,
@@ -299,6 +299,7 @@ function SussySpt:init()
                 NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
                 NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
                 NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
+                return obj
             end
         end
 
@@ -307,6 +308,7 @@ function SussySpt:init()
                 playerlistwidth = 211,
                 searchtext = "",
                 players = {},
+                doupdates = 0,
                 selectedplayer = nil,
                 selectedplayerinfo = {},
                 ramoptions = {
@@ -336,8 +338,17 @@ function SussySpt:init()
                 pickupoption = "Action Figure - UWU",
                 pickupamount = 1,
                 cashamount = 1,
-                cashvalue = 100
+                cashvalue = 100,
+                attachoptions = {
+                    [joaat("prop_beach_fire")] = "Beach fire",
+                    [-2007231801] = "Gas pump",
+                    [joaat("prop_gas_tank_01a")] = "Gas tank",
+                    [joaat("p_spinning_anus_s")] = "Big ufo",
+                    [joaat("prop_ld_toilet_01")] = "Toilet",
+                    [joaat("prop_ld_farm_couch01")] = "Couch",
+                }
             }
+            a.attachoption = next(a.attachoptions)
             SussySpt.online_players_a = a
 
             local function updatePlayerlistElements()
@@ -521,8 +532,10 @@ function SussySpt:init()
 
             yu.rif(function(rs)
                 while true do
-                    if SussySpt.in_online and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                    if SussySpt.in_online and a.doupdates > 0 and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                        a.doupdates = a.doupdates - 1
                         refreshPlayerlist()
+                        log.info("Updated!")
                     else
                         a.selectedplayer = nil
                         a.players = {}
@@ -532,6 +545,7 @@ function SussySpt:init()
             end)
 
             tab.sub[1] = SussySpt.rendering.new_tab("Players", function()
+                a.doupdates = 1
                 ImGui.BeginGroup()
                 ImGui.Text("Players ("..yu.len(a.players)..")")
 
@@ -654,34 +668,36 @@ function SussySpt:init()
                             end
 
                             ImGui.Text("Explode:")
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Invisible") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
-                                end)
-                            end
-                            yu.rendering.tooltip("\"Random\" death")
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Normal") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
-                                end)
-                            end
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Huge") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
-                                end)
-                            end
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Car") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
-                                end)
+                            do
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Invisible") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                    end)
+                                end
+                                yu.rendering.tooltip("\"Random\" death")
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Normal") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                    end)
+                                end
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Huge") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                    end)
+                                end
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Car") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
+                                    end)
+                                end
                             end
 
                             if ImGui.TreeNodeEx("Trap") then
@@ -748,31 +764,33 @@ function SussySpt:init()
                                 ImGui.TreePop()
                             end
 
-                            ImGui.PushItemWidth(237)
-                            local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
-                            if ror.changed then
-                                a.ramoption = ror.key
-                            end
-                            ImGui.PopItemWidth()
-                            ImGui.SameLine()
-                            if ImGui.Button("Ram") then
-                                yu.rif(function(runscript)
-                                    local hash = joaat(a.ramoption)
-                                    if STREAMING.IS_MODEL_VALID(hash) then
-                                        STREAMING.REQUEST_MODEL(hash)
-                                        repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                        local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
-                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
-                                        networkent(veh)
-                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
-                                        runscript:sleep(100)
-                                        for i = 0, 10 do
-                                            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                            do
+                                ImGui.PushItemWidth(237)
+                                local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
+                                if ror.changed then
+                                    a.ramoption = ror.key
+                                end
+                                ImGui.PopItemWidth()
+                                ImGui.SameLine()
+                                if ImGui.Button("Ram") then
+                                    yu.rif(function(runscript)
+                                        local hash = joaat(a.ramoption)
+                                        if STREAMING.IS_MODEL_VALID(hash) then
+                                            STREAMING.REQUEST_MODEL(hash)
+                                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                            local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
+                                            local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                            networkent(veh)
+                                            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
                                             runscript:sleep(100)
+                                            for i = 0, 10 do
+                                                VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                                                runscript:sleep(100)
+                                            end
+                                            VEHICLE.DELETE_VEHICLE(veh)
                                         end
-                                        VEHICLE.DELETE_VEHICLE(veh)
-                                    end
-                                end)
+                                    end)
+                                end
                             end
 
                             if ImGui.SmallButton("Spawn cargoplane") then
@@ -792,6 +810,44 @@ function SussySpt:init()
                                         ENTITY.SET_ENTITY_COLLISION(veh, true, true)
                                     end
                                 end)
+                            end
+
+                            do
+                                ImGui.PushItemWidth(237)
+                                local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
+                                if resp.changed then
+                                    a.attachoption = resp.key
+                                end
+                                ImGui.PopItemWidth()
+
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Attach") then
+                                    yu.rif(function(rs)
+                                        local hash = a.attachoption
+
+                                        if STREAMING.IS_MODEL_VALID(hash) then
+                                            STREAMING.REQUEST_MODEL(hash)
+                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                            local obj = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, 0, 0, 0, true, true, false)
+                                            if networkobj(obj) ~= nil then
+                                                ENTITY.ATTACH_ENTITY_TO_ENTITY(obj, player.ped, 57597, 0, 0, 0, 0, 0, 0, false, false, false, false, 2, true)
+                                                if yu.rendering.isCheckboxChecked("online_players_attach_invis") then
+                                                    ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                                    ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
+                                                end
+                                                ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                            end
+
+                                            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                yu.rendering.renderCheckbox("Invisible##attach_invis", "online_players_attach_invis")
                             end
 
                             ImGui.TreePop()
@@ -1046,7 +1102,7 @@ function SussySpt:init()
                                     a.givepickupblocked = true
                                     yu.rif(function(rs)
                                         local value = a.pickupoptions[a.pickupoption]
-                                        if yu.is_num_between(a.pickupamount, 0, 15) and type(value) == "string" then
+                                        if yu.is_num_between(a.pickupamount, 0, 20) and type(value) == "string" then
                                             local hash = joaat(value)
                                             if STREAMING.IS_MODEL_VALID(hash) then
                                                 STREAMING.REQUEST_MODEL(hash)
@@ -1054,7 +1110,7 @@ function SussySpt:init()
                                                 yu.loop(a.pickupamount, function()
                                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
                                                     OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                                    rs:sleep(10)
+                                                    rs:sleep(4)
                                                 end)
                                             end
                                         end
