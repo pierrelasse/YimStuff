@@ -365,6 +365,10 @@ return (function()
             return api.get_unique_number()
         end
 
+        api.cputms = function()
+            return os.clock() * 1000
+        end
+
         api.playerindex = function(method)
             if method == 1 then
                 return globals.get_int(1574918)
@@ -696,7 +700,12 @@ return (function()
             end
 
             if input_type == "text" then
-                local text, changed = ImGui.InputText(data.label, data.text or "", data.maxlength or 32)
+                local text, changed
+                if type(data.hint) == "string" then
+                    text, changed = ImGui.InputTextWithHint(data.label, data.hint, data.text or "", data.maxlength or 32)
+                else
+                    text, changed = ImGui.InputText(data.label, data.text or "", data.maxlength or 32)
+                end
                 return {
                     text = text,
                     changed = changed
