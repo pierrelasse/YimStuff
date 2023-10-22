@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.6",
-    versionid = 1547,
+    versionid = 1558,
 
     doInit = true,
     doDebug = false,
@@ -359,6 +359,8 @@ function SussySpt:init()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
                 for k, v in pairs(players) do
+                    local startTime = yu.cputms()
+
                     v.noped = type(v.ped) ~= "number" or v.ped == 0
                     v.tooltip = emptystr
 
@@ -395,6 +397,7 @@ function SussySpt:init()
                         local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                         local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
                         local weaponHash = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
+                        v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
                         v.info.interior = {
                             interior ~= 0,
@@ -411,6 +414,11 @@ function SussySpt:init()
                             "C",
                             "The player doesn't seem to have collision"
                         }
+                        v.info.noblip = {
+                            v.ped ~= selfppid and v.blip == 0,
+                            "B",
+                            "The player has no blip. In interior/not spawned yet?"
+                        }
 
                         v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
 
@@ -420,6 +428,12 @@ function SussySpt:init()
 
                         if distance > 0 then
                             v.tooltip = v.tooltip.."\nDistance: "..string.format("%.2f", distance).."m"
+
+                            local distanceAboveGround = ENTITY.GET_ENTITY_HEIGHT_ABOVE_GROUND(v.ped)
+                            if distanceAboveGround > 1.5 then
+                                v.tooltip = v.tooltip.."\nDistance above ground: "..string.format("%.2f", distanceAboveGround).."m"
+                            end
+
                             v.tooltip = v.tooltip.."\nRoad: "..road
                         end
 
@@ -447,7 +461,7 @@ function SussySpt:init()
                     for k1, v1 in pairs(v.info) do
                         if v1[1] == true then
                             if doInfoHeader then
-                                v.tooltip = v.tooltip.."\nWeird chars behind name:"
+                                v.tooltip = v.tooltip.."\n\nWeird chars behind name:"
                                 doInfoHeader = false
                             end
                             v.infoChar = v.infoChar..v1[2]
@@ -463,20 +477,14 @@ function SussySpt:init()
                     if not v.noped then
                         v.tooltip = v.tooltip.."\n  - Ped: "..v.ped
 
-                        local blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
-                        if blip ~= 0 then
-                            v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(blip)
-                        elseif v.ped ~= selfppid then
-                            v.info.noblip = {
-                                true,
-                                "B",
-                                "The player has no blip. In interior/not spawned yet?"
-                            }
+                        if v.blip ~= 0 then
+                            v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
                         end
                     end
 
+                    v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
                     v.tooltip = v.tooltip:replace("  ", " ")
-                    a.players[k:lowercase()] = v
+                    a.players[v.name:lowercase()] = v
                 end
 
                 updatePlayerlistElements()
@@ -530,7 +538,7 @@ function SussySpt:init()
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
                     for k, v in pairs(a.players) do
-                        if v.display ~= false then
+                        if v.display then
                             if ImGui.Selectable(v.displayName, false) then
                                 a.selectedplayer = v.name
                             end
