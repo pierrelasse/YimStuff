@@ -10,6 +10,7 @@ If you believe your contributions are not properly credited, please feel free to
    - [L7NEG/Ultimate-Menu](https://github.com/L7NEG/Ultimate-Menu): potential feature inspiration
    - [IceDoomfist/Stand-Heist-Control](https://github.com/IceDoomfist/Stand-Heist-Control): potential feature inspiration
    - [XxpichoclesxX/GtaVScripts](https://github.com/XxpichoclesxX/GtaVScripts): potential feature inspiration
+   - [Prisuhm/JinxScript](https://github.com/Prisuhm/JinxScript)
    - [Originns/luamenus](https://github.com/Originns/luamenus): potential feature inspiration
    - [CSY0N/CsyonSubMenu](https://github.com/CSY0N/CsyonSubMenu): potential feature inspiration
 
@@ -23,5 +24,3 @@ If you believe your contributions are not properly credited, please feel free to
    - [Yimceo CEO Crates](https://unknowncheats.me/forum/grand-theft-auto-v/591335-yimceo-ceo-crates-method-yimmenu.html): potential feature inspiration
 
 ### Kiddions Subreddit ([r/Kiddions](https://reddit.com/r/Kiddions))
-
-### JinxScript [Discord found in script](https://discord.gg/hjs5S93kQv)
