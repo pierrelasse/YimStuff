@@ -312,9 +312,53 @@ return (function()
             if type(ent) ~= "number" or ent == 0 then
                 return false
             end
-            local success, result = pcall(ENTITY.DOES_ENTITY_EXIST, ent)
-            return success and result == true
+            return ENTITY.DOES_ENTITY_EXIST(ent)
         end
+
+        api.load_ground_at_coord = function(rs, pos)
+            local done = false
+
+            for i = 0, 9 do
+                for z = 0, 975, 25 do
+                    local groundIter = z
+
+                    if i >= 1 and z % 100 == 0 then
+                        STREAMING.REQUEST_COLLISION_AT_COORD(pos.x, pos.y, groundIter)
+                        rs:yield()
+                    end
+
+                    local retval, groundZ = MISC.GET_GROUND_Z_FOR_3D_COORD(pos.x, pos.y, groundIter, false, false)
+                    if retval then
+                        pos.z = groundZ + 1
+                        done = true
+                    end
+                end
+
+                local height
+                if done and WATER.GET_WATER_HEIGHT(pos.x, pos.y, pos.z, height) then
+                    pos.z = height + 1
+                end
+
+                if done then
+                    return true
+                end
+            end
+
+            pos.z = 1000
+
+            return false
+        end
+
+        api.get_free_vehicle_seat = function(veh)
+            if not ENTITY.IS_ENTITY_A_VEHICLE(veh) then
+                return nil
+            end
+            for i = -1, VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(veh) - 1 do
+                if VEHICLE.IS_VEHICLE_SEAT_FREE(veh, i) then
+                    return i
+                end
+            end
+        end        
     end
 
     local function initStats()
