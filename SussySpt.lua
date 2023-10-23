@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1590,
+    versionid = 1627,
 
     doInit = true,
     doDebug = false,
@@ -523,7 +523,7 @@ function SussySpt:init()
                     damage or 1,
                     true,
                     weaponHash,
-                    ped or yu.ppid(),
+                    yu.ppid(),
                     true,
                     false,
                     speed or -1
@@ -615,6 +615,23 @@ function SussySpt:init()
 
                             ImGui.SameLine()
 
+                            if ImGui.SmallButton("Tp into vehicle") then
+                                yu.rif(function(rs)
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil then
+                                        local seatIndex = yu.get_free_vehicle_seat(veh)
+                                        if seatIndex ~= nil then
+                                            local c = ENTITY.GET_ENTITY_COORDS(veh)
+                                            yu.load_ground_at_coord(rs, c)
+                                            local ped = yu.ppid()
+                                            ENTITY.SET_ENTITY_COORDS(ped, c.x, c.y, c.z, false, false, false, false)
+                                            rs:yield()
+                                            PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
+                                        end
+                                    end
+                                end)
+                            end
+
                             if ImGui.SmallButton("Set waypoint") then
                                 yu.rif(function()
                                     local c = ENTITY.GET_ENTITY_COORDS(player.ped)
@@ -660,7 +677,7 @@ function SussySpt:init()
                         if ImGui.TreeNodeEx("Trolling") then
                             if ImGui.SmallButton("Taze") then
                                 yu.rif(function(rs)
-                                    shootPlayer(rs, player.ped, joaat("WEAPON_STUNGUN"), 2)
+                                    shootPlayer(rs, player.ped, joaat("weapon_stungun"), 0)
                                 end)
                             end
 
@@ -1156,12 +1173,47 @@ function SussySpt:init()
                             if ImGui.SmallButton("Kick from vehicle") then
                                 yu.rif(function()
                                     local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
+                                    if veh ~= nil and entities.take_control_of(veh) then
                                         TASK.TASK_LEAVE_VEHICLE(player.ped, veh, 0)
                                     end
                                 end)
                             end
-                            yu.rendering.tooltip("Meh meh does not work really")
+                            yu.rendering.tooltip("Doesn't work well")
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Flip") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
+                                        rot.y = rot.y + 180
+                                        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Rotate") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
+                                        rot.z = rot.z + 180
+                                        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
+                                    end
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Lock them inside") then
+                                yu.rif(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh ~= nil and entities.take_control_of(veh) then
+                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED(veh, 4)
+                                    end
+                                end)
+                            end
 
                             ImGui.TreePop()
                         end
