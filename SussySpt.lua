@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1627,
+    versionid = 1653,
 
     doInit = true,
     doDebug = false,
@@ -776,6 +776,43 @@ function SussySpt:init()
                                 end)
                             end
 
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Squish") then
+                                yu.rif(function(rs)
+                                    local hash = joaat("khanjali")
+                                    STREAMING.REQUEST_MODEL(hash)
+                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                    local distance = TASK.IS_PED_STILL(player.ped) and 0 or 2.5
+
+                                    local vehicles = {}
+
+                                    for i = 1, 1 do
+                                        local pos = (i == 1) and ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, distance, 2.8) or c
+                                        local heading = (i == 1) and ENTITY.GET_ENTITY_HEADING(player.ped) or 0
+                                        vehicles[i] = networkent(VEHICLE.CREATE_VEHICLE(hash, pos.x, pos.y, pos.z, heading))
+                                    end
+
+                                    for k, v in pairs(vehicles) do
+                                        if k ~= 1 and v ~= nil then
+                                            ENTITY.ATTACH_ENTITY_TO_ENTITY(v, vehicles[1], 0, k == 4 and 0 or 3, k >= 3 and 0, 0, 0, 0, k == 2 and -180 or 0, 0, false, true, false, 0, true)
+                                        end
+                                        ENTITY.SET_ENTITY_VISIBLE(v, false)
+                                        ENTITY.SET_ENTITY_ALPHA(v, 0, true)
+                                    end
+                                    ENTITY.APPLY_FORCE_TO_ENTITY(vehicles[1], 1, 0, 0, -10, 0, 0, 0, 0, true, true, true, false, true)
+
+                                    rs:sleep(5000)
+
+                                    for k, v in pairs(vehicles) do
+                                        ENTITY.DELETE_ENTITY(v)
+                                    end
+                                end)
+                            end
+                            yu.rendering.tooltip("This even kills godmode players but it requires them\nto have no ragdoll turned off.")
+
                             ImGui.Text("Explode:")
                             do
                                 ImGui.SameLine()
@@ -1336,6 +1373,22 @@ function SussySpt:init()
             end)
         end)()
 
+        -- do
+        --     tab.sub[3] = (function()
+        --         return SussySpt.rendering.new_tab("Session", function()
+        --             yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
+        --                 if state then
+        --                     NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
+        --                 else
+        --                     NETWORK.NETWORK_END_TUTORIAL_SESSION()
+        --                 end
+        --                 yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
+        --             end)
+        --             yu.rendering.tooltip("This really just puts the players client-side under the map")
+        --         end)
+        --     end)()
+        -- end
+
         SussySpt.rendering.tabs[1] = tab
     end
 
@@ -1555,6 +1608,24 @@ function SussySpt:init()
                 end
             end)
         end)()
+
+        -- tab.sub[4] = (function()
+        --     yu.rif(function(rs)
+        --         while true do
+        --             if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
+        --                 for k, v in pairs(entities.get_all_peds_as_handles()) do
+        --                     PED.SET_PED_SEEING_RANGE(v, 0)
+        --                 end
+        --             end
+
+        --             rs:sleep(2)
+        --         end
+        --     end)
+
+        --     return SussySpt.rendering.new_tab("Peds", function()
+        --         yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
+        --     end)
+        -- end)()
 
         SussySpt.rendering.tabs[2] = tab
     end
