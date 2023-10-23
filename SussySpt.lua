@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1664,
+    versionid = 1683,
 
     doInit = true,
     doDebug = false,
@@ -106,7 +106,7 @@ function SussySpt:init()
         tabs = {}
     }
 
-    SussySpt.rendering.theme = "Nightly"
+    SussySpt.rendering.theme = "Purple"
     SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
 
     SussySpt.rendering.get_theme = function()
@@ -658,6 +658,10 @@ function SussySpt:init()
                             end
                             yu.rendering.tooltip("Does not work well / teleports them under the map")
 
+                            if ImGui.SmallButton("Mark as modder") then
+                                network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, "Marked as modder by the user")
+                            end
+
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                                 yu.rif(function()
                                     for k, v in pairs(a.players) do
@@ -978,7 +982,7 @@ function SussySpt:init()
                         end
 
                         if ImGui.TreeNodeEx("Weapons") then
-                            if ImGui.Button("Remove all weapons") then
+                            if ImGui.SmallButton("Remove all weapons") then
                                 yu.rif(function()
                                     WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
                                     for k, v in pairs(yu.get_all_weapons()) do
@@ -986,6 +990,7 @@ function SussySpt:init()
                                     end
                                 end)
                             end
+                            yu.rendering.tooltip("Most of them.\nThis will be fixed when yimmenu finally allows access to the cache...")
 
                             ImGui.Text("Parachute:")
                             ImGui.SameLine()
