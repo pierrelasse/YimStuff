@@ -6,6 +6,8 @@
         "ImGuiStyleVar",
         "ImGuiInputTextFlags",
 
+        "infraction",
+
         "command",
         "entities",
         "event",
