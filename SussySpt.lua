@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1653,
+    versionid = 1664,
 
     doInit = true,
     doDebug = false,
@@ -378,6 +378,11 @@ function SussySpt:init()
                     v.tooltip = emptystr
 
                     v.info = {
+                        talking = {
+                            NETWORK.NETWORK_IS_PLAYER_TALKING(v.player),
+                            "T",
+                            "The player is currently screaming or talking in the voicechat"
+                        },
                         modder = {
                             network.is_player_flagged_as_modder(v.player),
                             "M",
@@ -548,6 +553,15 @@ function SussySpt:init()
                 ImGui.Text("Players ("..yu.len(a.players)..")")
 
                 ImGui.PushItemWidth(a.playerlistwidth)
+                local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
+                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                if a.searchtext ~= searchtext then
+                    a.searchtext = searchtext
+                    yu.rif(updatePlayerlistElements)
+                end
+                ImGui.PopItemWidth()
+
+                ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
                     for k, v in pairs(a.players) do
                         if v.display then
@@ -561,15 +575,6 @@ function SussySpt:init()
                     end
 
                     ImGui.EndListBox()
-                end
-                ImGui.PopItemWidth()
-
-                ImGui.PushItemWidth(a.playerlistwidth)
-                local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
-                SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.searchtext ~= searchtext then
-                    a.searchtext = searchtext
-                    yu.rif(updatePlayerlistElements)
                 end
                 ImGui.PopItemWidth()
 
@@ -760,21 +765,13 @@ function SussySpt:init()
                                 end)
                             end
 
-                            if ImGui.SmallButton("Blackscreen") then
-                                yu.rif(function()
-                                    local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
-                                    network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), 1, 4, handle, handle, handle, handle, 1, 1})
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Cutscene loop") then
+                            if ImGui.SmallButton("Spawn animation") then
                                 yu.rif(function()
                                     local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
                                     network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), math.random(0, 114), 4, handle, handle, handle, handle, 1, 1})
                                 end)
                             end
+                            yu.rendering.tooltip("Gives the player a blackscreen,\nthen after some time, it spawns them at a random location.\nSimilar to when you join a session.")
 
                             ImGui.SameLine()
 
@@ -1373,7 +1370,7 @@ function SussySpt:init()
             end)
         end)()
 
-        -- do
+        do
         --     tab.sub[3] = (function()
         --         return SussySpt.rendering.new_tab("Session", function()
         --             yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
@@ -1387,7 +1384,7 @@ function SussySpt:init()
         --             yu.rendering.tooltip("This really just puts the players client-side under the map")
         --         end)
         --     end)()
-        -- end
+        end
 
         SussySpt.rendering.tabs[1] = tab
     end
@@ -1609,23 +1606,25 @@ function SussySpt:init()
             end)
         end)()
 
-        -- tab.sub[4] = (function()
-        --     yu.rif(function(rs)
-        --         while true do
-        --             if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
-        --                 for k, v in pairs(entities.get_all_peds_as_handles()) do
-        --                     PED.SET_PED_SEEING_RANGE(v, 0)
-        --                 end
-        --             end
+        do
+            -- tab.sub[4] = (function()
+            --     yu.rif(function(rs)
+            --         while true do
+            --             if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
+            --                 for k, v in pairs(entities.get_all_peds_as_handles()) do
+            --                     PED.SET_PED_SEEING_RANGE(v, 0)
+            --                 end
+            --             end
 
-        --             rs:sleep(2)
-        --         end
-        --     end)
+            --             rs:sleep(2)
+            --         end
+            --     end)
 
-        --     return SussySpt.rendering.new_tab("Peds", function()
-        --         yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
-        --     end)
-        -- end)()
+            --     return SussySpt.rendering.new_tab("Peds", function()
+            --         yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
+            --     end)
+            -- end)()
+        end
 
         SussySpt.rendering.tabs[2] = tab
     end
