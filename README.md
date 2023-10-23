@@ -23,6 +23,6 @@ You can optionally contact me on discord `dcistdreck`.<br />
 If you like the project and want to let me and others know, you can star the repo!
 
 ## Other
-[Credits](https://github.com/pierrelasse/YimStuff/blob/master/CREDITS.md)
+[Credits](https://github.com/pierrelasse/YimStuff/blob/master/.github/CREDITS.md)
 |
 [License](https://github.com/pierrelasse/YimStuff/blob/master/LICENSE)
