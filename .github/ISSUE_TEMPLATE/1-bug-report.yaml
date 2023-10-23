@@ -43,5 +43,5 @@ body:
     attributes:
       label: Testing Without Scripts
       options:
-        - label: The issue does not occur without any additional scripts
+        - label: The issue does not occur without yimutils and/or SussySpt loaded
           required: false
