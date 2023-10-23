@@ -23,3 +23,5 @@ If you believe your contributions are not properly credited, please feel free to
    - [Yimceo CEO Crates](https://unknowncheats.me/forum/grand-theft-auto-v/591335-yimceo-ceo-crates-method-yimmenu.html): potential feature inspiration
 
 ### Kiddions Subreddit ([r/Kiddions](https://reddit.com/r/Kiddions))
+
+### JinxScript [Discord found in script](https://discord.gg/hjs5S93kQv)
