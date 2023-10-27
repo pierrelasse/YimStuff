@@ -1357,89 +1357,7 @@ function SussySpt:init()
             tab.sub[1] = tab2
         end
 
-        do -- CMM
-            local tab2 = SussySpt.rendering.new_tab("CMM")
-
-            local a = {
-                apps = {
-                    ["appsecuroserv"] = "SecuroServ (Office)",
-                    ["appbusinesshub"] = "Nightclub",
-                    ["appAvengerOperations"] = "Avenger Operations",
-                    ["appfixersecurity"] = "Agency",
-                    ["appinternet"] = "Internet (Phone)",
-                    ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
-                    ["appbunkerbusiness"] = "Bunker Business",
-                    ["apphackertruck"] = "Terrorbyte",
-                    ["appbikerbusiness"] = "The Open Road (MC)",
-                    ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
-                }
-            }
-
-            tab2.render = function()
-                ImGui.Text("Works best when low ping / session host")
-
-                for k, v in pairs(a.apps) do
-                    if ImGui.Button(v) then
-                        yu.rif(function()
-                            run_script(k)
-                        end)
-                    end
-                end
-            end
-
-            tab.sub[2] = tab2
-        end
-
-        do -- Chatlog
-            local tab2 = SussySpt.rendering.new_tab("Chatlog")
-
-            yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
-            yu.rendering.setCheckboxChecked("online_chatlog_console", true)
-            yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
-
-            tab2.render = function()
-                if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
-                    ImGui.Spacing()
-                    yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
-                end
-
-                if SussySpt.chatlog.text ~= nil and ImGui.TreeNodeEx("Logs") then
-                    yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
-
-                    ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
-                    SussySpt.push_disable_controls(ImGui.IsItemActive())
-
-                    ImGui.TreePop()
-                else
-                    ImGui.Spacing()
-                    ImGui.Text("Nothing to show yet")
-                end
-            end
-
-            tab.sub[3] = tab2
-        end
-
-        do -- Session
-            local tab2 = SussySpt.rendering.new_tab("Session")
-
-            tab2.should_display = SussySpt.getDev
-
-            tab2.render = function()
-                yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
-                    if state then
-                        NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
-                    else
-                        NETWORK.NETWORK_END_TUTORIAL_SESSION()
-                    end
-                    yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
-                end)
-                yu.rendering.tooltip("This really just puts the players client-side under the map")
-            end
-
-            tab.sub[4] = tab2
-        end
-
-        do
+        do -- Stats
             local a = {
                 abilities = {
                     "Stamina", "Strength", "Shooting",
@@ -1472,7 +1390,7 @@ function SussySpt:init()
             end
             yu.rif(refresh)
 
-            tab.sub[4] = (function()
+            tab.sub[2] = (function()
                 return SussySpt.rendering.new_tab("Stats", function()
                     if ImGui.TreeNodeEx("Abilities") then
                         if ImGui.SmallButton("Refresh##abilities") then
@@ -1533,6 +1451,88 @@ function SussySpt:init()
                     end
                 end)
             end)()
+        end
+
+        do -- Chatlog
+            local tab2 = SussySpt.rendering.new_tab("Chatlog")
+
+            yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
+            yu.rendering.setCheckboxChecked("online_chatlog_console", true)
+            yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
+
+            tab2.render = function()
+                if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
+                    ImGui.Spacing()
+                    yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
+                end
+
+                if SussySpt.chatlog.text ~= nil and ImGui.TreeNodeEx("Logs") then
+                    yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
+
+                    ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
+
+                    ImGui.TreePop()
+                else
+                    ImGui.Spacing()
+                    ImGui.Text("Nothing to show yet")
+                end
+            end
+
+            tab.sub[3] = tab2
+        end
+
+        do -- CMM
+            local tab2 = SussySpt.rendering.new_tab("CMM")
+
+            local a = {
+                apps = {
+                    ["appsecuroserv"] = "SecuroServ (Office)",
+                    ["appbusinesshub"] = "Nightclub",
+                    ["appAvengerOperations"] = "Avenger Operations",
+                    ["appfixersecurity"] = "Agency",
+                    ["appinternet"] = "Internet (Phone)",
+                    ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
+                    ["appbunkerbusiness"] = "Bunker Business",
+                    ["apphackertruck"] = "Terrorbyte",
+                    ["appbikerbusiness"] = "The Open Road (MC)",
+                    ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
+                }
+            }
+
+            tab2.render = function()
+                ImGui.Text("Works best when low ping / session host")
+
+                for k, v in pairs(a.apps) do
+                    if ImGui.Button(v) then
+                        yu.rif(function()
+                            run_script(k)
+                        end)
+                    end
+                end
+            end
+
+            tab.sub[4] = tab2
+        end
+
+        do -- Session
+            local tab2 = SussySpt.rendering.new_tab("Session")
+
+            tab2.should_display = SussySpt.getDev
+
+            tab2.render = function()
+                yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
+                    if state then
+                        NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
+                    else
+                        NETWORK.NETWORK_END_TUTORIAL_SESSION()
+                    end
+                    yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
+                end)
+                yu.rendering.tooltip("This really just puts the players client-side under the map")
+            end
+
+            tab.sub[5] = tab2
         end
 
         SussySpt.rendering.tabs[1] = tab
