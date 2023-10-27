@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1683,
+    versionid = 1704,
 
     doInit = true,
     doDebug = false,
@@ -214,7 +214,7 @@ function SussySpt:init()
     end
 
     SussySpt.tick = function()
-        SussySpt.in_online = yu.is_script_running("freemode")
+        SussySpt.in_online = NETWORK.NETWORK_IS_SESSION_STARTED() == true
 
         if SussySpt.invisible == true then
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
@@ -283,7 +283,7 @@ function SussySpt:init()
         local tab = SussySpt.rendering.new_tab("Online")
 
         tab.should_display = function()
-            return SussySpt.in_online
+            return SussySpt.in_online or yu.len(SussySpt.players) >= 2
         end
 
         local function networkent(ent)
@@ -354,7 +354,7 @@ function SussySpt:init()
             SussySpt.online_players_a = a
 
             local function updatePlayerlistElements()
-                for k, v in pairs(a.players) do
+                for k, v in pairs(SussySpt.players) do
                     v.display = k:contains(a.searchtext:lowercase())
                 end
             end
@@ -362,7 +362,7 @@ function SussySpt:init()
             local emptystr = ""
 
             local function refreshPlayerlist()
-                a.players = {}
+                SussySpt.players = {}
                 local players = yu.get_all_players()
                 if type(players) ~= "table" then
                     return
@@ -500,7 +500,7 @@ function SussySpt:init()
 
                     v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
                     v.tooltip = v.tooltip:replace("  ", " ")
-                    a.players[v.name:lowercase()] = v
+                    SussySpt.players[v.name:lowercase()] = v
                 end
 
                 updatePlayerlistElements()
@@ -537,20 +537,15 @@ function SussySpt:init()
 
             yu.rif(function(rs)
                 while true do
-                    if not SussySpt.in_online or DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                        a.selectedplayer = nil
-                        a.players = {}
-                    elseif a.doupdates > 0 then
-                        refreshPlayerlist()
-                    end
-                    rs:sleep(500)
+                    refreshPlayerlist()
+                    rs:sleep(yu.shc(a.doupdates > 0, 250, 1000))
                 end
             end)
 
             tab.sub[1] = SussySpt.rendering.new_tab("Players", function()
                 a.doupdates = 1
                 ImGui.BeginGroup()
-                ImGui.Text("Players ("..yu.len(a.players)..")")
+                ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
 
                 ImGui.PushItemWidth(a.playerlistwidth)
                 local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
@@ -563,7 +558,7 @@ function SussySpt:init()
 
                 ImGui.PushItemWidth(a.playerlistwidth)
                 if ImGui.BeginListBox("##playerlist") then
-                    for k, v in pairs(a.players) do
+                    for k, v in pairs(SussySpt.players) do
                         if v.display then
                             if ImGui.Selectable(v.displayName, false) then
                                 a.selectedplayer = v.name
@@ -583,7 +578,7 @@ function SussySpt:init()
                 if a.selectedplayer ~= nil then
                     local player
                     a.splayer = nil
-                    for k, v in pairs(a.players) do
+                    for k, v in pairs(SussySpt.players) do
                         if v.name == a.selectedplayer then
                             player = v
                             a.splayer = player
@@ -664,7 +659,7 @@ function SussySpt:init()
 
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
                                 yu.rif(function()
-                                    for k, v in pairs(a.players) do
+                                    for k, v in pairs(SussySpt.players) do
                                         if v.ped ~= player.ped then
                                             if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
                                                 NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
@@ -1391,6 +1386,52 @@ function SussySpt:init()
         --     end)()
         end
 
+        do
+            local a = {
+                abilities = {
+                    "Stamina", "Strength", "Shooting",
+                    "Stealth", "Flying", "Driving",
+                    "Diving", "Mental State"
+                },
+                abilitystats = {
+                    "STAMINA", "STRENGTH", "SHOOTING_ABILITY",
+                    "STEALTH_ABILITY", "FLYING_ABILITY",
+                    "WHEELIE_ABILITY", "LUNG_CAPACITY",
+                    "PLAYER_MENTAL_STATE"
+                },
+                abilitiyvalues = {}
+            }
+
+            local function refreshAbilityValues()
+                local mpx = yu.mpx()
+                for k, v in pairs(a.abilitystats) do
+                    if k == 8 then
+                        a.abilitiyvalues[k] = stats.get_float(mpx..v)
+                    else
+                        a.abilitiyvalues[k] = stats.get_int(mpx..v)
+                    end
+                end
+            end
+
+            local function refresh()
+                refreshAbilityValues()
+            end
+            yu.rif(refresh)
+
+            tab.sub[4] = (function()
+                return SussySpt.rendering.new_tab("Stats", function()
+                    if ImGui.TreeNodeEx("Abilities") then
+
+                        for k, v in pairs(a.abilities) do
+                            ImGui.Text(v..": "..a.abilitiyvalues[k])
+                        end
+
+                        ImGui.TreePop()
+                    end
+                end)
+            end)()
+        end
+
         SussySpt.rendering.tabs[1] = tab
     end
 
@@ -1694,7 +1735,7 @@ function SussySpt:init()
             rs:yield()
             if yu.rendering.isCheckboxChecked("config_esp_enabled") and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
                 local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                for k, v in pairs(SussySpt.online_players_a.players) do
+                for k, v in pairs(SussySpt.online_players_SussySpt.players) do
                     local ped = v.ped
                     local c = ENTITY.GET_ENTITY_COORDS(ped)
                     local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
