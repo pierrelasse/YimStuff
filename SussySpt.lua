@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1704,
+    versionid = 1733,
 
     doInit = true,
     doDebug = false,
@@ -24,6 +24,11 @@ function SussySpt:init()
         return
     end
     SussySpt.doInit = nil
+
+    SussySpt.dev = false
+    SussySpt.getDev = function()
+        return SussySpt.dev
+    end
 
     SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."]")
 
@@ -279,7 +284,7 @@ function SussySpt:init()
         end
     end)
 
-    do
+    do -- Online
         local tab = SussySpt.rendering.new_tab("Online")
 
         tab.should_display = function()
@@ -305,7 +310,9 @@ function SussySpt:init()
             end
         end
 
-        do
+        do -- Players
+            local tab2 = SussySpt.rendering.new_tab("Players")
+
             local a = {
                 playerlistwidth = 211,
                 searchtext = "",
@@ -542,7 +549,7 @@ function SussySpt:init()
                 end
             end)
 
-            tab.sub[1] = SussySpt.rendering.new_tab("Players", function()
+            tab2.render = function()
                 a.doupdates = 1
                 ImGui.BeginGroup()
                 ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
@@ -1345,15 +1352,52 @@ function SussySpt:init()
 
                     ImGui.EndGroup()
                 end
-            end)
+            end
+
+            tab.sub[1] = tab2
         end
 
-        tab.sub[2] = (function()
+        do -- CMM
+            local tab2 = SussySpt.rendering.new_tab("CMM")
+
+            local a = {
+                apps = {
+                    ["appsecuroserv"] = "SecuroServ (Office)",
+                    ["appbusinesshub"] = "Nightclub",
+                    ["appAvengerOperations"] = "Avenger Operations",
+                    ["appfixersecurity"] = "Agency",
+                    ["appinternet"] = "Internet (Phone)",
+                    ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
+                    ["appbunkerbusiness"] = "Bunker Business",
+                    ["apphackertruck"] = "Terrorbyte",
+                    ["appbikerbusiness"] = "The Open Road (MC)",
+                    ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
+                }
+            }
+
+            tab2.render = function()
+                ImGui.Text("Works best when low ping / session host")
+
+                for k, v in pairs(a.apps) do
+                    if ImGui.Button(v) then
+                        yu.rif(function()
+                            run_script(k)
+                        end)
+                    end
+                end
+            end
+
+            tab.sub[2] = tab2
+        end
+
+        do -- Chatlog
+            local tab2 = SussySpt.rendering.new_tab("Chatlog")
+
             yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
             yu.rendering.setCheckboxChecked("online_chatlog_console", true)
             yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
 
-            return SussySpt.rendering.new_tab("Chatlog", function()
+            tab2.render = function()
                 if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
                     ImGui.Spacing()
                     yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
@@ -1366,24 +1410,33 @@ function SussySpt:init()
                     SussySpt.push_disable_controls(ImGui.IsItemActive())
 
                     ImGui.TreePop()
+                else
+                    ImGui.Spacing()
+                    ImGui.Text("Nothing to show yet")
                 end
-            end)
-        end)()
+            end
 
-        do
-        --     tab.sub[3] = (function()
-        --         return SussySpt.rendering.new_tab("Session", function()
-        --             yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
-        --                 if state then
-        --                     NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
-        --                 else
-        --                     NETWORK.NETWORK_END_TUTORIAL_SESSION()
-        --                 end
-        --                 yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
-        --             end)
-        --             yu.rendering.tooltip("This really just puts the players client-side under the map")
-        --         end)
-        --     end)()
+            tab.sub[3] = tab2
+        end
+
+        do -- Session
+            local tab2 = SussySpt.rendering.new_tab("Session")
+
+            tab2.should_display = SussySpt.getDev
+
+            tab2.render = function()
+                yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
+                    if state then
+                        NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
+                    else
+                        NETWORK.NETWORK_END_TUTORIAL_SESSION()
+                    end
+                    yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
+                end)
+                yu.rendering.tooltip("This really just puts the players client-side under the map")
+            end
+
+            tab.sub[4] = tab2
         end
 
         do
@@ -1398,12 +1451,13 @@ function SussySpt:init()
                     "STEALTH_ABILITY", "FLYING_ABILITY",
                     "WHEELIE_ABILITY", "LUNG_CAPACITY",
                     "PLAYER_MENTAL_STATE"
-                },
-                abilitiyvalues = {}
+                }
             }
 
             local function refreshAbilityValues()
                 local mpx = yu.mpx()
+                a.abilitiyvalues = {}
+                a.abilitiynewvalues = {}
                 for k, v in pairs(a.abilitystats) do
                     if k == 8 then
                         a.abilitiyvalues[k] = stats.get_float(mpx..v)
@@ -1421,9 +1475,58 @@ function SussySpt:init()
             tab.sub[4] = (function()
                 return SussySpt.rendering.new_tab("Stats", function()
                     if ImGui.TreeNodeEx("Abilities") then
+                        if ImGui.SmallButton("Refresh##abilities") then
+                            yu.rif(refreshAbilityValues)
+                        end
 
+                        ImGui.Spacing()
+
+                        ImGui.PushItemWidth(331)
                         for k, v in pairs(a.abilities) do
-                            ImGui.Text(v..": "..a.abilitiyvalues[k])
+                            local newValue, changed = ImGui.DragInt(v, a.abilitiynewvalues[k] or a.abilitiyvalues[k], .2, 0, 100, "%d", 5)
+                            if changed then
+                                a.abilitiynewvalues[k] = newValue
+                            end
+
+                            if a.abilitiynewvalues[k] ~= nil then
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Apply##abilities_"..k) then
+                                    yu.rif(function()
+                                        local stat = yu.mpx(a.abilitystats[k])
+                                        if k == 8 then
+                                            stats.set_float(stat, a.abilitiynewvalues[k])
+                                        else
+                                            stats.set_int(stat, a.abilitiynewvalues[k])
+                                        end
+                                        refreshAbilityValues()
+                                    end)
+                                end
+                            end
+                        end
+                        ImGui.PopItemWidth()
+
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Badsport") then
+                        if ImGui.SmallButton("Add##badsport") then
+                            yu.rif(function()
+                                stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                                stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                            end)
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.SmallButton("Remove##badsport") then
+                            yu.rif(function()
+                                stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                                stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                            end)
                         end
 
                         ImGui.TreePop()
@@ -1435,7 +1538,7 @@ function SussySpt:init()
         SussySpt.rendering.tabs[1] = tab
     end
 
-    do
+    do -- World
         local tab = SussySpt.rendering.new_tab("World")
 
         tab.sub[1] = (function()
@@ -1675,16 +1778,20 @@ function SussySpt:init()
         SussySpt.rendering.tabs[2] = tab
     end
 
-    do
+    do -- Config
         local tab = SussySpt.rendering.new_tab("Config")
 
         tab.sub[1] = SussySpt.rendering.new_tab("Info", function()
             ImGui.Text("Made by pierrelasse.")
             ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
+
             ImGui.Spacing()
+
             ImGui.Text("SussySpt version: "..SussySpt.version)
             ImGui.Text("SussySpt version id: "..SussySpt.versionid)
+
             ImGui.Spacing()
+
             ImGui.Text("Theme: "..SussySpt.rendering.theme)
             ImGui.PushItemWidth(265)
             if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
@@ -1697,12 +1804,22 @@ function SussySpt:init()
                 ImGui.EndCombo()
             end
             ImGui.PopItemWidth()
+
             ImGui.Spacing()
+
             if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
                 ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
                 ImGui.TreePop()
             end
+
             ImGui.Spacing()
+
+            yu.rendering.renderCheckbox("Dev mode", "dev", function(state)
+                SussySpt.dev = state
+            end)
+
+            ImGui.Spacing()
+
             if ImGui.Button("Go airplane mode :)") then
                 yu.add_task(function()
                     STREAMING.REQUEST_ANIM_DICT("missfbi1")
@@ -2582,31 +2699,6 @@ function SussySpt:initTabSelf()
                         ImGui.Separator()
 
                         renderCrewRank()
-
-                        ImGui.EndTabItem()
-                    end
-
-                    if ImGui.BeginTabItem("CMM") then
-                        ImGui.Text("Works best when low ping / session host")
-
-                        for k, v in pairs({
-                            ["appsecuroserv"] = "SecuroServ (Office)",
-                            ["appbusinesshub"] = "Nightclub",
-                            ["appAvengerOperations"] = "Avenger Operations",
-                            ["appfixersecurity"] = "Agency",
-                            ["appinternet"] = "Internet (Phone)",
-                            ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
-                            ["appbunkerbusiness"] = "Bunker Business",
-                            ["apphackertruck"] = "Terrorbyte",
-                            ["appbikerbusiness"] = "The Open Road (MC)",
-                            ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
-                        }) do
-                            if ImGui.Button(v) then
-                                yu.add_task(function()
-                                    run_script(k)
-                                end)
-                            end
-                        end
 
                         ImGui.EndTabItem()
                     end
