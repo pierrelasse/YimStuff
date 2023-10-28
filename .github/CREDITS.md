@@ -11,6 +11,7 @@ If you believe your contributions are not properly credited, please feel free to
    - [Prisuhm/JinxScript](https://github.com/Prisuhm/JinxScript): potential feature inspiration
    - [Pocakking/GTAV-1.50-Scripts](https://github.com/Pocakking/GTAV-1.50-Scripts): Online->Players's pickup spawner made possible
    - [IceDoomfist/Stand-Heist-Control](https://github.com/IceDoomfist/Stand-Heist-Control): potential feature inspiration
+   - [sch-lda](https://github.com/sch-lda)
    - [XxpichoclesxX/GtaVScripts](https://github.com/XxpichoclesxX/GtaVScripts): potential feature inspiration
    - [Originns/luamenus](https://github.com/Originns/luamenus): potential feature inspiration
    - [CSY0N/CsyonSubMenu](https://github.com/CSY0N/CsyonSubMenu): potential feature inspiration
@@ -23,5 +24,6 @@ If you believe your contributions are not properly credited, please feel free to
 ### UnknownCheats ([unknowncheats.me](https://unknowncheats.me)):
    - [Grand Theft Auto V Section](https://unknowncheats.me/forum/grand-theft-auto-v): potential feature inspiration
    - [Yimceo CEO Crates](https://unknowncheats.me/forum/grand-theft-auto-v/591335-yimceo-ceo-crates-method-yimmenu.html): potential feature inspiration
+   - [book4](https://www.unknowncheats.me/forum/members/2505795.html)
 
 ### Kiddions Subreddit ([r/Kiddions](https://reddit.com/r/Kiddions))

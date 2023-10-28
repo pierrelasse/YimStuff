@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.7",
-    versionid = 1733,
+    versionid = 1743,
 
     doInit = true,
     doDebug = false,
@@ -109,6 +109,17 @@ function SussySpt:init()
             }
         },
         tabs = {}
+    }
+
+    SussySpt.globals = {
+        bounty_self_value = 1 + 2359296 + 5150 + 14,
+        bounty_self_time = 1 + 2359296 + 5150 + 13,
+        bounty_other_amount = function(pid)
+            return 1 + 1895156 + (pid * 609) + 600
+        end,
+        bounty_other_by = function(pid)
+            return 1 + 1895156 + (pid * 609) + 601
+        end
     }
 
     SussySpt.rendering.theme = "Purple"
@@ -368,17 +379,17 @@ function SussySpt:init()
 
             local emptystr = ""
 
-            local function refreshPlayerlist()
-                SussySpt.players = {}
-                local players = yu.get_all_players()
-                if type(players) ~= "table" then
+            local function refreshPlayerlist(updateInfo)
+                SussySpt.players = yu.get_all_players()
+
+                if not updateInfo then
                     return
                 end
 
                 local selfppid = yu.ppid()
                 local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
-                for k, v in pairs(players) do
+                for k, v in pairs(SussySpt.players) do
                     local startTime = yu.cputms()
 
                     v.noped = type(v.ped) ~= "number" or v.ped == 0
@@ -507,7 +518,8 @@ function SussySpt:init()
 
                     v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
                     v.tooltip = v.tooltip:replace("  ", " ")
-                    SussySpt.players[v.name:lowercase()] = v
+
+                    SussySpt.players[k] = v
                 end
 
                 updatePlayerlistElements()
@@ -544,7 +556,7 @@ function SussySpt:init()
 
             yu.rif(function(rs)
                 while true do
-                    refreshPlayerlist()
+                    refreshPlayerlist(a.doupdates > 0)
                     rs:sleep(yu.shc(a.doupdates > 0, 250, 1000))
                 end
             end)
@@ -1449,6 +1461,16 @@ function SussySpt:init()
 
                         ImGui.TreePop()
                     end
+
+                    if ImGui.TreeNodeEx("Bounty") then
+                        if ImGui.Button("Remove bounty") then
+                            yu.rif(function()
+                                globals.set_int(SussySpt.globals.bounty_self_time, 2880000)
+                            end)
+                        end
+
+                        ImGui.TreePop()
+                    end
                 end)
             end)()
         end
@@ -1816,6 +1838,7 @@ function SussySpt:init()
 
             yu.rendering.renderCheckbox("Dev mode", "dev", function(state)
                 SussySpt.dev = state
+                SussySpt.debug(yu.shc(state, "En", "Dis").."abled dev mode")
             end)
 
             ImGui.Spacing()
