@@ -688,6 +688,9 @@ return (function()
         end
 
         api.rendering.setCheckboxChecked = function(id, value)
+            if value == nil then
+                value = true
+            end
             data.rendering.checkboxstates[id] = {
                 state = value,
                 oldstate = value
