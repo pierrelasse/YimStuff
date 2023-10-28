@@ -11,7 +11,7 @@ Everything here is made to work with [YimMenu](https://github.com/YimMenu/YimMen
  * [Other](#other)
 
 ## Quick installation
-- Download [yimutils.lua](https://github.com/pierrelasse/YimStuff/releases/download/1.3.7/yimutils.lua) and optionally [SussySpt.lua](https://github.com/pierrelasse/YimStuff/releases/download/1.3.7/SussySpt.lua) too and put them into your scripts folder `%appdata%/YimMenu/scripts`
+- Download [yimutils.lua](https://github.com/pierrelasse/YimStuff/releases/download/1.3.8/yimutils.lua) and optionally [SussySpt.lua](https://github.com/pierrelasse/YimStuff/releases/download/1.3.8/SussySpt.lua) too and put them into your scripts folder `%appdata%/YimMenu/scripts`
 - Ensure you have yimutils installed.
 - Go to `Settings->Lua Scripts` and press `Reload All`
 - Enjoy. See [Table of contents](#table-of-contents) for more info.
