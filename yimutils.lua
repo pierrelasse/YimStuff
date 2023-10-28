@@ -459,7 +459,7 @@ return (function()
             for i = 0, 32 do
                 local name = PLAYER.GET_PLAYER_NAME(i)
                 if type(name) == "string" and name ~= "**Invalid**" then
-                    players[name] = {
+                    players[name:lowercase()] = {
                         player = i,
                         ped = PLAYER.GET_PLAYER_PED(i),
                         name = name
