@@ -71,6 +71,7 @@
         "ZONE"
     ],
     "Lua.diagnostics.disable": [
-        "lowercase-global"
+        "lowercase-global",
+        "redefined-local"
     ]
 }
