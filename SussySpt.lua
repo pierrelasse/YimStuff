@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1766,
+    versionid = 1768,
 
     doInit = true,
     doDebug = false,
@@ -4304,13 +4304,6 @@ function SussySpt:initTabHBO()
             end
         end
 
-        local function refillStorage(k)
-            yu.add_task(function()
-                stats.set_int(yu.mpx("HUB_PROD_TOTAL_"..k), a.storages[k][3])
-                refresh()
-            end)
-        end
-
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
@@ -4368,7 +4361,7 @@ function SussySpt:initTabHBO()
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Storage")
 
-                if ImGui.BeginTable("##storage_table", 4, 3905) then
+                if ImGui.BeginTable("##storage_table", 3, 3905) then
                     ImGui.TableSetupColumn("Goods")
                     ImGui.TableSetupColumn("Stock")
                     ImGui.TableSetupColumn("Stock price")
@@ -4388,10 +4381,6 @@ function SussySpt:initTabHBO()
                             ImGui.Text(storage[1])
                             ImGui.TableSetColumnIndex(2)
                             ImGui.Text(storage[2])
-                            ImGui.TableSetColumnIndex(3)
-                            if ImGui.SmallButton("Refill##storage") then
-                                refillStorage(k)
-                            end
                             ImGui.PopID()
                             row = row + 1
                         end
