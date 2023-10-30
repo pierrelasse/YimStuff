@@ -1,7 +1,7 @@
 Credits
 =======
 
-If you believe your contributions are not properly credited, please feel free to open an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).
+If you believe that something is not properly credited, please feel free to open an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).
 
 ### Github
    - [YimMenu/YimMenu](https://github.com/YimMenu/YimMenu): potential code inspiration
@@ -20,6 +20,7 @@ If you believe your contributions are not properly credited, please feel free to
    - [#lua-scripts](https://discord.com/channels/872637249081180222/935720668270579763/1150764224767873105)
    - [Diamond Casino cloth unlocker ("Dimond casino cloth unlocker!'")](https://discord.com/channels/872637249081180222/935720668270579763/1150483595023106108): feature copy
    - [Doomsday script?](https://discord.com/channels/872637249081180222/935720668270579763/1143939943450816613): potential feature inspiration
+   - [Jack O' Lantern](https://discord.com/channels/872637249081180222/1168197091235987477/1168236400244699196)
 
 ### UnknownCheats ([unknowncheats.me](https://unknowncheats.me)):
    - [Grand Theft Auto V Section](https://unknowncheats.me/forum/grand-theft-auto-v): potential feature inspiration

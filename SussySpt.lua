@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1761,
+    versionid = 1766,
 
     doInit = true,
     doDebug = false,
@@ -111,7 +111,7 @@ function SussySpt:init()
         tabs = {}
     }
 
-    SussySpt.globals = {
+    SussySpt.pointers = {
         bounty_self_value = 1 + 2359296 + 5150 + 14,
         bounty_self_time = 1 + 2359296 + 5150 + 13,
         bounty_other_amount = function(pid)
@@ -120,7 +120,9 @@ function SussySpt:init()
         bounty_other_by = function(pid)
             return 1 + 1895156 + (pid * 609) + 601
         end,
-        tunables_rpmultiplier = 262146
+        tunables_rpmultiplier = 262146,
+        halloween_unlock = 2765084 + 591,
+        halloween_pumpkin_picked_up = 2765084 + 591
     }
 
     SussySpt.rendering.theme = "Purple"
@@ -1466,8 +1468,50 @@ function SussySpt:init()
                     if ImGui.TreeNodeEx("Bounty") then
                         if ImGui.SmallButton("Remove bounty") then
                             yu.rif(function()
-                                globals.set_int(SussySpt.globals.bounty_self_time, 2880000)
+                                globals.set_int(SussySpt.pointers.bounty_self_time, 2880000)
                             end)
+                        end
+
+                        ImGui.TreePop()
+                    end
+
+                    if ImGui.TreeNodeEx("Jack O' Lantern") then
+                        if ImGui.SmallButton("Unlock Mask") then
+                            yu.rif(function()
+                                globals.set_int(SussySpt.pointers.halloween_unlock, 9)
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock T-Shirt") then
+                            yu.rif(function()
+                                globals.set_int(SussySpt.pointers.halloween_unlock, 199)
+                            end)
+                        end
+
+                        ImGui.Spacing()
+
+                        do
+                            ImGui.PushItemWidth(150)
+                            local resp = yu.rendering.input("int", {
+                                label = "##pumpkin",
+                                value = a.pumpkinspickedup or 1
+                            })
+                            ImGui.PopItemWidth()
+                            if resp ~= nil and resp.changed then
+                                a.pumpkinspickedup = resp.value
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Set") then
+                                yu.rif(function()
+                                    if yu.is_num_between(a.pumpkinspickedup, 0, 199) then
+                                        globals.set_int(SussySpt.pointers.halloween_pumpkin_picked_up, a.pumpkinspickedup)
+                                    else
+                                        yu.notify(3, "Invalid number! Number must be between 0 and 199", "Online->Stats")
+                                    end
+                                end)
+                            end
                         end
 
                         ImGui.TreePop()
@@ -2128,7 +2172,7 @@ function SussySpt:init()
             local a = {}
 
             local function refreshRPMultiplier()
-                a.rpmultiplier = globals.get_float(SussySpt.globals.tunables_rpmultiplier)
+                a.rpmultiplier = globals.get_float(SussySpt.pointers.tunables_rpmultiplier)
             end
 
             local function refresh()
@@ -2157,7 +2201,7 @@ function SussySpt:init()
 
                     if ImGui.Button("Apply##rpmultiplier") then
                         yu.add_task(function()
-                            globals.set_float(SussySpt.globals.tunables_rpmultiplier, a.rpmultiplier)
+                            globals.set_float(SussySpt.pointers.tunables_rpmultiplier, a.rpmultiplier)
                             refreshRPMultiplier()
                         end)
                     end
