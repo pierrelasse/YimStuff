@@ -2622,18 +2622,24 @@ function SussySpt:init()
                 SussySpt.dev = state
                 SussySpt.debug(yu.shc(state, "En", "Dis").."abled dev mode")
             end)
+            yu.rendering.tooltip("This just enables testing and not serious things")
 
-            ImGui.Spacing()
+            if SussySpt.dev then
+                ImGui.Spacing()
 
-            if ImGui.Button("Go airplane mode :)") then
-                yu.add_task(function()
-                    STREAMING.REQUEST_ANIM_DICT("missfbi1")
-                    TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
-                end)
+                if ImGui.Button("Go airplane mode :)") then
+                    yu.add_task(function()
+                        STREAMING.REQUEST_ANIM_DICT("missfbi1")
+                        TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
+                    end)
+                end
             end
         end)
 
         tab.sub[2] = SussySpt.rendering.new_tab("Weird ESP", function()
+            ImGui.Text("This was just a test and is for now nothing real.")
+            ImGui.Text("And yes it is working but there is currently no way to render it above things using natives.")
+            ImGui.Spacing()
             yu.rendering.renderCheckbox("Very cool skeleton esp enabled", "config_esp_enabled")
         end)
 
