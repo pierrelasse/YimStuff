@@ -1,7 +1,9 @@
 Credits
 =======
 
-If you believe that something is not properly credited, please feel free to open an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).
+If you believe that something is not properly credited, please feel free to open an [issue](https://github.com/pierrelasse/YimStuff/issues/new/choose).<br />
+This is just a list of places where stuff can be from.<br />
+This is not 100% and not everything is listed because i started doing this later on.
 
 ### Github
    - [YimMenu/YimMenu](https://github.com/YimMenu/YimMenu): potential code inspiration
@@ -10,6 +12,7 @@ If you believe that something is not properly credited, please feel free to open
    - [L7NEG/Ultimate-Menu](https://github.com/L7NEG/Ultimate-Menu): potential feature inspiration
    - [Prisuhm/JinxScript](https://github.com/Prisuhm/JinxScript): potential feature inspiration
    - [Pocakking/GTAV-1.50-Scripts](https://github.com/Pocakking/GTAV-1.50-Scripts): Online->Players's pickup spawner made possible
+   - [YimMenu-Lua/Alestarov-Menu](https://github.com/YimMenu-Lua/Alestarov-Menu): CMM idea and some others things maybe
    - [IceDoomfist/Stand-Heist-Control](https://github.com/IceDoomfist/Stand-Heist-Control): potential feature inspiration
    - [sch-lda](https://github.com/sch-lda)
    - [XxpichoclesxX/GtaVScripts](https://github.com/XxpichoclesxX/GtaVScripts): potential feature inspiration
