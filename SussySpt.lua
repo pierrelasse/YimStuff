@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1768,
+    versionid = 1774,
 
     doInit = true,
     doDebug = false,
@@ -902,10 +902,26 @@ function SussySpt:init()
                                     end)
                                 end
 
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Rub Cage") then
+                                    yu.rif(function()
+                                        local hash = joaat("prop_rub_cage01a")
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        for i = 0, 1 do
+                                            local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z - 1, true, true, false)
+                                            networkobj(obj)
+                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, 0, yu.shc(i == 0, 0, 90), 2, true)
+                                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                        end
+                                    end)
+                                end
+
                                 if ImGui.SmallButton("Race tube") then
                                     yu.rif(function()
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                         networkobj(obj)
                                         ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
@@ -916,7 +932,7 @@ function SussySpt:init()
                                 if ImGui.SmallButton("Invisible race tube") then
                                     yu.rif(function()
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, false, true)
+                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                         networkobj(obj)
                                         ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
