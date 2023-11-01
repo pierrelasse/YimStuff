@@ -1,4 +1,5 @@
 {
+    "editor.formatOnSave": true,
     "Lua.diagnostics.globals": [
         "ImGuiTableFlags",
         "ImGuiWindowFlags",
@@ -73,5 +74,8 @@
     "Lua.diagnostics.disable": [
         "lowercase-global",
         "redefined-local"
+    ],
+    "commentAnchors.tags.matchPrefix": [
+        "--"
     ]
 }
