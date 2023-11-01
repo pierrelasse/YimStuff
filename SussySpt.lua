@@ -18,7 +18,7 @@ SussySpt = {
 SussySpt.debug("Loading yimutils")
 yu = require("yimutils")
 
-function SussySpt:init()
+function SussySpt:init() -- SECTION SussySpt:init
     if SussySpt.doInit ~= true then
         SussySpt.debug("SussySpt:init() was called after initialization")
         return
@@ -37,6 +37,7 @@ function SussySpt:init()
     SussySpt.tab = gui.get_tab("SussySpt")
 
     SussySpt.in_online = false
+
     SussySpt.rendering = {
         themes = {
             Nightly = {
@@ -298,2424 +299,2442 @@ function SussySpt:init()
         end
     end)
 
-    do -- Online
-        local tab = SussySpt.rendering.new_tab("Online")
+    do -- SECTION Define tabs
+        do -- SECTION Online
+            local tab = SussySpt.rendering.new_tab("Online")
 
-        tab.should_display = function()
-            return SussySpt.in_online or yu.len(SussySpt.players) >= 2
-        end
-
-        local function networkent(ent)
-            if ent and ent ~= 0 and yu.does_entity_exist(ent) then
-                NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
-                local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(ent)
-                NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
-                return ent
+            tab.should_display = function()
+                return SussySpt.in_online or yu.len(SussySpt.players) >= 2
             end
-        end
 
-        local function networkobj(obj)
-            if networkent(obj) ~= nil then
-                local id = NETWORK.OBJ_TO_NET(obj)
-                NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
-                NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
-                NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
-                return obj
-            end
-        end
-
-        do -- Players
-            local tab2 = SussySpt.rendering.new_tab("Players")
-
-            local a = {
-                playerlistwidth = 211,
-                searchtext = "",
-                players = {},
-                doupdates = 0,
-                selectedplayer = nil,
-                selectedplayerinfo = {},
-                ramoptions = {
-                    ["bus"] = "Bus",
-                    ["adder"] = "Adder",
-                    ["monster"] = "Monster",
-                    ["freight"] = "Train",
-                    ["bulldozer"] = "Bulldozer (very cool)",
-                    ["dump"] = "Dump (big)",
-                    ["cutter"] = "Cutter",
-                    ["firetruk"] = "Firetruk"
-                },
-                ramoption = "bus",
-                givecustomweaponammo = 999,
-                pickupoptions = {
-                    ["Casino Playing Card"] = "vw_prop_vw_lux_card_01a",
-                    ["Action Figure - Boxeddoll (Not falling)"] = "bkr_prop_coke_boxeddoll",
-                    ["Action Figure - Sasquatch"] = "vw_prop_vw_colle_sasquatch",
-                    ["Action Figure - Beast"] = "vw_prop_vw_colle_beast",
-                    ["Action Figure - Green guy"] = "vw_prop_vw_colle_rsrgeneric",
-                    ["Action Figure - Other green guy"] = "vw_prop_vw_colle_rsrcomm",
-                    ["Action Figure - Pogo"] = "vw_prop_vw_colle_pogo",
-                    ["Action Figure - UWU"] = "vw_prop_vw_colle_prbubble",
-                    ["Action Figure - Imporage"] = "vw_prop_vw_colle_imporage",
-                    ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
-                },
-                pickupoption = "Action Figure - UWU",
-                pickupamount = 1,
-                cashamount = 1,
-                cashvalue = 100,
-                attachoptions = {
-                    [joaat("prop_beach_fire")] = "Beach fire",
-                    [-2007231801] = "Gas pump",
-                    [joaat("prop_gas_tank_01a")] = "Gas tank",
-                    [joaat("p_spinning_anus_s")] = "Big ufo",
-                    [joaat("prop_ld_toilet_01")] = "Toilet",
-                    [joaat("prop_ld_farm_couch01")] = "Couch",
-                }
-            }
-            a.attachoption = next(a.attachoptions)
-            SussySpt.online_players_a = a
-
-            local function updatePlayerlistElements()
-                for k, v in pairs(SussySpt.players) do
-                    v.display = k:contains(a.searchtext:lowercase())
+            local function networkent(ent)
+                if ent and ent ~= 0 and yu.does_entity_exist(ent) then
+                    NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
+                    local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(ent)
+                    NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
+                    return ent
                 end
             end
 
-            local emptystr = ""
-
-            local function refreshPlayerlist(updateInfo)
-                SussySpt.players = yu.get_all_players()
-
-                if not updateInfo then
-                    return
+            local function networkobj(obj)
+                if networkent(obj) ~= nil then
+                    local id = NETWORK.OBJ_TO_NET(obj)
+                    NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
+                    NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
+                    NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
+                    return obj
                 end
+            end
 
-                local selfppid = yu.ppid()
-                local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
+            do -- ANCHOR Players
+                local tab2 = SussySpt.rendering.new_tab("Players")
 
-                for k, v in pairs(SussySpt.players) do
-                    local startTime = yu.cputms()
-
-                    v.noped = type(v.ped) ~= "number" or v.ped == 0
-                    v.tooltip = emptystr
-
-                    v.info = {
-                        talking = {
-                            NETWORK.NETWORK_IS_PLAYER_TALKING(v.player),
-                            "T",
-                            "The player is currently screaming or talking in the voicechat"
-                        },
-                        modder = {
-                            network.is_player_flagged_as_modder(v.player),
-                            "M",
-                            "This player was detected as a modder"
-                        },
-                        noped = {
-                            v.noped,
-                            "P",
-                            "No character (ped) was found"
-                        }
+                local a = {
+                    playerlistwidth = 211,
+                    searchtext = "",
+                    players = {},
+                    doupdates = 0,
+                    selectedplayer = nil,
+                    selectedplayerinfo = {},
+                    ramoptions = {
+                        ["bus"] = "Bus",
+                        ["adder"] = "Adder",
+                        ["monster"] = "Monster",
+                        ["freight"] = "Train",
+                        ["bulldozer"] = "Bulldozer (very cool)",
+                        ["dump"] = "Dump (big)",
+                        ["cutter"] = "Cutter",
+                        ["firetruk"] = "Firetruk"
+                    },
+                    ramoption = "bus",
+                    givecustomweaponammo = 999,
+                    pickupoptions = {
+                        ["Casino Playing Card"] = "vw_prop_vw_lux_card_01a",
+                        ["Action Figure - Boxeddoll (Not falling)"] = "bkr_prop_coke_boxeddoll",
+                        ["Action Figure - Sasquatch"] = "vw_prop_vw_colle_sasquatch",
+                        ["Action Figure - Beast"] = "vw_prop_vw_colle_beast",
+                        ["Action Figure - Green guy"] = "vw_prop_vw_colle_rsrgeneric",
+                        ["Action Figure - Other green guy"] = "vw_prop_vw_colle_rsrcomm",
+                        ["Action Figure - Pogo"] = "vw_prop_vw_colle_pogo",
+                        ["Action Figure - UWU"] = "vw_prop_vw_colle_prbubble",
+                        ["Action Figure - Imporage"] = "vw_prop_vw_colle_imporage",
+                        ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
+                    },
+                    pickupoption = "Action Figure - UWU",
+                    pickupamount = 1,
+                    cashamount = 1,
+                    cashvalue = 100,
+                    attachoptions = {
+                        [joaat("prop_beach_fire")] = "Beach fire",
+                        [-2007231801] = "Gas pump",
+                        [joaat("prop_gas_tank_01a")] = "Gas tank",
+                        [joaat("p_spinning_anus_s")] = "Big ufo",
+                        [joaat("prop_ld_toilet_01")] = "Toilet",
+                        [joaat("prop_ld_farm_couch01")] = "Couch",
                     }
+                }
+                a.attachoption = next(a.attachoptions)
+                SussySpt.online_players_a = a
 
-                    if not v.noped then
-                        local c = ENTITY.GET_ENTITY_COORDS(v.ped)
-
-                        local vehicle = yu.veh(v.ped)
-                        local vehicleName =
-                            vehicle == nil
-                            and "???"
-                            or VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-
-                        local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
-
-                        local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
-
-                        local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
-                        local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
-                        local armor = PED.GET_PED_ARMOUR(v.ped)
-                        local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
-                        local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
-                        local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
-                        v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
-
-                        v.info.interior = {
-                            interior ~= 0,
-                            "I",
-                            "The player might be in an interior. Interior id: "..interior
-                        }
-                        v.info.vehicle = {
-                            vehicle ~= nil,
-                            "V",
-                            "The player is in a vehicle. "..vehicleName
-                        }
-                        v.info.nocollision = {
-                            collisionDisabled == true and distance < 100 and vehicle == nil,
-                            "C",
-                            "The player doesn't seem to have collision"
-                        }
-                        v.info.noblip = {
-                            v.ped ~= selfppid and v.blip == 0,
-                            "B",
-                            "The player has no blip. In interior/not spawned yet?"
-                        }
-
-                        v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
-
-                        if armor > 0 then
-                            v.tooltip = v.tooltip.."\nArmor: "..string.format("%.0f", armor)
-                        end
-
-                        if distance > 0 then
-                            v.tooltip = v.tooltip.."\nDistance: "..string.format("%.2f", distance).."m"
-
-                            local distanceAboveGround = ENTITY.GET_ENTITY_HEIGHT_ABOVE_GROUND(v.ped)
-                            if distanceAboveGround > 1.5 then
-                                v.tooltip = v.tooltip.."\nDistance above ground: "..string.format("%.2f", distanceAboveGround).."m"
-                            end
-
-                            v.tooltip = v.tooltip.."\nRoad: "..road
-                        end
-
-                        if speed > 0 then
-                            v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
-                        end
-
-                        v.proofs = yu.get_entity_proofs(v.ped)
-                        if v.proofs.success and v.proofs.anytrue then
-                            v.tooltip = v.tooltip.."\nProofs: "
-                            for k1, v1 in pairs(v.proofs.translated) do
-                                if v1 then
-                                    v.tooltip = v.tooltip.." "..k1
-                                end
-                            end
-                        end
-                    end
-
-                    v.infoChar = emptystr
-                    local doInfoHeader = true
-                    for k1, v1 in pairs(v.info) do
-                        if v1[1] == true then
-                            if doInfoHeader then
-                                if not v.noped then
-                                    v.tooltip = v.tooltip.."\n\n"
-                                end
-                                v.tooltip = v.tooltip.."Weird chars behind name:"
-                                doInfoHeader = false
-                            end
-                            v.infoChar = v.infoChar..v1[2]
-                            v.tooltip = v.tooltip.."\n  - "..v1[2]..": "..v1[3]
-                        end
-                    end
-                    v.displayName = doInfoHeader and v.name or v.name.." ["..v.infoChar.."]"
-
-                    v.tooltip = v.tooltip
-                        .."\n\nFor nerds:"
-                        .."\n  - Player: "..v.player
-
-                    if not v.noped then
-                        v.tooltip = v.tooltip.."\n  - Ped: "..v.ped
-
-                        if v.blip ~= 0 then
-                            v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
-                        end
-                    end
-
-                    v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
-                    v.tooltip = v.tooltip:replace("  ", " ")
-
-                    SussySpt.players[k] = v
-                end
-
-                updatePlayerlistElements()
-            end
-
-            local function weaponFromInput(s)
-                if type(s) == "string" then
-                    return joaat("WEAPON_"..s:uppercase():replace(" ", "_"))
-                end
-                return nil
-            end
-
-            local function shootPlayer(rs, ped, weaponHash, damage, speed)
-                if not WEAPON.IS_WEAPON_VALID(weaponHash) then
-                    return
-                end
-
-                WEAPON.REQUEST_WEAPON_ASSET(weaponHash, 31, 0)
-                repeat rs:yield() until WEAPON.HAS_WEAPON_ASSET_LOADED(weaponHash)
-
-                local c = ENTITY.GET_ENTITY_COORDS(ped)
-                MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
-                    c.x, c.y, c.z - .5,
-                    c.x, c.y, c.z + .5,
-                    damage or 1,
-                    true,
-                    weaponHash,
-                    yu.ppid(),
-                    true,
-                    false,
-                    speed or -1
-                )
-            end
-
-            yu.rif(function(rs)
-                while true do
-                    refreshPlayerlist(a.doupdates > 0)
-                    rs:sleep(yu.shc(a.doupdates > 0, 250, 1000))
-                end
-            end)
-
-            tab2.render = function()
-                a.doupdates = 1
-                ImGui.BeginGroup()
-                ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
-
-                ImGui.PushItemWidth(a.playerlistwidth)
-                local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
-                SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.searchtext ~= searchtext then
-                    a.searchtext = searchtext
-                    yu.rif(updatePlayerlistElements)
-                end
-                ImGui.PopItemWidth()
-
-                ImGui.PushItemWidth(a.playerlistwidth)
-                if ImGui.BeginListBox("##playerlist") then
+                local function updatePlayerlistElements()
                     for k, v in pairs(SussySpt.players) do
-                        if v.display then
-                            if ImGui.Selectable(v.displayName, false) then
-                                a.selectedplayer = v.name
-                            end
-                            if v.tooltip ~= nil then
-                                yu.rendering.tooltip(v.tooltip)
-                            end
-                        end
+                        v.display = k:contains(a.searchtext:lowercase())
                     end
-
-                    ImGui.EndListBox()
                 end
-                ImGui.PopItemWidth()
 
-                ImGui.EndGroup()
+                local emptystr = ""
 
-                if a.selectedplayer ~= nil then
-                    local player
-                    a.splayer = nil
-                    for k, v in pairs(SussySpt.players) do
-                        if v.name == a.selectedplayer then
-                            player = v
-                            a.splayer = player
-                            break
-                        end
+                local function refreshPlayerlist(updateInfo)
+                    SussySpt.players = yu.get_all_players()
+
+                    if not updateInfo then
+                        return
                     end
 
-                    if player ~= nil then
-                        ImGui.SameLine()
+                    local selfppid = yu.ppid()
+                    local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
-                        ImGui.BeginGroup()
+                    for k, v in pairs(SussySpt.players) do
+                        local startTime = yu.cputms()
 
-                        ImGui.Text("Selected player: "..player.name)
-                        yu.rendering.tooltip(player.tooltip)
+                        v.noped = type(v.ped) ~= "number" or v.ped == 0
+                        v.tooltip = emptystr
 
-                        if ImGui.TreeNodeEx("General") then
-                            if ImGui.SmallButton("Goto") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
-                                end)
+                        v.info = {
+                            talking = {
+                                NETWORK.NETWORK_IS_PLAYER_TALKING(v.player),
+                                "T",
+                                "The player is currently screaming or talking in the voicechat"
+                            },
+                            modder = {
+                                network.is_player_flagged_as_modder(v.player),
+                                "M",
+                                "This player was detected as a modder"
+                            },
+                            noped = {
+                                v.noped,
+                                "P",
+                                "No character (ped) was found"
+                            }
+                        }
+
+                        if not v.noped then
+                            local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+
+                            local vehicle = yu.veh(v.ped)
+                            local vehicleName =
+                                vehicle == nil
+                                and "???"
+                                or VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+
+                            local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
+
+                            local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+
+                            local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
+                            local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                            local armor = PED.GET_PED_ARMOUR(v.ped)
+                            local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
+                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
+                            local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+                            v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
+
+                            v.info.interior = {
+                                interior ~= 0,
+                                "I",
+                                "The player might be in an interior. Interior id: "..interior
+                            }
+                            v.info.vehicle = {
+                                vehicle ~= nil,
+                                "V",
+                                "The player is in a vehicle. "..vehicleName
+                            }
+                            v.info.nocollision = {
+                                collisionDisabled == true and distance < 100 and vehicle == nil,
+                                "C",
+                                "The player doesn't seem to have collision"
+                            }
+                            v.info.noblip = {
+                                v.ped ~= selfppid and v.blip == 0,
+                                "B",
+                                "The player has no blip. In interior/not spawned yet?"
+                            }
+
+                            v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
+
+                            if armor > 0 then
+                                v.tooltip = v.tooltip.."\nArmor: "..string.format("%.0f", armor)
                             end
-                            yu.rendering.tooltip("Teleport yourself to the player")
 
-                            ImGui.SameLine()
+                            if distance > 0 then
+                                v.tooltip = v.tooltip.."\nDistance: "..string.format("%.2f", distance).."m"
 
-                            if ImGui.SmallButton("Bring") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                                    network.set_player_coords(player.player, c.x, c.y, c.z)
-                                end)
+                                local distanceAboveGround = ENTITY.GET_ENTITY_HEIGHT_ABOVE_GROUND(v.ped)
+                                if distanceAboveGround > 1.5 then
+                                    v.tooltip = v.tooltip.."\nDistance above ground: "..string.format("%.2f", distanceAboveGround).."m"
+                                end
+
+                                v.tooltip = v.tooltip.."\nRoad: "..road
                             end
-                            yu.rendering.tooltip("Bring the player to you")
 
-                            ImGui.SameLine()
+                            if speed > 0 then
+                                v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
+                            end
 
-                            if ImGui.SmallButton("Tp into vehicle") then
-                                yu.rif(function(rs)
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
-                                        local seatIndex = yu.get_free_vehicle_seat(veh)
-                                        if seatIndex ~= nil then
-                                            local c = ENTITY.GET_ENTITY_COORDS(veh)
-                                            yu.load_ground_at_coord(rs, c)
-                                            local ped = yu.ppid()
-                                            ENTITY.SET_ENTITY_COORDS(ped, c.x, c.y, c.z, false, false, false, false)
-                                            rs:yield()
-                                            PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
-                                        end
+                            v.proofs = yu.get_entity_proofs(v.ped)
+                            if v.proofs.success and v.proofs.anytrue then
+                                v.tooltip = v.tooltip.."\nProofs: "
+                                for k1, v1 in pairs(v.proofs.translated) do
+                                    if v1 then
+                                        v.tooltip = v.tooltip.." "..k1
                                     end
-                                end)
+                                end
                             end
+                        end
 
-                            if ImGui.SmallButton("Set waypoint") then
-                                yu.rif(function()
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    HUD.SET_NEW_WAYPOINT(c.x, c.y)
-                                end)
+                        v.infoChar = emptystr
+                        local doInfoHeader = true
+                        for k1, v1 in pairs(v.info) do
+                            if v1[1] == true then
+                                if doInfoHeader then
+                                    if not v.noped then
+                                        v.tooltip = v.tooltip.."\n\n"
+                                    end
+                                    v.tooltip = v.tooltip.."Weird chars behind name:"
+                                    doInfoHeader = false
+                                end
+                                v.infoChar = v.infoChar..v1[2]
+                                v.tooltip = v.tooltip.."\n  - "..v1[2]..": "..v1[3]
                             end
-                            yu.rendering.tooltip("Sets a waypoint to them")
+                        end
+                        v.displayName = doInfoHeader and v.name or v.name.." ["..v.infoChar.."]"
 
+                        v.tooltip = v.tooltip
+                            .."\n\nFor nerds:"
+                            .."\n  - Player: "..v.player
+
+                        if not v.noped then
+                            v.tooltip = v.tooltip.."\n  - Ped: "..v.ped
+
+                            if v.blip ~= 0 then
+                                v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
+                            end
+                        end
+
+                        v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
+                        v.tooltip = v.tooltip:replace("  ", " ")
+
+                        SussySpt.players[k] = v
+                    end
+
+                    updatePlayerlistElements()
+                end
+
+                local function weaponFromInput(s)
+                    if type(s) == "string" then
+                        return joaat("WEAPON_"..s:uppercase():replace(" ", "_"))
+                    end
+                    return nil
+                end
+
+                local function shootPlayer(rs, ped, weaponHash, damage, speed)
+                    if not WEAPON.IS_WEAPON_VALID(weaponHash) then
+                        return
+                    end
+
+                    WEAPON.REQUEST_WEAPON_ASSET(weaponHash, 31, 0)
+                    repeat rs:yield() until WEAPON.HAS_WEAPON_ASSET_LOADED(weaponHash)
+
+                    local c = ENTITY.GET_ENTITY_COORDS(ped)
+                    MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
+                        c.x, c.y, c.z - .5,
+                        c.x, c.y, c.z + .5,
+                        damage or 1,
+                        true,
+                        weaponHash,
+                        yu.ppid(),
+                        true,
+                        false,
+                        speed or -1
+                    )
+                end
+
+                yu.rif(function(rs)
+                    while true do
+                        refreshPlayerlist(a.doupdates > 0)
+                        rs:sleep(yu.shc(a.doupdates > 0, 250, 1000))
+                    end
+                end)
+
+                tab2.render = function()
+                    a.doupdates = 1
+                    ImGui.BeginGroup()
+                    ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
+
+                    ImGui.PushItemWidth(a.playerlistwidth)
+                    local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
+                    if a.searchtext ~= searchtext then
+                        a.searchtext = searchtext
+                        yu.rif(updatePlayerlistElements)
+                    end
+                    ImGui.PopItemWidth()
+
+                    ImGui.PushItemWidth(a.playerlistwidth)
+                    if ImGui.BeginListBox("##playerlist") then
+                        for k, v in pairs(SussySpt.players) do
+                            if v.display then
+                                if ImGui.Selectable(v.displayName, false) then
+                                    a.selectedplayer = v.name
+                                end
+                                if v.tooltip ~= nil then
+                                    yu.rendering.tooltip(v.tooltip)
+                                end
+                            end
+                        end
+
+                        ImGui.EndListBox()
+                    end
+                    ImGui.PopItemWidth()
+
+                    ImGui.EndGroup()
+
+                    if a.selectedplayer ~= nil then
+                        local player
+                        a.splayer = nil
+                        for k, v in pairs(SussySpt.players) do
+                            if v.name == a.selectedplayer then
+                                player = v
+                                a.splayer = player
+                                break
+                            end
+                        end
+
+                        if player ~= nil then
                             ImGui.SameLine()
 
-                            if ImGui.SmallButton("Waypoint") then
-                                yu.rif(function()
-                                    local blip = 8 -- radar_waypoint
-                                    if HUD.DOES_BLIP_EXIST(blip) then
-                                        local c = HUD.GET_BLIP_COORDS(blip)
+                            ImGui.BeginGroup()
+
+                            ImGui.Text("Selected player: "..player.name)
+                            yu.rendering.tooltip(player.tooltip)
+
+                            if ImGui.TreeNodeEx("General") then
+                                if ImGui.SmallButton("Goto") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
+                                    end)
+                                end
+                                yu.rendering.tooltip("Teleport yourself to the player")
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Bring") then
+                                    yu.rif(function()
+                                        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
                                         network.set_player_coords(player.player, c.x, c.y, c.z)
-                                    end
-                                end)
-                            end
-                            yu.rendering.tooltip("Does not work well / teleports them under the map")
+                                    end)
+                                end
+                                yu.rendering.tooltip("Bring the player to you")
 
-                            if ImGui.SmallButton("Mark as modder") then
-                                network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, "Marked as modder by the user")
-                            end
+                                ImGui.SameLine()
 
-                            yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
-                                yu.rif(function()
-                                    for k, v in pairs(SussySpt.players) do
-                                        if v.ped ~= player.ped then
-                                            if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
-                                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
-                                                NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                                if ImGui.SmallButton("Tp into vehicle") then
+                                    yu.rif(function(rs)
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil then
+                                            local seatIndex = yu.get_free_vehicle_seat(veh)
+                                            if seatIndex ~= nil then
+                                                local c = ENTITY.GET_ENTITY_COORDS(veh)
+                                                yu.load_ground_at_coord(rs, c)
+                                                local ped = yu.ppid()
+                                                ENTITY.SET_ENTITY_COORDS(ped, c.x, c.y, c.z, false, false, false, false)
+                                                rs:yield()
+                                                PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
                                             end
                                         end
-                                    end
-                                    if state then
-                                        NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
-                                    else
-                                        NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
-                                    end
-                                end)
-                            end)
-
-                            ImGui.TreePop()
-                        end
-
-                        if ImGui.TreeNodeEx("Trolling") then
-                            if ImGui.SmallButton("Taze") then
-                                yu.rif(function(rs)
-                                    shootPlayer(rs, player.ped, joaat("weapon_stungun"), 0)
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Spawn cargoplane") then
-                                yu.rif(function(rs)
-                                    local hash = joaat("cargoplane")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
-                                    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
-                                    if networkent(veh) then
-                                        VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
-                                        VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
-                                        ENTITY.SET_ENTITY_COLLISION(veh, false, true)
-                                        ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
-                                        rs:sleep(2)
-                                        ENTITY.SET_ENTITY_COLLISION(veh, true, true)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Launch") then
-                                yu.rif(function(rs)
-                                    local hash = joaat("mule5")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-
-                                    local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, 1, -3)
-                                    local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped))
-                                    networkent(veh)
-                                    ENTITY.SET_ENTITY_VISIBLE(veh, true, 0)
-                                    ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
-                                    rs:sleep(250)
-                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 1000, 0, 0, 0, 0, true, true, true, false, true)
-                                    rs:sleep(2500)
-                                    ENTITY.DELETE_ENTITY(veh)
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Stumble") then
-                                yu.rif(function(rs)
-                                    local hash = joaat("prop_roofvent_06a")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    c.z = c.z - 2.4
-
-                                    local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
-                                    ENTITY.SET_ENTITY_VISIBLE(obj, true, 0)
-                                    ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
-
-                                    local pos = {
-                                        x = 0,
-                                        y = 0,
-                                        z = 0
-                                    }
-                                    local objects = {}
-                                    for i = 1, 4 do
-                                        local angle = (i / 4) * 360
-                                        pos.z = angle
-                                        pos.x = pos.x * 1.25
-                                        pos.y = pos.y * 1.25
-                                        pos.z = pos.z * 1.25
-                                        pos.x = pos.x + c.x
-                                        pos.y = pos.y + c.y
-                                        pos.z = pos.z + c.z
-                                        objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
-                                        ENTITY.SET_ENTITY_VISIBLE(objects[i], true, 0)
-                                        ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
-                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(objects[i])
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Spawn animation") then
-                                yu.rif(function()
-                                    local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
-                                    network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), math.random(0, 114), 4, handle, handle, handle, handle, 1, 1})
-                                end)
-                            end
-                            yu.rendering.tooltip("Gives the player a blackscreen,\nthen after some time, it spawns them at a random location.\nSimilar to when you join a session.")
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Squish") then
-                                yu.rif(function(rs)
-                                    local hash = joaat("khanjali")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-
-                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                    local distance = TASK.IS_PED_STILL(player.ped) and 0 or 2.5
-
-                                    local vehicles = {}
-
-                                    for i = 1, 1 do
-                                        local pos = (i == 1) and ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, distance, 2.8) or c
-                                        local heading = (i == 1) and ENTITY.GET_ENTITY_HEADING(player.ped) or 0
-                                        vehicles[i] = networkent(VEHICLE.CREATE_VEHICLE(hash, pos.x, pos.y, pos.z, heading))
-                                    end
-
-                                    for k, v in pairs(vehicles) do
-                                        if k ~= 1 and v ~= nil then
-                                            ENTITY.ATTACH_ENTITY_TO_ENTITY(v, vehicles[1], 0, k == 4 and 0 or 3, k >= 3 and 0, 0, 0, 0, k == 2 and -180 or 0, 0, false, true, false, 0, true)
-                                        end
-                                        ENTITY.SET_ENTITY_VISIBLE(v, false)
-                                        ENTITY.SET_ENTITY_ALPHA(v, 0, true)
-                                    end
-                                    ENTITY.APPLY_FORCE_TO_ENTITY(vehicles[1], 1, 0, 0, -10, 0, 0, 0, 0, true, true, true, false, true)
-
-                                    rs:sleep(5000)
-
-                                    for k, v in pairs(vehicles) do
-                                        ENTITY.DELETE_ENTITY(v)
-                                    end
-                                end)
-                            end
-                            yu.rendering.tooltip("This even kills godmode players but it requires them\nto have no ragdoll turned off.")
-
-                            ImGui.Text("Explode:")
-                            do
-                                ImGui.SameLine()
-                                if ImGui.SmallButton("Invisible") then
-                                    yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
                                     end)
                                 end
-                                yu.rendering.tooltip("\"Random\" death")
-                                ImGui.SameLine()
-                                if ImGui.SmallButton("Normal") then
-                                    yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
-                                    end)
-                                end
-                                ImGui.SameLine()
-                                if ImGui.SmallButton("Huge") then
-                                    yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
-                                    end)
-                                end
-                                ImGui.SameLine()
-                                if ImGui.SmallButton("Car") then
-                                    yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
-                                    end)
-                                end
-                            end
 
-                            if ImGui.TreeNodeEx("Trap") then
-                                if ImGui.SmallButton("Normal") then
+                                if ImGui.SmallButton("Set waypoint") then
                                     yu.rif(function()
-                                        local modelHash = joaat("prop_gold_cont_01b")
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        for i = 0, 1 do
-                                            local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
-                                            networkobj(obj)
-                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
-                                            ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                        HUD.SET_NEW_WAYPOINT(c.x, c.y)
+                                    end)
+                                end
+                                yu.rendering.tooltip("Sets a waypoint to them")
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Waypoint") then
+                                    yu.rif(function()
+                                        local blip = 8 -- radar_waypoint
+                                        if HUD.DOES_BLIP_EXIST(blip) then
+                                            local c = HUD.GET_BLIP_COORDS(blip)
+                                            network.set_player_coords(player.player, c.x, c.y, c.z)
                                         end
                                     end)
                                 end
+                                yu.rendering.tooltip("Does not work well / teleports them under the map")
+
+                                if ImGui.SmallButton("Mark as modder") then
+                                    network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, "Marked as modder by the user")
+                                end
+
+                                yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
+                                    yu.rif(function()
+                                        for k, v in pairs(SussySpt.players) do
+                                            if v.ped ~= player.ped then
+                                                if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
+                                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
+                                                    NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
+                                                end
+                                            end
+                                        end
+                                        if state then
+                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(true, player.ped)
+                                        else
+                                            NETWORK.NETWORK_SET_ACTIVITY_SPECTATOR(false)
+                                        end
+                                    end)
+                                end)
+
+                                ImGui.TreePop()
+                            end
+
+                            if ImGui.TreeNodeEx("Trolling") then
+                                if ImGui.SmallButton("Taze") then
+                                    yu.rif(function(rs)
+                                        shootPlayer(rs, player.ped, joaat("weapon_stungun"), 0)
+                                    end)
+                                end
+
                                 ImGui.SameLine()
-                                if ImGui.SmallButton("Cage") then
-                                    yu.rif(function(runscript)
+
+                                if ImGui.SmallButton("Spawn cargoplane") then
+                                    yu.rif(function(rs)
+                                        local hash = joaat("cargoplane")
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
                                         local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        local x = tonumber(string.format('%.2f', c.x))
-                                        local y = tonumber(string.format('%.2f', c.y))
-                                        local z = tonumber(string.format('%.2f', c.z))
+                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                        if networkent(veh) then
+                                            VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
+                                            VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
+                                            ENTITY.SET_ENTITY_COLLISION(veh, false, true)
+                                            ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                            rs:sleep(2)
+                                            ENTITY.SET_ENTITY_COLLISION(veh, true, true)
+                                        end
+                                    end)
+                                end
 
-                                        local modelHash = joaat("prop_fnclink_05crnr1")
-                                        STREAMING.REQUEST_MODEL(modelHash)
-                                        repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+                                ImGui.SameLine()
 
-                                        local createObject = function(offsetX, offsetY, heading)
-                                            local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                if ImGui.SmallButton("Launch") then
+                                    yu.rif(function(rs)
+                                        local hash = joaat("mule5")
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                        local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, 1, -3)
+                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped))
+                                        networkent(veh)
+                                        ENTITY.SET_ENTITY_VISIBLE(veh, true, 0)
+                                        ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
+                                        rs:sleep(250)
+                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 1000, 0, 0, 0, 0, true, true, true, false, true)
+                                        rs:sleep(2500)
+                                        ENTITY.DELETE_ENTITY(veh)
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Stumble") then
+                                    yu.rif(function(rs)
+                                        local hash = joaat("prop_roofvent_06a")
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        c.z = c.z - 2.4
+
+                                        local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
+                                        ENTITY.SET_ENTITY_VISIBLE(obj, true, 0)
+                                        ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
+
+                                        local pos = {
+                                            x = 0,
+                                            y = 0,
+                                            z = 0
+                                        }
+                                        local objects = {}
+                                        for i = 1, 4 do
+                                            local angle = (i / 4) * 360
+                                            pos.z = angle
+                                            pos.x = pos.x * 1.25
+                                            pos.y = pos.y * 1.25
+                                            pos.z = pos.z * 1.25
+                                            pos.x = pos.x + c.x
+                                            pos.y = pos.y + c.y
+                                            pos.z = pos.z + c.z
+                                            objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
+                                            ENTITY.SET_ENTITY_VISIBLE(objects[i], true, 0)
+                                            ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
+                                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(objects[i])
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Spawn animation") then
+                                    yu.rif(function()
+                                        local handle = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
+                                        network.trigger_script_event(1 << player.player, {-1604421397, yu.pid(), math.random(0, 114), 4, handle, handle, handle, handle, 1, 1})
+                                    end)
+                                end
+                                yu.rendering.tooltip("Gives the player a blackscreen,\nthen after some time, it spawns them at a random location.\nSimilar to when you join a session.")
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Squish") then
+                                    yu.rif(function(rs)
+                                        local hash = joaat("khanjali")
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                        local distance = TASK.IS_PED_STILL(player.ped) and 0 or 2.5
+
+                                        local vehicles = {}
+
+                                        for i = 1, 1 do
+                                            local pos = (i == 1) and ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, distance, 2.8) or c
+                                            local heading = (i == 1) and ENTITY.GET_ENTITY_HEADING(player.ped) or 0
+                                            vehicles[i] = networkent(VEHICLE.CREATE_VEHICLE(hash, pos.x, pos.y, pos.z, heading))
+                                        end
+
+                                        for k, v in pairs(vehicles) do
+                                            if k ~= 1 and v ~= nil then
+                                                ENTITY.ATTACH_ENTITY_TO_ENTITY(v, vehicles[1], 0, k == 4 and 0 or 3, k >= 3 and 0, 0, 0, 0, k == 2 and -180 or 0, 0, false, true, false, 0, true)
+                                            end
+                                            ENTITY.SET_ENTITY_VISIBLE(v, false)
+                                            ENTITY.SET_ENTITY_ALPHA(v, 0, true)
+                                        end
+                                        ENTITY.APPLY_FORCE_TO_ENTITY(vehicles[1], 1, 0, 0, -10, 0, 0, 0, 0, true, true, true, false, true)
+
+                                        rs:sleep(5000)
+
+                                        for k, v in pairs(vehicles) do
+                                            ENTITY.DELETE_ENTITY(v)
+                                        end
+                                    end)
+                                end
+                                yu.rendering.tooltip("This even kills godmode players but it requires them\nto have no ragdoll turned off.")
+
+                                ImGui.Text("Explode:")
+                                do
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Invisible") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                        end)
+                                    end
+                                    yu.rendering.tooltip("\"Random\" death")
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Normal") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                        end)
+                                    end
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Huge") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                        end)
+                                    end
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Car") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
+                                        end)
+                                    end
+                                end
+
+                                if ImGui.TreeNodeEx("Trap") then
+                                    if ImGui.SmallButton("Normal") then
+                                        yu.rif(function()
+                                            local modelHash = joaat("prop_gold_cont_01b")
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            for i = 0, 1 do
+                                                local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
+                                                networkobj(obj)
+                                                ENTITY.SET_ENTITY_ROTATION(obj, 0, yu.shc(i == 0, 90, -90), 0, 2, true)
+                                                ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                            end
+                                        end)
+                                    end
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Cage") then
+                                        yu.rif(function(runscript)
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            local x = tonumber(string.format('%.2f', c.x))
+                                            local y = tonumber(string.format('%.2f', c.y))
+                                            local z = tonumber(string.format('%.2f', c.z))
+
+                                            local modelHash = joaat("prop_fnclink_05crnr1")
+                                            STREAMING.REQUEST_MODEL(modelHash)
+                                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+
+                                            local createObject = function(offsetX, offsetY, heading)
+                                                local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                                networkobj(obj)
+                                                ENTITY.SET_ENTITY_HEADING(obj, heading)
+                                                ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                                ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                            end
+
+                                            createObject(-1.70, -1.70, -90.0)
+                                            createObject(1.70, 1.70, 90.0)
+                                        end)
+                                    end
+
+                                    ImGui.SameLine()
+
+                                    if ImGui.SmallButton("Rub Cage") then
+                                        yu.rif(function()
+                                            local hash = joaat("prop_rub_cage01a")
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            for i = 0, 1 do
+                                                local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z - 1, true, true, false)
+                                                networkobj(obj)
+                                                ENTITY.SET_ENTITY_ROTATION(obj, 0, 0, yu.shc(i == 0, 0, 90), 2, true)
+                                                ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                                ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                            end
+                                        end)
+                                    end
+
+                                    if ImGui.SmallButton("Race tube") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                             networkobj(obj)
-                                            ENTITY.SET_ENTITY_HEADING(obj, heading)
+                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                             ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                             ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
-                                        end
-
-                                        createObject(-1.70, -1.70, -90.0)
-                                        createObject(1.70, 1.70, 90.0)
-                                    end)
-                                end
-
-                                ImGui.SameLine()
-
-                                if ImGui.SmallButton("Rub Cage") then
-                                    yu.rif(function()
-                                        local hash = joaat("prop_rub_cage01a")
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        for i = 0, 1 do
-                                            local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z - 1, true, true, false)
+                                        end)
+                                    end
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Invisible race tube") then
+                                        yu.rif(function()
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                             networkobj(obj)
-                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, 0, yu.shc(i == 0, 0, 90), 2, true)
+                                            ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                             ENTITY.FREEZE_ENTITY_POSITION(obj, true)
+                                            ENTITY.SET_ENTITY_VISIBLE(obj, false)
                                             ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                        end)
+                                    end
+
+                                    ImGui.TreePop()
+                                end
+
+                                do
+                                    ImGui.PushItemWidth(237)
+                                    local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
+                                    if ror.changed then
+                                        a.ramoption = ror.key
+                                    end
+                                    ImGui.PopItemWidth()
+                                    ImGui.SameLine()
+                                    if ImGui.Button("Ram") then
+                                        yu.rif(function(runscript)
+                                            local hash = joaat(a.ramoption)
+                                            if STREAMING.IS_MODEL_VALID(hash) then
+                                                STREAMING.REQUEST_MODEL(hash)
+                                                repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                                local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
+                                                local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                                networkent(veh)
+                                                VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
+                                                runscript:sleep(100)
+                                                for i = 0, 10 do
+                                                    VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
+                                                    runscript:sleep(100)
+                                                end
+                                                VEHICLE.DELETE_VEHICLE(veh)
+                                            end
+                                        end)
+                                    end
+                                end
+
+                                do
+                                    ImGui.PushItemWidth(237)
+                                    local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
+                                    if resp.changed then
+                                        a.attachoption = resp.key
+                                    end
+                                    ImGui.PopItemWidth()
+
+                                    ImGui.SameLine()
+
+                                    if ImGui.Button("Attach") then
+                                        yu.rif(function(rs)
+                                            local hash = a.attachoption
+
+                                            if STREAMING.IS_MODEL_VALID(hash) then
+                                                STREAMING.REQUEST_MODEL(hash)
+                                                repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                                local obj = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, 0, 0, 0, true, true, false)
+                                                if networkobj(obj) ~= nil then
+                                                    ENTITY.ATTACH_ENTITY_TO_ENTITY(obj, player.ped, 57597, 0, 0, 0, 0, 0, 0, false, false, false, false, 2, true)
+                                                    if yu.rendering.isCheckboxChecked("online_players_attach_invis") then
+                                                        ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                                        ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
+                                                    end
+                                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                end
+
+                                                STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                            end
+                                        end)
+                                    end
+
+                                    ImGui.SameLine()
+
+                                    yu.rendering.renderCheckbox("Invisible##attach_invis", "online_players_attach_invis")
+                                end
+
+                                ImGui.TreePop()
+                            end
+
+                            if ImGui.TreeNodeEx("Weapons") then
+                                if ImGui.SmallButton("Remove all weapons") then
+                                    yu.rif(function()
+                                        WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
+                                        for k, v in pairs(yu.get_all_weapons()) do
+                                            WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                                        end
+                                    end)
+                                end
+                                yu.rendering.tooltip("Most of them.\nThis will be fixed when yimmenu finally allows access to the cache...")
+
+                                ImGui.Text("Parachute:")
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Give##give_parachute") then
+                                    yu.rif(function()
+                                        WEAPON.GIVE_WEAPON_TO_PED(player.ped, joaat("GADGET_PARACHUTE"), 1, false, false)
+                                    end)
+                                end
+                                ImGui.SameLine()
+                                if ImGui.SmallButton("Remove##remove_parachute") then
+                                    yu.rif(function()
+                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, joaat("GADGET_PARACHUTE"))
+                                    end)
+                                end
+
+                                ImGui.Spacing()
+
+                                ImGui.PushItemWidth(120)
+                                local gcwr = yu.rendering.input("text", {
+                                    label = "##gcw",
+                                    text = a.givecustomweapontext,
+                                    hint = "ex. pistol"
+                                })
+                                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                                ImGui.PopItemWidth()
+                                if gcwr ~= nil and gcwr.changed then
+                                    a.givecustomweapontext = gcwr.text
+                                    a.weaponinfo = nil
+                                end
+
+                                ImGui.SameLine()
+
+                                ImGui.PushItemWidth(79)
+                                local gcwar = yu.rendering.input("int", {
+                                    label = "##gcwa",
+                                    value = a.givecustomweaponammo,
+                                    min = 0,
+                                    max = 99999
+                                })
+                                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                                ImGui.PopItemWidth()
+                                if gcwar ~= nil and gcwar.changed then
+                                    a.givecustomweaponammo = gcwar.value
+                                end
+
+                                ImGui.SameLine()
+                                if ImGui.Button("Give") then
+                                    yu.rif(function()
+                                        if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
+                                            a.weaponinfo = 1
+                                        else
+                                            local hash = weaponFromInput(a.givecustomweapontext)
+                                            if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
+                                                a.weaponinfo = 2
+                                            else
+                                                WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
+                                                a.weaponinfo = 3
+                                            end
+                                        end
+                                    end)
+                                end
+                                ImGui.SameLine()
+                                if ImGui.Button("Remove") then
+                                    yu.rif(function()
+                                        if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
+                                            a.weaponinfo = 1
+                                        else
+                                            local hash = weaponFromInput(a.givecustomweapontext)
+                                            if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
+                                                a.weaponinfo = 2
+                                            else
+                                                WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
+                                                a.weaponinfo = 4
+                                            end
                                         end
                                     end)
                                 end
 
-                                if ImGui.SmallButton("Race tube") then
+                                if a.weaponinfo ~= nil then
+                                    if a.weaponinfo == 1 then
+                                        yu.rendering.coloredtext("A weapon id is required", 255, 25, 25)
+                                    elseif a.weaponinfo == 2 then
+                                        yu.rendering.coloredtext("Invalid weapon id", 255, 25, 25)
+                                    elseif a.weaponinfo == 3 then
+                                        yu.rendering.coloredtext("Weapon given successfully", 41, 250, 41)
+                                    elseif a.weaponinfo == 4 then
+                                        yu.rendering.coloredtext("Weapon removed successfully", 41, 250, 41)
+                                    end
+                                end
+
+                                ImGui.TreePop()
+                            end
+
+                            if ImGui.TreeNodeEx("Vehicle") then
+                                yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
                                     yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
-                                        networkobj(obj)
-                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
-                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil then
+                                            ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
+                                        end
+                                    end)
+                                end)
+                                yu.rendering.tooltip("Sets the vehicle in godmode")
+
+                                if ImGui.SmallButton("Repair") then
+                                    yu.rif(function()
+                                        if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
+                                            local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
+                                            VEHICLE.SET_VEHICLE_FIXED(veh)
+                                            VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
+                                        end
                                     end)
                                 end
+
                                 ImGui.SameLine()
-                                if ImGui.SmallButton("Invisible race tube") then
+
+                                if ImGui.SmallButton("Delete") then
                                     yu.rif(function()
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
-                                        networkobj(obj)
-                                        ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
-                                        ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                        ENTITY.SET_ENTITY_VISIBLE(obj, false)
-                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
+                                            ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
+                                            VEHICLE.DELETE_VEHICLE(veh)
+                                            if yu.does_entity_exist(veh) then
+                                                ENTITY.DELETE_ENTITY(veh)
+                                            end
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Halt") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Engine off") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            yu.request_entity_control_once(veh)
+                                            VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Kill engine") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Launch") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Boost") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, VEHICLE.GET_VEHICLE_ESTIMATED_MAX_SPEED(veh))
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Halt") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Burst tires") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
+                                            yu.loop(8, function(i)
+                                                VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
+                                            end)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Smash windows") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            yu.loop(8, function(i)
+                                                VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
+                                            end)
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Kick from vehicle") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            TASK.TASK_LEAVE_VEHICLE(player.ped, veh, 0)
+                                        end
+                                    end)
+                                end
+                                yu.rendering.tooltip("Doesn't work well")
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Flip") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
+                                            rot.y = rot.y + 180
+                                            ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
+                                        end
+                                    end)
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.SmallButton("Rotate") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
+                                            rot.z = rot.z + 180
+                                            ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
+                                        end
+                                    end)
+                                end
+
+                                if ImGui.SmallButton("Lock them inside") then
+                                    yu.rif(function()
+                                        local veh = yu.veh(player.ped)
+                                        if veh ~= nil and entities.take_control_of(veh) then
+                                            VEHICLE.SET_VEHICLE_DOORS_LOCKED(veh, 4)
+                                        end
                                     end)
                                 end
 
                                 ImGui.TreePop()
                             end
 
-                            do
-                                ImGui.PushItemWidth(237)
-                                local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
-                                if ror.changed then
-                                    a.ramoption = ror.key
+                            if ImGui.TreeNodeEx("Online") then
+                                ImGui.PushItemWidth(243)
+                                if ImGui.BeginCombo("##online_player_pickups", a.pickupoption) then
+                                    for k, v in pairs(a.pickupoptions) do
+                                        if ImGui.Selectable(k, false) then
+                                            a.pickupoption = k
+                                        end
+                                        yu.rendering.tooltip(v)
+                                    end
+                                    ImGui.EndCombo()
                                 end
                                 ImGui.PopItemWidth()
+
                                 ImGui.SameLine()
-                                if ImGui.Button("Ram") then
-                                    yu.rif(function(runscript)
-                                        local hash = joaat(a.ramoption)
-                                        if STREAMING.IS_MODEL_VALID(hash) then
-                                            STREAMING.REQUEST_MODEL(hash)
-                                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                            local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
-                                            local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
-                                            networkent(veh)
-                                            VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
-                                            runscript:sleep(100)
-                                            for i = 0, 10 do
-                                                VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
-                                                runscript:sleep(100)
+
+                                ImGui.PushItemWidth(35)
+                                local par = yu.rendering.input("int", {
+                                    label = "##pa",
+                                    value = a.pickupamount
+                                })
+                                yu.rendering.tooltip("How many times the pickup should get spawned")
+                                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                                ImGui.PopItemWidth()
+                                if par ~= nil and par.changed then
+                                    a.pickupamount = par.value
+                                end
+
+                                if not a.givepickupblocked then
+                                    ImGui.SameLine()
+                                    if ImGui.Button("Give pickup") then
+                                        a.givepickupblocked = true
+                                        yu.rif(function(rs)
+                                            local value = a.pickupoptions[a.pickupoption]
+                                            if yu.is_num_between(a.pickupamount, 0, 20) and type(value) == "string" then
+                                                local hash = joaat(value)
+                                                if STREAMING.IS_MODEL_VALID(hash) then
+                                                    STREAMING.REQUEST_MODEL(hash)
+                                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                                                    yu.loop(a.pickupamount, function()
+                                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                        OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
+                                                        rs:sleep(4)
+                                                    end)
+                                                end
                                             end
-                                            VEHICLE.DELETE_VEHICLE(veh)
+                                            a.givepickupblocked = nil
+                                        end)
+                                    end
+                                end
+
+                                ImGui.PushItemWidth(78)
+
+                                local car = yu.rendering.input("int", {
+                                    label = "##ca",
+                                    value = a.cashamount
+                                })
+                                yu.rendering.tooltip("How much cash to spawn")
+                                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                                if car ~= nil and car.changed then
+                                    a.cashamount = car.value
+                                end
+
+                                ImGui.SameLine()
+
+                                local cvr = yu.rendering.input("int", {
+                                    label = "##cv",
+                                    value = a.cashvalue
+                                })
+                                yu.rendering.tooltip("How much money per cash")
+                                SussySpt.push_disable_controls(ImGui.IsItemActive())
+                                if cvr ~= nil and cvr.changed then
+                                    a.cashvalue = cvr.value
+                                end
+
+                                ImGui.PopItemWidth()
+
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Spawn cash") then
+                                    yu.rif(function()
+                                        if yu.is_num_between(a.cashamount, 0, 10000) then
+                                            local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                            OBJECT.CREATE_MONEY_PICKUPS(c.x, c.y, c.z, a.cashvalue, a.cashamount, 2628187989)
                                         end
                                     end)
                                 end
+
+                                ImGui.TreePop()
+                            end
+                        end
+
+                        ImGui.EndGroup()
+                    end
+                end
+
+                tab.sub[1] = tab2
+            end
+
+            do -- ANCHOR Stats
+                local a = {
+                    abilities = {
+                        "Stamina", "Strength", "Shooting",
+                        "Stealth", "Flying", "Driving",
+                        "Diving", "Mental State"
+                    },
+                    abilitystats = {
+                        "STAMINA", "STRENGTH", "SHOOTING_ABILITY",
+                        "STEALTH_ABILITY", "FLYING_ABILITY",
+                        "WHEELIE_ABILITY", "LUNG_CAPACITY",
+                        "PLAYER_MENTAL_STATE"
+                    }
+                }
+
+                local function refreshAbilityValues()
+                    local mpx = yu.mpx()
+                    a.abilitiyvalues = {}
+                    a.abilitiynewvalues = {}
+                    for k, v in pairs(a.abilitystats) do
+                        if k == 8 then
+                            a.abilitiyvalues[k] = stats.get_float(mpx..v)
+                        else
+                            a.abilitiyvalues[k] = stats.get_int(mpx..v)
+                        end
+                    end
+                end
+
+                local function refresh()
+                    refreshAbilityValues()
+                end
+                yu.rif(refresh)
+
+                tab.sub[2] = (function()
+                    return SussySpt.rendering.new_tab("Stats", function()
+                        if ImGui.TreeNodeEx("Abilities") then
+                            if ImGui.SmallButton("Refresh##abilities") then
+                                yu.rif(refreshAbilityValues)
                             end
 
-                            do
-                                ImGui.PushItemWidth(237)
-                                local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
-                                if resp.changed then
-                                    a.attachoption = resp.key
+                            ImGui.Spacing()
+
+                            ImGui.PushItemWidth(331)
+                            for k, v in pairs(a.abilities) do
+                                local newValue, changed = ImGui.DragInt(v, a.abilitiynewvalues[k] or a.abilitiyvalues[k], .2, 0, 100, "%d", 5)
+                                if changed then
+                                    a.abilitiynewvalues[k] = newValue
                                 end
-                                ImGui.PopItemWidth()
 
-                                ImGui.SameLine()
-
-                                if ImGui.Button("Attach") then
-                                    yu.rif(function(rs)
-                                        local hash = a.attachoption
-
-                                        if STREAMING.IS_MODEL_VALID(hash) then
-                                            STREAMING.REQUEST_MODEL(hash)
-                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-
-                                            local obj = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, 0, 0, 0, true, true, false)
-                                            if networkobj(obj) ~= nil then
-                                                ENTITY.ATTACH_ENTITY_TO_ENTITY(obj, player.ped, 57597, 0, 0, 0, 0, 0, 0, false, false, false, false, 2, true)
-                                                if yu.rendering.isCheckboxChecked("online_players_attach_invis") then
-                                                    ENTITY.SET_ENTITY_VISIBLE(obj, false)
-                                                    ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
-                                                end
-                                                ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                if a.abilitiynewvalues[k] ~= nil then
+                                    ImGui.SameLine()
+                                    if ImGui.SmallButton("Apply##abilities_"..k) then
+                                        yu.rif(function()
+                                            local stat = yu.mpx(a.abilitystats[k])
+                                            if k == 8 then
+                                                stats.set_float(stat, a.abilitiynewvalues[k])
+                                            else
+                                                stats.set_int(stat, a.abilitiynewvalues[k])
                                             end
-
-                                            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
-                                        end
-                                    end)
+                                            refreshAbilityValues()
+                                        end)
+                                    end
                                 end
+                            end
+                            ImGui.PopItemWidth()
 
-                                ImGui.SameLine()
+                            ImGui.TreePop()
+                        end
 
-                                yu.rendering.renderCheckbox("Invisible##attach_invis", "online_players_attach_invis")
+                        if ImGui.TreeNodeEx("Badsport") then
+                            if ImGui.SmallButton("Add##badsport") then
+                                yu.rif(function()
+                                    stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
+                                    stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
+                                    stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
+                                    stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.SmallButton("Remove##badsport") then
+                                yu.rif(function()
+                                    stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
+                                    stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
+                                    stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
+                                    stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                                end)
                             end
 
                             ImGui.TreePop()
                         end
 
-                        if ImGui.TreeNodeEx("Weapons") then
-                            if ImGui.SmallButton("Remove all weapons") then
+                        if ImGui.TreeNodeEx("Bounty") then
+                            if ImGui.SmallButton("Remove bounty") then
                                 yu.rif(function()
-                                    WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
-                                    for k, v in pairs(yu.get_all_weapons()) do
-                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
-                                    end
+                                    globals.set_int(SussySpt.pointers.bounty_self_time, 2880000)
                                 end)
                             end
-                            yu.rendering.tooltip("Most of them.\nThis will be fixed when yimmenu finally allows access to the cache...")
 
-                            ImGui.Text("Parachute:")
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Give##give_parachute") then
+                            ImGui.TreePop()
+                        end
+
+                        if ImGui.TreeNodeEx("Jack O' Lantern") then
+                            if ImGui.SmallButton("Unlock Mask") then
                                 yu.rif(function()
-                                    WEAPON.GIVE_WEAPON_TO_PED(player.ped, joaat("GADGET_PARACHUTE"), 1, false, false)
+                                    globals.set_int(SussySpt.pointers.halloween_unlock, 9)
                                 end)
                             end
-                            ImGui.SameLine()
-                            if ImGui.SmallButton("Remove##remove_parachute") then
+
+                            if ImGui.SmallButton("Unlock T-Shirt") then
                                 yu.rif(function()
-                                    WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, joaat("GADGET_PARACHUTE"))
+                                    globals.set_int(SussySpt.pointers.halloween_unlock, 199)
                                 end)
                             end
 
                             ImGui.Spacing()
 
-                            ImGui.PushItemWidth(120)
-                            local gcwr = yu.rendering.input("text", {
-                                label = "##gcw",
-                                text = a.givecustomweapontext,
-                                hint = "ex. pistol"
-                            })
-                            SussySpt.push_disable_controls(ImGui.IsItemActive())
-                            ImGui.PopItemWidth()
-                            if gcwr ~= nil and gcwr.changed then
-                                a.givecustomweapontext = gcwr.text
-                                a.weaponinfo = nil
-                            end
-
-                            ImGui.SameLine()
-
-                            ImGui.PushItemWidth(79)
-                            local gcwar = yu.rendering.input("int", {
-                                label = "##gcwa",
-                                value = a.givecustomweaponammo,
-                                min = 0,
-                                max = 99999
-                            })
-                            SussySpt.push_disable_controls(ImGui.IsItemActive())
-                            ImGui.PopItemWidth()
-                            if gcwar ~= nil and gcwar.changed then
-                                a.givecustomweaponammo = gcwar.value
-                            end
-
-                            ImGui.SameLine()
-                            if ImGui.Button("Give") then
-                                yu.rif(function()
-                                    if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
-                                        a.weaponinfo = 1
-                                    else
-                                        local hash = weaponFromInput(a.givecustomweapontext)
-                                        if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
-                                            a.weaponinfo = 2
-                                        else
-                                            WEAPON.GIVE_WEAPON_TO_PED(player.ped, hash, a.givecustomweaponammo, false, false)
-                                            a.weaponinfo = 3
-                                        end
-                                    end
-                                end)
-                            end
-                            ImGui.SameLine()
-                            if ImGui.Button("Remove") then
-                                yu.rif(function()
-                                    if type(a.givecustomweapontext) ~= "string" or a.givecustomweapontext:len() == 0 then
-                                        a.weaponinfo = 1
-                                    else
-                                        local hash = weaponFromInput(a.givecustomweapontext)
-                                        if WEAPON.GET_WEAPONTYPE_MODEL(hash) == 0 then
-                                            a.weaponinfo = 2
-                                        else
-                                            WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, hash)
-                                            a.weaponinfo = 4
-                                        end
-                                    end
-                                end)
-                            end
-
-                            if a.weaponinfo ~= nil then
-                                if a.weaponinfo == 1 then
-                                    yu.rendering.coloredtext("A weapon id is required", 255, 25, 25)
-                                elseif a.weaponinfo == 2 then
-                                    yu.rendering.coloredtext("Invalid weapon id", 255, 25, 25)
-                                elseif a.weaponinfo == 3 then
-                                    yu.rendering.coloredtext("Weapon given successfully", 41, 250, 41)
-                                elseif a.weaponinfo == 4 then
-                                    yu.rendering.coloredtext("Weapon removed successfully", 41, 250, 41)
+                            do
+                                ImGui.PushItemWidth(150)
+                                local resp = yu.rendering.input("int", {
+                                    label = "##pumpkin",
+                                    value = a.pumpkinspickedup or 1
+                                })
+                                ImGui.PopItemWidth()
+                                if resp ~= nil and resp.changed then
+                                    a.pumpkinspickedup = resp.value
                                 end
-                            end
 
-                            ImGui.TreePop()
-                        end
-
-                        if ImGui.TreeNodeEx("Vehicle") then
-                            yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil then
-                                        ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
-                                    end
-                                end)
-                            end)
-                            yu.rendering.tooltip("Sets the vehicle in godmode")
-
-                            if ImGui.SmallButton("Repair") then
-                                yu.rif(function()
-                                    if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
-                                        local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
-                                        VEHICLE.SET_VEHICLE_FIXED(veh)
-                                        VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Delete") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
-                                        ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
-                                        VEHICLE.DELETE_VEHICLE(veh)
-                                        if yu.does_entity_exist(veh) then
-                                            ENTITY.DELETE_ENTITY(veh)
-                                        end
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Halt") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Engine off") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        yu.request_entity_control_once(veh)
-                                        VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Kill engine") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_ENGINE_HEALTH(veh, -4000)
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Launch") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Boost") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, VEHICLE.GET_VEHICLE_ESTIMATED_MAX_SPEED(veh))
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Halt") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_MAX_SPEED(veh, .1)
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Burst tires") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_TYRES_CAN_BURST(veh, true)
-                                        yu.loop(8, function(i)
-                                            VEHICLE.SET_VEHICLE_TYRE_BURST(veh, i, true, 1000);
-                                        end)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Smash windows") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        yu.loop(8, function(i)
-                                            VEHICLE.SMASH_VEHICLE_WINDOW(veh, i)
-                                        end)
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Kick from vehicle") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        TASK.TASK_LEAVE_VEHICLE(player.ped, veh, 0)
-                                    end
-                                end)
-                            end
-                            yu.rendering.tooltip("Doesn't work well")
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Flip") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
-                                        rot.y = rot.y + 180
-                                        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
-                                    end
-                                end)
-                            end
-
-                            ImGui.SameLine()
-
-                            if ImGui.SmallButton("Rotate") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        local rot = ENTITY.GET_ENTITY_ROTATION(veh, 2)
-                                        rot.z = rot.z + 180
-                                        ENTITY.SET_ENTITY_ROTATION(veh, rot.x, rot.y, rot.z, 2, false)
-                                    end
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Lock them inside") then
-                                yu.rif(function()
-                                    local veh = yu.veh(player.ped)
-                                    if veh ~= nil and entities.take_control_of(veh) then
-                                        VEHICLE.SET_VEHICLE_DOORS_LOCKED(veh, 4)
-                                    end
-                                end)
-                            end
-
-                            ImGui.TreePop()
-                        end
-
-                        if ImGui.TreeNodeEx("Online") then
-                            ImGui.PushItemWidth(243)
-                            if ImGui.BeginCombo("##online_player_pickups", a.pickupoption) then
-                                for k, v in pairs(a.pickupoptions) do
-                                    if ImGui.Selectable(k, false) then
-                                        a.pickupoption = k
-                                    end
-                                    yu.rendering.tooltip(v)
-                                end
-                                ImGui.EndCombo()
-                            end
-                            ImGui.PopItemWidth()
-
-                            ImGui.SameLine()
-
-                            ImGui.PushItemWidth(35)
-                            local par = yu.rendering.input("int", {
-                                label = "##pa",
-                                value = a.pickupamount
-                            })
-                            yu.rendering.tooltip("How many times the pickup should get spawned")
-                            SussySpt.push_disable_controls(ImGui.IsItemActive())
-                            ImGui.PopItemWidth()
-                            if par ~= nil and par.changed then
-                                a.pickupamount = par.value
-                            end
-
-                            if not a.givepickupblocked then
                                 ImGui.SameLine()
-                                if ImGui.Button("Give pickup") then
-                                    a.givepickupblocked = true
-                                    yu.rif(function(rs)
-                                        local value = a.pickupoptions[a.pickupoption]
-                                        if yu.is_num_between(a.pickupamount, 0, 20) and type(value) == "string" then
-                                            local hash = joaat(value)
-                                            if STREAMING.IS_MODEL_VALID(hash) then
-                                                STREAMING.REQUEST_MODEL(hash)
-                                                repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                                yu.loop(a.pickupamount, function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                                    OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                                    rs:sleep(4)
-                                                end)
-                                            end
-                                        end
-                                        a.givepickupblocked = nil
-                                    end)
-                                end
-                            end
 
-                            ImGui.PushItemWidth(78)
-
-                            local car = yu.rendering.input("int", {
-                                label = "##ca",
-                                value = a.cashamount
-                            })
-                            yu.rendering.tooltip("How much cash to spawn")
-                            SussySpt.push_disable_controls(ImGui.IsItemActive())
-                            if car ~= nil and car.changed then
-                                a.cashamount = car.value
-                            end
-
-                            ImGui.SameLine()
-
-                            local cvr = yu.rendering.input("int", {
-                                label = "##cv",
-                                value = a.cashvalue
-                            })
-                            yu.rendering.tooltip("How much money per cash")
-                            SussySpt.push_disable_controls(ImGui.IsItemActive())
-                            if cvr ~= nil and cvr.changed then
-                                a.cashvalue = cvr.value
-                            end
-
-                            ImGui.PopItemWidth()
-
-                            ImGui.SameLine()
-
-                            if ImGui.Button("Spawn cash") then
-                                yu.rif(function()
-                                    if yu.is_num_between(a.cashamount, 0, 10000) then
-                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
-                                        OBJECT.CREATE_MONEY_PICKUPS(c.x, c.y, c.z, a.cashvalue, a.cashamount, 2628187989)
-                                    end
-                                end)
-                            end
-
-                            ImGui.TreePop()
-                        end
-                    end
-
-                    ImGui.EndGroup()
-                end
-            end
-
-            tab.sub[1] = tab2
-        end
-
-        do -- Stats
-            local a = {
-                abilities = {
-                    "Stamina", "Strength", "Shooting",
-                    "Stealth", "Flying", "Driving",
-                    "Diving", "Mental State"
-                },
-                abilitystats = {
-                    "STAMINA", "STRENGTH", "SHOOTING_ABILITY",
-                    "STEALTH_ABILITY", "FLYING_ABILITY",
-                    "WHEELIE_ABILITY", "LUNG_CAPACITY",
-                    "PLAYER_MENTAL_STATE"
-                }
-            }
-
-            local function refreshAbilityValues()
-                local mpx = yu.mpx()
-                a.abilitiyvalues = {}
-                a.abilitiynewvalues = {}
-                for k, v in pairs(a.abilitystats) do
-                    if k == 8 then
-                        a.abilitiyvalues[k] = stats.get_float(mpx..v)
-                    else
-                        a.abilitiyvalues[k] = stats.get_int(mpx..v)
-                    end
-                end
-            end
-
-            local function refresh()
-                refreshAbilityValues()
-            end
-            yu.rif(refresh)
-
-            tab.sub[2] = (function()
-                return SussySpt.rendering.new_tab("Stats", function()
-                    if ImGui.TreeNodeEx("Abilities") then
-                        if ImGui.SmallButton("Refresh##abilities") then
-                            yu.rif(refreshAbilityValues)
-                        end
-
-                        ImGui.Spacing()
-
-                        ImGui.PushItemWidth(331)
-                        for k, v in pairs(a.abilities) do
-                            local newValue, changed = ImGui.DragInt(v, a.abilitiynewvalues[k] or a.abilitiyvalues[k], .2, 0, 100, "%d", 5)
-                            if changed then
-                                a.abilitiynewvalues[k] = newValue
-                            end
-
-                            if a.abilitiynewvalues[k] ~= nil then
-                                ImGui.SameLine()
-                                if ImGui.SmallButton("Apply##abilities_"..k) then
+                                if ImGui.Button("Set") then
                                     yu.rif(function()
-                                        local stat = yu.mpx(a.abilitystats[k])
-                                        if k == 8 then
-                                            stats.set_float(stat, a.abilitiynewvalues[k])
+                                        if yu.is_num_between(a.pumpkinspickedup, 0, 199) then
+                                            globals.set_int(SussySpt.pointers.halloween_pumpkin_picked_up, a.pumpkinspickedup)
                                         else
-                                            stats.set_int(stat, a.abilitiynewvalues[k])
+                                            yu.notify(3, "Invalid number! Number must be between 0 and 199", "Online->Stats")
                                         end
-                                        refreshAbilityValues()
                                     end)
                                 end
                             end
-                        end
-                        ImGui.PopItemWidth()
 
-                        ImGui.TreePop()
+                            ImGui.TreePop()
+                        end
+                    end)
+                end)()
+            end
+
+            do -- ANCHOR Chatlog
+                local tab2 = SussySpt.rendering.new_tab("Chatlog")
+
+                yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
+                yu.rendering.setCheckboxChecked("online_chatlog_console", true)
+                yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
+
+                tab2.render = function()
+                    if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
+                        ImGui.Spacing()
+                        yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
                     end
 
-                    if ImGui.TreeNodeEx("Badsport") then
-                        if ImGui.SmallButton("Add##badsport") then
+                    if SussySpt.chatlog.text ~= nil then
+                        if ImGui.TreeNodeEx("Logs") then
+                            yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
+
+                            ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                            SussySpt.push_disable_controls(ImGui.IsItemActive())
+
+                            ImGui.TreePop()
+                        end
+                    else
+                        ImGui.Spacing()
+                        ImGui.Text("Nothing to show yet")
+                    end
+                end
+
+                tab.sub[3] = tab2
+            end
+
+            do -- ANCHOR CMM
+                local tab2 = SussySpt.rendering.new_tab("CMM")
+
+                local a = {
+                    apps = {
+                        ["appsecuroserv"] = "SecuroServ (Office)",
+                        ["appbusinesshub"] = "Nightclub",
+                        ["appAvengerOperations"] = "Avenger Operations",
+                        ["appfixersecurity"] = "Agency",
+                        ["appinternet"] = "Internet (Phone)",
+                        ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
+                        ["appbunkerbusiness"] = "Bunker Business",
+                        ["apphackertruck"] = "Terrorbyte",
+                        ["appbikerbusiness"] = "The Open Road (MC)",
+                        ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
+                    }
+                }
+
+                local function runScript(name)
+                    yu.rif(function(rs)
+                        SCRIPT.REQUEST_SCRIPT(name)
+                        repeat rs:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
+                        SYSTEM.START_NEW_SCRIPT(name, 5000)
+                        SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
+                    end)
+                end
+
+                tab2.render = function()
+                    ImGui.Text("Works best when low ping / session host")
+
+                    for k, v in pairs(a.apps) do
+                        if ImGui.Button(v) then
                             yu.rif(function()
-                                stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
-                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", -1)
-                                stats.set_float("MPPLY_OVERALL_BADSPORT", 60000)
-                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", true)
+                                runScript(k)
                             end)
+                        end
+                    end
+                end
+
+                tab.sub[4] = tab2
+            end
+
+            do -- ANCHOR Unlocks
+                local tab2 = SussySpt.rendering.new_tab("Unlocks")
+
+                local a = {
+                    tabBarId = "##self_tabbar",
+                    rpmultiplierp = 262146,
+                    rank = -1
+                }
+
+                local crew = 1
+                local crewRank = 0
+                local minCrewRank = 0
+                local checkingCrewRank = false
+
+                function getCrewRankByXp(xp)
+                    local rank = 0
+                    for k, v in pairs(yu.xp_for_crew_rank()) do
+                        if v < xp then
+                            rank = k
+                        else
+                            return rank
+                        end
+                    end
+                    return rank
+                end
+
+                function updateCrewRank()
+                    if not checkingCrewRank then
+                        checkingCrewRank = true
+                        yu.add_task(function()
+                            crewRank = getCrewRankByXp(stats.get_int("MPPLY_CREW_LOCAL_XP_"..crew))
+                            minCrewRank = crewRank
+                            checkingCrewRank = false
+                        end)
+                    end
+                end
+
+                yu.add_task(updateCrewRank)
+
+                function renderCrewRank()
+                    ImGui.Text("Crew rank")
+
+                    local crewNewValue, crewChanged = ImGui.SliderInt("Crew", crew, 0, 4)
+                    if crewChanged then
+                        crew = crewNewValue
+                        updateCrewRank()
+                    end
+                    yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews.")
+
+                    local rankNewValue, rankChanged = ImGui.SliderInt("Rank", crewRank, minCrewRank, 8000)
+                    if rankChanged then
+                        crewRank = rankNewValue
+                    end
+                    yu.rendering.tooltip("You can't go down again!")
+
+                    if ImGui.Button("Set") then
+                        yu.add_task(function()
+                            if crewRank >= minCrewRank then
+                                stats.set_int("MPPLY_CREW_LOCAL_XP_"..crew, yu.xp_for_crew_rank()[crewRank] + 100)
+                                yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
+                                yu.notify(1, "Set rank to "..crewRank.."!!!!1 :DDD", "It's fine... No ban!!!11")
+                            end
+                            updateCrewRank()
+                        end)
+                    end
+                end
+
+                local much = {
+                    ints = {
+                        ["CHAR_XP_FM"]=2165850,["SAWNOFF_ENEMY_KILLS"]=600,["SCRIPT_INCREASE_STAM"]=100,["SCRIPT_INCREASE_STRN"]=100,["SCRIPT_INCREASE_LUNG"]=100,
+                        ["SCRIPT_INCREASE_DRIV"]=100,["SCRIPT_INCREASE_FLY"]=100,["SCRIPT_INCREASE_SHO"]=100,["SCRIPT_INCREASE_STL"]=100,["RACES_WON"]=100,
+                        ["PISTOL_KILLS"]=600,["CMBTPISTOL_KILLS"]=600,["APPISTOL_KILLS"]=600,["MICROSMG_KILLS"]=600,["SMG_KILLS"]=600,["ASLTSHTGN_KILLS"]=600,
+                        ["PUMP_KILLS"]=600,["GRNLAUNCH_KILLS"]=600,["RPG_KILLS"]=600,["MINIGUNS_KILLS"]=600,["ASLTSMG_KILLS"]=600,["ASLTRIFLE_KILLS"]=600,
+                        ["CRBNRIFLE_KILLS"]=600,["ADVRIFLE_KILLS"]=600,["HVYSNIPER_KILLS"]=600,["SNIPERRFL_KILLS"]=600,["MG_KILLS"]=600,["CMBTMG_KILLS"]=600,
+                        ["PISTOL_ENEMY_KILLS"]=600,["CMBTPISTOL_ENEMY_KILLS"]=600,["APPISTOL_ENEMY_KILLS"]=600,["MICROSMG_ENEMY_KILLS"]=600,["SMG_ENEMY_KILLS"]=600,
+                        ["ASLTSHTGN_ENEMY_KILLS"]=600,["PUMP_ENEMY_KILLS"]=600,["GRNLAUNCH_ENEMY_KILLS"]=600,["RPG_ENEMY_KILLS"]=600,["MINIGUNS_ENEMY_KILLS"]=600,
+                        ["ASLTSMG_ENEMY_KILLS"]=600,["ASLTRIFLE_ENEMY_KILLS"]=600,["CRBNRIFLE_ENEMY_KILLS"]=600,["ADVRIFLE_ENEMY_KILLS"]=600,
+                        ["HVYSNIPER_ENEMY_KILLS"]=600,["SNIPERRFL_ENEMY_KILLS"]=600,["MG_ENEMY_KILLS"]=600,["CMBTMG_ENEMY_KILLS"]=600,["AWD_ENEMYDRIVEBYKILLS"]=600,
+                        ["USJS_COMPLETED"]=50,["USJS_FOUND"]=50,["DB_PLAYER_KILLS"]=1000,["KILLS_PLAYERS"]=1000,["AWD_FMHORDWAVESSURVIVE"]=21,
+                        ["AWD_CAR_BOMBS_ENEMY_KILLS"]=25,["AWD_FM_TDM_MVP"]=60,["AWD_HOLD_UP_SHOPS"]=20,["AWD_RACES_WON"]=101,["AWD_NO_ARMWRESTLING_WINS"]=21,
+                        ["AWD_FMBBETWIN"]=50000,["AWD_FM_DM_TOTALKILLS"]=500,["MPPLY_DM_TOTAL_DEATHS"]=412,["MPPLY_TIMES_FINISH_DM_TOP_3"]=36,
+                        ["PLAYER_HEADSHOTS"]=623,["AWD_FM_DM_WINS"]=63,["AWD_FM_TDM_WINS"]=13,["AWD_FM_GTA_RACES_WON"]=12,["AWD_FM_GOLF_WON"]=2,
+                        ["AWD_FM_SHOOTRANG_TG_WON"]=2,["AWD_FM_SHOOTRANG_RT_WON"]=2,["AWD_FM_SHOOTRANG_CT_WON"]=2,["AWD_FM_SHOOTRANG_GRAN_WON"]=2,
+                        ["AWD_FM_TENNIS_WON"]=2,["MPPLY_TENNIS_MATCHES_WON"]=2,["MPPLY_TOTAL_TDEATHMATCH_WON"]=63,["MPPLY_TOTAL_RACES_WON"]=101,
+                        ["MPPLY_TOTAL_DEATHMATCH_LOST"]=23,["MPPLY_TOTAL_RACES_LOST"]=36,["AWD_25_KILLS_STICKYBOMBS"]=50,["AWD_50_KILLS_GRENADES"]=50,
+                        ["GRENADE_ENEMY_KILLS"]=50,["AWD_20_KILLS_MELEE"]=50,["AWD_FMRALLYWONDRIVE"]=2,["AWD_FMWINSEARACE"]=2,["AWD_FMWINAIRRACE"]=2,
+                        ["NUMBER_TURBO_STARTS_IN_RACE"]=100,["AWD_FM_RACES_FASTEST_LAP"]=101,["NUMBER_SLIPSTREAMS_IN_RACE"]=105,["MPPLY_OVERALL_CHEAT"]=0,
+                        ["LAP_DANCED_BOUGHT"]=50,["AWD_FMKILLBOUNTY"]=50,["AWD_FMREVENGEKILLSDM"]=60,["AWD_SECURITY_CARS_ROBBED"]=40,["CHAR_KIT_FM_PURCHASE"]=-1,
+                        ["CHAR_KIT_FM_PURCHASE2"]=-1,["CHAR_KIT_FM_PURCHASE3"]=-1,["CHAR_KIT_FM_PURCHASE4"]=-1,["CHAR_KIT_FM_PURCHASE5"]=-1,
+                        ["CHAR_KIT_FM_PURCHASE6"]=-1,["CHAR_KIT_FM_PURCHASE7"]=-1,["CHAR_KIT_FM_PURCHASE8"]=-1,["CHAR_KIT_FM_PURCHASE9"]=-1,
+                        ["CHAR_KIT_FM_PURCHASE10"]=-1,["CHAR_KIT_FM_PURCHASE11"]=-1,["CHAR_KIT_FM_PURCHASE12"]=-1,["CHAR_KIT_1_FM_UNLCK"]=-1,
+                        ["CHAR_KIT_2_FM_UNLCK"]=-1,["CHAR_KIT_3_FM_UNLCK"]=-1,["CHAR_KIT_4_FM_UNLCK"]=-1,["CHAR_KIT_5_FM_UNLCK"]=-1,["CHAR_KIT_6_FM_UNLCK"]=-1,
+                        ["CHAR_KIT_7_FM_UNLCK"]=-1,["CHAR_KIT_8_FM_UNLCK"]=-1,["CHAR_KIT_9_FM_UNLCK"]=-1,["CHAR_KIT_10_FM_UNLCK"]=-1,["CHAR_KIT_11_FM_UNLCK"]=-1,
+                        ["CHAR_KIT_12_FM_UNLCK"]=-1,["races_won"]=100,["number_turbo_starts_in_race"]=100,["usjs_found"]=50,["usjs_completed"]=50,
+                        ["awd_fmwinairrace"]=50,["awd_fmwinsearace"]=50,["awd_fmrallywonnav"]=50,["awd_fmrallywondrive"]=500,["awd_fm_races_fastest_lap"]=500,
+                        ["char_fm_carmod_0_unlck"]=-1,["char_fm_carmod_1_unlck"]=-1,["char_fm_carmod_2_unlck"]=-1,["char_fm_carmod_3_unlck"]=-1,
+                        ["char_fm_carmod_4_unlck"]=-1,["char_fm_carmod_5_unlck"]=-1,["char_fm_carmod_6_unlck"]=-1,["char_fm_carmod_7_unlck"]=-1,
+                        ["CHAR_FM_VEHICLE_1_UNLCK"]=-1,["CHAR_FM_VEHICLE_2_UNLCK"]=-1,["CHAR_FM_ABILITY_1_UNLCK"]=-1,["CHAR_FM_ABILITY_2_UNLCK"]=-1,
+                        ["CHAR_FM_ABILITY_3_UNLCK"]=-1,["CHAR_FM_PACKAGE_1_COLLECT"]=-1,["CHAR_FM_PACKAGE_2_COLLECT"]=-1,["CHAR_FM_PACKAGE_3_COLLECT"]=-1,
+                        ["CHAR_FM_PACKAGE_4_COLLECT"]=-1,["CHAR_FM_PACKAGE_5_COLLECT"]=-1,["CHAR_FM_PACKAGE_6_COLLECT"]=-1,["CHAR_FM_PACKAGE_7_COLLECT"]=-1,
+                        ["CHAR_FM_PACKAGE_8_COLLECT"]=-1,["CHAR_FM_PACKAGE_9_COLLECT"]=-1,["CHAR_FM_HEALTH_1_UNLCK"]=-1,["CHAR_FM_HEALTH_2_UNLCK"]=-1,
+                        ["CHEAT_BITSET"]=0,["MPPLY_TIMES_RACE_BEST_LAP"]=120,["MPPLY_REPORT_STRENGTH"]=32,["MPPLY_COMMEND_STRENGTH"]=100,["MPPLY_FRIENDLY"]=100,
+                        ["MPPLY_HELPFUL"]=100,["MPPLY_GRIEFING"]=0,["MPPLY_OFFENSIVE_LANGUAGE"]=0,["MPPLY_OFFENSIVE_UGC"]=0,["MPPLY_VC_HATE"]=0,
+                        ["MPPLY_GAME_EXPLOITS"]=0,["MPPLY_ISPUNISHED"]=0
+                    },
+                    bools = {
+                        "AWD_FMPICKUPDLCCRATE1ST","AWD_FMRACEWORLDRECHOLDER","AWD_FMWINALLRACEMODES","AWD_FMWINEVERYGAMEMODE","AWD_FMATTGANGHQ",
+                        "AWD_FMFULLYMODDEDCAR","AWD_FMMOSTKILLSSURVIVE","AWD_FMKILL3ANDWINGTARACE"
+                    }
+                }
+
+                tab2.render = function()
+                    if SussySpt.dev then
+                        local rankNewValue, rankChanged = ImGui.InputInt("Rank", a.rank, a.rank, 8000, 8)
+                        if rankChanged then
+                            a.rank = rankNewValue
                         end
 
                         ImGui.SameLine()
 
-                        if ImGui.SmallButton("Remove##badsport") then
-                            yu.rif(function()
-                                stats.set_int("MPPLY_BADSPORT_MESSAGE", 0)
-                                stats.set_int("MPPLY_BECAME_BADSPORT_NUM", 0)
-                                stats.set_float("MPPLY_OVERALL_BADSPORT", 0)
-                                stats.set_bool("MPPLY_CHAR_IS_BADSPORT", false)
+                        if ImGui.Button("Apply##rank") then
+                            yu.add_task(function()
+                                if a.rank >= 0 and a.rank <= 8000 then
+                                    local newRP = globals.get_int(294329 + a.rank) + 100
+                                    log.info(a.rank..": "..newRP)
+                                    -- stats.set_int("MP"..yu.playerindex(2).."_CHAR_SET_RP_GIFT_ADMIN", newRP)
+                                else
+                                    yu.notify(3, "Invalid rank ["..a.rank.."] 0-8000", "Rank correction")
+                                end
                             end)
                         end
 
-                        ImGui.TreePop()
+                        if ImGui.Button("Give RP") then
+                            yu.rif(function(runscript)
+                                -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
+                                PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
+                                -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
+                                log.info("ok")
+                                -- runscript:sleep(1000)
+                                -- PLAYER.SET_PLAYER_WANTED_LEVEL(yu.pid(), oldLvl, false)
+                            end)
+                        end
                     end
 
-                    if ImGui.TreeNodeEx("Bounty") then
-                        if ImGui.SmallButton("Remove bounty") then
-                            yu.rif(function()
-                                globals.set_int(SussySpt.pointers.bounty_self_time, 2880000)
-                            end)
-                        end
 
-                        ImGui.TreePop()
-                    end
-
-                    if ImGui.TreeNodeEx("Jack O' Lantern") then
-                        if ImGui.SmallButton("Unlock Mask") then
-                            yu.rif(function()
-                                globals.set_int(SussySpt.pointers.halloween_unlock, 9)
-                            end)
-                        end
-
-                        if ImGui.SmallButton("Unlock T-Shirt") then
-                            yu.rif(function()
-                                globals.set_int(SussySpt.pointers.halloween_unlock, 199)
-                            end)
-                        end
-
-                        ImGui.Spacing()
-
-                        do
-                            ImGui.PushItemWidth(150)
-                            local resp = yu.rendering.input("int", {
-                                label = "##pumpkin",
-                                value = a.pumpkinspickedup or 1
-                            })
-                            ImGui.PopItemWidth()
-                            if resp ~= nil and resp.changed then
-                                a.pumpkinspickedup = resp.value
+                    if ImGui.Button("Max all stats") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            for k, v in pairs({"SCRIPT_INCREASE_DRIV","SCRIPT_INCREASE_FLY",
+                                "SCRIPT_INCREASE_LUNG","SCRIPT_INCREASE_SHO","SCRIPT_INCREASE_STAM",
+                                "SCRIPT_INCREASE_STL","SCRIPT_INCREASE_STRN"}) do
+                                stats.set_int(mpx..v, 100)
                             end
-
-                            ImGui.SameLine()
-
-                            if ImGui.Button("Set") then
-                                yu.rif(function()
-                                    if yu.is_num_between(a.pumpkinspickedup, 0, 199) then
-                                        globals.set_int(SussySpt.pointers.halloween_pumpkin_picked_up, a.pumpkinspickedup)
-                                    else
-                                        yu.notify(3, "Invalid number! Number must be between 0 and 199", "Online->Stats")
-                                    end
-                                end)
-                            end
-                        end
-
-                        ImGui.TreePop()
+                        end)
                     end
-                end)
-            end)()
-        end
 
-        do -- Chatlog
-            local tab2 = SussySpt.rendering.new_tab("Chatlog")
-
-            yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
-            yu.rendering.setCheckboxChecked("online_chatlog_console", true)
-            yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
-
-            tab2.render = function()
-                if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
-                    ImGui.Spacing()
-                    yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
-                end
-
-                if SussySpt.chatlog.text ~= nil then
-                    if ImGui.TreeNodeEx("Logs") then
-                        yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
-
-                        ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
-                        SussySpt.push_disable_controls(ImGui.IsItemActive())
-
-                        ImGui.TreePop()
-                    end
-                else
-                    ImGui.Spacing()
-                    ImGui.Text("Nothing to show yet")
-                end
-            end
-
-            tab.sub[3] = tab2
-        end
-
-        do -- CMM
-            local tab2 = SussySpt.rendering.new_tab("CMM")
-
-            local a = {
-                apps = {
-                    ["appsecuroserv"] = "SecuroServ (Office)",
-                    ["appbusinesshub"] = "Nightclub",
-                    ["appAvengerOperations"] = "Avenger Operations",
-                    ["appfixersecurity"] = "Agency",
-                    ["appinternet"] = "Internet (Phone)",
-                    ["apparcadebusinesshub"] = "Mastercontrol (Arcade)",
-                    ["appbunkerbusiness"] = "Bunker Business",
-                    ["apphackertruck"] = "Terrorbyte",
-                    ["appbikerbusiness"] = "The Open Road (MC)",
-                    ["appsmuggler"] = "Free Trade Shipping Co. (Hangar)",
-                }
-            }
-
-            local function runScript(name)
-                yu.rif(function(rs)
-                    SCRIPT.REQUEST_SCRIPT(name)
-                    repeat rs:yield() until SCRIPT.HAS_SCRIPT_LOADED(name)
-                    SYSTEM.START_NEW_SCRIPT(name, 5000)
-                    SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(name)
-                end)
-            end
-
-            tab2.render = function()
-                ImGui.Text("Works best when low ping / session host")
-
-                for k, v in pairs(a.apps) do
-                    if ImGui.Button(v) then
+                    if ImGui.Button("Unlock all achievements") then
                         yu.rif(function()
-                            runScript(k)
+                            yu.loop(59, function(i)
+                                if not PLAYER.HAS_ACHIEVEMENT_BEEN_PASSED(i) then
+                                    PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
+                                end
+                            end)
                         end)
                     end
+
+                    if ImGui.Button("Unlock xmas liveries") then
+                        yu.add_task(function()
+                            stats.set_int("MPPLY_XMASLIVERIES", -1)
+                            for i = 1, 20 do
+                                stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock LSCarMeet podium prize") then
+                        yu.add_task(function()
+                            stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
+                            stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
+                        end)
+                    end
+                    yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
+
+                    if ImGui.Button("LSCarMeet unlocks") then
+                        yu.add_task(function()
+                            for i = 293419, 293446 do
+                                globals.set_float(i, 100000)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock flightschool stuff") then
+                        yu.add_task(function()
+                            stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
+                            for i = 0, 9 do
+                                stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_"..i , -1)
+                                stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_"..i, -1)
+                                stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_"..i, true)
+                            end
+                        end)
+                    end
+                    yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
+
+                    if ImGui.Button("Unlock shooting range") then
+                        yu.add_task(function()
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690)
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_4", 2660)
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_5", 2650)
+                            stats.set_int(yu.mpx().."SR_HIGHSCORE_6", 450)
+                            stats.set_int(yu.mpx().."SR_TARGETS_HIT", 269)
+                            stats.set_int(yu.mpx().."SR_WEAPON_BIT_SET", -1)
+                            stats.set_bool(yu.mpx().."SR_TIER_1_REWARD", true)
+                            stats.set_bool(yu.mpx().."SR_TIER_3_REWARD", true)
+                            stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
+                        end)
+                    end
+                    yu.rendering.tooltip("Bunker thingy")
+
+                    if ImGui.Button("Unlock trade prices for arenawar vehicles") then
+                        yu.add_task(function()
+                            for i = 1, 16 do
+                                stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                            end
+                            for i = 11, 19 do
+                                stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL2", true, i)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock colored headlights") then
+                        yu.add_task(function()
+                            for i = 18, 29 do
+                                stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock fast run and reload") then
+                        yu.add_task(function()
+                            for i = 1, 3 do
+                                stats.set_int(yu.mpx().."CHAR_ABILITY_"..i.."_UNLCK", -1)
+                                stats.set_int(yu.mpx().."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
+                            end
+                        end)
+                    end
+                    yu.rendering.tooltip("Makes you run and reload weapons faster")
+
+                    if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
+                        yu.add_task(function()
+                            globals.set_int(262145 + 34131, 0)
+                            globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
+                            globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock all tattos") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
+                            for i = 0, 47 do
+                                stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("CEO & MC money clutter") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            for k, v in pairs({
+                                ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
+                                ["LIFETIME_BIKER_BUY_UNDERTA"]=1000,["LIFETIME_BIKER_SELL_COMPLET"]=1000,["LIFETIME_BIKER_SELL_UNDERTA"]=1000,["LIFETIME_BIKER_BUY_COMPLET1"]=1000,["LIFETIME_BIKER_BUY_UNDERTA1"]=1000,
+                                ["LIFETIME_BIKER_SELL_COMPLET1"]=1000,["LIFETIME_BIKER_SELL_UNDERTA1"]=1000,["LIFETIME_BIKER_BUY_COMPLET2"]=1000,["LIFETIME_BIKER_BUY_UNDERTA2"]=1000,["LIFETIME_BIKER_SELL_COMPLET2"]=1000,
+                                ["LIFETIME_BIKER_SELL_UNDERTA2"]=1000,["LIFETIME_BIKER_BUY_COMPLET3"]=1000,["LIFETIME_BIKER_BUY_UNDERTA3"]=1000,["LIFETIME_BIKER_SELL_COMPLET3"]=1000,["LIFETIME_BIKER_SELL_UNDERTA3"]=1000,
+                                ["LIFETIME_BIKER_BUY_COMPLET4"]=1000,["LIFETIME_BIKER_BUY_UNDERTA4"]=1000,["LIFETIME_BIKER_SELL_COMPLET4"]=1000,["LIFETIME_BIKER_SELL_UNDERTA4"]=1000,["LIFETIME_BIKER_BUY_COMPLET5"]=1000,
+                                ["LIFETIME_BIKER_BUY_UNDERTA5"]=1000,["LIFETIME_BIKER_SELL_COMPLET5"]=1000,["LIFETIME_BIKER_SELL_UNDERTA5"]=1000,["LIFETIME_BKR_SELL_EARNINGS0"]=20000000,["LIFETIME_BKR_SELL_EARNINGS1"]=20000000,
+                                ["LIFETIME_BKR_SELL_EARNINGS2"]=20000000,["LIFETIME_BKR_SELL_EARNINGS3"]=20000000,["LIFETIME_BKR_SELL_EARNINGS4"]=20000000,["LIFETIME_BKR_SELL_EARNINGS5"]=20000000,["LFETIME_IE_EXPORT_COMPLETED"]=1000,
+                                ["LFETIME_IE_MISSION_EARNINGS"]=20000000,["LFETIME_HANGAR_EARNINGS"]=20000000,["BKR_PROD_STOP_COUT_S1_0"]=500,["BKR_PROD_STOP_COUT_S2_0"]=500,["BKR_PROD_STOP_COUT_S3_0"]=500,
+                                ["LIFETIME_BKR_SELL_UNDERTABC"]=500,["LIFETIME_BKR_SELL_COMPLETBC"]=500,["LFETIME_BIKER_BUY_UNDERTA1"]=500,["LFETIME_BIKER_BUY_COMPLET1"]=500,["LFETIME_BIKER_SELL_UNDERTA1"]=500,
+                                ["LFETIME_BIKER_SELL_COMPLET1"]=500,["LIFETIME_BKR_SEL_UNDERTABC1"]=500,["LIFETIME_BKR_SEL_COMPLETBC1"]=500,["BKR_PROD_STOP_COUT_S1_1"]=500,["BKR_PROD_STOP_COUT_S2_1"]=500,["BKR_PROD_STOP_COUT_S3_1"]=500,
+                                ["LFETIME_BIKER_BUY_UNDERTA2"]=500,["LFETIME_BIKER_BUY_COMPLET2"]=500,["LFETIME_BIKER_SELL_UNDERTA2"]=500,["LFETIME_BIKER_SELL_COMPLET2"]=500,["LIFETIME_BKR_SEL_UNDERTABC2"]=500,
+                                ["LIFETIME_BKR_SEL_COMPLETBC2"]=500,["BKR_PROD_STOP_COUT_S1_2"]=500,["BKR_PROD_STOP_COUT_S2_2"]=500,["BKR_PROD_STOP_COUT_S3_2"]=500,["LFETIME_BIKER_BUY_UNDERTA3"]=500,["LFETIME_BIKER_BUY_COMPLET3"]=500,
+                                ["LFETIME_BIKER_SELL_UNDERTA3"]=500,["LFETIME_BIKER_SELL_COMPLET3"]=500,["LIFETIME_BKR_SEL_UNDERTABC3"]=500,["LIFETIME_BKR_SEL_COMPLETBC3"]=500,["BKR_PROD_STOP_COUT_S1_3"]=500,["BKR_PROD_STOP_COUT_S2_3"]=500,
+                                ["BKR_PROD_STOP_COUT_S3_3"]=500,["LFETIME_BIKER_BUY_UNDERTA4"]=500,["LFETIME_BIKER_BUY_COMPLET4"]=500,["LFETIME_BIKER_SELL_UNDERTA4"]=500,["LFETIME_BIKER_SELL_COMPLET4"]=500,["LIFETIME_BKR_SEL_UNDERTABC4"]=500,
+                                ["LIFETIME_BKR_SEL_COMPLETBC4"]=500,["BKR_PROD_STOP_COUT_S1_4"]=500,["BKR_PROD_STOP_COUT_S2_4"]=500,["BKR_PROD_STOP_COUT_S3_4"]=500,["LFETIME_BIKER_BUY_UNDERTA5"]=500,["LFETIME_BIKER_BUY_COMPLET5"]=500,
+                                ["LIFETIME_BKR_SEL_UNDERTABC5"]=500,["LIFETIME_BKR_SEL_COMPLETBC5"]=500,["LFETIME_BIKER_SELL_UNDERTA5"]=500,["LFETIME_BIKER_SELL_COMPLET5"]=500,["BUNKER_UNITS_MANUFAC"]=500,["LFETIME_HANGAR_BUY_UNDETAK"]=500,
+                                ["LFETIME_HANGAR_BUY_COMPLET"]=500,["LFETIME_HANGAR_SEL_UNDETAK"]=500,["LFETIME_HANGAR_SEL_COMPLET"]=500,["LFETIME_HANGAR_EARN_BONUS"]=1598746,["RIVAL_HANGAR_CRATES_STOLEN"]=500,["LFETIME_IE_STEAL_STARTED"]=500,
+                                ["LFETIME_IE_EXPORT_STARTED"]=500,["AT_FLOW_IMPEXP_NUM"]=500
+                            }) do
+                                stats.set_int(mpx..k, v)
+                            end
+                        end)
+                    end
+                    yu.rendering.tooltip("Money on floor")
+
+                    if ImGui.Button("Skip Lamar missions") then
+                        yu.add_task(function()
+                            stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
+                            stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
+                            stats.set_bool(yu.mpx().."LOW_FLOW_CS_FUN_SEEN", true)
+                            stats.set_bool(yu.mpx().."LOW_FLOW_CS_PHO_SEEN", true)
+                            stats.set_bool(yu.mpx().."LOW_FLOW_CS_FIN_SEEN", true)
+                            stats.set_bool(yu.mpx().."LOW_BEN_INTRO_CS_SEEN", true)
+                            stats.set_int(yu.mpx().."LOWRIDER_FLOW_COMPLETE", 4)
+                            stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_PROG", 9)
+                            stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_CALL", 9)
+                            stats.set_int(yu.mpx().."LOW_FLOW_CS_HELPTEXT", 66)
+                        end)
+                    end
+
+                    if ImGui.Button("Skip yacht missions") then
+                        yu.add_task(function()
+                            stats.set_int(yu.mpx("YACHT_MISSION_PROG"), 0)
+                            stats.set_int(yu.mpx("YACHT_MISSION_FLOW"), 21845)
+                            stats.set_int(yu.mpx("CASINO_DECORATION_GIFT_1"), -1)
+                        end)
+                    end
+
+                    if ImGui.Button("Skip ULP missions") then
+                        yu.add_task(function()
+                            stats.set_int(yu.mpx("ULP_MISSION_PROGRESS"), 127)
+                            stats.set_int(yu.mpx("ULP_MISSION_CURRENT"), 0)
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock LSC stuff & paints") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_1_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_2_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_3_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_4_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_5_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_6_UNLCK", -1)
+                            stats.set_int(mpx.."CHAR_FM_CARMOD_7_UNLCK", -1)
+                            stats.set_int(mpx.."AWD_WIN_CAPTURES", 50)
+                            stats.set_int(mpx.."AWD_DROPOFF_CAP_PACKAGES", 100)
+                            stats.set_int(mpx.."AWD_KILL_CARRIER_CAPTURE", 100)
+                            stats.set_int(mpx.."AWD_FINISH_HEISTS", 50)
+                            stats.set_int(mpx.."AWD_FINISH_HEIST_SETUP_JOB", 50)
+                            stats.set_int(mpx.."AWD_NIGHTVISION_KILLS", 100)
+                            stats.set_int(mpx.."AWD_WIN_LAST_TEAM_STANDINGS", 50)
+                            stats.set_int(mpx.."AWD_ONLY_PLAYER_ALIVE_LTS", 50)
+                            stats.set_int(mpx.."AWD_FMRALLYWONDRIVE", 25)
+                            stats.set_int(mpx.."AWD_FMRALLYWONNAV", 25)
+                            stats.set_int(mpx.."AWD_FMWINSEARACE", 25)
+                            stats.set_int(mpx.."AWD_RACES_WON", 50)
+                            stats.set_int(mpx.."MOST_FLIPS_IN_ONE_JUMP", 5)
+                            stats.set_int(mpx.."MOST_SPINS_IN_ONE_JUMP", 5)
+                            stats.set_int(mpx.."NUMBER_SLIPSTREAMS_IN_RACE", 100)
+                            stats.set_int(mpx.."NUMBER_TURBO_STARTS_IN_RACE", 50)
+                            stats.set_int(mpx.."RACES_WON", 50)
+                            stats.set_int(mpx.."USJS_COMPLETED", 50)
+                            stats.set_int(mpx.."AWD_FM_GTA_RACES_WON", 50)
+                            stats.set_int(mpx.."AWD_FM_RACE_LAST_FIRST", 25)
+                            stats.set_int(mpx.."AWD_FM_RACES_FASTEST_LAP", 50)
+                            stats.set_int(mpx.."AWD_FMBASEJMP", 25)
+                            stats.set_int(mpx.."AWD_FMWINAIRRACE", 25)
+                            stats.set_int("MPPLY_TOTAL_RACES_WON", 50)
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock phone contracts") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            stats.set_int(mpx.."FM_ACT_PHN", -1)
+                            stats.set_int(mpx.."FM_ACT_PH2", -1)
+                            stats.set_int(mpx.."FM_ACT_PH3", -1)
+                            stats.set_int(mpx.."FM_ACT_PH4", -1)
+                            stats.set_int(mpx.."FM_ACT_PH5", -1)
+                            stats.set_int(mpx.."FM_VEH_TX1", -1)
+                            stats.set_int(mpx.."FM_ACT_PH6", -1)
+                            stats.set_int(mpx.."FM_ACT_PH7", -1)
+                            stats.set_int(mpx.."FM_ACT_PH8", -1)
+                            stats.set_int(mpx.."FM_ACT_PH9", -1)
+                            stats.set_int(mpx.."FM_CUT_DONE", -1)
+                            stats.set_int(mpx.."FM_CUT_DONE_2", -1)
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock all trade prices") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            stats.set_int(mpx.."GANGOPS_FLOW_BITSET_MISS0", -1)
+                            stats.set_int(mpx.."LFETIME_HANGAR_BUY_UNDETAK", 42)
+                            stats.set_int(mpx.."LFETIME_HANGAR_BUY_COMPLET", 42)
+                            stats.set_int(mpx.."AT_FLOW_IMPEXP_NUM", 32)
+                            stats.set_int(mpx.."AT_FLOW_VEHICLE_BS", -1)
+                            stats.set_int(mpx.."WVM_FLOW_VEHICLE_BS", -1)
+                            stats.set_int(mpx.."H3_BOARD_DIALOGUE0", -1)
+                            stats.set_int(mpx.."H3_BOARD_DIALOGUE1", -1)
+                            stats.set_int(mpx.."H3_BOARD_DIALOGUE2", -1)
+                            stats.set_int(mpx.."H3_VEHICLESUSED", -1)
+                            stats.set_int(mpx.."WAM_FLOW_VEHICLE_BS", -1)
+                            stats.set_bool(mpx.."HELP_VEHUNHEISTISL", true)
+                            stats.set_bool(mpx.."HELP_VEHICLESUNLOCK", true)
+                            stats.set_bool(mpx.."HELP_VETO", true)
+                            stats.set_bool(mpx.."HELP_VETO2", true)
+                            stats.set_bool(mpx.."HELP_ITALIRSX", true)
+                            stats.set_bool(mpx.."HELP_BRIOSO2", true)
+                            stats.set_bool(mpx.."HELP_MANCHEZ2", true)
+                            stats.set_bool(mpx.."HELP_SLAMTRUCK", true)
+                            stats.set_bool(mpx.."HELP_VETIR", true)
+                            stats.set_bool(mpx.."HELP_SQUADDIE", true)
+                            stats.set_bool(mpx.."HELP_DINGY5", true)
+                            stats.set_bool(mpx.."HELP_VERUS", true)
+                            stats.set_bool(mpx.."HELP_WEEVIL", true)
+                            stats.set_bool(mpx.."HELP_VEHUNTUNER", true)
+                            stats.set_bool(mpx.."FIXER_VEH_HELP", true)
+                            stats.set_bool(mpx.."HELP_DOMINATOR7", true)
+                            stats.set_bool(mpx.."HELP_JESTER4", true)
+                            stats.set_bool(mpx.."HELP_FUTO2", true)
+                            stats.set_bool(mpx.."HELP_DOMINATOR8", true)
+                            stats.set_bool(mpx.."HELP_PREVION", true)
+                            stats.set_bool(mpx.."HELP_GROWLER", true)
+                            stats.set_bool(mpx.."HELP_COMET6", true)
+                            stats.set_bool(mpx.."HELP_VECTRE", true)
+                            stats.set_bool(mpx.."HELP_SULTAN3", true)
+                            stats.set_bool(mpx.."HELP_CYPHER", true)
+                            stats.set_bool(mpx.."HELP_VEHUNFIXER", true)
+                            stats.set_bool(mpx.."COMPLETE_H4_F_USING_VETIR", true)
+                            stats.set_bool(mpx.."COMPLETE_H4_F_USING_LONGFIN", true)
+                            stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
+                            stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
+                            stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
+                            if stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5 then
+                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
+                            end
+                            stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock bunker research (temp?)") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            for j = 0, 63 do
+                                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j)
+                                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j)
+                                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j)
+                                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j)
+                            end
+                            local bitSize = 8
+                            for j = 0, 64 / bitSize - 1 do
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
+                                stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
+                            end
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock diamond casino heist outfits") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL1", true, 63) -- Refuse Collectors
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 0) -- Undertakers
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 1) -- Valet Outfits
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 3) -- Prison Guards
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 4) -- FIB Suits
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 6) -- Gruppe Sechs Gear
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 7) -- Bugstars Uniforms
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 8) -- Maintenance
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 9) -- Yung Ancestors
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 10) -- Firefighter Gear
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 11) -- Orderly Armor
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 12) -- Upscale Armor
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 13) -- Evening Armor
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 14) -- Reinforced: Padded Combat
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 15) -- Reinforced: Bulk Combat
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 16) -- Reinforced: Compact Combat
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 17) -- Balaclava Crook
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 18) -- Classic Crook
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 19) -- High-end Crook
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 20) -- Infiltration: Upgraded Tech
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 21) -- Infiltration: Advanced Tech
+                            stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 22) -- Infiltration: Modernized Tech
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock guns") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+                            for i in pairs({
+                                    "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
+                                    "CHAR_WEAP_ADDON_2_UNLCK","CHAR_WEAP_ADDON_3_UNLCK","CHAR_WEAP_ADDON_4_UNLCK","CHAR_WEAP_FREE","CHAR_WEAP_FREE2",
+                                    "CHAR_FM_WEAP_FREE","CHAR_FM_WEAP_FREE2","CHAR_FM_WEAP_FREE3","CHAR_FM_WEAP_FREE4","CHAR_WEAP_PURCHASED",
+                                    "CHAR_WEAP_PURCHASED2","WEAPON_PICKUP_BITSET","WEAPON_PICKUP_BITSET2","CHAR_FM_WEAP_UNLOCKED","NO_WEAPONS_UNLOCK",
+                                    "NO_WEAPON_MODS_UNLOCK","NO_WEAPON_CLR_MOD_UNLOCK","CHAR_FM_WEAP_UNLOCKED2","CHAR_FM_WEAP_UNLOCKED3",
+                                    "CHAR_FM_WEAP_UNLOCKED4","CHAR_KIT_1_FM_UNLCK","CHAR_KIT_2_FM_UNLCK","CHAR_KIT_3_FM_UNLCK","CHAR_KIT_4_FM_UNLCK",
+                                    "CHAR_KIT_5_FM_UNLCK","CHAR_KIT_6_FM_UNLCK","CHAR_KIT_7_FM_UNLCK","CHAR_KIT_8_FM_UNLCK","CHAR_KIT_9_FM_UNLCK",
+                                    "CHAR_KIT_10_FM_UNLCK","CHAR_KIT_11_FM_UNLCK","CHAR_KIT_12_FM_UNLCK","CHAR_KIT_FM_PURCHASE","CHAR_WEAP_FM_PURCHASE",
+                                    "CHAR_WEAP_FM_PURCHASE2","CHAR_WEAP_FM_PURCHASE3","CHAR_WEAP_FM_PURCHASE4"}) do
+                                stats.set_int(mpx..i, -1)
+                            end
+                            stats.set_int(mpx.."FIREWORK_TYPE_1_WHITE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_1_RED", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_1_BLUE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_2_WHITE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_2_RED", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_2_BLUE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_3_WHITE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_3_RED", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_3_BLUE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_4_WHITE", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_4_RED", 1000)
+                            stats.set_int(mpx.."FIREWORK_TYPE_4_BLUE", 1000)
+                            stats.set_int(mpx.."WEAP_FM_ADDON_PURCH", -1)
+                        for i = 2, 19 do
+                            stats.set_int(mpx.."WEAP_FM_ADDON_PURCH"..i, -1)
+                        end
+                        for i = 1, 19 do
+                            stats.set_int(mpx.."CHAR_FM_WEAP_ADDON_"..i.."_UNLCK", -1)
+                        end
+                        for i = 1, 41 do
+                            stats.set_int(mpx.."CHAR_KIT_"..i.."_FM_UNLCK", -1)
+                        end
+                        for i = 2, 41 do
+                            stats.set_int(mpx.."CHAR_KIT_FM_PURCHASE"..i, -1)
+                        end
+                        end)
+                    end
+
+                    if ImGui.Button("Very much things") then
+                        yu.add_task(function()
+                            local mpx = yu.mpx()
+
+                            for k, v in pairs(much.ints) do
+                                stats.set_int(yu.shc(k.startswith("MPPLY"), "", mpx)..k, v)
+                            end
+
+                            for k, v in pairs(much.bools) do
+                                stats.set_bool(mpx..k, true)
+                            end
+
+                            yu.notify(1, "Success!")
+                        end)
+                    end
+
+                    if ImGui.Button("Unlock gunvan guns") then
+                        yu.add_task(function()
+                            globals.set_int(296276, 0)
+                            globals.set_int(296242, -22923932) -- Railgun
+                            globals.set_int(296243, 1171102963) -- Stungun
+                            globals.set_int(296244, -1355376991) -- Up-n-Atomizer
+                            globals.set_int(296245, -1238556825) -- Widowmaker
+                            globals.set_int(296246, 1198256469) -- Hellbringer
+                            globals.set_int(296247, -1786099057) -- Bat
+                        end)
+                    end
+
+                    ImGui.Separator()
+
+                    renderCrewRank()
                 end
+
+                tab.sub[5] = tab2
             end
 
-            tab.sub[4] = tab2
-        end
+            do -- ANCHOR Tunables
+                local tab2 = SussySpt.rendering.new_tab("Tunables")
 
-        do -- Unlocks
-            local tab2 = SussySpt.rendering.new_tab("Unlocks")
+                local a = {}
 
-            local a = {
-                tabBarId = "##self_tabbar",
-                rpmultiplierp = 262146,
-                rank = -1
-            }
+                local function refreshRPMultiplier()
+                    a.rpmultiplier = globals.get_float(SussySpt.pointers.tunables_rpmultiplier)
+                end
 
-            local crew = 1
-            local crewRank = 0
-            local minCrewRank = 0
-            local checkingCrewRank = false
+                local function refresh()
+                    refreshRPMultiplier()
+                end
+                yu.rif(refresh)
 
-            function getCrewRankByXp(xp)
-                local rank = 0
-                for k, v in pairs(yu.xp_for_crew_rank()) do
-                    if v < xp then
-                        rank = k
-                    else
-                        return rank
+                tab2.render = function()
+                    do -- RP Multiplier
+                        ImGui.Text("RP Multiplier")
+
+                        ImGui.SameLine()
+
+                        ImGui.PushItemWidth(100)
+                        local resp = yu.rendering.input("int", {
+                            label = "##rp_multiplier",
+                            value = a.rpmultiplier
+                        })
+                        ImGui.PopItemWidth()
+                        if resp ~= nil and resp.changed then
+                            a.rpmultiplier = resp.value
+                        end
+                        yu.rendering.tooltip("Max is 140 for some reason")
+
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Apply##rpmultiplier") then
+                            yu.add_task(function()
+                                globals.set_float(SussySpt.pointers.tunables_rpmultiplier, a.rpmultiplier)
+                                refreshRPMultiplier()
+                            end)
+                        end
                     end
                 end
-                return rank
+
+                tab.sub[6] = tab2
             end
 
-            function updateCrewRank()
-                if not checkingCrewRank then
-                    checkingCrewRank = true
-                    yu.add_task(function()
-                        crewRank = getCrewRankByXp(stats.get_int("MPPLY_CREW_LOCAL_XP_"..crew))
-                        minCrewRank = crewRank
-                        checkingCrewRank = false
+            do -- ANCHOR Misc
+                local tab2 = SussySpt.rendering.new_tab("Misc")
+
+                tab2.render = function()
+                    yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
+                        yu.rif(function()
+                            globals.set_int(292539, yu.shc(state, 0, 60000))
+                        end)
+                    end)
+
+                    yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
+                        yu.rif(function()
+                            globals.set_int(292540, yu.shc(state, 4000, 99999))
+                        end)
                     end)
                 end
+
+                tab.sub[7] = tab2
             end
 
-            yu.add_task(updateCrewRank)
+            do -- ANCHOR Session
+                local tab2 = SussySpt.rendering.new_tab("Session")
 
-            function renderCrewRank()
-                ImGui.Text("Crew rank")
+                tab2.should_display = SussySpt.getDev
 
-                local crewNewValue, crewChanged = ImGui.SliderInt("Crew", crew, 0, 4)
-                if crewChanged then
-                    crew = crewNewValue
-                    updateCrewRank()
-                end
-                yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews.")
-
-                local rankNewValue, rankChanged = ImGui.SliderInt("Rank", crewRank, minCrewRank, 8000)
-                if rankChanged then
-                    crewRank = rankNewValue
-                end
-                yu.rendering.tooltip("You can't go down again!")
-
-                if ImGui.Button("Set") then
-                    yu.add_task(function()
-                        if crewRank >= minCrewRank then
-                            stats.set_int("MPPLY_CREW_LOCAL_XP_"..crew, yu.xp_for_crew_rank()[crewRank] + 100)
-                            yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
-                            yu.notify(1, "Set rank to "..crewRank.."!!!!1 :DDD", "It's fine... No ban!!!11")
+                tab2.render = function()
+                    yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
+                        if state then
+                            NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
+                        else
+                            NETWORK.NETWORK_END_TUTORIAL_SESSION()
                         end
-                        updateCrewRank()
+                        yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
                     end)
+                    yu.rendering.tooltip("This really just puts the players client-side under the map")
                 end
+
+                tab.sub[8] = tab2
             end
 
-            local much = {
-                ints = {
-                    ["CHAR_XP_FM"]=2165850,["SAWNOFF_ENEMY_KILLS"]=600,["SCRIPT_INCREASE_STAM"]=100,["SCRIPT_INCREASE_STRN"]=100,["SCRIPT_INCREASE_LUNG"]=100,
-                    ["SCRIPT_INCREASE_DRIV"]=100,["SCRIPT_INCREASE_FLY"]=100,["SCRIPT_INCREASE_SHO"]=100,["SCRIPT_INCREASE_STL"]=100,["RACES_WON"]=100,
-                    ["PISTOL_KILLS"]=600,["CMBTPISTOL_KILLS"]=600,["APPISTOL_KILLS"]=600,["MICROSMG_KILLS"]=600,["SMG_KILLS"]=600,["ASLTSHTGN_KILLS"]=600,
-                    ["PUMP_KILLS"]=600,["GRNLAUNCH_KILLS"]=600,["RPG_KILLS"]=600,["MINIGUNS_KILLS"]=600,["ASLTSMG_KILLS"]=600,["ASLTRIFLE_KILLS"]=600,
-                    ["CRBNRIFLE_KILLS"]=600,["ADVRIFLE_KILLS"]=600,["HVYSNIPER_KILLS"]=600,["SNIPERRFL_KILLS"]=600,["MG_KILLS"]=600,["CMBTMG_KILLS"]=600,
-                    ["PISTOL_ENEMY_KILLS"]=600,["CMBTPISTOL_ENEMY_KILLS"]=600,["APPISTOL_ENEMY_KILLS"]=600,["MICROSMG_ENEMY_KILLS"]=600,["SMG_ENEMY_KILLS"]=600,
-                    ["ASLTSHTGN_ENEMY_KILLS"]=600,["PUMP_ENEMY_KILLS"]=600,["GRNLAUNCH_ENEMY_KILLS"]=600,["RPG_ENEMY_KILLS"]=600,["MINIGUNS_ENEMY_KILLS"]=600,
-                    ["ASLTSMG_ENEMY_KILLS"]=600,["ASLTRIFLE_ENEMY_KILLS"]=600,["CRBNRIFLE_ENEMY_KILLS"]=600,["ADVRIFLE_ENEMY_KILLS"]=600,
-                    ["HVYSNIPER_ENEMY_KILLS"]=600,["SNIPERRFL_ENEMY_KILLS"]=600,["MG_ENEMY_KILLS"]=600,["CMBTMG_ENEMY_KILLS"]=600,["AWD_ENEMYDRIVEBYKILLS"]=600,
-                    ["USJS_COMPLETED"]=50,["USJS_FOUND"]=50,["DB_PLAYER_KILLS"]=1000,["KILLS_PLAYERS"]=1000,["AWD_FMHORDWAVESSURVIVE"]=21,
-                    ["AWD_CAR_BOMBS_ENEMY_KILLS"]=25,["AWD_FM_TDM_MVP"]=60,["AWD_HOLD_UP_SHOPS"]=20,["AWD_RACES_WON"]=101,["AWD_NO_ARMWRESTLING_WINS"]=21,
-                    ["AWD_FMBBETWIN"]=50000,["AWD_FM_DM_TOTALKILLS"]=500,["MPPLY_DM_TOTAL_DEATHS"]=412,["MPPLY_TIMES_FINISH_DM_TOP_3"]=36,
-                    ["PLAYER_HEADSHOTS"]=623,["AWD_FM_DM_WINS"]=63,["AWD_FM_TDM_WINS"]=13,["AWD_FM_GTA_RACES_WON"]=12,["AWD_FM_GOLF_WON"]=2,
-                    ["AWD_FM_SHOOTRANG_TG_WON"]=2,["AWD_FM_SHOOTRANG_RT_WON"]=2,["AWD_FM_SHOOTRANG_CT_WON"]=2,["AWD_FM_SHOOTRANG_GRAN_WON"]=2,
-                    ["AWD_FM_TENNIS_WON"]=2,["MPPLY_TENNIS_MATCHES_WON"]=2,["MPPLY_TOTAL_TDEATHMATCH_WON"]=63,["MPPLY_TOTAL_RACES_WON"]=101,
-                    ["MPPLY_TOTAL_DEATHMATCH_LOST"]=23,["MPPLY_TOTAL_RACES_LOST"]=36,["AWD_25_KILLS_STICKYBOMBS"]=50,["AWD_50_KILLS_GRENADES"]=50,
-                    ["GRENADE_ENEMY_KILLS"]=50,["AWD_20_KILLS_MELEE"]=50,["AWD_FMRALLYWONDRIVE"]=2,["AWD_FMWINSEARACE"]=2,["AWD_FMWINAIRRACE"]=2,
-                    ["NUMBER_TURBO_STARTS_IN_RACE"]=100,["AWD_FM_RACES_FASTEST_LAP"]=101,["NUMBER_SLIPSTREAMS_IN_RACE"]=105,["MPPLY_OVERALL_CHEAT"]=0,
-                    ["LAP_DANCED_BOUGHT"]=50,["AWD_FMKILLBOUNTY"]=50,["AWD_FMREVENGEKILLSDM"]=60,["AWD_SECURITY_CARS_ROBBED"]=40,["CHAR_KIT_FM_PURCHASE"]=-1,
-                    ["CHAR_KIT_FM_PURCHASE2"]=-1,["CHAR_KIT_FM_PURCHASE3"]=-1,["CHAR_KIT_FM_PURCHASE4"]=-1,["CHAR_KIT_FM_PURCHASE5"]=-1,
-                    ["CHAR_KIT_FM_PURCHASE6"]=-1,["CHAR_KIT_FM_PURCHASE7"]=-1,["CHAR_KIT_FM_PURCHASE8"]=-1,["CHAR_KIT_FM_PURCHASE9"]=-1,
-                    ["CHAR_KIT_FM_PURCHASE10"]=-1,["CHAR_KIT_FM_PURCHASE11"]=-1,["CHAR_KIT_FM_PURCHASE12"]=-1,["CHAR_KIT_1_FM_UNLCK"]=-1,
-                    ["CHAR_KIT_2_FM_UNLCK"]=-1,["CHAR_KIT_3_FM_UNLCK"]=-1,["CHAR_KIT_4_FM_UNLCK"]=-1,["CHAR_KIT_5_FM_UNLCK"]=-1,["CHAR_KIT_6_FM_UNLCK"]=-1,
-                    ["CHAR_KIT_7_FM_UNLCK"]=-1,["CHAR_KIT_8_FM_UNLCK"]=-1,["CHAR_KIT_9_FM_UNLCK"]=-1,["CHAR_KIT_10_FM_UNLCK"]=-1,["CHAR_KIT_11_FM_UNLCK"]=-1,
-                    ["CHAR_KIT_12_FM_UNLCK"]=-1,["races_won"]=100,["number_turbo_starts_in_race"]=100,["usjs_found"]=50,["usjs_completed"]=50,
-                    ["awd_fmwinairrace"]=50,["awd_fmwinsearace"]=50,["awd_fmrallywonnav"]=50,["awd_fmrallywondrive"]=500,["awd_fm_races_fastest_lap"]=500,
-                    ["char_fm_carmod_0_unlck"]=-1,["char_fm_carmod_1_unlck"]=-1,["char_fm_carmod_2_unlck"]=-1,["char_fm_carmod_3_unlck"]=-1,
-                    ["char_fm_carmod_4_unlck"]=-1,["char_fm_carmod_5_unlck"]=-1,["char_fm_carmod_6_unlck"]=-1,["char_fm_carmod_7_unlck"]=-1,
-                    ["CHAR_FM_VEHICLE_1_UNLCK"]=-1,["CHAR_FM_VEHICLE_2_UNLCK"]=-1,["CHAR_FM_ABILITY_1_UNLCK"]=-1,["CHAR_FM_ABILITY_2_UNLCK"]=-1,
-                    ["CHAR_FM_ABILITY_3_UNLCK"]=-1,["CHAR_FM_PACKAGE_1_COLLECT"]=-1,["CHAR_FM_PACKAGE_2_COLLECT"]=-1,["CHAR_FM_PACKAGE_3_COLLECT"]=-1,
-                    ["CHAR_FM_PACKAGE_4_COLLECT"]=-1,["CHAR_FM_PACKAGE_5_COLLECT"]=-1,["CHAR_FM_PACKAGE_6_COLLECT"]=-1,["CHAR_FM_PACKAGE_7_COLLECT"]=-1,
-                    ["CHAR_FM_PACKAGE_8_COLLECT"]=-1,["CHAR_FM_PACKAGE_9_COLLECT"]=-1,["CHAR_FM_HEALTH_1_UNLCK"]=-1,["CHAR_FM_HEALTH_2_UNLCK"]=-1,
-                    ["CHEAT_BITSET"]=0,["MPPLY_TIMES_RACE_BEST_LAP"]=120,["MPPLY_REPORT_STRENGTH"]=32,["MPPLY_COMMEND_STRENGTH"]=100,["MPPLY_FRIENDLY"]=100,
-                    ["MPPLY_HELPFUL"]=100,["MPPLY_GRIEFING"]=0,["MPPLY_OFFENSIVE_LANGUAGE"]=0,["MPPLY_OFFENSIVE_UGC"]=0,["MPPLY_VC_HATE"]=0,
-                    ["MPPLY_GAME_EXPLOITS"]=0,["MPPLY_ISPUNISHED"]=0
-                },
-                bools = {
-                    "AWD_FMPICKUPDLCCRATE1ST","AWD_FMRACEWORLDRECHOLDER","AWD_FMWINALLRACEMODES","AWD_FMWINEVERYGAMEMODE","AWD_FMATTGANGHQ",
-                    "AWD_FMFULLYMODDEDCAR","AWD_FMMOSTKILLSSURVIVE","AWD_FMKILL3ANDWINGTARACE"
+            do -- ANCHOR Money
+                local tab2 = SussySpt.rendering.new_tab("Money")
+
+                tab2.render = function()
+                    local om1sMoneyMade = yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0)
+                    if om1sMoneyMade > 0 then
+                        ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade))
+                    end
+                    yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
+                        if state then
+                            yu.rif(function(runscript)
+                                while true do
+                                    if not tab.should_display() or not yu.rendering.isCheckboxChecked("self_money_1m1sloop") then
+                                        log.info("$1M/1s loop was cancelled", "Online->Money")
+                                        break
+                                    end
+
+                                    local b = 4536533
+                                    globals.set_int(b + 1, 2147483646)
+                                    globals.set_int(b + 7, 2147483647)
+                                    globals.set_int(b + 6, 0)
+                                    globals.set_int(b + 5, 0)
+                                    globals.set_int(b + 3, 0x615762F1)
+                                    globals.set_int(b + 2, 1000000)
+                                    globals.set_int(b, 1)
+
+                                    yu.set_stat("SELF_MONEY_1M1SLOOP_MM", yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0) + 1000000)
+
+                                    runscript:sleep(1000)
+                                end
+                            end)
+                        end
+                    end)
+                    yu.rendering.tooltip("This is a pure copy from SilentNight! DC: silentsalo\nThey say it's safe :)")
+                end
+
+                tab.sub[9] = tab2
+            end
+
+            SussySpt.rendering.tabs[1] = tab
+        end -- !SECTION
+
+        do -- SECTION World
+            local tab = SussySpt.rendering.new_tab("World")
+
+            do -- ANCHOR Object Spawner
+                local tab2 = SussySpt.rendering.new_tab("Object Spawner")
+
+                local a = {
+                    model = "",
+                    awidth = 195
                 }
-            }
 
-            tab2.render = function()
-                if SussySpt.dev then
-                    local rankNewValue, rankChanged = ImGui.InputInt("Rank", a.rank, a.rank, 8000, 8)
-                    if rankChanged then
-                        a.rank = rankNewValue
+                yu.rendering.setCheckboxChecked("world_objspawner_deleteprev", true)
+                yu.rendering.setCheckboxChecked("world_objspawner_missionent", true)
+
+                local function temp_text(infotext, duration)
+                    yu.rif(function(runscript)
+                        a.infotext = infotext
+                        local id = yu.gun()
+                        a.infotextid = id
+                        runscript:sleep(duration)
+                        if a.infotextid == id then
+                            a.infotext = nil
+                        end
+                    end)
+                end
+
+                tab2.render = function()
+                    ImGui.BeginGroup()
+
+                    ImGui.Text("Spawner")
+
+                    ImGui.PushItemWidth(a.awidth)
+
+                    local model_text, _ = ImGui.InputTextWithHint("Model", "ex. stt_prop_stunt_bowling_pin", a.model, 32)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
+                    if a.model ~= model_text then
+                        a.model = model_text
+                        a.invalidmodel = nil
                     end
 
-                    ImGui.SameLine()
-
-                    if ImGui.Button("Apply##rank") then
-                        yu.add_task(function()
-                            if a.rank >= 0 and a.rank <= 8000 then
-                                local newRP = globals.get_int(294329 + a.rank) + 100
-                                log.info(a.rank..": "..newRP)
-                                -- stats.set_int("MP"..yu.playerindex(2).."_CHAR_SET_RP_GIFT_ADMIN", newRP)
-                            else
-                                yu.notify(3, "Invalid rank ["..a.rank.."] 0-8000", "Rank correction")
-                            end
-                        end)
+                    if a.invalidmodel then
+                        yu.rendering.coloredtext("Invalid model!", 255, 25, 25)
+                    elseif a.blocked then
+                        yu.rendering.coloredtext("Spawning...", 108, 149, 218)
                     end
 
-                    if ImGui.Button("Give RP") then
-                        yu.rif(function(runscript)
-                            -- local oldLvl = PLAYER.GET_PLAYER_WANTED_LEVEL(yu.pid())
-                            PLAYER.SET_PLAYER_WANTED_LEVEL_NO_DROP(yu.pid(), 5, false)
-                            -- PLAYER.SET_PLAYER_WANTED_LEVEL_NOW(yu.pid(), true)
-                            log.info("ok")
-                            -- runscript:sleep(1000)
-                            -- PLAYER.SET_PLAYER_WANTED_LEVEL(yu.pid(), oldLvl, false)
-                        end)
+                    if a.infotext ~= nil then
+                        yu.rendering.coloredtext(a.infotext[1], a.infotext[2], a.infotext[3], a.infotext[4])
                     end
-                end
 
-
-                if ImGui.Button("Max all stats") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        for k, v in pairs({"SCRIPT_INCREASE_DRIV","SCRIPT_INCREASE_FLY",
-                            "SCRIPT_INCREASE_LUNG","SCRIPT_INCREASE_SHO","SCRIPT_INCREASE_STAM",
-                            "SCRIPT_INCREASE_STL","SCRIPT_INCREASE_STRN"}) do
-                            stats.set_int(mpx..v, 100)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock all achievements") then
-                    yu.rif(function()
-                        yu.loop(59, function(i)
-                            if not PLAYER.HAS_ACHIEVEMENT_BEEN_PASSED(i) then
-                                PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
-                            end
-                        end)
-                    end)
-                end
-
-                if ImGui.Button("Unlock xmas liveries") then
-                    yu.add_task(function()
-                        stats.set_int("MPPLY_XMASLIVERIES", -1)
-                        for i = 1, 20 do
-                            stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock LSCarMeet podium prize") then
-                    yu.add_task(function()
-                        stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
-                        stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
-                    end)
-                end
-                yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
-
-                if ImGui.Button("LSCarMeet unlocks") then
-                    yu.add_task(function()
-                        for i = 293419, 293446 do
-                            globals.set_float(i, 100000)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock flightschool stuff") then
-                    yu.add_task(function()
-                        stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
-                        for i = 0, 9 do
-                            stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_"..i , -1)
-                            stats.set_int(yu.mpx().."PILOT_SCHOOL_MEDAL_"..i, -1)
-                            stats.set_bool(yu.mpx().."PILOT_ASPASSEDLESSON_"..i, true)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
-
-                if ImGui.Button("Unlock shooting range") then
-                    yu.add_task(function()
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690)
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_4", 2660)
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_5", 2650)
-                        stats.set_int(yu.mpx().."SR_HIGHSCORE_6", 450)
-                        stats.set_int(yu.mpx().."SR_TARGETS_HIT", 269)
-                        stats.set_int(yu.mpx().."SR_WEAPON_BIT_SET", -1)
-                        stats.set_bool(yu.mpx().."SR_TIER_1_REWARD", true)
-                        stats.set_bool(yu.mpx().."SR_TIER_3_REWARD", true)
-                        stats.set_bool(yu.mpx().."SR_INCREASE_THROW_CAP", true)
-                    end)
-                end
-                yu.rendering.tooltip("Bunker thingy")
-
-                if ImGui.Button("Unlock trade prices for arenawar vehicles") then
-                    yu.add_task(function()
-                        for i = 1, 16 do
-                            stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
-                        end
-                        for i = 11, 19 do
-                            stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL2", true, i)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock colored headlights") then
-                    yu.add_task(function()
-                        for i = 18, 29 do
-                            stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock fast run and reload") then
-                    yu.add_task(function()
-                        for i = 1, 3 do
-                            stats.set_int(yu.mpx().."CHAR_ABILITY_"..i.."_UNLCK", -1)
-                            stats.set_int(yu.mpx().."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("Makes you run and reload weapons faster")
-
-                if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
-                    yu.add_task(function()
-                        globals.set_int(262145 + 34131, 0)
-                        globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
-                        globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
-                    end)
-                end
-
-                if ImGui.Button("Unlock all tattos") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
-                        for i = 0, 47 do
-                            stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("CEO & MC money clutter") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        for k, v in pairs({
-                            ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
-                            ["LIFETIME_BIKER_BUY_UNDERTA"]=1000,["LIFETIME_BIKER_SELL_COMPLET"]=1000,["LIFETIME_BIKER_SELL_UNDERTA"]=1000,["LIFETIME_BIKER_BUY_COMPLET1"]=1000,["LIFETIME_BIKER_BUY_UNDERTA1"]=1000,
-                            ["LIFETIME_BIKER_SELL_COMPLET1"]=1000,["LIFETIME_BIKER_SELL_UNDERTA1"]=1000,["LIFETIME_BIKER_BUY_COMPLET2"]=1000,["LIFETIME_BIKER_BUY_UNDERTA2"]=1000,["LIFETIME_BIKER_SELL_COMPLET2"]=1000,
-                            ["LIFETIME_BIKER_SELL_UNDERTA2"]=1000,["LIFETIME_BIKER_BUY_COMPLET3"]=1000,["LIFETIME_BIKER_BUY_UNDERTA3"]=1000,["LIFETIME_BIKER_SELL_COMPLET3"]=1000,["LIFETIME_BIKER_SELL_UNDERTA3"]=1000,
-                            ["LIFETIME_BIKER_BUY_COMPLET4"]=1000,["LIFETIME_BIKER_BUY_UNDERTA4"]=1000,["LIFETIME_BIKER_SELL_COMPLET4"]=1000,["LIFETIME_BIKER_SELL_UNDERTA4"]=1000,["LIFETIME_BIKER_BUY_COMPLET5"]=1000,
-                            ["LIFETIME_BIKER_BUY_UNDERTA5"]=1000,["LIFETIME_BIKER_SELL_COMPLET5"]=1000,["LIFETIME_BIKER_SELL_UNDERTA5"]=1000,["LIFETIME_BKR_SELL_EARNINGS0"]=20000000,["LIFETIME_BKR_SELL_EARNINGS1"]=20000000,
-                            ["LIFETIME_BKR_SELL_EARNINGS2"]=20000000,["LIFETIME_BKR_SELL_EARNINGS3"]=20000000,["LIFETIME_BKR_SELL_EARNINGS4"]=20000000,["LIFETIME_BKR_SELL_EARNINGS5"]=20000000,["LFETIME_IE_EXPORT_COMPLETED"]=1000,
-                            ["LFETIME_IE_MISSION_EARNINGS"]=20000000,["LFETIME_HANGAR_EARNINGS"]=20000000,["BKR_PROD_STOP_COUT_S1_0"]=500,["BKR_PROD_STOP_COUT_S2_0"]=500,["BKR_PROD_STOP_COUT_S3_0"]=500,
-                            ["LIFETIME_BKR_SELL_UNDERTABC"]=500,["LIFETIME_BKR_SELL_COMPLETBC"]=500,["LFETIME_BIKER_BUY_UNDERTA1"]=500,["LFETIME_BIKER_BUY_COMPLET1"]=500,["LFETIME_BIKER_SELL_UNDERTA1"]=500,
-                            ["LFETIME_BIKER_SELL_COMPLET1"]=500,["LIFETIME_BKR_SEL_UNDERTABC1"]=500,["LIFETIME_BKR_SEL_COMPLETBC1"]=500,["BKR_PROD_STOP_COUT_S1_1"]=500,["BKR_PROD_STOP_COUT_S2_1"]=500,["BKR_PROD_STOP_COUT_S3_1"]=500,
-                            ["LFETIME_BIKER_BUY_UNDERTA2"]=500,["LFETIME_BIKER_BUY_COMPLET2"]=500,["LFETIME_BIKER_SELL_UNDERTA2"]=500,["LFETIME_BIKER_SELL_COMPLET2"]=500,["LIFETIME_BKR_SEL_UNDERTABC2"]=500,
-                            ["LIFETIME_BKR_SEL_COMPLETBC2"]=500,["BKR_PROD_STOP_COUT_S1_2"]=500,["BKR_PROD_STOP_COUT_S2_2"]=500,["BKR_PROD_STOP_COUT_S3_2"]=500,["LFETIME_BIKER_BUY_UNDERTA3"]=500,["LFETIME_BIKER_BUY_COMPLET3"]=500,
-                            ["LFETIME_BIKER_SELL_UNDERTA3"]=500,["LFETIME_BIKER_SELL_COMPLET3"]=500,["LIFETIME_BKR_SEL_UNDERTABC3"]=500,["LIFETIME_BKR_SEL_COMPLETBC3"]=500,["BKR_PROD_STOP_COUT_S1_3"]=500,["BKR_PROD_STOP_COUT_S2_3"]=500,
-                            ["BKR_PROD_STOP_COUT_S3_3"]=500,["LFETIME_BIKER_BUY_UNDERTA4"]=500,["LFETIME_BIKER_BUY_COMPLET4"]=500,["LFETIME_BIKER_SELL_UNDERTA4"]=500,["LFETIME_BIKER_SELL_COMPLET4"]=500,["LIFETIME_BKR_SEL_UNDERTABC4"]=500,
-                            ["LIFETIME_BKR_SEL_COMPLETBC4"]=500,["BKR_PROD_STOP_COUT_S1_4"]=500,["BKR_PROD_STOP_COUT_S2_4"]=500,["BKR_PROD_STOP_COUT_S3_4"]=500,["LFETIME_BIKER_BUY_UNDERTA5"]=500,["LFETIME_BIKER_BUY_COMPLET5"]=500,
-                            ["LIFETIME_BKR_SEL_UNDERTABC5"]=500,["LIFETIME_BKR_SEL_COMPLETBC5"]=500,["LFETIME_BIKER_SELL_UNDERTA5"]=500,["LFETIME_BIKER_SELL_COMPLET5"]=500,["BUNKER_UNITS_MANUFAC"]=500,["LFETIME_HANGAR_BUY_UNDETAK"]=500,
-                            ["LFETIME_HANGAR_BUY_COMPLET"]=500,["LFETIME_HANGAR_SEL_UNDETAK"]=500,["LFETIME_HANGAR_SEL_COMPLET"]=500,["LFETIME_HANGAR_EARN_BONUS"]=1598746,["RIVAL_HANGAR_CRATES_STOLEN"]=500,["LFETIME_IE_STEAL_STARTED"]=500,
-                            ["LFETIME_IE_EXPORT_STARTED"]=500,["AT_FLOW_IMPEXP_NUM"]=500
-                        }) do
-                            stats.set_int(mpx..k, v)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("Money on floor")
-
-                if ImGui.Button("Skip Lamar missions") then
-                    yu.add_task(function()
-                        stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
-                        stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
-                        stats.set_bool(yu.mpx().."LOW_FLOW_CS_FUN_SEEN", true)
-                        stats.set_bool(yu.mpx().."LOW_FLOW_CS_PHO_SEEN", true)
-                        stats.set_bool(yu.mpx().."LOW_FLOW_CS_FIN_SEEN", true)
-                        stats.set_bool(yu.mpx().."LOW_BEN_INTRO_CS_SEEN", true)
-                        stats.set_int(yu.mpx().."LOWRIDER_FLOW_COMPLETE", 4)
-                        stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_PROG", 9)
-                        stats.set_int(yu.mpx().."LOW_FLOW_CURRENT_CALL", 9)
-                        stats.set_int(yu.mpx().."LOW_FLOW_CS_HELPTEXT", 66)
-                    end)
-                end
-
-                if ImGui.Button("Skip yacht missions") then
-                    yu.add_task(function()
-                        stats.set_int(yu.mpx("YACHT_MISSION_PROG"), 0)
-                        stats.set_int(yu.mpx("YACHT_MISSION_FLOW"), 21845)
-                        stats.set_int(yu.mpx("CASINO_DECORATION_GIFT_1"), -1)
-                    end)
-                end
-
-                if ImGui.Button("Skip ULP missions") then
-                    yu.add_task(function()
-                        stats.set_int(yu.mpx("ULP_MISSION_PROGRESS"), 127)
-                        stats.set_int(yu.mpx("ULP_MISSION_CURRENT"), 0)
-                    end)
-                end
-
-                if ImGui.Button("Unlock LSC stuff & paints") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_1_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_2_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_3_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_4_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_5_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_6_UNLCK", -1)
-                        stats.set_int(mpx.."CHAR_FM_CARMOD_7_UNLCK", -1)
-                        stats.set_int(mpx.."AWD_WIN_CAPTURES", 50)
-                        stats.set_int(mpx.."AWD_DROPOFF_CAP_PACKAGES", 100)
-                        stats.set_int(mpx.."AWD_KILL_CARRIER_CAPTURE", 100)
-                        stats.set_int(mpx.."AWD_FINISH_HEISTS", 50)
-                        stats.set_int(mpx.."AWD_FINISH_HEIST_SETUP_JOB", 50)
-                        stats.set_int(mpx.."AWD_NIGHTVISION_KILLS", 100)
-                        stats.set_int(mpx.."AWD_WIN_LAST_TEAM_STANDINGS", 50)
-                        stats.set_int(mpx.."AWD_ONLY_PLAYER_ALIVE_LTS", 50)
-                        stats.set_int(mpx.."AWD_FMRALLYWONDRIVE", 25)
-                        stats.set_int(mpx.."AWD_FMRALLYWONNAV", 25)
-                        stats.set_int(mpx.."AWD_FMWINSEARACE", 25)
-                        stats.set_int(mpx.."AWD_RACES_WON", 50)
-                        stats.set_int(mpx.."MOST_FLIPS_IN_ONE_JUMP", 5)
-                        stats.set_int(mpx.."MOST_SPINS_IN_ONE_JUMP", 5)
-                        stats.set_int(mpx.."NUMBER_SLIPSTREAMS_IN_RACE", 100)
-                        stats.set_int(mpx.."NUMBER_TURBO_STARTS_IN_RACE", 50)
-                        stats.set_int(mpx.."RACES_WON", 50)
-                        stats.set_int(mpx.."USJS_COMPLETED", 50)
-                        stats.set_int(mpx.."AWD_FM_GTA_RACES_WON", 50)
-                        stats.set_int(mpx.."AWD_FM_RACE_LAST_FIRST", 25)
-                        stats.set_int(mpx.."AWD_FM_RACES_FASTEST_LAP", 50)
-                        stats.set_int(mpx.."AWD_FMBASEJMP", 25)
-                        stats.set_int(mpx.."AWD_FMWINAIRRACE", 25)
-                        stats.set_int("MPPLY_TOTAL_RACES_WON", 50)
-                    end)
-                end
-
-                if ImGui.Button("Unlock phone contracts") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        stats.set_int(mpx.."FM_ACT_PHN", -1)
-                        stats.set_int(mpx.."FM_ACT_PH2", -1)
-                        stats.set_int(mpx.."FM_ACT_PH3", -1)
-                        stats.set_int(mpx.."FM_ACT_PH4", -1)
-                        stats.set_int(mpx.."FM_ACT_PH5", -1)
-                        stats.set_int(mpx.."FM_VEH_TX1", -1)
-                        stats.set_int(mpx.."FM_ACT_PH6", -1)
-                        stats.set_int(mpx.."FM_ACT_PH7", -1)
-                        stats.set_int(mpx.."FM_ACT_PH8", -1)
-                        stats.set_int(mpx.."FM_ACT_PH9", -1)
-                        stats.set_int(mpx.."FM_CUT_DONE", -1)
-                        stats.set_int(mpx.."FM_CUT_DONE_2", -1)
-                    end)
-                end
-
-                if ImGui.Button("Unlock all trade prices") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        stats.set_int(mpx.."GANGOPS_FLOW_BITSET_MISS0", -1)
-                        stats.set_int(mpx.."LFETIME_HANGAR_BUY_UNDETAK", 42)
-                        stats.set_int(mpx.."LFETIME_HANGAR_BUY_COMPLET", 42)
-                        stats.set_int(mpx.."AT_FLOW_IMPEXP_NUM", 32)
-                        stats.set_int(mpx.."AT_FLOW_VEHICLE_BS", -1)
-                        stats.set_int(mpx.."WVM_FLOW_VEHICLE_BS", -1)
-                        stats.set_int(mpx.."H3_BOARD_DIALOGUE0", -1)
-                        stats.set_int(mpx.."H3_BOARD_DIALOGUE1", -1)
-                        stats.set_int(mpx.."H3_BOARD_DIALOGUE2", -1)
-                        stats.set_int(mpx.."H3_VEHICLESUSED", -1)
-                        stats.set_int(mpx.."WAM_FLOW_VEHICLE_BS", -1)
-                        stats.set_bool(mpx.."HELP_VEHUNHEISTISL", true)
-                        stats.set_bool(mpx.."HELP_VEHICLESUNLOCK", true)
-                        stats.set_bool(mpx.."HELP_VETO", true)
-                        stats.set_bool(mpx.."HELP_VETO2", true)
-                        stats.set_bool(mpx.."HELP_ITALIRSX", true)
-                        stats.set_bool(mpx.."HELP_BRIOSO2", true)
-                        stats.set_bool(mpx.."HELP_MANCHEZ2", true)
-                        stats.set_bool(mpx.."HELP_SLAMTRUCK", true)
-                        stats.set_bool(mpx.."HELP_VETIR", true)
-                        stats.set_bool(mpx.."HELP_SQUADDIE", true)
-                        stats.set_bool(mpx.."HELP_DINGY5", true)
-                        stats.set_bool(mpx.."HELP_VERUS", true)
-                        stats.set_bool(mpx.."HELP_WEEVIL", true)
-                        stats.set_bool(mpx.."HELP_VEHUNTUNER", true)
-                        stats.set_bool(mpx.."FIXER_VEH_HELP", true)
-                        stats.set_bool(mpx.."HELP_DOMINATOR7", true)
-                        stats.set_bool(mpx.."HELP_JESTER4", true)
-                        stats.set_bool(mpx.."HELP_FUTO2", true)
-                        stats.set_bool(mpx.."HELP_DOMINATOR8", true)
-                        stats.set_bool(mpx.."HELP_PREVION", true)
-                        stats.set_bool(mpx.."HELP_GROWLER", true)
-                        stats.set_bool(mpx.."HELP_COMET6", true)
-                        stats.set_bool(mpx.."HELP_VECTRE", true)
-                        stats.set_bool(mpx.."HELP_SULTAN3", true)
-                        stats.set_bool(mpx.."HELP_CYPHER", true)
-                        stats.set_bool(mpx.."HELP_VEHUNFIXER", true)
-                        stats.set_bool(mpx.."COMPLETE_H4_F_USING_VETIR", true)
-                        stats.set_bool(mpx.."COMPLETE_H4_F_USING_LONGFIN", true)
-                        stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
-                        stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
-                        stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
-                        if stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5 then
-                            stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
-                        end
-                        stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
-                    end)
-                end
-
-                if ImGui.Button("Unlock bunker research (temp?)") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        for j = 0, 63 do
-                            stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j)
-                            stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, j)
-                            stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, j)
-                            stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, j)
-                        end
-                        local bitSize = 8
-                        for j = 0, 64 / bitSize - 1 do
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, j * bitSize, bitSize)
-                            stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, j * bitSize, bitSize)
-                        end
-                    end)
-                end
-
-                if ImGui.Button("Unlock diamond casino heist outfits") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL1", true, 63) -- Refuse Collectors
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 0) -- Undertakers
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 1) -- Valet Outfits
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 3) -- Prison Guards
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 4) -- FIB Suits
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 6) -- Gruppe Sechs Gear
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 7) -- Bugstars Uniforms
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 8) -- Maintenance
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 9) -- Yung Ancestors
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 10) -- Firefighter Gear
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 11) -- Orderly Armor
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 12) -- Upscale Armor
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 13) -- Evening Armor
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 14) -- Reinforced: Padded Combat
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 15) -- Reinforced: Bulk Combat
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 16) -- Reinforced: Compact Combat
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 17) -- Balaclava Crook
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 18) -- Classic Crook
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 19) -- High-end Crook
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 20) -- Infiltration: Upgraded Tech
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 21) -- Infiltration: Advanced Tech
-                        stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 22) -- Infiltration: Modernized Tech
-                    end)
-                end
-
-                if ImGui.Button("Unlock guns") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-                        for i in pairs({
-                                "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
-                                "CHAR_WEAP_ADDON_2_UNLCK","CHAR_WEAP_ADDON_3_UNLCK","CHAR_WEAP_ADDON_4_UNLCK","CHAR_WEAP_FREE","CHAR_WEAP_FREE2",
-                                "CHAR_FM_WEAP_FREE","CHAR_FM_WEAP_FREE2","CHAR_FM_WEAP_FREE3","CHAR_FM_WEAP_FREE4","CHAR_WEAP_PURCHASED",
-                                "CHAR_WEAP_PURCHASED2","WEAPON_PICKUP_BITSET","WEAPON_PICKUP_BITSET2","CHAR_FM_WEAP_UNLOCKED","NO_WEAPONS_UNLOCK",
-                                "NO_WEAPON_MODS_UNLOCK","NO_WEAPON_CLR_MOD_UNLOCK","CHAR_FM_WEAP_UNLOCKED2","CHAR_FM_WEAP_UNLOCKED3",
-                                "CHAR_FM_WEAP_UNLOCKED4","CHAR_KIT_1_FM_UNLCK","CHAR_KIT_2_FM_UNLCK","CHAR_KIT_3_FM_UNLCK","CHAR_KIT_4_FM_UNLCK",
-                                "CHAR_KIT_5_FM_UNLCK","CHAR_KIT_6_FM_UNLCK","CHAR_KIT_7_FM_UNLCK","CHAR_KIT_8_FM_UNLCK","CHAR_KIT_9_FM_UNLCK",
-                                "CHAR_KIT_10_FM_UNLCK","CHAR_KIT_11_FM_UNLCK","CHAR_KIT_12_FM_UNLCK","CHAR_KIT_FM_PURCHASE","CHAR_WEAP_FM_PURCHASE",
-                                "CHAR_WEAP_FM_PURCHASE2","CHAR_WEAP_FM_PURCHASE3","CHAR_WEAP_FM_PURCHASE4"}) do
-                            stats.set_int(mpx..i, -1)
-                        end
-                        stats.set_int(mpx.."FIREWORK_TYPE_1_WHITE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_1_RED", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_1_BLUE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_2_WHITE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_2_RED", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_2_BLUE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_3_WHITE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_3_RED", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_3_BLUE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_4_WHITE", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_4_RED", 1000)
-                        stats.set_int(mpx.."FIREWORK_TYPE_4_BLUE", 1000)
-                        stats.set_int(mpx.."WEAP_FM_ADDON_PURCH", -1)
-                    for i = 2, 19 do
-                        stats.set_int(mpx.."WEAP_FM_ADDON_PURCH"..i, -1)
-                    end
-                    for i = 1, 19 do
-                        stats.set_int(mpx.."CHAR_FM_WEAP_ADDON_"..i.."_UNLCK", -1)
-                    end
-                    for i = 1, 41 do
-                        stats.set_int(mpx.."CHAR_KIT_"..i.."_FM_UNLCK", -1)
-                    end
-                    for i = 2, 41 do
-                        stats.set_int(mpx.."CHAR_KIT_FM_PURCHASE"..i, -1)
-                    end
-                    end)
-                end
-
-                if ImGui.Button("Very much things") then
-                    yu.add_task(function()
-                        local mpx = yu.mpx()
-
-                        for k, v in pairs(much.ints) do
-                            stats.set_int(yu.shc(k.startswith("MPPLY"), "", mpx)..k, v)
-                        end
-
-                        for k, v in pairs(much.bools) do
-                            stats.set_bool(mpx..k, true)
-                        end
-
-                        yu.notify(1, "Success!")
-                    end)
-                end
-
-                if ImGui.Button("Unlock gunvan guns") then
-                    yu.add_task(function()
-                        globals.set_int(296276, 0)
-                        globals.set_int(296242, -22923932) -- Railgun
-                        globals.set_int(296243, 1171102963) -- Stungun
-                        globals.set_int(296244, -1355376991) -- Up-n-Atomizer
-                        globals.set_int(296245, -1238556825) -- Widowmaker
-                        globals.set_int(296246, 1198256469) -- Hellbringer
-                        globals.set_int(296247, -1786099057) -- Bat
-                    end)
-                end
-
-                ImGui.Separator()
-
-                renderCrewRank()
-            end
-
-            tab.sub[5] = tab2
-        end
-
-        do -- Tunables
-            local tab2 = SussySpt.rendering.new_tab("Tunables")
-
-            local a = {}
-
-            local function refreshRPMultiplier()
-                a.rpmultiplier = globals.get_float(SussySpt.pointers.tunables_rpmultiplier)
-            end
-
-            local function refresh()
-                refreshRPMultiplier()
-            end
-            yu.rif(refresh)
-
-            tab2.render = function()
-                do -- RP Multiplier
-                    ImGui.Text("RP Multiplier")
-                    
-                    ImGui.SameLine()
-
-                    ImGui.PushItemWidth(100)
-                    local resp = yu.rendering.input("int", {
-                        label = "##rp_multiplier",
-                        value = a.rpmultiplier
-                    })
                     ImGui.PopItemWidth()
-                    if resp ~= nil and resp.changed then
-                        a.rpmultiplier = resp.value
-                    end
-                    yu.rendering.tooltip("Max is 140 for some reason")
 
-                    ImGui.SameLine()
-
-                    if ImGui.Button("Apply##rpmultiplier") then
-                        yu.add_task(function()
-                            globals.set_float(SussySpt.pointers.tunables_rpmultiplier, a.rpmultiplier)
-                            refreshRPMultiplier()
-                        end)
-                    end
-                end
-            end
-
-            tab.sub[6] = tab2
-        end
-
-        do -- Misc
-            local tab2 = SussySpt.rendering.new_tab("Misc")
-
-            tab2.render = function()
-                yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
-                    yu.rif(function()
-                        globals.set_int(292539, yu.shc(state, 0, 60000))
-                    end)
-                end)
-
-                yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
-                    yu.rif(function()
-                        globals.set_int(292540, yu.shc(state, 4000, 99999))
-                    end)
-                end)
-            end
-
-            tab.sub[7] = tab2
-        end
-
-        do -- Session
-            local tab2 = SussySpt.rendering.new_tab("Session")
-
-            tab2.should_display = SussySpt.getDev
-
-            tab2.render = function()
-                yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
-                    if state then
-                        NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
-                    else
-                        NETWORK.NETWORK_END_TUTORIAL_SESSION()
-                    end
-                    yu.notify(1, "Ghost session "..(state and "en" or "dis").."abled!", "Online->Session")
-                end)
-                yu.rendering.tooltip("This really just puts the players client-side under the map")
-            end
-
-            tab.sub[8] = tab2
-        end
-
-        do -- Money
-            local tab2 = SussySpt.rendering.new_tab("Money")
-
-            tab2.render = function()
-                local om1sMoneyMade = yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0)
-                if om1sMoneyMade > 0 then
-                    ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade))
-                end
-                yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
-                    if state then
+                    if not a.blocked and ImGui.Button("Spawn") then
                         yu.rif(function(runscript)
-                            while true do
-                                if not tab.should_display() or not yu.rendering.isCheckboxChecked("self_money_1m1sloop") then
-                                    log.info("$1M/1s loop was cancelled", "Online->Money")
-                                    break
+                            a.blocked = true
+
+                            local hash = joaat(a.model)
+
+                            if not STREAMING.IS_MODEL_VALID(hash) then
+                                a.invalidmodel = true
+                            else
+                                STREAMING.REQUEST_MODEL(hash)
+                                repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and yu.does_entity_exist(a.entity) then
+                                    ENTITY.DELETE_ENTITY(a.entity)
                                 end
 
-                                local b = 4536533
-                                globals.set_int(b + 1, 2147483646)
-                                globals.set_int(b + 7, 2147483647)
-                                globals.set_int(b + 6, 0)
-                                globals.set_int(b + 5, 0)
-                                globals.set_int(b + 3, 0x615762F1)
-                                globals.set_int(b + 2, 1000000)
-                                globals.set_int(b, 1)
+                                local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                a.entity = OBJECT.CREATE_OBJECT_NO_OFFSET(
+                                    hash,
+                                    c.x,
+                                    c.y,
+                                    c.z,
+                                    true,
+                                    yu.rendering.isCheckboxChecked("world_objspawner_missionent") ~= false,
+                                    true
+                                )
 
-                                yu.set_stat("SELF_MONEY_1M1SLOOP_MM", yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0) + 1000000)
+                                STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
 
-                                runscript:sleep(1000)
+                                if a.entity then
+                                    ENTITY.SET_ENTITY_LOD_DIST(a.entity, 0xFFFF)
+                                    ENTITY.FREEZE_ENTITY_POSITION(a.entity, yu.rendering.isCheckboxChecked("world_objspawner_freeze"))
+                                    if yu.rendering.isCheckboxChecked("world_objspawner_groundplace") then
+                                        OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
+                                    end
+                                else
+                                    temp_text({"Error while spawning entity", 255, 0, 0}, 2500)
+                                end
                             end
+
+                            a.blocked = nil
                         end)
                     end
-                end)
-                yu.rendering.tooltip("This is a pure copy from SilentNight! DC: silentsalo\nThey say it's safe :)")
-            end
 
-            tab.sub[9] = tab2
-        end
+                    if a.entity ~= nil then
+                        ImGui.SameLine()
 
-        SussySpt.rendering.tabs[1] = tab
-    end
-
-    do -- World
-        local tab = SussySpt.rendering.new_tab("World")
-
-        tab.sub[1] = (function()
-            local a = {
-                model = "",
-                awidth = 195
-            }
-
-            yu.rendering.setCheckboxChecked("world_objspawner_deleteprev", true)
-            yu.rendering.setCheckboxChecked("world_objspawner_missionent", true)
-
-            local function temp_text(infotext, duration)
-                yu.rif(function(runscript)
-                    a.infotext = infotext
-                    local id = yu.gun()
-                    a.infotextid = id
-                    runscript:sleep(duration)
-                    if a.infotextid == id then
-                        a.infotext = nil
+                        if ImGui.Button("Delete##last_spawned") then
+                            yu.rif(function(runscript)
+                                if yu.does_entity_exist(a.entity) then
+                                    ENTITY.DELETE_ENTITY(a.entity)
+                                end
+                            end)
+                        end
                     end
-                end)
+
+                    ImGui.EndGroup()
+                    ImGui.SameLine()
+                    ImGui.BeginGroup()
+
+                    ImGui.Text("Options")
+
+                    if ImGui.TreeNodeEx("Spawn options") then
+                        yu.rendering.renderCheckbox("Frozen", "world_objspawner_freeze", function(state)
+                            yu.rif(function()
+                                if a.entity ~= nil and yu.does_entity_exist(a.entity) then
+                                    ENTITY.FREEZE_ENTITY_POSITION(a.entity, state)
+                                end
+                            end)
+                        end)
+
+                        yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
+                        yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
+                        yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
+                            yu.rif(function()
+                                if a.entity ~= nil and yu.does_entity_exist(a.entity) then
+                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
+                                end
+                            end)
+                        end)
+
+                        ImGui.TreePop()
+                    end
+
+                    ImGui.EndGroup()
+                end
+
+                tab.sub[1] = tab2
             end
 
-            return SussySpt.rendering.new_tab("Object Spawner", function()
-                ImGui.BeginGroup()
+            do -- ANCHOR Nearby vehicles
+                local tab2 = SussySpt.rendering.new_tab("Nearby vehicles")
 
-                ImGui.Text("Spawner")
-
-                ImGui.PushItemWidth(a.awidth)
-
-                local model_text, _ = ImGui.InputTextWithHint("Model", "ex. stt_prop_stunt_bowling_pin", a.model, 32)
-                SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.model ~= model_text then
-                    a.model = model_text
-                    a.invalidmodel = nil
+                tab2.render = function()
+                    for i = 0, 10 do
+                        ImGui.Text(i..":")
+                        ImGui.SameLine()
+                        if ImGui.SmallButton("Open##"..i) then
+                            yu.rif(function()
+                                local veh = yu.veh(yu.ppid())
+                                if veh ~= nil then
+                                    VEHICLE.SET_VEHICLE_DOOR_OPEN(veh, i, false, true)
+                                end
+                            end)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.SmallButton("Closed##"..i) then
+                            yu.rif(function()
+                                local veh = yu.veh(yu.ppid())
+                                if veh ~= nil then
+                                    VEHICLE.SET_VEHICLE_DOOR_SHUT(veh, i, true)
+                                end
+                            end)
+                        end
+                    end
                 end
 
-                if a.invalidmodel then
-                    yu.rendering.coloredtext("Invalid model!", 255, 25, 25)
-                elseif a.blocked then
-                    yu.rendering.coloredtext("Spawning...", 108, 149, 218)
-                end
+                tab.sub[2] = tab2
+            end
 
-                if a.infotext ~= nil then
-                    yu.rendering.coloredtext(a.infotext[1], a.infotext[2], a.infotext[3], a.infotext[4])
-                end
+            do -- ANCHOR Particle Spawner
+                local tab2 = SussySpt.rendering.new_tab("Particle Spawner")
 
-                ImGui.PopItemWidth()
+                local a = {
+                    awidth = 280,
+                    dict = "core",
+                    effect = "ent_sht_petrol_fire"
+                }
 
-                if not a.blocked and ImGui.Button("Spawn") then
-                    yu.rif(function(runscript)
-                        a.blocked = true
+                tab2.render = function()
+                    ImGui.PushItemWidth(a.awidth)
 
-                        local hash = joaat(a.model)
+                    local dict, _ = ImGui.InputTextWithHint("Dict", "ex. core", a.dict, 32)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
+                    if a.dict ~= dict then
+                        a.dict = dict
+                    end
 
-                        if not STREAMING.IS_MODEL_VALID(hash) then
-                            a.invalidmodel = true
-                        else
-                            STREAMING.REQUEST_MODEL(hash)
-                            repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+                    local effect, _ = ImGui.InputTextWithHint("Effect", "ex. ent_sht_petrol_fire", a.effect, 32)
+                    SussySpt.push_disable_controls(ImGui.IsItemActive())
+                    if a.effect ~= effect then
+                        a.effect = effect
+                    end
 
-                            if yu.rendering.isCheckboxChecked("world_objspawner_deleteprev") and yu.does_entity_exist(a.entity) then
-                                ENTITY.DELETE_ENTITY(a.entity)
-                            end
+                    ImGui.PopItemWidth()
+
+                    if a.blocked ~= true and ImGui.Button("Spawn") then
+                        yu.rif(function(rs)
+                            a.blocked = true
+
+                            STREAMING.REQUEST_NAMED_PTFX_ASSET(a.dict)
+                            repeat rs:yield() until STREAMING.HAS_NAMED_PTFX_ASSET_LOADED(a.dict)
+                            GRAPHICS.USE_PARTICLE_FX_ASSET(a.dict)
 
                             local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                            a.entity = OBJECT.CREATE_OBJECT_NO_OFFSET(
-                                hash,
-                                c.x,
-                                c.y,
-                                c.z,
-                                true,
-                                yu.rendering.isCheckboxChecked("world_objspawner_missionent") ~= false,
-                                true
-                            )
+                            local x, y, z = c.x, c.y, c.z
+                            GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, 1, 1, 1)
 
-                            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                            STREAMING.REMOVE_PTFX_ASSET()
 
-                            if a.entity then
-                                ENTITY.SET_ENTITY_LOD_DIST(a.entity, 0xFFFF)
-                                ENTITY.FREEZE_ENTITY_POSITION(a.entity, yu.rendering.isCheckboxChecked("world_objspawner_freeze"))
-                                if yu.rendering.isCheckboxChecked("world_objspawner_groundplace") then
-                                    OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(a.entity)
-                                end
-                            else
-                                temp_text({"Error while spawning entity", 255, 0, 0}, 2500)
+                            a.blocked = nil
+                        end)
+                    end
+                end
+
+                tab.sub[3] = tab2
+            end
+
+            do -- ANCHOR Peds
+                local tab2 = SussySpt.rendering.new_tab("Peds")
+
+                yu.rif(function(rs)
+                    while true do
+                        if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
+                            for k, v in pairs(entities.get_all_peds_as_handles()) do
+                                PED.SET_PED_SEEING_RANGE(v, 0)
                             end
                         end
-
-                        a.blocked = nil
-                    end)
-                end
-
-                if a.entity ~= nil then
-                    ImGui.SameLine()
-
-                    if ImGui.Button("Delete##last_spawned") then
-                        yu.rif(function(runscript)
-                            if yu.does_entity_exist(a.entity) then
-                                ENTITY.DELETE_ENTITY(a.entity)
-                            end
-                        end)
-                    end
-                end
-
-                ImGui.EndGroup()
-                ImGui.SameLine()
-                ImGui.BeginGroup()
-
-                ImGui.Text("Options")
-
-                if ImGui.TreeNodeEx("Spawn options") then
-                    yu.rendering.renderCheckbox("Frozen", "world_objspawner_freeze", function(state)
-                        yu.rif(function()
-                            if a.entity ~= nil and yu.does_entity_exist(a.entity) then
-                                ENTITY.FREEZE_ENTITY_POSITION(a.entity, state)
-                            end
-                        end)
-                    end)
-
-                    yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
-                    yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
-                    yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
-                        yu.rif(function()
-                            if a.entity ~= nil and yu.does_entity_exist(a.entity) then
-                                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
-                            end
-                        end)
-                    end)
-
-                    ImGui.TreePop()
-                end
-
-                ImGui.EndGroup()
-            end)
-        end)()
-
-        tab.sub[2] = (function()
-            return SussySpt.rendering.new_tab("Nearby vehicles", function()
-                -- ImGui.Text("Coming soon :D")
-                -- ImGui.BeginGroup()
-                -- ImGui.Text("Nearby vehicles")
-                -- ImGui.EndGroup()
-                -- ImGui.SameLine()
-                -- ImGui.Text("Vehicle options")
-                -- ImGui.BeginGroup()
-                -- ImGui.EndGroup()
-
-                for i = 0, 10 do
-                    ImGui.Text(i..":")
-                    ImGui.SameLine()
-                    if ImGui.SmallButton("Open##"..i) then
-                        yu.rif(function()
-                            local veh = yu.veh(yu.ppid())
-                            if veh ~= nil then
-                                VEHICLE.SET_VEHICLE_DOOR_OPEN(veh, i, false, true)
-                            end
-                        end)
-                    end
-                    ImGui.SameLine()
-                    if ImGui.SmallButton("Closed##"..i) then
-                        yu.rif(function()
-                            local veh = yu.veh(yu.ppid())
-                            if veh ~= nil then
-                                VEHICLE.SET_VEHICLE_DOOR_SHUT(veh, i, true)
-                            end
-                        end)
-                    end
-                end
-            end)
-        end)()
-
-        tab.sub[3] = (function()
-            local a = {
-                awidth = 280,
-                dict = "core",
-                effect = "ent_sht_petrol_fire"
-            }
-
-            return SussySpt.rendering.new_tab("Particle Spawner", function()
-                ImGui.PushItemWidth(a.awidth)
-
-                local dict, _ = ImGui.InputTextWithHint("Dict", "ex. core", a.dict, 32)
-                SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.dict ~= dict then
-                    a.dict = dict
-                end
-
-                local effect, _ = ImGui.InputTextWithHint("Effect", "ex. ent_sht_petrol_fire", a.effect, 32)
-                SussySpt.push_disable_controls(ImGui.IsItemActive())
-                if a.effect ~= effect then
-                    a.effect = effect
-                end
-
-                ImGui.PopItemWidth()
-
-                if a.blocked ~= true and ImGui.Button("Spawn") then
-                    yu.rif(function(rs)
-                        a.blocked = true
-
-                        STREAMING.REQUEST_NAMED_PTFX_ASSET(a.dict)
-                        repeat rs:yield() until STREAMING.HAS_NAMED_PTFX_ASSET_LOADED(a.dict)
-                        GRAPHICS.USE_PARTICLE_FX_ASSET(a.dict)
-
-                        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                        local x, y, z = c.x, c.y, c.z
-                        GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, 1, 1, 1)
-
-                        STREAMING.REMOVE_PTFX_ASSET()
-
-                        a.blocked = nil
-                    end)
-                end
-            end)
-        end)()
-
-        do
-            -- tab.sub[4] = (function()
-            --     yu.rif(function(rs)
-            --         while true do
-            --             if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
-            --                 for k, v in pairs(entities.get_all_peds_as_handles()) do
-            --                     PED.SET_PED_SEEING_RANGE(v, 0)
-            --                 end
-            --             end
-
-            --             rs:sleep(2)
-            --         end
-            --     end)
-
-            --     return SussySpt.rendering.new_tab("Peds", function()
-            --         yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
-            --     end)
-            -- end)()
-        end
-
-        SussySpt.rendering.tabs[2] = tab
-    end
-
-    do -- Singleplayer
-        local tab = SussySpt.rendering.new_tab("Singleplayer")
-
-        local a = {
-            characters = {
-                [0] = "Michael",
-                [1] = "Franklin",
-                [2] = "Trevor"
-            }
-        }
-
-        do -- Cash
-            local tab2 = SussySpt.rendering.new_tab("Cash")
-
-            local function refresh()
-                a.cash = {}
-                for k, v in pairs(a.characters) do
-                    a.cash[k] = stats.get_int("SP"..k.."_TOTAL_CASH")
-                end
-            end
-            yu.rif(refresh)
-
-            tab2.render = function()
-                for k, v in pairs(a.cash) do
-                    local resp = yu.rendering.input("int", {
-                        label = a.characters[k],
-                        value = v
-                    })
-                    if resp ~= nil and resp.changed then
-                        a.cash[k] = resp.value
-                    end
-                end
-
-                if ImGui.Button("Apply") then
-                    yu.rif(function()
-                        for k, v in pairs(a.cash) do
-                            stats.set_int("SP"..k.."_TOTAL_CASH", v)
-                        end
-                        refresh()
-                    end)
-                end
-            end
-
-            tab.sub[1] = tab2
-        end
-
-        SussySpt.rendering.tabs[3] = tab
-    end
-
-    do -- Config
-        local tab = SussySpt.rendering.new_tab("Config")
-
-        tab.sub[1] = SussySpt.rendering.new_tab("Info", function()
-            ImGui.Text("Made by pierrelasse.")
-            ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
-
-            ImGui.Spacing()
-
-            ImGui.Text("SussySpt version: "..SussySpt.version)
-            ImGui.Text("SussySpt version id: "..SussySpt.versionid)
-
-            ImGui.Spacing()
-
-            ImGui.Text("Theme: "..SussySpt.rendering.theme)
-            ImGui.PushItemWidth(265)
-            if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
-                for k, v in pairs(SussySpt.rendering.themes) do
-                    if ImGui.Selectable(k, false) then
-                        SussySpt.rendering.theme = k
-                        SussySpt.debug("Set theme to '"..k.."'")
-                    end
-                end
-                ImGui.EndCombo()
-            end
-            ImGui.PopItemWidth()
-
-            ImGui.Spacing()
-
-            if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
-                ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
-                ImGui.TreePop()
-            end
-
-            ImGui.Spacing()
-
-            yu.rendering.renderCheckbox("Dev mode", "dev", function(state)
-                SussySpt.dev = state
-                SussySpt.debug(yu.shc(state, "En", "Dis").."abled dev mode")
-            end)
-            yu.rendering.tooltip("This just enables testing and not serious things")
-
-            if SussySpt.dev then
-                ImGui.Spacing()
-
-                if ImGui.Button("Go airplane mode :)") then
-                    yu.add_task(function()
-                        STREAMING.REQUEST_ANIM_DICT("missfbi1")
-                        TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
-                    end)
-                end
-            end
-        end)
-
-        tab.sub[2] = SussySpt.rendering.new_tab("Weird ESP", function()
-            ImGui.Text("This was just a test and is for now nothing real.")
-            ImGui.Text("And yes it is working but there is currently no way to render it above things using natives.")
-            ImGui.Spacing()
-            yu.rendering.renderCheckbox("Very cool skeleton esp enabled", "config_esp_enabled")
-        end)
-
-        do
-            local tab2 = SussySpt.rendering.new_tab("Invisible")
-
-            yu.rendering.setCheckboxChecked("invisible_hotkey")
-
-            local makingVehicleInivs = false
-            SussySpt.ensureVis = function(state, id, veh)
-                if state ~= true and state ~= false then
-                    return nil
-                end
-                if id ~= nil then
-                    ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
-                end
-                if not makingVehicleInivs then
-                    yu.rif(function()
-                        makingVehicleInivs = true
-                        if veh ~= nil and entities.take_control_of(veh) then
-                            ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
-                        end
-                        makingVehicleInivs = false
-                    end)
-                end
-            end
-
-            SussySpt.enableVis = function()
-                SussySpt.invisible = nil
-                SussySpt.ensureVis(true, yu.ppid(), yu.veh())
-            end
-
-            yu.key_listener.add_callback(yu.keys["L"], function()
-                if yu.rendering.isCheckboxChecked("invisible_hotkey") and not HUD.IS_PAUSE_MENU_ACTIVE() then
-                    if SussySpt.invisible == true then
-                        SussySpt.enableVis()
-                    else
-                        SussySpt.invisible = true
-                    end
-                    log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
-                end
-            end)
-
-            tab2.render = function()
-                yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "invisible", function(state)
-                    if state then
-                        SussySpt.invisible = true
-                    else
-                        SussySpt.enableVis()
+                        rs:yield()
                     end
                 end)
 
-                yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey")
+                tab2.render = function()
+                    yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
+                end
+
+                tab.sub[4] = tab2
             end
 
-            tab.sub[3] = tab2
-        end
+            SussySpt.rendering.tabs[2] = tab
+        end -- !SECTION
 
-        SussySpt.rendering.tabs[4] = tab
-    end
+        do -- SECTION Singleplayer
+            local tab = SussySpt.rendering.new_tab("Singleplayer")
+
+            local a = {
+                characters = {
+                    [0] = "Michael",
+                    [1] = "Franklin",
+                    [2] = "Trevor"
+                }
+            }
+
+            do -- ANCHOR Cash
+                local tab2 = SussySpt.rendering.new_tab("Cash")
+
+                local function refresh()
+                    a.cash = {}
+                    for k, v in pairs(a.characters) do
+                        a.cash[k] = stats.get_int("SP"..k.."_TOTAL_CASH")
+                    end
+                end
+                yu.rif(refresh)
+
+                tab2.render = function()
+                    for k, v in pairs(a.cash) do
+                        local resp = yu.rendering.input("int", {
+                            label = a.characters[k],
+                            value = v
+                        })
+                        if resp ~= nil and resp.changed then
+                            a.cash[k] = resp.value
+                        end
+                    end
+
+                    if ImGui.Button("Apply") then
+                        yu.rif(function()
+                            for k, v in pairs(a.cash) do
+                                stats.set_int("SP"..k.."_TOTAL_CASH", v)
+                            end
+                            refresh()
+                        end)
+                    end
+                end
+
+                tab.sub[1] = tab2
+            end
+
+            SussySpt.rendering.tabs[3] = tab
+        end -- !SECTION
+
+        do -- SECTION Config
+            local tab = SussySpt.rendering.new_tab("Config")
+
+            do -- ANCHOR Info
+                local tab2 = SussySpt.rendering.new_tab("Info")
+
+                tab2.render = function()
+                    ImGui.Text("Made by pierrelasse.")
+                    ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
+
+                    ImGui.Spacing()
+
+                    ImGui.Text("SussySpt version: "..SussySpt.version)
+                    ImGui.Text("SussySpt version id: "..SussySpt.versionid)
+
+                    ImGui.Spacing()
+
+                    ImGui.Text("Theme: "..SussySpt.rendering.theme)
+                    ImGui.PushItemWidth(265)
+                    if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
+                        for k, v in pairs(SussySpt.rendering.themes) do
+                            if ImGui.Selectable(k, false) then
+                                SussySpt.rendering.theme = k
+                                SussySpt.debug("Set theme to '"..k.."'")
+                            end
+                        end
+                        ImGui.EndCombo()
+                    end
+                    ImGui.PopItemWidth()
+
+                    ImGui.Spacing()
+
+                    if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
+                        ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                        ImGui.TreePop()
+                    end
+
+                    ImGui.Spacing()
+
+                    yu.rendering.renderCheckbox("Dev mode", "dev", function(state)
+                        SussySpt.dev = state
+                        SussySpt.debug(yu.shc(state, "En", "Dis").."abled dev mode")
+                    end)
+                    yu.rendering.tooltip("This just enables testing and not serious things")
+
+                    if SussySpt.dev then
+                        ImGui.Spacing()
+
+                        if ImGui.Button("Go airplane mode :)") then
+                            yu.add_task(function()
+                                STREAMING.REQUEST_ANIM_DICT("missfbi1")
+                                TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
+                            end)
+                        end
+                    end
+                end
+
+                tab.sub[1] = tab2
+            end
+
+            do -- ANCHOR Weird ESP
+                local tab2 = SussySpt.rendering.new_tab("Weird ESP")
+
+                tab2.render = function()
+                    ImGui.Text("This was just a test and is for now nothing real.")
+                    ImGui.Text("And yes it is working but there is currently no way to render it above things using natives.")
+                    ImGui.Spacing()
+                    yu.rendering.renderCheckbox("Very cool skeleton esp enabled", "config_esp_enabled")
+                end
+
+                tab.sub[2] = tab2
+            end
+
+            do -- ANCHOR Invisible
+                local tab2 = SussySpt.rendering.new_tab("Invisible")
+
+                yu.rendering.setCheckboxChecked("invisible_hotkey")
+
+                local makingVehicleInivs = false
+                SussySpt.ensureVis = function(state, id, veh)
+                    if state ~= true and state ~= false then
+                        return nil
+                    end
+                    if id ~= nil then
+                        ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
+                    end
+                    if not makingVehicleInivs then
+                        yu.rif(function()
+                            makingVehicleInivs = true
+                            if veh ~= nil and entities.take_control_of(veh) then
+                                ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
+                            end
+                            makingVehicleInivs = false
+                        end)
+                    end
+                end
+
+                SussySpt.enableVis = function()
+                    SussySpt.invisible = nil
+                    SussySpt.ensureVis(true, yu.ppid(), yu.veh())
+                end
+
+                yu.key_listener.add_callback(yu.keys["L"], function()
+                    if yu.rendering.isCheckboxChecked("invisible_hotkey") and not HUD.IS_PAUSE_MENU_ACTIVE() then
+                        if SussySpt.invisible == true then
+                            SussySpt.enableVis()
+                        else
+                            SussySpt.invisible = true
+                        end
+                        log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
+                    end
+                end)
+
+                tab2.render = function()
+                    yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "invisible", function(state)
+                        if state then
+                            SussySpt.invisible = true
+                        else
+                            SussySpt.enableVis()
+                        end
+                    end)
+
+                    yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey")
+                end
+
+                tab.sub[3] = tab2
+            end
+
+            SussySpt.rendering.tabs[4] = tab
+        end -- !SECTION
+    end -- !SECTION
 
     SussySpt.debug("Registered 'sussyspt' loop")
     script.register_looped("sussyspt", SussySpt.tick)
@@ -2723,6 +2742,7 @@ function SussySpt:init()
     SussySpt.tab:add_imgui(SussySpt.render)
 
     SussySpt.debug("Creating esp thread")
+    -- ANCHOR ESP
     yu.rif(function(rs)
         local function drawLine(ped, index1, index2)
             local c1 = PED.GET_PED_BONE_COORDS(ped, index1, 0, 0, 0)
@@ -2767,9 +2787,9 @@ function SussySpt:init()
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
-end
+end -- !SECTION
 
-function SussySpt:initCategories()
+function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     local tab = SussySpt.tab
     SussySpt.pushStyle = function() end
     SussySpt.popStyle = SussySpt.pushStyle
@@ -2797,9 +2817,9 @@ function SussySpt:initCategories()
         end
         yu.rendering.renderCheckbox("Quick actions", "cat_qa")
     end)
-end
+end -- !SECTION
 
-function SussySpt:initUtils()
+function SussySpt:initUtils() -- SECTION SussySpt:initUtils
     function requireScript(name)
         if yu.is_script_running(name) == false then
             yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
@@ -2856,9 +2876,9 @@ function SussySpt:initUtils()
             return tbs.tabs[key] or gui.get_tab("void")
         end
     }
-end
+end -- !SECTION
 
-function SussySpt:initTabHBO()
+function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
     local toRender = {}
     local function addToRender(id, cb)
         toRender[id] = cb
@@ -4981,9 +5001,9 @@ function SussySpt:initTabHBO()
             SussySpt.popStyle()
         end
     end)
-end
+end -- !SECTION
 
-function SussySpt:initTabQA()
+function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_qa") then
             SussySpt.pushStyle()
@@ -5120,9 +5140,9 @@ function SussySpt:initTabQA()
             SussySpt.popStyle()
         end
     end)
-end
+end -- !SECTION
 
-function SussySpt:initTabHeist()
+function SussySpt:initTabHeist() -- SECTION SussySpt:initTabHeist
     local tab = tbs.getTab(SussySpt.tab, " Heists & Stuff idk")
     tab:clear()
 
@@ -5191,6 +5211,8 @@ function SussySpt:initTabHeist()
     end
 
     initTabDDay()
-end
+end -- !SECTION
 
 SussySpt:init()
+
+-- ANCHOR EOF
