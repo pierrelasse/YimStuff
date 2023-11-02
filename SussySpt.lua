@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1818,
+    versionid = 1843,
 
     doInit = true,
     doDebug = false,
@@ -478,6 +478,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 "B",
                                 "The player has no blip. In interior/not spawned yet?"
                             }
+                            v.info.dead = {
+                                ENTITY.IS_ENTITY_DEAD(v.ped) or PED.IS_PED_DEAD_OR_DYING(v.ped, 1),
+                                "D",
+                                "Player seems to be dead"
+                            }
 
                             v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
 
@@ -601,7 +606,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.PopItemWidth()
 
                     ImGui.PushItemWidth(a.playerlistwidth)
-                    if ImGui.BeginListBox("##playerlist") then
+                    local _, availY = ImGui.GetContentRegionAvail()
+                    if ImGui.BeginListBox("##playerlist", 0, availY) then
                         for k, v in pairs(SussySpt.players) do
                             if v.display then
                                 if ImGui.Selectable(v.displayName, false) then
@@ -636,6 +642,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.SameLine()
 
                             ImGui.BeginGroup()
+
+                            ImGui.PushStyleColor(ImGuiCol.FrameBg, 0, 0, 0, .15)
+                            ImGui.BeginListBox("##selectedplayer", ImGui.GetContentRegionAvail())
+                            ImGui.PopStyleColor()
 
                             ImGui.Text("Selected player: "..player.name)
                             yu.rendering.tooltip(player.tooltip)
@@ -849,7 +859,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         rs:sleep(5000)
 
                                         for k, v in pairs(vehicles) do
-                                            ENTITY.DELETE_ENTITY(v)
+                                            if v ~= nil then
+                                                ENTITY.DELETE_ENTITY(v)
+                                            end
                                         end
                                     end)
                                 end
@@ -968,7 +980,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     ImGui.TreePop()
                                 end
 
-                                do
+                                do -- Ram
                                     ImGui.PushItemWidth(237)
                                     local ror = yu.rendering.renderList(a.ramoptions, a.ramoption, "online_player_ram", "")
                                     if ror.changed then
@@ -997,7 +1009,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     end
                                 end
 
-                                do
+                                do -- Attach
                                     ImGui.PushItemWidth(237)
                                     local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
                                     if resp.changed then
@@ -1434,9 +1446,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     end)
                                 end
                             end
-                        end
 
-                        ImGui.EndGroup()
+                            ImGui.EndListBox()
+
+                            ImGui.EndGroup()
+                        end
                     end
                 end
 
@@ -2810,6 +2824,10 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Invisible
                 local tab2 = SussySpt.rendering.new_tab("Invisible")
 
+                local a = {
+                    key = "L"
+                }
+
                 yu.rendering.setCheckboxChecked("invisible_hotkey")
 
                 local makingVehicleInivs = false
@@ -2836,19 +2854,23 @@ function SussySpt:init() -- SECTION SussySpt:init
                     SussySpt.ensureVis(true, yu.ppid(), yu.veh())
                 end
 
-                yu.key_listener.add_callback(yu.keys["L"], function()
-                    if yu.rendering.isCheckboxChecked("invisible_hotkey") and not HUD.IS_PAUSE_MENU_ACTIVE() then
-                        if SussySpt.invisible == true then
-                            SussySpt.enableVis()
-                        else
-                            SussySpt.invisible = true
+                local function bindHotkey(key)
+                    yu.key_listener.remove_callback(a.callback)
+                    a.callback = yu.key_listener.add_callback(key, function()
+                        if yu.rendering.isCheckboxChecked("invisible_hotkey") and not HUD.IS_PAUSE_MENU_ACTIVE() then
+                            if SussySpt.invisible == true then
+                                SussySpt.enableVis()
+                            else
+                                SussySpt.invisible = true
+                            end
+                            log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
                         end
-                        log.info("You are now "..yu.shc(SussySpt.invisible, "invisible", "visible").."!")
-                    end
-                end)
+                    end)
+                end
+                bindHotkey(yu.keys[a.key])
 
                 tab2.render = function()
-                    yu.rendering.renderCheckbox("Invisible (Press 'L' to toggle)", "invisible", function(state)
+                    yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
                         if state then
                             SussySpt.invisible = true
                         else
@@ -2856,7 +2878,20 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                     end)
 
+                    ImGui.Spacing()
+
                     yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey")
+
+                    ImGui.PushItemWidth(140)
+                    if ImGui.BeginCombo("Key", a.key) then
+                        for k, v in pairs(yu.keys) do
+                            if ImGui.Selectable(k, false) then
+                                a.key = k
+                                bindHotkey(yu.keys[k])
+                            end
+                        end
+                    end
+                    ImGui.PopItemWidth()
                 end
 
                 tab.sub[3] = tab2
