@@ -77,5 +77,8 @@
     ],
     "commentAnchors.tags.matchPrefix": [
         "--"
-    ]
+    ],
+    "commentAnchors.tags.matchSuffix": [],
+    "commentAnchors.scrollPosition": "center",
+    "commentAnchors.tags.displayLineNumber": false
 }
