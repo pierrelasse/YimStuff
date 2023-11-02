@@ -6,9 +6,7 @@
         "ImGuiCol",
         "ImGuiStyleVar",
         "ImGuiInputTextFlags",
-
         "infraction",
-
         "command",
         "entities",
         "event",
@@ -24,7 +22,6 @@
         "script",
         "stats",
         "tunables",
-
         "APP",
         "AUDIO",
         "BRAIN",
@@ -78,6 +75,7 @@
     "commentAnchors.tags.matchPrefix": [
         "--"
     ],
+    "commentAnchors.workspace.matchFiles": "**/*.lua",
     "commentAnchors.tags.matchSuffix": [],
     "commentAnchors.scrollPosition": "center",
     "commentAnchors.tags.displayLineNumber": false
