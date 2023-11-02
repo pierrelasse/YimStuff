@@ -44,7 +44,7 @@ return (function()
         end
 
         api.get_or_default = function(tbl, key, defaultValue)
-            return tbl[key] or defaultValue or "<null>"
+            return tbl[key] or (defaultValue or "nil")
         end
 
         api.god = function(tbl, key, defaultValue)
@@ -358,7 +358,7 @@ return (function()
                     return i
                 end
             end
-        end        
+        end
     end
 
     local function initStats()
