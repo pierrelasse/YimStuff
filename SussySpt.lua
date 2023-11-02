@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1843,
+    versionid = 1845,
 
     doInit = true,
     doDebug = false,
@@ -605,23 +605,24 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                     ImGui.PopItemWidth()
 
-                    ImGui.PushItemWidth(a.playerlistwidth)
-                    local _, availY = ImGui.GetContentRegionAvail()
-                    if ImGui.BeginListBox("##playerlist", 0, availY) then
-                        for k, v in pairs(SussySpt.players) do
-                            if v.display then
-                                if ImGui.Selectable(v.displayName, false) then
-                                    a.selectedplayer = v.name
-                                end
-                                if v.tooltip ~= nil then
-                                    yu.rendering.tooltip(v.tooltip)
+                    do
+                        ImGui.PushItemWidth(a.playerlistwidth)
+                        local _, y = ImGui.GetContentRegionAvail()
+                        if ImGui.BeginListBox("##playerlist", 0, y) then
+                            for k, v in pairs(SussySpt.players) do
+                                if v.display then
+                                    if ImGui.Selectable(v.displayName, false) then
+                                        a.selectedplayer = v.name
+                                    end
+                                    if v.tooltip ~= nil then
+                                        yu.rendering.tooltip(v.tooltip)
+                                    end
                                 end
                             end
+                            ImGui.EndListBox()
                         end
-
-                        ImGui.EndListBox()
+                        ImGui.PopItemWidth()
                     end
-                    ImGui.PopItemWidth()
 
                     ImGui.EndGroup()
 
