@@ -78,5 +78,6 @@
     "commentAnchors.workspace.matchFiles": "**/*.lua",
     "commentAnchors.tags.matchSuffix": [],
     "commentAnchors.scrollPosition": "center",
-    "commentAnchors.tags.displayLineNumber": false
+    "commentAnchors.tags.displayLineNumber": false,
+    "commentAnchors.tags.displayInRuler": false
 }
