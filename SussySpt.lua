@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1774,
+    versionid = 1818,
 
     doInit = true,
     doDebug = false,
@@ -326,7 +326,23 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
             end
 
-            do -- ANCHOR Players
+            local function triggerTransaction(rs, hash, amount)
+                local b = 4536533
+                globals.set_int(b + 1, 2147483646)
+                globals.set_int(b + 7, 2147483647)
+                globals.set_int(b + 6, 0)
+                globals.set_int(b + 5, 0)
+                globals.set_int(b + 3, hash)
+                globals.set_int(b + 2, amount)
+                globals.set_int(b, 2)
+                rs:sleep(5)
+                globals.set_int(b + 1, 2147483647)
+                globals.set_int(b + 7, 0)
+                globals.set_int(b + 5, 202606500)
+                globals.set_int(b + 2, 0)
+            end
+
+            do -- SECTION Players
                 local tab2 = SussySpt.rendering.new_tab("Players")
 
                 local a = {
@@ -344,7 +360,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ["bulldozer"] = "Bulldozer (very cool)",
                         ["dump"] = "Dump (big)",
                         ["cutter"] = "Cutter",
-                        ["firetruk"] = "Firetruk"
+                        ["firetruk"] = "Firetruk",
+                        ["luxor"] = "Luxor",
+                        ["blimp"] = "Blimp - Atomic",
+                        ["metrotrain"] = "Metro"
                     },
                     ramoption = "bus",
                     givecustomweaponammo = 999,
@@ -566,6 +585,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end)
 
+                -- ANCHOR Render
                 tab2.render = function()
                     a.doupdates = 1
                     ImGui.BeginGroup()
@@ -600,10 +620,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.EndGroup()
 
                     if a.selectedplayer ~= nil then
+                        local key
                         local player
                         a.splayer = nil
                         for k, v in pairs(SussySpt.players) do
                             if v.name == a.selectedplayer then
+                                key = k
                                 player = v
                                 a.splayer = player
                                 break
@@ -1381,6 +1403,37 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                 ImGui.TreePop()
                             end
+
+                            if SussySpt.dev and ImGui.TreeNodeEx("Test") then
+                                if ImGui.SmallButton("Set killer") then
+                                    a.killer = key
+                                end
+
+                                if ImGui.SmallButton("Explode veh") then
+                                    yu.rif(function(rs)
+                                        local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+
+                                        local hash = joaat("adder")
+                                        STREAMING.REQUEST_MODEL(hash)
+                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
+
+                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z + 1.5, 0, true, true)
+                                        ENTITY.FREEZE_ENTITY_POSITION(veh, true)
+                                        ENTITY.SET_ENTITY_COLLISION(veh, false, false)
+                                        ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
+                                        ENTITY.SET_ENTITY_VISIBLE(veh, false)
+
+                                        rs:sleep(5)
+
+                                        local killer = SussySpt.players[a.killer]
+                                        if killer ~= nil then
+                                            NETWORK.NETWORK_EXPLODE_VEHICLE(veh, true, false, killer.player)
+                                        end
+
+                                        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
+                                    end)
+                                end
+                            end
                         end
 
                         ImGui.EndGroup()
@@ -1388,7 +1441,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
 
                 tab.sub[1] = tab2
-            end
+            end -- !SECTION
 
             do -- ANCHOR Stats
                 local a = {
@@ -2272,37 +2325,114 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Money
                 local tab2 = SussySpt.rendering.new_tab("Money")
 
+                local a = {
+                    transactions = {
+                        {"15M (Bend Job)", 0x176D9D54, 15000000},
+                        {"15M (Bend Bonus)", 0xA174F633, 15000000},
+                        {"15M (Criminal Mastermind)", 0x3EBB7442, 15000000},
+                        {"15M (Gangpos Mastermind)", 0x23F59C7C, 15000000},
+                        {"7M (Gang)", 0xED97AFC1, 7000000},
+                        {"3.6M (Casino Heist)", 0xB703ED29, 3619000},
+                        {"3M (Agency Story)", 0xBD0D94E3, 3000000},
+                        {"3M (Gangpos Mastermind)", 0x370A42A5, 3000000},
+                        {"2.5M (Gang)", 0x46521174, 2550000},
+                        {"2.5M (Island Heist)", 0xDBF39508, 2550000},
+                        {"2M (Gangpos Award Order)", 0x32537662, 2000000},
+                        {"2M (Heist Awards)", 0x8107BB89, 2000000},
+                        {"2M (Tuner Robbery)", 0x921FCF3C, 2000000},
+                        {"2M (Business Hub)", 0x4B6A869C, 2000000},
+                        {"1.5M (Gangpos Loyal Award)", 0x33E1D8F6, 1500000},
+                        {"1.2M (Boss Agency)", 0xCCFA52D, 1200000},
+                        {"1M (Music Trip)", 0xDF314B5A, 1000000},
+                        {"1M (Daily Objective Event)", 0x314FB8B0, 1000000},
+                        {"1M (Daily Objective)", 0xBFCBE6B6, 1000000},
+                        {"1M (Juggalo Story Award)", 0x615762F1, 1000000},
+                        {"700K (Gangpos Loyal Award)", 0xED74CC1D, 700000},
+                        {"680K (Betting)", 0xACA75AAE, 680000},
+                        {"620K (Vehicle Export)", 0xEE884170, 620000},
+                        {"500K (Casino Straight Flush)", 0x059E889DD, 500000},
+                        {"500K (Juggalo Story)", 0x05F2B7EE, 500000},
+                        {"400K (Cayo Heist Award Professional)", 0xAC7144BC, 400000},
+                        {"400K (Cayo Heist Award Cat Burglar)", 0xB4CA7969, 400000},
+                        {"400K (Cayo Heist Award Elite Thief)", 0xF5AAD2DE, 400000},
+                        {"400K (Cayo Heist Award Island Thief)", 0x1868FE18, 400000},
+                        {"350K (Casino Heist Award Elite Thief)", 0x7954FD0F, 350000},
+                        {"300K (Casino Heist Award All Rounder)", 0x234B8864, 300000},
+                        {"300K (Casino Heist Award Pro Thief)", 0x2EC48716, 300000},
+                        {"300K (Ambient Job Blast)", 0xC94D30CC, 300000},
+                        {"300K (Premium Job)", 0xFD2A7DE7, 300000},
+                        {"270K (Smuggler Agency)", 0x1B9AFE05, 270000},
+                        {"250K (Casino Heist Award Professional)", 0x5D7FD908, 250000},
+                        {"250K (Fixer Award Agency Story)", 0x87356274, 250000},
+                        {"200K (DoomsDay Finale Bonus)", 0x9145F938, 200000},
+                        {"200K (Action Figures)", 0xCDCF2380, 200000},
+                        {"190K (Vehicle Sales)", 0xFD389995, 190000},
+                        {"180K (Jobs)", -0x3D3A1CC7, 180000}
+                    },
+                    transaction = 20,
+                    moneyMade = 0
+                }
+
                 tab2.render = function()
-                    local om1sMoneyMade = yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0)
-                    if om1sMoneyMade > 0 then
-                        ImGui.Text("Money made: "..yu.format_num(om1sMoneyMade))
+                    if a.moneyMade > 0 then
+                        ImGui.Text("Money made: "..yu.format_num(a.moneyMade))
                     end
-                    yu.rendering.renderCheckbox("$1M/1s loop", "self_money_1m1sloop", function(state)
+
+                    ImGui.PushItemWidth(340)
+                    if ImGui.BeginCombo("Transaction", a.transactions[a.transaction][1]) then
+                        for k, v in pairs(a.transactions) do
+                            if ImGui.Selectable(v[1], false) then
+                                a.transaction = k
+                            end
+                        end
+                        ImGui.EndCombo()
+                    end
+                    ImGui.PopItemWidth()
+
+                    if ImGui.Button("Trigger transaction") then
+                        yu.rif(function(rs)
+                            local data = a.transactions[a.transaction]
+                            if type(data) == "table" then
+                                triggerTransaction(rs, data[2], data[3])
+                                a.moneyMade = a.moneyMade + data[3]
+                            end
+                        end)
+                    end
+
+                    yu.rendering.renderCheckbox("Loop", "online_money_loop", function(state)
                         if state then
-                            yu.rif(function(runscript)
-                                while true do
-                                    if not tab.should_display() or not yu.rendering.isCheckboxChecked("self_money_1m1sloop") then
-                                        log.info("$1M/1s loop was cancelled", "Online->Money")
-                                        break
+                            yu.rif(function(rs)
+                                local data = a.transactions[a.transaction]
+                                if type(data) == "table" then
+                                    while not a.loop do
+                                        a.loop = true
+
+                                        triggerTransaction(rs, data[2], data[3])
+                                        a.moneyMade = a.moneyMade + data[3]
+
+                                        rs:sleep(1000)
+
+                                        a.loop = nil
                                     end
-
-                                    local b = 4536533
-                                    globals.set_int(b + 1, 2147483646)
-                                    globals.set_int(b + 7, 2147483647)
-                                    globals.set_int(b + 6, 0)
-                                    globals.set_int(b + 5, 0)
-                                    globals.set_int(b + 3, 0x615762F1)
-                                    globals.set_int(b + 2, 1000000)
-                                    globals.set_int(b, 1)
-
-                                    yu.set_stat("SELF_MONEY_1M1SLOOP_MM", yu.get_stat("SELF_MONEY_1M1SLOOP_MM", 0) + 1000000)
-
-                                    runscript:sleep(1000)
                                 end
                             end)
                         end
                     end)
-                    yu.rendering.tooltip("This is a pure copy from SilentNight! DC: silentsalo\nThey say it's safe :)")
+
+                    if SussySpt.dev and ImGui.Button("Dump globals") then
+                        yu.rif(function()
+                            local b = 4536533
+                            log.info("====[ Start ]====")
+                            log.info((b + 1)..": "..globals.get_int(b + 1).." = 2147483646")
+                            log.info((b + 7)..": "..globals.get_int(b + 7).." = 2147483647")
+                            log.info((b + 6)..": "..globals.get_int(b + 6).." = 0")
+                            log.info((b + 5)..": "..globals.get_int(b + 5).." = 0")
+                            log.info((b + 3)..": "..globals.get_int(b + 3).." = <hash>")
+                            log.info((b + 2)..": "..globals.get_int(b + 2).." = <amount>")
+                            log.info(b..": "..globals.get_int(b).." = 2")
+                            log.info("=====[ End ]=====")
+                        end)
+                    end
                 end
 
                 tab.sub[9] = tab2
