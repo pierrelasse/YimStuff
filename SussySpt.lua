@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1845,
+    versionid = 1855,
 
     doInit = true,
     doDebug = false,
@@ -38,20 +38,23 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.in_online = false
 
+    -- ANCHOR Define rendering
     SussySpt.rendering = {
         themes = {
             Nightly = {
                 ImGuiCol = {
-                    TitleBg = {9, 27, 46, 1.0},
-                    TitleBgActive = {9, 27, 46, 1.0},
+                    TitleBg = {9, 27, 46, 1},
+                    TitleBgActive = {9, 27, 46, 1},
                     WindowBg = {0, 19, 37, .95},
-                    Tab = {10, 30, 46, 1.0},
-                    TabActive = {14, 60, 90, 1.0},
-                    TabHovered = {52, 64, 71, 1.0},
-                    Button = {3, 45, 79, 1.0},
-                    FrameBg = {35, 38, 53, 1.0},
-                    HeaderActive = {54, 55, 66, 1.0},
-                    HeaderHovered = {62, 63, 73, 1.0},
+                    Tab = {10, 30, 46, 1},
+                    TabActive = {14, 60, 90, 1},
+                    TabHovered = {52, 64, 71, 1},
+                    Button = {3, 45, 79, 1},
+                    FrameBg = {35, 38, 53, 1},
+                    FrameBgHovered = {37, 40, 55, 1},
+                    FrameBgActive = {37, 40, 55, 1},
+                    HeaderActive = {54, 55, 66, 1},
+                    HeaderHovered = {62, 63, 73, 1},
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {4},
@@ -65,10 +68,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                     TitleBgActive = {21, 74, 93, .87},
                     WindowBg = {24, 78, 98, .87},
                     Tab = {0, 0, 0, 0.0},
-                    TabActive = {243, 212, 109, 1.0},
-                    TabHovered = {243, 212, 109, 1.0},
+                    TabActive = {243, 212, 109, 1},
+                    TabHovered = {243, 212, 109, 1},
                     Button = {234, 207, 116, .8},
-                    FrameBg = {13, 57, 73, 1.0}
+                    FrameBg = {13, 57, 73, 1},
+                    FrameBgHovered = {13, 57, 73, 1},
+                    FrameBgActive = {13, 57, 73, 1}
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {0},
@@ -84,7 +89,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                     TabActive = {134, 134, 134, 1},
                     TabHovered = {147, 147, 147, 1},
                     Button = {42, 42, 42, .8},
-                    FrameBg = {32, 32, 32, 1}
+                    FrameBg = {32, 32, 32, 1},
+                    FrameBgHovered = {34, 34, 34, 1},
+                    FrameBgActive = {34, 34, 34, 1}
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {8},
@@ -101,11 +108,30 @@ function SussySpt:init() -- SECTION SussySpt:init
                     TabHovered = {51, 35, 90, .55},
                     Button = {94, 57, 186, .3},
                     FrameBg = {41, 25, 80, .67},
-                    FrameBgHovered = {41, 35, 90, .67}
+                    FrameBgHovered = {41, 35, 90, .67},
+                    FrameBgActive = {41, 35, 90, .67}
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {16},
                     FrameRounding = {3}
+                }
+            },
+            Fatality = {
+                ImGuiCol = {
+                    TitleBg = {9, 6, 20, .75},
+                    TitleBgActive = {9, 6, 20, .85},
+                    WindowBg = {19, 13, 43, .87},
+                    Tab = {239, 7, 73, .5},
+                    TabActive = {239, 7, 73, .5},
+                    TabHovered = {239, 7, 73, .55},
+                    Button = {239, 7, 73, .3},
+                    FrameBg = {19, 13, 41, .67},
+                    FrameBgHovered = {19, 13, 41, .67},
+                    FrameBgActive = {19, 13, 41, .67}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding = {5},
+                    FrameRounding = {2.5}
                 }
             }
         },
@@ -126,7 +152,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         halloween_pumpkin_picked_up = 2765084 + 591
     }
 
-    SussySpt.rendering.theme = "Purple"
+    SussySpt.rendering.theme = "Fatality"
     SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
 
     SussySpt.rendering.get_theme = function()
@@ -927,7 +953,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
 
                                             local createObject = function(offsetX, offsetY, heading)
-                                                local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1.0, true, true, true)
+                                                local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1, true, true, true)
                                                 networkobj(obj)
                                                 ENTITY.SET_ENTITY_HEADING(obj, heading)
                                                 ENTITY.FREEZE_ENTITY_POSITION(obj, true)
@@ -998,7 +1024,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
                                                 local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
                                                 networkent(veh)
-                                                VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1.0)
+                                                VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1)
                                                 runscript:sleep(100)
                                                 for i = 0, 10 do
                                                     VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
