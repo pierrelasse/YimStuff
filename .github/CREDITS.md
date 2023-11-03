@@ -29,5 +29,6 @@ This is not 100% and not everything is listed because i started doing this later
    - [Grand Theft Auto V Section](https://unknowncheats.me/forum/grand-theft-auto-v): potential feature inspiration
    - [Yimceo CEO Crates](https://unknowncheats.me/forum/grand-theft-auto-v/591335-yimceo-ceo-crates-method-yimmenu.html): potential feature inspiration
    - [book4](https://www.unknowncheats.me/forum/members/2505795.html)
+   - [Fatality Theme](https://www.unknowncheats.me/forum/3493235-post1317.html): design inspiration
 
 ### Kiddions Subreddit ([r/Kiddions](https://reddit.com/r/Kiddions))
