@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1855,
+    versionid = 1856,
 
     doInit = true,
     doDebug = false,
@@ -362,10 +362,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                 globals.set_int(b + 2, amount)
                 globals.set_int(b, 2)
                 rs:sleep(5)
-                globals.set_int(b + 1, 2147483647)
-                globals.set_int(b + 7, 0)
-                globals.set_int(b + 5, 202606500)
+                globals.set_int(b + 1, 2147483646)
+                globals.set_int(b + 7, 2147483647)
+                globals.set_int(b + 6, 0)
+                globals.set_int(b + 5, 0)
+                globals.set_int(b + 3, 0)
                 globals.set_int(b + 2, 0)
+                globals.set_int(b, 16)
             end
 
             do -- SECTION Players
