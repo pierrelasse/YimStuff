@@ -1,0 +1,9 @@
+# Files for testing things
+idk
+
+# Move files into script folder
+upd.bat
+upd.py
+
+# Files for releases, etc.
+out
