@@ -71,11 +71,20 @@ return (function()
             return string.format(format or "%02dH %02dM %02dS", hours, minutes, seconds)
         end
 
-        api.copy_table = function(tbl) -- TODO: Copy also value table?
+        api.copy_table = function(tbl)
+            if type(tbl) ~= "table" then
+                return tbl
+            end
+
             local newTable = {}
             for k, v in pairs(tbl) do
-                newTable[k] = v
+                if type(v) == "table" and v ~= tbl then
+                    newTable[k] = api.copy_table(v)
+                else
+                    newTable[k] = v
+                end
             end
+
             return newTable
         end
 
