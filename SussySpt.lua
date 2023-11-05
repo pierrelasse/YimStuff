@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.8",
-    versionid = 1857,
+    versionid = 1869,
 
     doInit = true,
     doDebug = false,
@@ -432,6 +432,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 local emptystr = ""
 
+                -- ANCHOR Refresh playerlist
                 local function refreshPlayerlist(updateInfo)
                     SussySpt.players = yu.get_all_players()
 
@@ -458,6 +459,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 network.is_player_flagged_as_modder(v.player),
                                 "M",
                                 "This player was detected as a modder"
+                            },
+                            cheater = {
+                                NETWORK.NETWORK_PLAYER_INDEX_IS_CHEATER(v.player),
+                                "H",
+                                "Marked as cheater by R*"
                             },
                             noped = {
                                 v.noped,
@@ -1532,7 +1538,59 @@ function SussySpt:init() -- SECTION SussySpt:init
                 yu.rif(refresh)
 
                 tab.sub[2] = (function()
+                    local a2 = {
+                        stats = {
+                            {"MPPLY_IS_CHEATER", 1, "Cheater"},
+                            {"MPPLY_WAS_I_BAD_SPORT", 1, "Was i badsport"},
+                            {"MPPLY_IS_HIGH_EARNER", 1, "High earner"},
+                            {"MPPLY_GRIEFING", 2, "Reports -> Griefing"},
+                            {"MPPLY_EXPLOITS", 2, "Reports -> Exploits"},
+                            {"MPPLY_GAME_EXPLOITS", 2, "Reports -> Game exploits"},
+                            {"MPPLY_TC_ANNOYINGME", 2, "Reports -> Text chat -> Annoying me"},
+                            {"MPPLY_TC_HATE", 2, "Reports -> Text chat -> Hate Speech"},
+                            {"MPPLY_VC_ANNOYINGME", 2, "Reports -> Voice chat > Annoying me"},
+                            {"MPPLY_VC_HATE", 2, "Reports -> Voice chat > Hate Speech"},
+                            {"MPPLY_OFFENSIVE_LANGUAGE", 2, "Reports -> Offensive language"},
+                            {"MPPLY_OFFENSIVE_TAGPLATE", 2, "Reports -> Offensive tagplate"},
+                            {"MPPLY_OFFENSIVE_UGC", 2, "Reports -> Offensive content"},
+                            {"MPPLY_BAD_CREW_NAME", 2, "Reports -> Bad crew name"},
+                            {"MPPLY_BAD_CREW_MOTTO", 2, "Reports -> Bad crew motto"},
+                            {"MPPLY_BAD_CREW_STATUS", 2, "Reports -> Bad crew status"},
+                            {"MPPLY_BAD_CREW_EMBLEM", 2, "Reports -> Bad crew emblem"},
+                            {"MPPLY_FRIENDLY", 2, "Commend -> Friendly"},
+                            {"MPPLY_HELPFUL", 2, "Commend -> Helpful"},
+                        }
+                    }
+
+                    local function refreshStats()
+                        for k, v in pairs(a2.stats) do
+                            if v[2] == 1 then
+                                v[4] = tostring(stats.get_bool(v[1]))
+                            elseif v[2] == 2 then
+                                local value = stats.get_int(v[1])
+                                if value ~= 0 then
+                                    v[4] = yu.format_num(value)
+                                end
+                            end
+                        end
+                    end
+                    yu.rif(refreshStats)
+
                     return SussySpt.rendering.new_tab("Stats", function()
+                        if ImGui.TreeNodeEx("Stats") then
+                            if ImGui.SmallButton("Refresh##stats") then
+                                yu.rif(refreshStats)
+                            end
+
+                            for k, v in pairs(a2.stats) do
+                                if v[4] ~= nil then
+                                    ImGui.Text(v[3]..": "..v[4])
+                                end
+                            end
+
+                            ImGui.TreePop()
+                        end
+
                         if ImGui.TreeNodeEx("Abilities") then
                             if ImGui.SmallButton("Refresh##abilities") then
                                 yu.rif(refreshAbilityValues)
