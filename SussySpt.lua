@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1869,
+    versionid = 1870,
 
     doInit = true,
     doDebug = false,
@@ -2954,6 +2954,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
 
                 local function bindHotkey(key)
+                    if key == nil then
+                        return
+                    end
                     yu.key_listener.remove_callback(a.callback)
                     a.callback = yu.key_listener.add_callback(key, function()
                         if yu.rendering.isCheckboxChecked("invisible_hotkey") and not HUD.IS_PAUSE_MENU_ACTIVE() then
@@ -2989,6 +2992,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 bindHotkey(yu.keys[k])
                             end
                         end
+                        ImGui.EndCombo()
                     end
                     ImGui.PopItemWidth()
                 end
