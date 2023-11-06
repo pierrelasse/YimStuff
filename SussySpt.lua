@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1874,
+    versionid = 1878,
 
     doInit = true,
     doDebug = false,
@@ -1205,7 +1205,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
                                             yu.rif(function()
                                                 local veh = yu.veh(player.ped)
-                                                if veh ~= nil then
+                                                if veh ~= nil and entities.take_control_of(veh)  then
                                                     ENTITY.SET_ENTITY_INVINCIBLE(veh, state)
                                                 end
                                             end)
@@ -1214,7 +1214,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         if ImGui.SmallButton("Repair") then
                                             yu.rif(function()
-                                                if PED.IS_PED_IN_ANY_VEHICLE(player.ped, 0) then
+                                                local veh = yu.veh(player.ped)
+                                                if veh ~= nil and entities.take_control_of(veh)  then
                                                     local veh = PED.GET_VEHICLE_PED_IS_IN(player.ped, false)
                                                     VEHICLE.SET_VEHICLE_FIXED(veh)
                                                     VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
@@ -2927,7 +2928,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 local tab2 = SussySpt.rendering.new_tab("Invisible")
 
                 local a = {
-                    key = "N"
+                    key = "L"
                 }
 
                 yu.rendering.setCheckboxChecked("invisible_hotkey")
@@ -5360,7 +5361,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 if ImGui.Button("Repair vehicle") then
                     yu.add_task(function()
                         local veh = yu.veh()
-                        if veh ~= nil then
+                        if veh ~= nil and entities.take_control_of(veh) then
                             VEHICLE.SET_VEHICLE_FIXED(veh)
                             VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
                         end
