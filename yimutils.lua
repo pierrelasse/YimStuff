@@ -142,7 +142,7 @@ return (function()
             local first = true
             for k, v in pairs(tbl) do
                 if not first then
-                    result = result .. ", "
+                    result = result..", "
                 end
                 if type(k) == "number" or type(k) == "string" then
                     if type(v) == "table" then
@@ -817,7 +817,7 @@ return (function()
         end
         function string.contains(str, value)
             if type(str) == "string" and type(value) == "string" then
-                return string.find(str, value)
+                return string.find(str, value, 1, true) ~= nil
             end
         end
         function string.containsregex(str, pattern)
@@ -849,6 +849,11 @@ return (function()
                 return str:gsub("^%s*(.-)%s*$", "%1")
             end
         end
+        function string.substring(str, startIndex, endIndex)
+            if type(str) == "string" then
+                return string.sub(str, startIndex, endIndex)
+            end
+        end
 
         function table.length(tbl)
             if type(tbl) == "table" then
@@ -865,6 +870,18 @@ return (function()
             if startIndex <= endIndex then
                 return tbl[startIndex], table.unpck(tbl, endIndex, startIndex + 1)
             end
+        end
+        function table.join(tbl, delimiter)
+            local result = ""
+            if type(tbl) == "table" and type(delimiter) == "string" then
+                for i, value in ipairs(tbl) do
+                    result = result..value
+                    if i < #tbl then
+                        result = result..delimiter
+                    end
+                end
+            end
+            return result
         end
     end
 
