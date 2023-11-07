@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1878,
+    versionid = 1886,
 
     doInit = true,
     doDebug = false,
@@ -1516,9 +1516,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                         "Diving", "Mental State"
                     },
                     abilitystats = {
-                        "STAMINA", "STRENGTH", "SHOOTING_ABILITY",
-                        "STEALTH_ABILITY", "FLYING_ABILITY",
-                        "WHEELIE_ABILITY", "LUNG_CAPACITY",
+                        {"STAMINA", "SCRIPT_INCREASE_STAM"},
+                        {"STRENGTH", "SCRIPT_INCREASE_STRN"},
+                        {"SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
+                        {"STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
+                        {"FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
+                        {"WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
+                        {"LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
                         "PLAYER_MENTAL_STATE"
                     }
                 }
@@ -1531,7 +1535,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if k == 8 then
                             a.abilitiyvalues[k] = stats.get_float(mpx..v)
                         else
-                            a.abilitiyvalues[k] = stats.get_int(mpx..v)
+                            a.abilitiyvalues[k] = stats.get_int(mpx..v[1])
                         end
                     end
                 end
@@ -1613,13 +1617,18 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     ImGui.SameLine()
                                     if ImGui.SmallButton("Apply##abilities_"..k) then
                                         yu.rif(function()
-                                            local stat = yu.mpx(a.abilitystats[k])
-                                            if k == 8 then
-                                                stats.set_float(stat, a.abilitiynewvalues[k])
-                                            else
-                                                stats.set_int(stat, a.abilitiynewvalues[k])
+                                            local value = a.abilitiynewvalues[k]
+                                            if yu.is_num_between(value, 0, 100) then
+                                                for k1, v2 in pairs(a.abilitystats[k]) do
+                                                    local stat = yu.mpx(v2)
+                                                    if k == 8 then
+                                                        stats.set_float(stat, value)
+                                                    else
+                                                        stats.set_int(stat, value)
+                                                    end
+                                                    refreshAbilityValues()
+                                                end
                                             end
-                                            refreshAbilityValues()
                                         end)
                                     end
                                 end
