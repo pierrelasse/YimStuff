@@ -830,11 +830,17 @@ return (function()
                 return string.len(str)
             end
         end
-        function string.split(str, delimiter)
+        function string.split(str, delimiters)
             local result = {}
             if type(str) == "string" then
-                for match in (str..delimiter):gmatch("(.-)"..delimiter) do
-                    table.insert(result, match)
+                if type(delimiters) == "string" then
+                    delimiters = {delimiters}
+                end
+                if type(delimiters) == "table" then
+                    local pattern = "("..table.concat(delimiters, "|")..")"
+                    for match in (str..table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
+                        table.insert(result, match)
+                    end
                 end
             end
             return result
