@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1945,
+    versionid = 1960,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -127,8 +127,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     TitleBgActive = {9, 6, 20, .85},
                     WindowBg = {19, 13, 43, .87},
                     Tab = {239, 7, 73, .5},
-                    TabActive = {239, 7, 73, .5},
-                    TabHovered = {239, 7, 73, .55},
+                    TabActive = {255, 59, 115, .5},
+                    TabHovered = {255, 59, 115, .55},
                     Button = {239, 7, 73, .3},
                     FrameBg = {19, 13, 41, .67},
                     FrameBgHovered = {19, 13, 41, .67},
@@ -1538,9 +1538,9 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         local lines = string.split(a.input, "\n")
                         for k, v in pairs(lines) do
-                            local stripped = v:strip()
-                            if stripped:len() ~= 0 and not stripped:startswith("#") then
-                                local parts = stripped:replace("  ", " "):split(" ")
+                            local text = v:strip()
+                            if text:len() ~= 0 and not text:startswith("#") then
+                                local parts = text:split(" ")
 
                                 local type = parts[1]
                                 local stat = parts[2]
@@ -2956,6 +2956,59 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
 
                 tab.sub[4] = tab2
+            end
+
+            do -- ANCHOR Other
+                local tab2 = SussySpt.rendering.new_tab("Other")
+
+                tab2.should_display = SussySpt.getDev
+
+                local a = {
+                    blockexplosionshake = {
+                        pattern = "4C 8B 0D ? ? ? ? 44 ? ? 05 ? ? ? ? 48 8D 15",
+                        m_name = 0x0,
+                        m_cam_shake_name = 0x7c,
+                        struct_size = 0x88,
+                        patch_registry = {}
+                    }
+                }
+
+                script.run_in_fiber(function(rs)
+                    CExplosionInfoManager = memory.scan_pattern(a.blockexplosionshake.pattern):add(3):rip()
+                    exp_list_base = CExplosionInfoManager:deref()
+                    exp_count = CExplosionInfoManager:add(0x8):get_word()
+
+                    local enabled = yu.rendering.isCheckboxChecked("world_other_blockexplosionshake")
+
+                    for i = 0, exp_count - 1 do
+                        local exp_base = exp_list_base:add(a.blockexplosionshake.struct_size * i)
+                        local p = exp_base:add(a.blockexplosionshake.m_cam_shake_name):patch_dword(0)
+                        if enabled then
+                            p:apply()
+                        end
+                        table.insert(a.blockexplosionshake.patch_registry, p)
+                    end
+                    SussySpt.debug((enabled and "Blocked " or "Found ")..tostring(exp_count).." explosion shakes")
+                end)
+
+                tab2.render = function()
+                    yu.rendering.renderCheckbox("Block explosion shake", "world_other_blockexplosionshake", function(state)
+                        enabled = state
+
+                        local i = 0
+                        for k, v in ipairs(a.blockexplosionshake.patch_registry) do
+                            if state then
+                                v:apply()
+                            else
+                                v:restore()
+                            end
+                            i = i + 1
+                        end
+                        SussySpt.debug((state and "Block" or "Restor").."ed "..i.." explosion shakes")
+                    end)
+                end
+
+                tab.sub[5] = tab2
             end
 
             SussySpt.rendering.tabs[2] = tab
