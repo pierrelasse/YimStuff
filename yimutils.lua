@@ -93,11 +93,7 @@ return (function()
         end
 
         api.splitText = function(inputText, delimiter)
-            local lines = {}
-            for line in inputText:gmatch(delimiter) do
-                table.insert(lines, line)
-            end
-            return lines
+            return string.split(inputText, delimiter)
         end
 
         api.loop = function(amount, cb)
@@ -835,9 +831,13 @@ return (function()
             end
         end
         function string.split(str, delimiter)
+            local result = {}
             if type(str) == "string" then
-                return api.splitText(str, delimiter)
+                for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+                    table.insert(result, match)
+                end
             end
+            return result
         end
         function string.strip(str)
             if type(str) == "string" then
