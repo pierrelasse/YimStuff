@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1897,
+    versionid = 1919,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -265,7 +265,7 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
 
     SussySpt.tick = function()
-        SussySpt.in_online = NETWORK.NETWORK_IS_SESSION_STARTED() == true
+        SussySpt.in_online = NETWORK.NETWORK_IS_IN_SESSION() == true
 
         if SussySpt.invisible == true then
             SussySpt.ensureVis(false, yu.ppid(), yu.veh())
@@ -1513,45 +1513,53 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[1] = tab2
             end -- !SECTION
 
-            do -- ANCHOR Stats
-                local a = {
-                    abilities = {
-                        "Stamina", "Strength", "Shooting",
-                        "Stealth", "Flying", "Driving",
-                        "Diving", "Mental State"
-                    },
-                    abilitystats = {
-                        {"STAMINA", "SCRIPT_INCREASE_STAM"},
-                        {"STRENGTH", "SCRIPT_INCREASE_STRN"},
-                        {"SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
-                        {"STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
-                        {"FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
-                        {"WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
-                        {"LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
-                        "PLAYER_MENTAL_STATE"
-                    }
-                }
+            do -- SECTION Stats
+                local tab2 = SussySpt.rendering.new_tab("Stats")
 
-                local function refreshAbilityValues()
-                    local mpx = yu.mpx()
-                    a.abilitiyvalues = {}
-                    a.abilitiynewvalues = {}
-                    for k, v in pairs(a.abilitystats) do
-                        if k == 8 then
-                            a.abilitiyvalues[k] = stats.get_float(mpx..v)
-                        else
-                            a.abilitiyvalues[k] = stats.get_int(mpx..v[1])
+                do -- ANCHOR Loader
+                    local tab3 = SussySpt.rendering.new_tab("Loader")
+
+                    tab3.should_display = SussySpt.getDev
+
+                    local a = {
+                        input = "# This is a comment\nint MPX_SOME_STAT 123",
+                        loaded = {}
+                    }
+
+                    local function load(s)
+                        if type(s) ~= "string" then
+                            return
+                        end
+
+                        log.info(s)
+                        local lines = string.split(s, "\n")
+                        log.info(yu.table_to_string(lines))
+
+                        for k, v in pairs(lines) do
+                            log.info(k..": "..v)
                         end
                     end
+
+                    tab3.render = function()
+                        do
+                            local x, y = ImGui.GetContentRegionAvail()
+                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 25000, x, math.min(140, y))
+                            a.input = text
+                        end
+                        SussySpt.push_disable_controls(ImGui.IsItemActive())
+
+                        if ImGui.Button("Load") then
+                            load(a.input)
+                        end
+                    end
+
+                    tab2.sub[1] = tab3
                 end
 
-                local function refresh()
-                    refreshAbilityValues()
-                end
-                yu.rif(refresh)
+                do -- ANCHOR Other
+                    local tab3 = SussySpt.rendering.new_tab("Other")
 
-                tab.sub[2] = (function()
-                    local a2 = {
+                    local a = {
                         stats = {
                             {"MPPLY_IS_CHEATER", 1, "Cheater"},
                             {"MPPLY_WAS_I_BAD_SPORT", 1, "Was i badsport"},
@@ -1572,11 +1580,26 @@ function SussySpt:init() -- SECTION SussySpt:init
                             {"MPPLY_BAD_CREW_EMBLEM", 2, "Reports -> Bad crew emblem"},
                             {"MPPLY_FRIENDLY", 2, "Commend -> Friendly"},
                             {"MPPLY_HELPFUL", 2, "Commend -> Helpful"},
+                        },
+                        abilities = {
+                            "Stamina", "Strength", "Shooting",
+                            "Stealth", "Flying", "Driving",
+                            "Diving", "Mental State"
+                        },
+                        abilitystats = {
+                            {"STAMINA", "SCRIPT_INCREASE_STAM"},
+                            {"STRENGTH", "SCRIPT_INCREASE_STRN"},
+                            {"SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
+                            {"STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
+                            {"FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
+                            {"WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
+                            {"LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
+                            "PLAYER_MENTAL_STATE"
                         }
                     }
 
                     local function refreshStats()
-                        for k, v in pairs(a2.stats) do
+                        for k, v in pairs(a.stats) do
                             if v[2] == 1 then
                                 v[4] = tostring(stats.get_bool(v[1]))
                             elseif v[2] == 2 then
@@ -1587,15 +1610,37 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
                         end
                     end
-                    yu.rif(refreshStats)
 
-                    return SussySpt.rendering.new_tab("Stats", function()
+                    local function refreshAbilityValues()
+                        local mpx = yu.mpx()
+                        a.abilitiyvalues = {}
+                        a.abilitiynewvalues = {}
+                        for k, v in pairs(a.abilitystats) do
+                            if k == 8 then
+                                a.abilitiyvalues[k] = stats.get_float(mpx..v)
+                            else
+                                a.abilitiyvalues[k] = stats.get_int(mpx..v[1])
+                            end
+                        end
+                    end
+
+                    local function refresh()
+                        refreshStats()
+                        refreshAbilityValues()
+                    end
+                    yu.rif(refresh)
+
+                    tab3.render = function()
+                        if ImGui.SmallButton("Refresh") then
+                            yu.rif(refresh)
+                        end
+
                         if ImGui.TreeNodeEx("Stats") then
                             if ImGui.SmallButton("Refresh##stats") then
                                 yu.rif(refreshStats)
                             end
 
-                            for k, v in pairs(a2.stats) do
+                            for k, v in pairs(a.stats) do
                                 if v[4] ~= nil then
                                     ImGui.Text(v[3]..": "..v[4])
                                 end
@@ -1718,9 +1763,13 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             ImGui.TreePop()
                         end
-                    end)
-                end)()
-            end
+                    end
+
+                    tab2.sub[2] = tab3
+                end
+
+                tab.sub[2] = tab2
+            end -- !SECTION
 
             do -- ANCHOR Chatlog
                 local tab2 = SussySpt.rendering.new_tab("Chatlog")
@@ -1739,7 +1788,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if ImGui.TreeNodeEx("Logs") then
                             yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
 
-                            ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                            do
+                                local x, y = ImGui.GetContentRegionAvail()
+                                ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), x, math.min(140, y), ImGuiInputTextFlags.ReadOnly)
+                            end
                             SussySpt.push_disable_controls(ImGui.IsItemActive())
 
                             ImGui.TreePop()
@@ -2902,7 +2954,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.Spacing()
 
                     if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
-                        ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), 500, 140, ImGuiInputTextFlags.ReadOnly)
+                        local x, y = ImGui.GetContentRegionAvail()
+                        ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), x, math.min(140, y), ImGuiInputTextFlags.ReadOnly)
                         ImGui.TreePop()
                     end
 
