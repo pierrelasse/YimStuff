@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1919,
+    versionid = 1945,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1519,38 +1519,131 @@ function SussySpt:init() -- SECTION SussySpt:init
                 do -- ANCHOR Loader
                     local tab3 = SussySpt.rendering.new_tab("Loader")
 
-                    tab3.should_display = SussySpt.getDev
-
                     local a = {
-                        input = "# This is a comment\nint MPX_SOME_STAT 123",
-                        loaded = {}
+                        input = "# This is a comment\nbool SOME_STAT 0\nbool MPX_SOME_STAT 1\nbool SOME_STAT true\nbool MPX_SOME_STAT false\nint SOME_STAT 1\nfloat MPX_SOME_STAT 1.23",
+                        types = {
+                            "bool",
+                            "int",
+                            "float"
+                        }
                     }
 
-                    local function load(s)
-                        if type(s) ~= "string" then
+                    local function load()
+                        if type(a.input) ~= "string" then
                             return
                         end
 
-                        log.info(s)
-                        local lines = string.split(s, "\n")
-                        log.info(yu.table_to_string(lines))
+                        local tokens = {}
+                        local mpx = yu.mpx()
 
+                        local lines = string.split(a.input, "\n")
                         for k, v in pairs(lines) do
-                            log.info(k..": "..v)
+                            local stripped = v:strip()
+                            if stripped:len() ~= 0 and not stripped:startswith("#") then
+                                local parts = stripped:replace("  ", " "):split(" ")
+
+                                local type = parts[1]
+                                local stat = parts[2]
+                                local value = parts[3]
+
+                                if type == nil then
+                                    lines[k] = "#"..v.." # Could not read type"
+                                elseif stat == nil then
+                                    lines[k] = "#"..v.." # Could not read stat"
+                                elseif value == nil then
+                                    lines[k] = "#"..v.." # Could not read value"
+                                else
+                                    type = yu.get_key_from_table(a.types, type, nil)
+                                    if type == nil then
+                                        lines[k] = "#"..v.." # Invalid type"
+                                        goto continue
+                                    end
+
+                                    if stat:startswith("MPX_") then
+                                        stat = mpx..stat:sub(5)
+                                    end
+
+                                    if type == 1 then
+                                        if value == "false" or value == "0" then
+                                            value = false
+                                        elseif value == "true" or value == "1" then
+                                            value = true
+                                        else
+                                            lines[k] = "#"..v.." # Invalid value for bool type"
+                                            goto continue
+                                        end
+                                    elseif type == 2 then
+                                        if string.contains(value, ".") then
+                                            lines[k] = "#"..v.." # An integer as value is required"
+                                            goto continue
+                                        end
+                                        value = tonumber(value)
+                                        if value == nil then
+                                            lines[k] = "#"..v.." # Invalid value for int type"
+                                            goto continue
+                                        end
+                                    elseif type == 3 then
+                                        value = tonumber(value)
+                                        if value == nil then
+                                            lines[k] = "#"..v.." # Invalid value for float type"
+                                            goto continue
+                                        end
+                                    end
+
+                                    table.insert(tokens, {type, stat, value})
+                                end
+                            end
+                            ::continue::
                         end
+                        a.input = table.join(lines, "\n")
+                        a.tokens = tokens
+                    end
+
+                    local function apply()
+                        local applied = 0
+
+                        for k, v in pairs(a.tokens) do
+                            local type = v[1]
+                            local stat = v[2]
+                            local value = v[3]
+
+                            if type == 1 then
+                                stats.set_bool(stat, value)
+                                applied = applied + 1
+                            elseif type == 2 then
+                                stats.set_int(stat, value)
+                                applied = applied + 1
+                            elseif type == 3 then
+                                stats.set_float(stat, value)
+                                applied = applied + 1
+                            end
+                        end
+
+                        yu.notify(1, applied.." stat/s where applied", "Online->Stats->Loader")
                     end
 
                     tab3.render = function()
+                        if ImGui.Button("Load") then
+                            yu.rif(load)
+                        end
+
+                        if a.tokens ~= nil then
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Apply") then
+                                yu.rif(apply)
+                            end
+                        end
+
                         do
                             local x, y = ImGui.GetContentRegionAvail()
-                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 25000, x, math.min(140, y))
-                            a.input = text
+                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 25000, x, y)
+                            if a.input ~= text then
+                                a.input = text
+                                a.tokens = nil
+                            end
                         end
                         SussySpt.push_disable_controls(ImGui.IsItemActive())
-
-                        if ImGui.Button("Load") then
-                            load(a.input)
-                        end
                     end
 
                     tab2.sub[1] = tab3
