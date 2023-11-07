@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1886,
+    versionid = 1887,
 
     doInit = true,
     doDebug = false,
@@ -2530,7 +2530,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             yu.rif(function(rs)
                                 local data = a.transactions[a.transaction]
                                 if type(data) == "table" then
-                                    while not a.loop do
+                                    while yu.rendering.isCheckboxChecked("online_money_loop") and not a.loop do
                                         a.loop = true
 
                                         triggerTransaction(rs, data[2], data[3])
