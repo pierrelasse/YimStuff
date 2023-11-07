@@ -233,31 +233,6 @@ return (function()
             return NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(entity) == true
         end
 
-        -- TODO: Add to docs & make this useful
-        api.get_closest_player = function(radius)
-            -- local players = {}
-            -- local closestDistance = -1
-            -- local closestPlayer = -1
-            -- local playerPed = api.ppid()
-            -- local playerCoords = ENTITY.GET_ENTITY_COORDS(playerPed, false)
-
-            -- for k, v in ipairs(players) do
-            --     local targetPed = PLAYER.GET_PLAYER_PED(v)
-            --     if targetPed ~= playerPed then
-            --         local targetCoords = ENTITY.GET_ENTITY_COORDS(targetPed, false)
-            --         local distance = #(targetCoords - playerCoords)
-            --         if closestDistance == -1 or closestDistance > distance then
-            --             closestPlayer = v
-            --             closestDistance = distance
-            --         end
-            --     end
-            -- end
-            -- if closestDistance ~= -1 and closestDistance <= radius then
-            --     return closestPlayer
-            -- end
-            return nil
-        end
-
         api.deg_to_rad = function(deg)
             return (3.14159265359 / 180) * deg
         end
@@ -693,33 +668,26 @@ return (function()
         end
 
         api.rendering.setCheckboxChecked = function(id, value)
-            if value == nil then
+            if type(value) ~= "boolean" then
                 value = true
             end
-            data.rendering.checkboxstates[id] = {
-                state = value,
-                oldstate = value
-            }
+            data.rendering.checkboxstates[id] = value
         end
 
         api.rendering.renderCheckbox = function(name, id, callback)
-            local d = data.rendering.checkboxstates[id] or { state = false, oldstate = false }
-
-            if ImGui.Checkbox(name, d.state) ~= d.oldstate then
-                d.state = not d.state
-                d.oldstate = d.state
+            local enabled, toggled = ImGui.Checkbox(name, data.rendering.checkboxstates[id] == true)
+            if toggled then
+                data.rendering.checkboxstates[id] = enabled
                 if callback ~= nil then
-                    callback(d.state)
+                    callback(enabled)
                 end
             end
 
-            data.rendering.checkboxstates[id] = d
-
-            return d.state
+            return enabled
         end
 
         api.rendering.isCheckboxChecked = function(id)
-            return (data.rendering.checkboxstates[id] or { oldstate = false }).oldstate
+            return data.rendering.checkboxstates[id] == true
         end
 
         api.rendering.bigText = function(text)
