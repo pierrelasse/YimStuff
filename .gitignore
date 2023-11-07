@@ -1,9 +1,8 @@
 # Files for testing things
 idk
 
-# Move files into script folder
-upd.bat
-upd.py
+# Local config
+config.json
 
 # Files for releases, etc.
 out
