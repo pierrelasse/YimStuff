@@ -1,7 +1,8 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1887,
-
+    versionid = 1897,
+    versiontype = 0--[[VERSIONTYPE]],
+    build = 0--[[BUILD]],
     doInit = true,
     doDebug = false,
     debugtext = "",
@@ -25,12 +26,16 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
     SussySpt.doInit = nil
 
-    SussySpt.dev = false
+    SussySpt.dev = SussySpt.versiontype == 2
     SussySpt.getDev = function()
         return SussySpt.dev
     end
 
-    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."]")
+    if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
+        SussySpt.versiontype = 1
+    end
+
+    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
@@ -2866,14 +2871,18 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Info
                 local tab2 = SussySpt.rendering.new_tab("Info")
 
+                yu.rendering.setCheckboxChecked("dev", SussySpt.dev)
+
                 tab2.render = function()
                     ImGui.Text("Made by pierrelasse.")
                     ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
 
                     ImGui.Spacing()
 
-                    ImGui.Text("SussySpt version: "..SussySpt.version)
-                    ImGui.Text("SussySpt version id: "..SussySpt.versionid)
+                    ImGui.Text("Version: "..SussySpt.version)
+                    ImGui.Text("Version id: "..SussySpt.versionid)
+                    ImGui.Text("Version type: "..SussySpt.versiontype)
+                    ImGui.Text("Build: "..SussySpt.build)
 
                     ImGui.Spacing()
 
