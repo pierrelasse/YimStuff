@@ -17,6 +17,8 @@ This is not 100% and not everything is listed because i started doing this later
    - [IceDoomfist/Stand-Heist-Control](https://github.com/IceDoomfist/Stand-Heist-Control): potential feature inspiration
    - [CSY0N/CsyonSubMenu](https://github.com/CSY0N/CsyonSubMenu): potential feature inspiration
 
+   - [George0828Zhang/Fun-House - DisableExplosionShake.lua](https://github.com/George0828Zhang/Fun-House/blob/main/DisableExplosionShake.lua): steal some code
+
    - [Originns/luamenus](https://github.com/Originns/luamenus): potential feature inspiration
 
    - [Pocakking/GTAV-1.50-Scripts](https://github.com/Pocakking/GTAV-1.50-Scripts): Online->Players's pickup spawner made possible
