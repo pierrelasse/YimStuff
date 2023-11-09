@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1968,
+    versionid = 1970,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -493,14 +493,18 @@ function SussySpt:init() -- SECTION SussySpt:init
                             local wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
+                            v.info.vehicle = {
+                                PED.IS_PED_IN_ANY_VEHICLE(v.ped, false),
+                                "V",
+                                nil
+                            }
+
                             local vehicle = yu.veh(v.ped)
                             if vehicle ~= nil then
-                                v.info.vehicle = {
-                                    vehicle ~= nil,
-                                    "V",
-                                    "The player is in a vehicle. Type: "
-                                        ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-                                }
+                                v.info.vehicle[3] = "The player is in a vehicle. Type: "
+                                    ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+                            else
+                                v.info.vehicle[3] = "The player is in a vehicle"
                             end
 
                             v.info.interior = {
