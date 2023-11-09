@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1966,
+    versionid = 1967,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -560,7 +560,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
                         end
 
-                        v.infoChar = emptystr
+                        v.tags = emptystr
                         local doInfoHeader = true
                         for k1, v1 in pairs(v.info) do
                             if v1[1] == true then
@@ -571,11 +571,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     v.tooltip = v.tooltip.."Weird chars behind name:"
                                     doInfoHeader = false
                                 end
-                                v.infoChar = v.infoChar..v1[2]
+                                v.tags = v.tags..v1[2]
                                 v.tooltip = v.tooltip.."\n  - "..v1[2]..": "..v1[3]
                             end
                         end
-                        v.displayName = doInfoHeader and v.name or v.name.." ["..v.infoChar.."]"
+                        v.displayName = doInfoHeader and v.name or v.name.." ["..v.tags.."]"
 
                         v.tooltip = v.tooltip
                             .."\n\nFor nerds:"
@@ -702,7 +702,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
 
                             if shouldRender then
-                                ImGui.Text("Selected player: "..player.name)
+                                ImGui.Text("Selected player: "..player.name.." - "..player.tags)
                                 yu.rendering.tooltip(player.tooltip)
 
                                 if not player.noped then
