@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1960,
+    versionid = 1966,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -480,12 +480,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if not v.noped then
                             local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
-                            local vehicle = yu.veh(v.ped)
-                            local vehicleName =
-                                vehicle == nil
-                                and "???"
-                                or VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-
                             local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
 
                             local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
@@ -496,17 +490,25 @@ function SussySpt:init() -- SECTION SussySpt:init
                             local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                             local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
                             local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+                            local wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
+
+                            local vehicle = yu.veh(v.ped)
+                            if vehicle ~= nil then
+                                local vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+                                local vehicleGod = ENTITY.GET
+
+                                v.info.vehicle = {
+                                    vehicle ~= nil,
+                                    "V",
+                                    "The player is in a vehicle. Type: "..vehicleName
+                                }
+                            end
 
                             v.info.interior = {
                                 interior ~= 0,
                                 "I",
                                 "The player might be in an interior. Interior id: "..interior
-                            }
-                            v.info.vehicle = {
-                                vehicle ~= nil,
-                                "V",
-                                "The player is in a vehicle. "..vehicleName
                             }
                             v.info.nocollision = {
                                 collisionDisabled == true and distance < 100 and vehicle == nil,
@@ -543,6 +545,10 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             if speed > 0 then
                                 v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
+                            end
+
+                            if wantedLevel > 0 then
+                                v.tooltip = v.tooltip.."\nWanted level: "..wantedLevel
                             end
 
                             v.proofs = yu.get_entity_proofs(v.ped)
@@ -5567,13 +5573,16 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 if ImGui.Button("Stop player switch") then
                     yu.add_task(function()
-                        STREAMING.STOP_PLAYER_SWITCH()
-                        if CAM.IS_SCREEN_FADED_OUT() then
-                            CAM.DO_SCREEN_FADE_IN(0)
+                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
+                            STREAMING.STOP_PLAYER_SWITCH()
+                            if CAM.IS_SCREEN_FADED_OUT() then
+                                CAM.DO_SCREEN_FADE_IN(0)
+                            end
+                            HUD.CLEAR_HELP(true)
+                            HUD.SET_FRONTEND_ACTIVE(true)
+                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
+                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
                         end
-                        HUD.CLEAR_HELP(true)
-                        HUD.SET_FRONTEND_ACTIVE(true)
-                        SCRIPT.SHUTDOWN_LOADING_SCREEN()
                     end)
                 end
                 yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
