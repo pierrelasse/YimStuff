@@ -799,7 +799,7 @@ return (function()
             end
         end
         function string.split(str, delimiters)
-            local result = {}
+            local result = { [0] = str }
             if type(str) == "string" then
                 if type(delimiters) == "string" then
                     delimiters = {delimiters}
