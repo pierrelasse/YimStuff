@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1970,
+    versionid = 1974,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1702,7 +1702,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             {"FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
                             {"WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
                             {"LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
-                            "PLAYER_MENTAL_STATE"
+                            {"PLAYER_MENTAL_STATE"}
                         }
                     }
 
@@ -1721,13 +1721,14 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     local function refreshAbilityValues()
                         local mpx = yu.mpx()
-                        a.abilitiyvalues = {}
-                        a.abilitiynewvalues = {}
+                        a.abilityvalues = {}
+                        a.abilitynewvalues = {}
                         for k, v in pairs(a.abilitystats) do
+                            local stat = mpx..v[1]
                             if k == 8 then
-                                a.abilitiyvalues[k] = stats.get_float(mpx..v)
+                                a.abilityvalues[k] = stats.get_float(stat)
                             else
-                                a.abilitiyvalues[k] = stats.get_int(mpx..v[1])
+                                a.abilityvalues[k] = stats.get_int(stat)
                             end
                         end
                     end
@@ -1766,16 +1767,19 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             ImGui.PushItemWidth(331)
                             for k, v in pairs(a.abilities) do
-                                local newValue, changed = ImGui.DragInt(v, a.abilitiynewvalues[k] or a.abilitiyvalues[k], .2, 0, 100, "%d", 5)
-                                if changed then
-                                    a.abilitiynewvalues[k] = newValue
+                                do
+                                    local value, changed = ImGui.DragInt(v, a.abilitynewvalues[k] or a.abilityvalues[k], .2, 0, 100, "%d", 5)
+                                    if changed then
+                                        a.abilitynewvalues[k] = value
+                                    end
                                 end
 
-                                if a.abilitiynewvalues[k] ~= nil then
+                                local value = a.abilitynewvalues[k]
+                                if value ~= nil then
                                     ImGui.SameLine()
+
                                     if ImGui.SmallButton("Apply##abilities_"..k) then
                                         yu.rif(function()
-                                            local value = a.abilitiynewvalues[k]
                                             if yu.is_num_between(value, 0, 100) then
                                                 for k1, v2 in pairs(a.abilitystats[k]) do
                                                     local stat = yu.mpx(v2)
