@@ -2103,18 +2103,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                     end
 
-
-                    if ImGui.Button("Max all stats") then
-                        yu.add_task(function()
-                            local mpx = yu.mpx()
-                            for k, v in pairs({"SCRIPT_INCREASE_DRIV","SCRIPT_INCREASE_FLY",
-                                "SCRIPT_INCREASE_LUNG","SCRIPT_INCREASE_SHO","SCRIPT_INCREASE_STAM",
-                                "SCRIPT_INCREASE_STL","SCRIPT_INCREASE_STRN"}) do
-                                stats.set_int(mpx..v, 100)
-                            end
-                        end)
-                    end
-
                     if ImGui.Button("Unlock all achievements") then
                         yu.rif(function()
                             yu.loop(59, function(i)
