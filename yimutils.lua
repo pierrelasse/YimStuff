@@ -33,10 +33,10 @@ return (function()
         end
 
         api.is_num_between = function(num, min, max)
-            if type(num) ~= "number" or type(min) ~= "number" or type(max) ~= "number" then
-                return false
+            if type(num) == "number" and type(min) == "number" and type(max) == "number" then
+                return num >= min and num <= max
             end
-            return num >= min and num <= max
+            return false
         end
 
         api.get_between_or_default = function(num, min, max, defaultValue)
