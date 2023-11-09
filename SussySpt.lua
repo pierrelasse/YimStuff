@@ -1,6 +1,6 @@
 SussySpt = {
     version = "1.3.9",
-    versionid = 1967,
+    versionid = 1968,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -2971,8 +2971,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             do -- ANCHOR Other
                 local tab2 = SussySpt.rendering.new_tab("Other")
-
-                tab2.should_display = SussySpt.getDev
 
                 local a = {
                     blockexplosionshake = {
