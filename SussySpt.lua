@@ -495,13 +495,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             local vehicle = yu.veh(v.ped)
                             if vehicle ~= nil then
-                                local vehicleName = VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-                                local vehicleGod = ENTITY.GET
-
                                 v.info.vehicle = {
                                     vehicle ~= nil,
                                     "V",
-                                    "The player is in a vehicle. Type: "..vehicleName
+                                    "The player is in a vehicle. Type: "
+                                        ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
                                 }
                             end
 
