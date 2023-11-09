@@ -1540,6 +1540,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         for k, v in pairs(lines) do
                             local text = v:strip()
                             if text:len() ~= 0 and not text:startswith("#") then
+                                text = text:split("#")[1]
                                 local parts = text:split(" ")
 
                                 local type = parts[1]
@@ -1597,6 +1598,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                         a.input = table.join(lines, "\n")
                         a.tokens = tokens
+                        a.tokenlength = yu.len(tokens)
                     end
 
                     local function apply()
@@ -1635,12 +1637,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
                         end
 
+                        if a.tokenlength ~= nil then
+                            ImGui.Text(a.tokenlength + " stat/s loaded")
+                        end
+
                         do
                             local x, y = ImGui.GetContentRegionAvail()
                             local text, _ = ImGui.InputTextMultiline("##input", a.input, 25000, x, y)
                             if a.input ~= text then
                                 a.input = text
                                 a.tokens = nil
+                                a.tokenlength = nil
                             end
                         end
                         SussySpt.push_disable_controls(ImGui.IsItemActive())
@@ -3320,35 +3327,6 @@ function SussySpt:initUtils() -- SECTION SussySpt:initUtils
         return true
     end
 
-    function removeAllCameras()
-        for k, entity in pairs(entities.get_all_objects_as_handles()) do
-            for k1, hash in pairs({
-                joaat("prop_cctv_cam_01a"), joaat("prop_cctv_cam_01b"),
-                joaat("prop_cctv_cam_02a"), joaat("prop_cctv_cam_03a"),
-                joaat("prop_cctv_cam_04a"), joaat("prop_cctv_cam_04c"),
-                joaat("prop_cctv_cam_05a"), joaat("prop_cctv_cam_06a"),
-                joaat("prop_cctv_cam_07a"), joaat("prop_cs_cctv"),
-                joaat("p_cctv_s"), joaat("hei_prop_bank_cctv_01"),
-                joaat("hei_prop_bank_cctv_02"), joaat("ch_prop_ch_cctv_cam_02a"),
-                joaat("xm_prop_x17_server_farm_cctv_01")}) do
-                if ENTITY.GET_ENTITY_MODEL(entity) == hash then
-                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(entity, true, true)
-                    ENTITY.DELETE_ENTITY(entity)
-                end
-            end
-        end
-    end
-
-    function deleteEntityByName(name)
-        local hash = joaat(name)
-        for k, v in pairs(entities.get_all_objects_as_handles()) do
-            if ENTITY.GET_ENTITY_MODEL(v) == hash then
-                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(v, true, true)
-                ENTITY.DELETE_ENTITY(v)
-            end
-        end
-    end
-
     tbs = {
         tabs = {},
         getTab = function(tab, name, cat)
@@ -3405,6 +3383,25 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         end
 
         ImGui.PopButtonRepeat()
+    end
+
+    local function removeAllCameras()
+        for k, entity in pairs(entities.get_all_objects_as_handles()) do
+            for k1, hash in pairs({
+                joaat("prop_cctv_cam_01a"), joaat("prop_cctv_cam_01b"),
+                joaat("prop_cctv_cam_02a"), joaat("prop_cctv_cam_03a"),
+                joaat("prop_cctv_cam_04a"), joaat("prop_cctv_cam_04c"),
+                joaat("prop_cctv_cam_05a"), joaat("prop_cctv_cam_06a"),
+                joaat("prop_cctv_cam_07a"), joaat("prop_cs_cctv"),
+                joaat("p_cctv_s"), joaat("hei_prop_bank_cctv_01"),
+                joaat("hei_prop_bank_cctv_02"), joaat("ch_prop_ch_cctv_cam_02a"),
+                joaat("xm_prop_x17_server_farm_cctv_01")}) do
+                if ENTITY.GET_ENTITY_MODEL(entity) == hash then
+                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(entity, true, true)
+                    ENTITY.DELETE_ENTITY(entity)
+                end
+            end
+        end
     end
 
     local function initCayo()
@@ -4005,8 +4002,14 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Remove the drainage pipe") then
-                    yu.add_task(function()
-                        deleteEntityByName("prop_chem_grill_bit")
+                    yu.rif(function()
+                        local hash = joaat("prop_chem_grill_bit")
+                        for k, v in pairs(entities.get_all_objects_as_handles()) do
+                            if ENTITY.GET_ENTITY_MODEL(v) == hash then
+                                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(v, true, true)
+                                ENTITY.DELETE_ENTITY(v)
+                            end
+                        end
                     end)
                 end
                 yu.rendering.tooltip("This is good")
@@ -5635,15 +5638,15 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 end -- !SECTION
 
 function SussySpt:initTabHeist() -- SECTION SussySpt:initTabHeist
-    local tab = tbs.getTab(SussySpt.tab, " Heists & Stuff idk")
+    local tab = SussySpt.tab:add_tab(" Heists & Stuff idk")
     tab:clear()
 
     local function initTabDDay()
-        local ddayTab = tbs.getTab(tab, "  Doomsday", "heists")
+        local ddayTab = tab:add_tab("  Doomsday", "heists")
         ddayTab:clear()
 
         local function initTabPreps()
-            local prepsTab = tbs.getTab(ddayTab, "   Preps", "dday")
+            local prepsTab = ddayTab:add_tab("   Preps", "dday")
             prepsTab:clear()
 
             prepsTab:add_text("OneClick:")
