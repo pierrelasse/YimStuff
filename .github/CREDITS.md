@@ -45,5 +45,3 @@ This is not 100% and not everything is listed because i started doing this later
    - [Fatality Theme](https://www.unknowncheats.me/forum/3493235-post1317.html): design inspiration
 
 ### Kiddions Subreddit ([r/Kiddions](https://reddit.com/r/Kiddions))
-
-### [primer.style](https://primer.style/foundations/icons): icon/s used in the README
