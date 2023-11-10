@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2007,
+    versionid = 2009,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -726,7 +726,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
 
                             if shouldRender then
-                                ImGui.Text("Selected player: "..player.name.." - "..player.tags)
+                                do
+                                    local text = "Selected player: "..player.name
+                                    if player.tags ~= emptystr then
+                                        text = text.." - "..player.tags
+                                    end
+                                    ImGui.Text(text)
+                                end
                                 yu.rendering.tooltip(player.tooltip)
 
                                 if not player.noped then
@@ -3898,9 +3904,9 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 if ImGui.Button("Apply##cuts") then
                     for k, v in pairs(a.cuts) do
                         if k == -2 then
-                            globals.set_int(2722097, v)
+                            globals.set_int(2684820 + 6606, v)
                         else
-                            globals.set_int(1978495 + 881 + k, v)
+                            globals.set_int(1978495 + 825 + 56 + k, v)
                         end
                     end
                 end
