@@ -60,3 +60,8 @@ When concatenating strings using the `..` operator, avoid spaces before and afte
 ```lua
 local concatenatedString = "string1".."string2"
 ```
+
+# Your own version
+If you want to make changes to yimutils.lua, just go ahead.
+
+After making changes to SussySpt.lua, you need to run `t update` to have it updated.
