@@ -26,13 +26,14 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
     SussySpt.doInit = nil
 
+    if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
+        log.error("Could not start due to an invalid version type. Are you using a source file?")
+        return
+    end
+
     SussySpt.dev = SussySpt.versiontype == 2
     SussySpt.getDev = function()
         return SussySpt.dev
-    end
-
-    if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
-        SussySpt.versiontype = 1
     end
 
     SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
@@ -282,8 +283,13 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end
 
-    SussySpt.debug("Calling SussySpt:initUtils()")
-    SussySpt:initUtils()
+    SussySpt.requireScript = function(name)
+        if yu.is_script_running(name) == false then
+            yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
+            return false
+        end
+        return true
+    end
 
     SussySpt.rendercb = {}
     SussySpt.add_render = function(cb)
@@ -3288,8 +3294,6 @@ end -- !SECTION
 
 function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     local tab = SussySpt.tab
-    SussySpt.pushStyle = function() end
-    SussySpt.popStyle = SussySpt.pushStyle
 
     SussySpt.debug("Calling SussySpt:initTabHBO()")
     SussySpt:initTabHBO()
@@ -3314,36 +3318,6 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
         end
         yu.rendering.renderCheckbox("Quick actions", "cat_qa")
     end)
-end -- !SECTION
-
-function SussySpt:initUtils() -- SECTION SussySpt:initUtils
-    function requireScript(name)
-        if yu.is_script_running(name) == false then
-            yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
-            return false
-        end
-        return true
-    end
-
-    tbs = {
-        tabs = {},
-        getTab = function(tab, name, cat)
-            if tab == nil or name == nil then
-                return gui.get_tab("void")
-            end
-            local key = name..
-                (function()
-                    if cat ~= nil then
-                        return "-"..cat
-                    end
-                    return ""
-                end)()
-            if tbs.tabs[key] == nil then
-                tbs.tabs[key] = tab:add_tab(name.."##"..yu.gun())
-            end
-            return tbs.tabs[key] or gui.get_tab("void")
-        end
-    }
 end -- !SECTION
 
 function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
@@ -3649,7 +3623,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.renderCheckbox("Cutting powder", "hbo_cayo_cuttingpowder", function(state)
                     a.cuttingpowderchanged = true
                 end)
-                yu.rendering.tooltip("Pros don't need this ;)")
+                yu.rendering.tooltip("Guards will have reduced firing accuracy during the finale mission")
 
                 ImGui.PopItemWidth()
 
@@ -3847,7 +3821,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reload planning board") then
-                    if requireScript("heist_island_planning") then
+                    if SussySpt.requireScript("heist_island_planning") then
                         locals.set_int("heist_island_planning", 1526, 2)
                     end
                 end
@@ -3863,8 +3837,9 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Remove npc cuts") then
+                if ImGui.Button("Remove fencing fee & pavel cut") then
                     yu.add_task(function()
+                        globals.set_float(262145 + 29470, -.1)
                         globals.set_float(291786, 0)
                         globals.set_float(291787, 0)
                     end)
@@ -3945,7 +3920,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip sewer tunnel cut") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020")
+                        if SussySpt.requireScript("fm_mission_controller_2020")
                             and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
                                 or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
                             locals.set_int("fm_mission_controller_2020", 28446, 6)
@@ -3958,7 +3933,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip door hack") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020")
+                        if SussySpt.requireScript("fm_mission_controller_2020")
                             and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
                             locals.set_int("fm_mission_controller_2020", 54024, 5)
                             yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
@@ -3968,7 +3943,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip fingerprint hack") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020")
+                        if SussySpt.requireScript("fm_mission_controller_2020")
                             and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
                             locals.set_int("fm_mission_controller_2020", 23669, 5)
                             yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
@@ -3980,7 +3955,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip plasmacutter cut") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
                             yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
                         end
@@ -3989,7 +3964,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Obtain the primary target") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 29684, 5)
                             locals.set_int("fm_mission_controller_2020", 29685, 3)
                         end
@@ -4014,7 +3989,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Instant finish") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45450, 9)
                             locals.set_int("fm_mission_controller_2020", 46829, 50)
                             yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
@@ -4040,7 +4015,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Apply##lifes") then
-                    if requireScript("fm_mission_controller_2020") then
+                    if SussySpt.requireScript("fm_mission_controller_2020") then
                         locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, a.lifes)
                     end
                 end
@@ -4054,7 +4029,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Apply##realtake") then
-                    if requireScript("fm_mission_controller_2020") then
+                    if SussySpt.requireScript("fm_mission_controller_2020") then
                         locals.set_int("fm_mission_controller_2020", 43152, a.realtake)
                     end
                 end
@@ -4529,7 +4504,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip fingerprint hack") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
+                        if SussySpt.requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
                             locals.set_int("fm_mission_controller", 52964, 5)
                         end
                     end)
@@ -4539,7 +4514,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip keypad hack") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller")
+                        if SussySpt.requireScript("fm_mission_controller")
                             and locals.get_int("fm_mission_controller", 54026) ~= 4 then
                             locals.set_int("fm_mission_controller", 54026, 5)
                         end
@@ -4550,7 +4525,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip vault door drill") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") then
+                        if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int(
                                 "fm_mission_controller",
                                 10108,
@@ -4575,7 +4550,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Apply##lifes") then
-                    if requireScript("fm_mission_controller") then
+                    if SussySpt.requireScript("fm_mission_controller") then
                         locals.set_int("fm_mission_controller", 27400, a.lifes)
                     end
                 end
@@ -4631,7 +4606,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         local winPrizeChanged = false
 
         function winLuckyWheel(prize)
-            if requireScript("casino_lucky_wheel") and yu.is_num_between(prize, 0, 18) then
+            if SussySpt.requireScript("casino_lucky_wheel") and yu.is_num_between(prize, 0, 18) then
                 yu.notify(1, "Winning "..luckyWheelPrizes[prize].." from the lucky wheel!", "Diamond Casino & Resort")
                 locals.set_int("casino_lucky_wheel", (prize_wheel_win_state) + (prize_wheel_prize), prize)
                 locals.set_int("casino_lucky_wheel", prize_wheel_win_state + prize_wheel_prize_state, 11)
@@ -5051,7 +5026,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip hack##fleeca") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") then
+                        if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 11760 + 24, 7)
                         end
                     end)
@@ -5062,7 +5037,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Skip drill##fleeca") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") then
+                        if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 10072, 100)
                         end
                     end)
@@ -5073,7 +5048,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Instant finish (solo only)##fleeca") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller") then
+                        if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 19710, 12)
                             locals.set_int("fm_mission_controller", 28331 + 1, 99999)
                             locals.set_int("fm_mission_controller", 31587 + 69, 99999)
@@ -5225,7 +5200,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Instant finish") then
                     yu.add_task(function()
-                        if requireScript("fm_mission_controller_2020") then
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45451, 51338977)
                             locals.set_int("fm_mission_controller_2020", 46829, 101)
                         end
@@ -5442,7 +5417,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
     local function initOffice()
         local function getCrates(amount)
-            if requireScript("gb_contraband_buy") then
+            if SussySpt.requireScript("gb_contraband_buy") then
                 locals.set_int("gb_contraband_buy", 604, 1)
                 locals.set_int("gb_contraband_buy", 600, amount)
                 locals.set_int("gb_contraband_buy", 790, 6)
@@ -5480,7 +5455,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
     local tabBarId = "##cat_hbo"
     SussySpt.add_render(function()
         if SussySpt.in_online and yu.rendering.isCheckboxChecked("cat_hbo") then
-            SussySpt.pushStyle()
             if ImGui.Begin("HBO (Heists, Businesses & Other)") then
                 ImGui.BeginTabBar(tabBarId)
 
@@ -5491,7 +5465,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.EndTabBar()
             end
             ImGui.End()
-            SussySpt.popStyle()
         end
     end)
 end -- !SECTION
@@ -5499,7 +5472,6 @@ end -- !SECTION
 function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_qa") then
-            SussySpt.pushStyle()
             if ImGui.Begin("Quick actions") then
                 if ImGui.Button("Heal") then
                     yu.add_task(function()
@@ -5633,7 +5605,6 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 end
             end
             ImGui.End()
-            SussySpt.popStyle()
         end
     end)
 end -- !SECTION
