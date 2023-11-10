@@ -69,6 +69,8 @@ def main():
         cmd = args[1]
 
         if cmd == "u" or cmd == "update":
+            os.mkdir(root + "/out")
+
             with open(root + "/out/SussySpt.luao", "w") as f:
                 f.writelines(
                     convertLines(increaseSussySptVersionId(), {
