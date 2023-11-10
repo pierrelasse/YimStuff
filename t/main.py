@@ -43,6 +43,10 @@ def increaseSussySptVersionId():
             f.truncate()
         return lines
 
+def ensureDir(dir):
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+
 def main():
     args = sys.argv
     root = normpath(__file__ + "/../..")
@@ -69,7 +73,7 @@ def main():
         cmd = args[1]
 
         if cmd == "u" or cmd == "update":
-            os.mkdir(root + "/out")
+            ensureDir(root + "/out")
 
             with open(root + "/out/SussySpt.luao", "w") as f:
                 f.writelines(
