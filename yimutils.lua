@@ -1,5 +1,5 @@
--- Made by pierrelasse <:D
-return (function()
+--[[ yimutils ]]
+return (function() -- Made by pierrelasse <:D
     if yu ~= nil then return yu end
 
     local data = {
