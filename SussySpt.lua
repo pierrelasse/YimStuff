@@ -1,6 +1,6 @@
 SussySpt = {
-    version = "1.3.9",
-    versionid = 1974,
+    version = "1.3.10",
+    versionid = 1975,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
