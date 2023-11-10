@@ -1,6 +1,7 @@
+--[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 1975,
+    versionid = 2007,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -165,6 +166,19 @@ function SussySpt:init() -- SECTION SussySpt:init
         return SussySpt.rendering.themes[SussySpt.rendering.theme] or {}
     end
 
+    do
+        local title = "SussySpt"
+
+        if SussySpt.versiontype == 2 then
+            title = title.." vD"..SussySpt.version
+            title = title.."["..SussySpt.versionid.."]@"..SussySpt.build
+        else
+            title = title.." v"..SussySpt.version
+        end
+
+        SussySpt.rendering.title = title.."###sussyspt_mainwindow"
+    end
+
     SussySpt.rendering.new_tab = function(name, render)
         SussySpt.debug("Requested new tab with name '"..name.."'")
         return {
@@ -232,7 +246,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
         pushTheme(SussySpt.rendering.get_theme())
 
-        if ImGui.Begin("SussySpt v"..SussySpt.version) then
+        if ImGui.Begin(SussySpt.rendering.title) then
             ImGui.BeginTabBar("##tabbar")
             for k, v in pairs(SussySpt.rendering.tabs) do
                 render_tab(v)
