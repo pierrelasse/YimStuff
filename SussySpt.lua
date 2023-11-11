@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2014,
+    versionid = 2017,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -5546,6 +5546,9 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 if ImGui.Button("Skip cutscene") then
                     yu.add_task(function()
                         CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                        if NETWORK.NETWORK_IS_IN_MP_CUTSCENE() then
+                            NETWORK.NETWORK_SET_IN_MP_CUTSCENE(false, true)
+                        end
                     end)
                 end
                 yu.rendering.tooltip("There are some unskippable cutscenes where this doesn't work.")
