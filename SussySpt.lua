@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2009,
+    versionid = 2012,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -2892,10 +2892,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[1] = tab2
             end
 
-            do -- ANCHOR Nearby vehicles
-                local tab2 = SussySpt.rendering.new_tab("Nearby vehicles")
+            do -- ANCHOR Entities
+                local tab2 = SussySpt.rendering.new_tab("Entities")
+
+                tab2.should_display = SussySpt.getDev
 
                 tab2.render = function()
+                    ImGui.Text("Door controller")
+
                     for i = 0, 10 do
                         ImGui.Text(i..":")
                         ImGui.SameLine()
@@ -5600,6 +5604,15 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                     end)
                 end
                 yu.rendering.tooltip("Other way of refreshing the interior")
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Stop conversation") then
+                    yu.rif(function()
+                        AUDIO.STOP_SCRIPTED_CONVERSATION(false)
+                    end)
+                end
+                yu.rendering.tooltip("Tries to stop the blah blah from npcs")
 
                 if SussySpt.in_online then
                     if ImGui.Button("Instant BST") then
