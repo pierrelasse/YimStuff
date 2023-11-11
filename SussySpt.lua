@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2012,
+    versionid = 2014,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -3270,47 +3270,49 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.debug("Creating esp thread")
     -- ANCHOR ESP
-    yu.rif(function(rs)
+    do
         local function drawLine(ped, index1, index2)
             local c1 = PED.GET_PED_BONE_COORDS(ped, index1, 0, 0, 0)
             local c2 = PED.GET_PED_BONE_COORDS(ped, index2, 0, 0, 0)
             GRAPHICS.DRAW_LINE(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z, 255, 0, 0, 255)
         end
 
-        while not DLC.GET_IS_LOADING_SCREEN_ACTIVE() do
-            rs:yield()
-            if yu.rendering.isCheckboxChecked("config_esp_enabled") and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
-                for k, v in pairs(SussySpt.online_players_SussySpt.players) do
-                    local ped = v.ped
-                    local c = ENTITY.GET_ENTITY_COORDS(ped)
-                    local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
-                    if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z) then
-                        -- Head Bones
-                        drawLine(ped, 31086, 39317) -- Head, Neck
-                        -- Left Arm Bones
-                        drawLine(ped, 10706, 45509) -- Left Clavicle, Left Upper Arm
-                        drawLine(ped, 45509, 61163) -- Left Upper Arm, Left Forearm
-                        drawLine(ped, 61163, 18905) -- Left Forearm, Left Hand
-                        -- Right Arm Bones
-                        drawLine(ped, 10706, 40269) -- Right Clavicle, Right Upper Arm
-                        drawLine(ped, 40269, 28252) -- Right Upper Arm, Right Forearm
-                        drawLine(ped, 28252, 57005) -- Right Forearm, Right Hand
-                        -- Body Bones
-                        drawLine(ped, 11816, 10706) -- Pelvis, Left Clavicle
-                        -- Left Leg Bones
-                        drawLine(ped, 11816, 58271) -- Pelvis, Left Thigh
-                        drawLine(ped, 58271, 63931) -- Left Thigh, Left Calf
-                        drawLine(ped, 63931, 14201) -- Left Calf, Left Foot
-                        -- Right Leg Bones
-                        drawLine(ped, 11816, 51826) -- Pelvis, Right Thigh
-                        drawLine(ped, 51826, 36864) -- Right Thigh, Right Calf
-                        drawLine(ped, 36864, 52301) -- Right Calf, Right Foot
+        yu.rif(function(rs)
+            while true do
+                rs:yield()
+                if yu.rendering.isCheckboxChecked("config_esp_enabled") and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
+                    local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                    for k, v in pairs(SussySpt.players) do
+                        local ped = v.ped
+                        local c = ENTITY.GET_ENTITY_COORDS(ped)
+                        local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
+                        if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z) then
+                            -- Head Bones
+                            drawLine(ped, 31086, 39317) -- Head, Neck
+                            -- Left Arm Bones
+                            drawLine(ped, 10706, 45509) -- Left Clavicle, Left Upper Arm
+                            drawLine(ped, 45509, 61163) -- Left Upper Arm, Left Forearm
+                            drawLine(ped, 61163, 18905) -- Left Forearm, Left Hand
+                            -- Right Arm Bones
+                            drawLine(ped, 10706, 40269) -- Right Clavicle, Right Upper Arm
+                            drawLine(ped, 40269, 28252) -- Right Upper Arm, Right Forearm
+                            drawLine(ped, 28252, 57005) -- Right Forearm, Right Hand
+                            -- Body Bones
+                            drawLine(ped, 11816, 10706) -- Pelvis, Left Clavicle
+                            -- Left Leg Bones
+                            drawLine(ped, 11816, 58271) -- Pelvis, Left Thigh
+                            drawLine(ped, 58271, 63931) -- Left Thigh, Left Calf
+                            drawLine(ped, 63931, 14201) -- Left Calf, Left Foot
+                            -- Right Leg Bones
+                            drawLine(ped, 11816, 51826) -- Pelvis, Right Thigh
+                            drawLine(ped, 51826, 36864) -- Right Thigh, Right Calf
+                            drawLine(ped, 36864, 52301) -- Right Calf, Right Foot
+                        end
                     end
                 end
             end
-        end
-    end)
+        end)
+    end
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
