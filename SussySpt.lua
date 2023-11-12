@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2031,
+    versionid = 2032,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -464,6 +464,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                     local selfppid = yu.ppid()
                     local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
+                    local hostPlayerIndex = NETWORK.NETWORK_GET_HOST_PLAYER_INDEX()
+                    local fmHost = NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)
+
                     for k, v in pairs(SussySpt.players) do
                         local startTime = yu.cputms()
 
@@ -488,10 +491,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                             }
                         end
 
-                        if NETWORK.NETWORK_PLAYER_INDEX_IS_CHEATER(v.player) then
-                            v.info.cheater = {
+                        if hostPlayerIndex  == v.player then
+                            v.info.host = {
                                 "H",
-                                "Marked as cheater by R*"
+                                "Session host"
+                            }
+                        end
+
+                        if fmHost == v.player then
+                            v.info.scripthost = {
+                                "S",
+                                "Script host"
                             }
                         end
 
@@ -504,7 +514,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         if not isSelf and NETWORK.IS_PLAYER_IN_CUTSCENE(v.player) then
                             v.info.cutscene = {
-                                "S",
+                                "Cs",
                                 "A cutscene is currently playing"
                             }
                         end
