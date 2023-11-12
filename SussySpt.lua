@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2032,
+    versionid = 2038,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -464,8 +464,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                     local selfppid = yu.ppid()
                     local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
 
-                    local hostPlayerIndex = NETWORK.NETWORK_GET_HOST_PLAYER_INDEX()
-                    local fmHost = NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)
+                    local hostIndex = NETWORK.NETWORK_GET_HOST_PLAYER_INDEX()
+                    local hostName
+                    local fmHostIndex = NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)
+                    local fmHostName
 
                     for k, v in pairs(SussySpt.players) do
                         local startTime = yu.cputms()
@@ -491,18 +493,20 @@ function SussySpt:init() -- SECTION SussySpt:init
                             }
                         end
 
-                        if hostPlayerIndex  == v.player then
+                        if hostIndex == v.player then
                             v.info.host = {
                                 "H",
                                 "Session host"
                             }
+                            hostName = v.name
                         end
 
-                        if fmHost == v.player then
+                        if fmHostIndex == v.player then
                             v.info.scripthost = {
                                 "S",
                                 "Script host"
                             }
+                            fmHostName = v.name
                         end
 
                         if v.noped then
@@ -589,7 +593,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                 local distanceAboveGround = ENTITY.GET_ENTITY_HEIGHT_ABOVE_GROUND(v.ped)
                                 if distanceAboveGround > 1.5 then
-                                    v.tooltip = v.tooltip.."\nDistance above ground: "..string.format("%.2f", distanceAboveGround).."m"
+                                    v.tooltip = v.tooltip..", "..string.format("%.2f", distanceAboveGround).."m above ground"
                                 end
 
                                 v.tooltip = v.tooltip.."\nRoad: "..road
@@ -623,7 +627,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     if not v.noped then
                                         v.tooltip = v.tooltip.."\n\n"
                                     end
-                                    v.tooltip = v.tooltip.."Weird chars behind name:"
+                                    v.tooltip = v.tooltip.."Tags:"
                                     header = false
                                 end
                                 v.tags = v.tags..v1[1]
@@ -649,6 +653,23 @@ function SussySpt:init() -- SECTION SussySpt:init
                         v.tooltip = v.tooltip:replace("  ", " ")
 
                         SussySpt.players[k] = v
+                    end
+
+                    if SussySpt.dev then
+                        local lines = {}
+                        local function append(str)
+                            lines[#lines + 1] = str
+                        end
+
+                        if hostName ~= nil then
+                            append("Host: "..hostName)
+                        end
+
+                        if fmHostName ~= nil then
+                            append("Script host: "..fmHostName)
+                        end
+
+                        a.playersTooltip = table.join(lines, "\n")
                     end
 
                     updatePlayerlistElements()
@@ -700,6 +721,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                     a.open = 2
                     ImGui.BeginGroup()
                     ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
+                    if a.playersTooltip ~= nil and SussySpt.dev then
+                        yu.rendering.tooltip(a.playersTooltip)
+                    end
 
                     ImGui.PushItemWidth(a.playerlistwidth)
                     local searchtext, _ = ImGui.InputTextWithHint("##search", "Search...", a.searchtext, 32)
