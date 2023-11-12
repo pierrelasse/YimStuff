@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2017,
+    versionid = 2031,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -403,7 +403,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     playerlistwidth = 211,
                     searchtext = "",
                     players = {},
-                    doupdates = 0,
+                    open = 0,
                     selectedplayer = nil,
                     selectedplayerinfo = {},
                     ramoptions = {
@@ -458,12 +458,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 local emptystr = ""
 
                 -- ANCHOR Refresh playerlist
-                local function refreshPlayerlist(updateInfo)
+                local function refreshPlayerlist()
                     SussySpt.players = yu.get_all_players()
-
-                    if not updateInfo then
-                        return
-                    end
 
                     local selfppid = yu.ppid()
                     local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
@@ -471,31 +467,47 @@ function SussySpt:init() -- SECTION SussySpt:init
                     for k, v in pairs(SussySpt.players) do
                         local startTime = yu.cputms()
 
+                        local isSelf = v.ped == selfppid
+
                         v.noped = type(v.ped) ~= "number" or v.ped == 0
                         v.tooltip = emptystr
 
-                        v.info = {
-                            talking = {
-                                NETWORK.NETWORK_IS_PLAYER_TALKING(v.player),
+                        v.info = {}
+
+                        if not isSelf and NETWORK.NETWORK_IS_PLAYER_TALKING(v.player) then
+                            v.info.talking = {
                                 "T",
                                 "The player is currently screaming or talking in the voicechat"
-                            },
-                            modder = {
-                                network.is_player_flagged_as_modder(v.player),
+                            }
+                        end
+
+                        if network.is_player_flagged_as_modder(v.player) then
+                            v.info.modder = {
                                 "M",
                                 "This player was detected as a modder"
-                            },
-                            cheater = {
-                                NETWORK.NETWORK_PLAYER_INDEX_IS_CHEATER(v.player),
+                            }
+                        end
+
+                        if NETWORK.NETWORK_PLAYER_INDEX_IS_CHEATER(v.player) then
+                            v.info.cheater = {
                                 "H",
                                 "Marked as cheater by R*"
-                            },
-                            noped = {
-                                v.noped,
+                            }
+                        end
+
+                        if v.noped then
+                            v.info.noped = {
                                 "P",
                                 "No character (ped) was found"
                             }
-                        }
+                        end
+
+                        if not isSelf and NETWORK.IS_PLAYER_IN_CUTSCENE(v.player) then
+                            v.info.cutscene = {
+                                "S",
+                                "A cutscene is currently playing"
+                            }
+                        end
 
                         if not v.noped then
                             local c = ENTITY.GET_ENTITY_COORDS(v.ped)
@@ -513,40 +525,48 @@ function SussySpt:init() -- SECTION SussySpt:init
                             local wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
-                            v.info.vehicle = {
-                                PED.IS_PED_IN_ANY_VEHICLE(v.ped, false),
-                                "V",
-                                nil
-                            }
-
                             local vehicle = yu.veh(v.ped)
-                            if vehicle ~= nil then
-                                v.info.vehicle[3] = "The player is in a vehicle. Type: "
-                                    ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
-                            else
-                                v.info.vehicle[3] = "The player is in a vehicle"
+                            if vehicle ~= nil or PED.IS_PED_IN_ANY_VEHICLE(v.ped, false) then
+                                v.info.vehicle = {
+                                    "V",
+                                    nil
+                                }
+
+                                if vehicle ~= nil then
+                                    v.info.vehicle[2] = "The player is in a vehicle. Type: "
+                                        ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+                                else
+                                    v.info.vehicle[2] = "The player is in a vehicle"
+                                end
                             end
 
-                            v.info.interior = {
-                                interior ~= 0,
-                                "I",
-                                "The player might be in an interior. Interior id: "..interior
-                            }
-                            v.info.nocollision = {
-                                collisionDisabled == true and distance < 100 and vehicle == nil,
-                                "C",
-                                "The player doesn't seem to have collision"
-                            }
-                            v.info.noblip = {
-                                v.ped ~= selfppid and v.blip == 0,
-                                "B",
-                                "The player has no blip. In interior/not spawned yet?"
-                            }
-                            v.info.dead = {
-                                ENTITY.IS_ENTITY_DEAD(v.ped) or PED.IS_PED_DEAD_OR_DYING(v.ped, 1),
-                                "D",
-                                "Player seems to be dead"
-                            }
+                            if SussySpt.dev and interior ~= 0 then
+                                v.info.interior = {
+                                    "I",
+                                    "The player might be in an interior. Interior id: "..interior
+                                }
+                            end
+
+                            if collisionDisabled == true and distance < 100 and vehicle == nil then
+                                v.info.nocollision = {
+                                    "C",
+                                    "The player doesn't seem to have collision"
+                                }
+                            end
+
+                            if v.ped ~= selfppid and v.blip == 0 then
+                                v.info.noblip = {
+                                    "B",
+                                    "The player has no blip. In interior/not spawned yet?"
+                                }
+                            end
+
+                            if ENTITY.IS_ENTITY_DEAD(v.ped) or PED.IS_PED_DEAD_OR_DYING(v.ped, 1) then
+                                v.info.dead = {
+                                    "D",
+                                    "Player seems to be dead"
+                                }
+                            end
 
                             v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
 
@@ -584,22 +604,24 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
                         end
 
-                        v.tags = emptystr
-                        local doInfoHeader = true
-                        for k1, v1 in pairs(v.info) do
-                            if v1[1] == true then
-                                if doInfoHeader then
+                        do
+                            v.tags = emptystr
+
+                            local header = true
+                            for k1, v1 in pairs(v.info) do
+                                if header then
                                     if not v.noped then
                                         v.tooltip = v.tooltip.."\n\n"
                                     end
                                     v.tooltip = v.tooltip.."Weird chars behind name:"
-                                    doInfoHeader = false
+                                    header = false
                                 end
-                                v.tags = v.tags..v1[2]
-                                v.tooltip = v.tooltip.."\n  - "..v1[2]..": "..v1[3]
+                                v.tags = v.tags..v1[1]
+                                v.tooltip = v.tooltip.."\n  - "..v1[1]..": "..v1[2]
                             end
+
+                            v.displayName = header and v.name or v.name.." ["..v.tags.."]"
                         end
-                        v.displayName = doInfoHeader and v.name or v.name.." ["..v.tags.."]"
 
                         v.tooltip = v.tooltip
                             .."\n\nFor nerds:"
@@ -653,14 +675,19 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 yu.rif(function(rs)
                     while true do
-                        refreshPlayerlist(a.doupdates > 0)
-                        rs:sleep(yu.shc(a.doupdates > 0, 250, 1000))
+                        refreshPlayerlist()
+
+                        local isOpen = a.open > 0
+                        rs:sleep(isOpen and 250 or 1500)
+                        if isOpen then
+                            a.open = a.open - 1
+                        end
                     end
                 end)
 
                 -- ANCHOR Render
                 tab2.render = function()
-                    a.doupdates = 1
+                    a.open = 2
                     ImGui.BeginGroup()
                     ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
 
