@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2047,
+    versionid = 2051,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -469,8 +469,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                     local fmHostIndex = NETWORK.NETWORK_GET_HOST_OF_SCRIPT("freemode", -1, 0)
                     local fmHostName
 
+                    SussySpt.sortedPlayers = {}
+
                     for k, v in pairs(SussySpt.players) do
                         local startTime = yu.cputms()
+
+                        table.insert(SussySpt.sortedPlayers, k)
 
                         local isSelf = v.ped == selfppid
 
@@ -672,7 +676,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                         a.playersTooltip = table.join(lines, "\n")
                     end
 
+                    table.sort(SussySpt.sortedPlayers)
+
                     updatePlayerlistElements()
+
                 end
 
                 local function weaponFromInput(s)
@@ -738,7 +745,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.PushItemWidth(a.playerlistwidth)
                         local _, y = ImGui.GetContentRegionAvail()
                         if ImGui.BeginListBox("##playerlist", 0, y) then
-                            for k, v in pairs(SussySpt.players) do
+                            for k, v in pairs(SussySpt.sortedPlayers) do
+                                v = SussySpt.players[v]
                                 if v.display then
                                     if ImGui.Selectable(v.displayName, false) then
                                         a.selectedplayer = v.name
