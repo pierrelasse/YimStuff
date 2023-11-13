@@ -3314,7 +3314,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if state then
                             SussySpt.invisible = true
                         else
-                            SussySpt.enableVis()
+                            yu.rif(SussySpt.enableVis)
                         end
                     end)
 
