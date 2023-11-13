@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2038,
+    versionid = 2047,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1693,7 +1693,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                         a.input = table.join(lines, "\n")
                         a.tokens = tokens
-                        a.tokenlength = yu.len(tokens)
+                        a.tokenlength = yu.len(tokens).." stat/s loaded"
                     end
 
                     local function apply()
@@ -1730,15 +1730,34 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Apply") then
                                 yu.rif(apply)
                             end
+
+                            if SussySpt.dev then
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Dump tokens") then
+                                    yu.rif(function()
+                                        log.info("===[ TOKEN DUMP ]===")
+
+                                        for k, v in pairs(a.tokens) do
+                                            local type = v[1]
+                                            local stat = v[2]
+                                            local value = tostring(v[3])
+                                            log.info(k..": {type="..a.types[type].."["..type.."],stat="..stat..",value="..value.."}")
+                                        end
+
+                                        log.info("====================")
+                                    end)
+                                end
+                            end
                         end
 
                         if a.tokenlength ~= nil then
-                            ImGui.Text(a.tokenlength + " stat/s loaded")
+                            ImGui.Text(a.tokenlength)
                         end
 
                         do
                             local x, y = ImGui.GetContentRegionAvail()
-                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 25000, x, y)
+                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 2500000, x, y)
                             if a.input ~= text then
                                 a.input = text
                                 a.tokens = nil
@@ -3993,6 +4012,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 if ImGui.Button("Remove all cameras") then
                     yu.add_task(removeAllCameras)
                 end
+                yu.rendering.tooltip("This can make your game crash. Be careful")
 
                 ImGui.SameLine()
 
