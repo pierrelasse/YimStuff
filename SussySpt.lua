@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2051,
+    versionid = 2060,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -478,6 +478,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         local isSelf = v.ped == selfppid
 
+                        v.networkHandle = NETWORK.NETWORK_HANDLE_FROM_PLAYER(v.player, nil, 13)
+
                         v.noped = type(v.ped) ~= "number" or v.ped == 0
                         v.tooltip = emptystr
 
@@ -530,17 +532,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if not v.noped then
                             local c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
-                            local collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
+                            v.collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
 
-                            local interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+                            v.interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
 
-                            local health = ENTITY.GET_ENTITY_HEALTH(v.ped)
-                            local maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
-                            local armor = PED.GET_PED_ARMOUR(v.ped)
+                            v.health = ENTITY.GET_ENTITY_HEALTH(v.ped)
+                            v.maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
+                            v.armor = PED.GET_PED_ARMOUR(v.ped)
                             local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
                             local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
-                            local speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
-                            local wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
+                            v.speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+                            v.wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
 
                             local vehicle = yu.veh(v.ped)
@@ -558,14 +560,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
                             end
 
-                            if SussySpt.dev and interior ~= 0 then
+                            v.weapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
+                            v.weaponModel = WEAPON.GET_WEAPONTYPE_MODEL(v.weapon)
+
+                            if SussySpt.dev and v.interior ~= 0 then
                                 v.info.interior = {
                                     "I",
-                                    "The player might be in an interior. Interior id: "..interior
+                                    "The player might be in an interior. Interior id: "..v.interior
                                 }
                             end
 
-                            if collisionDisabled == true and distance < 100 and vehicle == nil then
+                            if v.collisionDisabled == true and distance < 100 and vehicle == nil then
                                 v.info.nocollision = {
                                     "C",
                                     "The player doesn't seem to have collision"
@@ -586,10 +591,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 }
                             end
 
-                            v.tooltip = v.tooltip.."Health: "..health.."/"..maxhealth.." "..math.floor(yu.calculate_percentage(health, maxhealth)).."%"
+                            v.tooltip = v.tooltip.."Health: "..v.health.."/"..v.maxhealth.." "..math.floor(yu.calculate_percentage(v.health, v.maxhealth)).."%"
 
-                            if armor > 0 then
-                                v.tooltip = v.tooltip.."\nArmor: "..string.format("%.0f", armor)
+                            if v.armor > 0 then
+                                v.tooltip = v.tooltip.."\nArmor: "..string.format("%.0f", v.armor)
                             end
 
                             if distance > 0 then
@@ -603,12 +608,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.tooltip = v.tooltip.."\nRoad: "..road
                             end
 
-                            if speed > 0 then
-                                v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", speed).."km/h"
+                            if v.speed > 0 then
+                                v.tooltip = v.tooltip.."\nSpeed: "..string.format("%.2f", v.speed).."km/h"
                             end
 
-                            if wantedLevel > 0 then
-                                v.tooltip = v.tooltip.."\nWanted level: "..wantedLevel
+                            if v.wantedLevel > 0 then
+                                v.tooltip = v.tooltip.."\nWanted level: "..v.wantedLevel
                             end
 
                             v.proofs = yu.get_entity_proofs(v.ped)
@@ -651,6 +656,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if v.blip ~= 0 then
                                 v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
                             end
+
+                            v.tooltip = v.tooltip.."\n  - Weapon: "..v.weaponModel
+                            v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
                         end
 
                         v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
@@ -2000,9 +2008,9 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Chatlog
                 local tab2 = SussySpt.rendering.new_tab("Chatlog")
 
-                yu.rendering.setCheckboxChecked("online_chatlog_enabled", true)
-                yu.rendering.setCheckboxChecked("online_chatlog_console", true)
-                yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", true)
+                yu.rendering.setCheckboxChecked("online_chatlog_enabled")
+                yu.rendering.setCheckboxChecked("online_chatlog_console")
+                yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp")
 
                 tab2.render = function()
                     if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
@@ -2849,8 +2857,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     awidth = 195
                 }
 
-                yu.rendering.setCheckboxChecked("world_objspawner_deleteprev", true)
-                yu.rendering.setCheckboxChecked("world_objspawner_missionent", true)
+                yu.rendering.setCheckboxChecked("world_objspawner_deleteprev")
+                yu.rendering.setCheckboxChecked("world_objspawner_missionent")
 
                 local function temp_text(infotext, duration)
                     yu.rif(function(runscript)
@@ -3278,10 +3286,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                     if state ~= true and state ~= false then
                         return nil
                     end
-                    if id ~= nil then
+                    if id ~= nil and yu.rendering.isCheckboxChecked("invisible_self") then
                         ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
                     end
-                    if not makingVehicleInivs then
+                    if not makingVehicleInivs and yu.rendering.isCheckboxChecked("invisible_vehicle") then
                         yu.rif(function()
                             makingVehicleInivs = true
                             if veh ~= nil and entities.take_control_of(veh) then
@@ -3317,6 +3325,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
                 bindHotkey(yu.keys[a.key])
 
+                yu.rendering.setCheckboxChecked("invisible_self")
+                yu.rendering.setCheckboxChecked("invisible_vehicle")
+
                 tab2.render = function()
                     yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
                         if state then
@@ -3330,6 +3341,13 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey")
                     yu.rendering.renderCheckbox("Log", "invisible_log")
+
+                    ImGui.Spacing()
+
+                    yu.rendering.renderCheckbox("Self", "invisible_self")
+                    yu.rendering.renderCheckbox("Vehicle", "invisible_vehicle")
+
+                    ImGui.Spacing()
 
                     ImGui.PushItemWidth(140)
                     if ImGui.BeginCombo("Key", a.key) then
@@ -3423,7 +3441,7 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
 
         if ImGui.SmallButton("Show all") then
             for k, v in pairs({"hbo", "qa"}) do
-                yu.rendering.setCheckboxChecked("cat_"..v, true)
+                yu.rendering.setCheckboxChecked("cat_"..v)
             end
         end
 
@@ -4145,7 +4163,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 if ImGui.Button("Apply##realtake") then
                     if SussySpt.requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 43152, a.realtake)
+                        locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
                     end
                 end
 
