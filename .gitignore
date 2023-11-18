@@ -6,3 +6,6 @@ config.json
 
 # Files for releases, etc.
 out
+
+# Cache files
+__pycache__
