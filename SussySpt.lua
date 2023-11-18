@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2187,
+    versionid = 2188,
 
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
@@ -5748,24 +5748,6 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 end
                 yu.rendering.tooltip("Remove the blackscreen :D")
 
-                ImGui.SameLine()
-
-                if ImGui.Button("Stop player switch") then
-                    yu.add_task(function()
-                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
-                            STREAMING.STOP_PLAYER_SWITCH()
-                            if CAM.IS_SCREEN_FADED_OUT() then
-                                CAM.DO_SCREEN_FADE_IN(0)
-                            end
-                            HUD.CLEAR_HELP(true)
-                            HUD.SET_FRONTEND_ACTIVE(true)
-                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
-                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
-
                 if ImGui.Button("Repair vehicle") then
                     yu.add_task(function()
                         local veh = yu.veh()
@@ -5805,7 +5787,25 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 end
                 yu.rendering.tooltip("Tries to stop the blah blah from npcs")
 
+                if ImGui.Button("Stop player switch") then
+                    yu.add_task(function()
+                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
+                            STREAMING.STOP_PLAYER_SWITCH()
+                            if CAM.IS_SCREEN_FADED_OUT() then
+                                CAM.DO_SCREEN_FADE_IN(0)
+                            end
+                            HUD.CLEAR_HELP(true)
+                            HUD.SET_FRONTEND_ACTIVE(true)
+                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
+                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
+
                 if SussySpt.in_online then
+                    ImGui.SameLine()
+
                     if ImGui.Button("Instant BST") then
                         globals.set_int(2672524 + 3690, 1)
                     end
