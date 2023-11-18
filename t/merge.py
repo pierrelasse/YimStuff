@@ -63,6 +63,6 @@ def merge(file, lines):
         for k in chars:
             v = chars[k]
             line += v
-        lines_out += line + "\n"
+        lines_out.append(line)
 
     return lines_out
