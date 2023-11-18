@@ -1,7 +1,8 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2093,
+    versionid = 2125,
+
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1620,6 +1621,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         }
                     }
 
+                    -- TODO Support for masked, globals?
+
                     local function load()
                         if type(a.input) ~= "string" then
                             return
@@ -2534,39 +2537,41 @@ function SussySpt:init() -- SECTION SussySpt:init
                         rank_rp = 0,
                         rank_min_rp = 0,
                         rank_max_rp = 1787576850,
-                        rank_getRpValue = function(value)
-                            if value <= 1 then
-                                return 0
-                            end
-
-                            local rp = globals.get_int(294328 + value + 1)
-
-                            if yu.is_num_between(rp, a.min_rp, a.max_rp) then
-                                return rp
-                            end
-
-                            log.warning("Unable to obtain correct rp value (value="..value..",rp="..rp..")")
-                            yu.notify(3, "Please check console for more details", "Error")
-
-                            return stats.get_int(yu.mpx("CHAR_XP_FM"))
-                        end,
 
                         crank_crew = 1,
                         crank_rank = 0,
                         crank_min = 0,
-                        crank_checking = false,
-                        crank_getRpValue = function(value)
-                            local rank = 0
-                            for k, v in pairs(yu.xp_for_crew_rank()) do
-                                if v < value then
-                                    rank = k
-                                else
-                                    return rank
-                                end
-                            end
-                            return rank
-                        end
+                        crank_checking = false
                     }
+
+                    function a.rank_getRpValue(value)
+                        if value <= 1 then
+                            return 0
+                        end
+
+                        local rp = globals.get_int(294328 + value + 1)
+
+                        if yu.is_num_between(rp, a.min_rp, a.max_rp) then
+                            return rp
+                        end
+
+                        log.warning("Unable to obtain correct rp value (value="..value..",rp="..rp..")")
+                        yu.notify(3, "Please check console for more details", "Error")
+
+                        return stats.get_int(yu.mpx("CHAR_XP_FM"))
+                    end
+
+                    function a.crank_getRpValue(value)
+                        local rank = 0
+                        for k, v in pairs(yu.xp_for_crew_rank()) do
+                            if v < value then
+                                rank = k
+                            else
+                                return rank
+                            end
+                        end
+                        return rank
+                    end
 
                     function updateCrewRank()
                         if not a.crank_checking then
@@ -3465,8 +3470,10 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     SussySpt.debug("Calling SussySpt:initTabQA()")
     SussySpt:initTabQA()
 
-    SussySpt.debug("Calling SussySpt:initTabHeist()")
-    SussySpt:initTabHeist()
+    if SussySpt.dev then
+        SussySpt.debug("Calling SussySpt:initTabHeist()")
+        SussySpt:initTabHeist()
+    end
 
     tab:add_text("Categories")
     tab:add_imgui(function()
