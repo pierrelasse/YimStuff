@@ -89,7 +89,7 @@ def main():
                     print("merging")
                     lines = merge(os.path.abspath("SussySpt.lua"), lines)
 
-                f.writelines(lines)
+                f.write("\n".join(lines))
 
             shutil.copy(root + "/out/SussySpt.luao", cfg["scriptsPath"] + "/SussySpt.lua")
             if not should_merge:
