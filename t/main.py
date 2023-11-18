@@ -22,11 +22,11 @@ def convertLines(lines, config={}):
     type = type[1]
 
     if type == "SussySpt":
-        lines[4] = lines[4].replace("0--[[VERSIONTYPE]]", str(config["versionType"]))
-        lines[5] = lines[5].replace("0--[[BUILD]]", str(time.time()).split(".")[0])
+        lines[5] = lines[5].replace("0--[[VERSIONTYPE]]", str(config["versionType"]))
+        lines[6] = lines[6].replace("0--[[BUILD]]", str(time.time()).split(".")[0])
 
     elif type == "yimutils":
-        print("Yimutils!")
+        pass
 
     else:
         raise Exception("Content has an invalid type")
@@ -35,11 +35,11 @@ def convertLines(lines, config={}):
 
 def increaseSussySptVersionId():
     with open("SussySpt.lua", "r+") as f:
-        lines = f.readlines()
+        lines = f.read().split("\n")
         if len(lines) >= 4:
-            lines[3] = "    versionid = {},\n".format(int(lines[3].split()[-1][:-1]) + 1)
+            lines[3] = "    versionid = {},".format(int(lines[3].split()[-1][:-1]) + 1)
             f.seek(0)
-            f.writelines(lines)
+            f.write("\n".join(lines))
             f.truncate()
         return lines
 
@@ -75,15 +75,25 @@ def main():
         if cmd == "u" or cmd == "update":
             ensureDir(root + "/out")
 
+            should_merge = False if len(args) <= 2 else (args[2] == "m" or args[2] == "merge")
+
+            merge = None
+            if should_merge:
+                from merge import merge as _merge
+                merge = _merge
+
             with open(root + "/out/SussySpt.luao", "w") as f:
-                f.writelines(
-                    convertLines(increaseSussySptVersionId(), {
-                        "versionType": 2
-                    })
-                )
+                lines = convertLines(increaseSussySptVersionId(), {"versionType": 2})
+
+                if should_merge:
+                    print("merging")
+                    lines = merge(os.path.abspath("SussySpt.lua"), lines)
+
+                f.writelines(lines)
 
             shutil.copy(root + "/out/SussySpt.luao", cfg["scriptsPath"] + "/SussySpt.lua")
-            shutil.copy(root + "/yimutils.lua", cfg["scriptsPath"] + "/yimutils.lua")
+            if not should_merge:
+                shutil.copy(root + "/yimutils.lua", cfg["scriptsPath"] + "/yimutils.lua")
 
         else:
             printHelp()
