@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2188,
+    versionid = 2222,
 
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
@@ -136,10 +136,13 @@ function SussySpt:init() -- SECTION SussySpt:init
         bounty_other_by = function(pid)
             return 1 + 1895156 + (pid * 609) + 601
         end,
-        tunables_rpmultiplier = 262146,
+        tunables_rpmultiplier = 262145 + 1,
+        tunables_apmultiplier = 288259,
         halloween_unlock = 2765084 + 591,
         halloween_pumpkin_picked_up = 2765084 + 591
     }
+
+    SussySpt.xp_to_rank = yu.xp_to_rank()
 
     SussySpt.rendering.theme = "Fatality"
     SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
@@ -474,6 +477,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                             }
                         end
 
+                        if not isSelf and network.is_player_friend(v.player) then
+                            v.info.friend = {
+                                "F",
+                                "This player is your friend in socialclub"
+                            }
+                        end
+
                         if network.is_player_flagged_as_modder(v.player) then
                             v.info.modder = {
                                 "M",
@@ -559,7 +569,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 }
                             end
 
-                            if v.ped ~= selfppid and v.blip == 0 then
+                            if not isSelf and v.blip == 0 then
                                 v.info.noblip = {
                                     "B",
                                     "The player has no blip. In interior/not spawned yet?"
@@ -570,6 +580,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.info.dead = {
                                     "D",
                                     "Player seems to be dead"
+                                }
+                            end
+
+                            if not isSelf and NETWORK.IS_ENTITY_A_GHOST(v.ped) or NETWORK.IS_ENTITY_IN_GHOST_COLLISION(v.ped) then
+                                v.info.ghost = {
+                                    "G",
+                                    "The player is a ghost. Passive mode?"
                                 }
                             end
 
@@ -1012,6 +1029,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             end)
                                         end
                                         yu.rendering.tooltip("This even kills godmode players but it requires them\nto have no ragdoll turned off.")
+
+                                        ImGui.SameLine()
+
+                                        if ImGui.SmallButton("Disable Passive mode") then
+                                            yu.rif(function()
+                                                network.trigger_script_event(1 << player.player, { -13748324, yu.pid(), 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 })
+                                            end)
+                                        end
 
                                         ImGui.Text("Explode:")
                                         do
@@ -2544,27 +2569,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                         crank_checking = false
                     }
 
-                    function a.rank_getRpValue(value)
-                        if value <= 1 then
-                            return 0
-                        end
-
-                        local rp = globals.get_int(294328 + value + 1)
-
-                        if yu.is_num_between(rp, a.min_rp, a.max_rp) then
-                            return rp
-                        end
-
-                        log.warning("Unable to obtain correct rp value (value="..value..",rp="..rp..")")
-                        yu.notify(3, "Please check console for more details", "Error")
-
-                        return stats.get_int(yu.mpx("CHAR_XP_FM"))
-                    end
-
-                    function a.crank_getRpValue(value)
+                    function a.getRankFromRP(rp)
                         local rank = 0
-                        for k, v in pairs(yu.xp_for_crew_rank()) do
-                            if v < value then
+                        for k, v in pairs(SussySpt.xp_to_rank) do
+                            if v < rp then
                                 rank = k
                             else
                                 return rank
@@ -2573,24 +2581,39 @@ function SussySpt:init() -- SECTION SussySpt:init
                         return rank
                     end
 
-                    function updateCrewRank()
+                    local function refreshRank()
+                        local mpx = yu.mpx()
+                        a.rank_rp = stats.get_int(mpx.."CHAR_XP_FM")
+                        a.rank = a.getRankFromRP(a.rank_rp)
+                    end
+
+                    function refreshCrewRank()
                         if not a.crank_checking then
                             a.crank_checking = true
                             yu.add_task(function()
-                                a.crank_rank = a.crank_getRpValue(stats.get_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew))
+                                a.crank_rank = a.getRankFromRP(stats.get_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew))
                                 a.crank_min = a.crank_rank
                                 a.crank_checking = false
                             end)
                         end
                     end
 
-                    yu.add_task(updateCrewRank)
+                    local function refresh()
+                        refreshRank()
+                        refreshCrewRank()
+                    end
+                    yu.rif(refresh)
 
                     tab3.render = function()
                         do -- ANCHOR Rank
                             ImGui.Text("Rank")
-                            ImGui.TextDisabled("Currently unstable. Can cause crashes, and errors")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Refresh##rank") then
+                                yu.rif(refreshRank)
+                            end
 
+                            ImGui.Text("RP")
+                            ImGui.SameLine()
                             ImGui.PushItemWidth(160)
                             a.rank_rp = ImGui.DragInt("##rank_rp", a.rank_rp, .2, a.rank_min_rp, a.rank_max_rp)
                             yu.rendering.tooltip("Use the slider below to obtain the rp for a specific rank\nRP for lvl 8000: "..a.rank_max_rp)
@@ -2601,9 +2624,18 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Apply##rank_apply") then
                                 yu.rif(function()
                                     local mpx = yu.mpx()
-                                    stats.set_int("MPPLY_GLOBALXP", a.rank_rp)
-                                    stats.set_int(mpx.."CHAR_XP_FM", a.rank_rp)
-                                    if yu.rendering.isCheckboxChecked("online_unlocks_rank_giftadmin") then
+                                    local currentRP = stats.get_int(mpx.."CHAR_XP_FM")
+                                    local giftAdmin = yu.rendering.isCheckboxChecked("online_unlocks_rank_giftadmin")
+
+                                    local goingDown = a.rank_rp < currentRP
+                                    if not goingDown then
+                                        stats.set_int("MPPLY_GLOBALXP", a.rank_rp)
+                                        stats.set_int(mpx.."CHAR_XP_FM", a.rank_rp)
+                                    elseif not giftAdmin then
+                                        yu.notify(2, "You will need to enable 'Gift Admin' to go down with your rank / RP", "Online->Unlocks->Ranks")
+                                    end
+
+                                    if giftAdmin then
                                         stats.set_int(mpx.."CHAR_SET_RP_GIFT_ADMIN", a.rank_rp)
                                         yu.notify(1, "Switch sessions to get your rank set", "Online->Unlocks->Ranks")
                                     else
@@ -2620,6 +2652,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end)
                             end
 
+                            ImGui.Text("Rank")
+                            ImGui.SameLine()
                             ImGui.PushItemWidth(80)
                             a.rank = ImGui.DragInt("##rank_rank", a.rank, .2, 0, 8000)
                             ImGui.PopItemWidth()
@@ -2629,7 +2663,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Get##rank_get") then
                                 yu.rif(function()
                                     if yu.is_num_between(a.rank, 0, 8000) then
-                                        a.rank_rp = a.rank_getRpValue(a.rank)
+                                        a.rank_rp = SussySpt.xp_to_rank[a.rank] or a.rank_rp
                                     end
                                 end)
                             end
@@ -2647,7 +2681,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 local value, changed = ImGui.SliderInt("Crew", a.crank_crew, 0, 4)
                                 if changed then
                                     a.crank_crew = value
-                                    updateCrewRank()
+                                    refreshCrewRank()
                                 end
                                 yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews.")
                             end
@@ -2663,11 +2697,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Set") then
                                 yu.add_task(function()
                                     if a.crank_rank >= a.crank_min then
-                                        stats.set_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew, yu.xp_for_crew_rank()[a.crank_rank] + 100)
+                                        stats.set_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew, SussySpt.xp_to_rank[a.crank_rank] + 100)
                                         yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
                                         yu.notify(1, "Set rank to "..a.crank_rank.."!!!!1 :DDD", "It's fine... No ban!!!11")
                                     end
-                                    updateCrewRank()
+                                    refreshCrewRank()
                                 end)
                             end
                         end
@@ -5130,7 +5164,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
     local function initApartment()
         local a = {
-            heistpointer = 1937645,
+            heistpointer = 1938365 + 3008 + 1,
             heists = {
                 "Fleeca $5M",
                 "Fleeca $10M",
@@ -5288,12 +5322,14 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                     end
                 end
 
-                -- ImGui.SameLine()
-
-                -- if ImGui.Button("$15m fleeca cuts") then
-                --     yu.add_task(function()
-                --     end)
-                -- end
+                if SussySpt.dev and ImGui.Button("15m Test") then
+                    yu.rif(function()
+                        globals.set_int(1936397 + 1 + 1, 7453)
+                        globals.set_int(1936397 + 1 + 1 + 1, 7453)
+                        globals.set_int(1936397 + 1 + 1 + 1 + 1, 100 - (7453 * 2))
+                        globals.set_int(1938365 + 3008 + 1, 7453)
+                    end)
+                end
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
