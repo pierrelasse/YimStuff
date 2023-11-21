@@ -1,4 +1,4 @@
-# Some of the info below might be outdated
+# Most of the info is outdated!
 
 # SussySpt
 SussySpt (weird name idk) is currently in development and features are getting added constantly.
