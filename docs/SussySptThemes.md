@@ -1,6 +1,6 @@
-## Themes
+# Themes
 
-# Available settings:
+## Available options:
 
 - ImGuiCol {red: 0-255 float, green: 0-255 float, blue: 0-255 float, alpha: 0-255 float}:
     - Text: The color of the text
