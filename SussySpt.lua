@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.10",
-    versionid = 2222,
+    versionid = 2231,
 
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
@@ -2148,6 +2148,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
                                     end
                                 end)
+                                for i = 1, 78 do
+                                    globals.set_int(4542602 + 1, i)
+                                end
                             end)
                         end
 
@@ -2233,14 +2236,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
                         yu.rendering.tooltip("Makes you run and reload weapons faster")
-
-                        if ImGui.Button("Unlock baseball bat and knife skins in gunvan") then
-                            yu.add_task(function()
-                                globals.set_int(262145 + 34131, 0)
-                                globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
-                                globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
-                            end)
-                        end
 
                         if ImGui.Button("Unlock all tattos") then
                             yu.add_task(function()
@@ -2479,49 +2474,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
 
-                        if ImGui.Button("Unlock guns") then
-                            yu.add_task(function()
-                                local mpx = yu.mpx()
-                                for i in pairs({
-                                        "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
-                                        "CHAR_WEAP_ADDON_2_UNLCK","CHAR_WEAP_ADDON_3_UNLCK","CHAR_WEAP_ADDON_4_UNLCK","CHAR_WEAP_FREE","CHAR_WEAP_FREE2",
-                                        "CHAR_FM_WEAP_FREE","CHAR_FM_WEAP_FREE2","CHAR_FM_WEAP_FREE3","CHAR_FM_WEAP_FREE4","CHAR_WEAP_PURCHASED",
-                                        "CHAR_WEAP_PURCHASED2","WEAPON_PICKUP_BITSET","WEAPON_PICKUP_BITSET2","CHAR_FM_WEAP_UNLOCKED","NO_WEAPONS_UNLOCK",
-                                        "NO_WEAPON_MODS_UNLOCK","NO_WEAPON_CLR_MOD_UNLOCK","CHAR_FM_WEAP_UNLOCKED2","CHAR_FM_WEAP_UNLOCKED3",
-                                        "CHAR_FM_WEAP_UNLOCKED4","CHAR_KIT_1_FM_UNLCK","CHAR_KIT_2_FM_UNLCK","CHAR_KIT_3_FM_UNLCK","CHAR_KIT_4_FM_UNLCK",
-                                        "CHAR_KIT_5_FM_UNLCK","CHAR_KIT_6_FM_UNLCK","CHAR_KIT_7_FM_UNLCK","CHAR_KIT_8_FM_UNLCK","CHAR_KIT_9_FM_UNLCK",
-                                        "CHAR_KIT_10_FM_UNLCK","CHAR_KIT_11_FM_UNLCK","CHAR_KIT_12_FM_UNLCK","CHAR_KIT_FM_PURCHASE","CHAR_WEAP_FM_PURCHASE",
-                                        "CHAR_WEAP_FM_PURCHASE2","CHAR_WEAP_FM_PURCHASE3","CHAR_WEAP_FM_PURCHASE4"}) do
-                                    stats.set_int(mpx..i, -1)
-                                end
-                                stats.set_int(mpx.."FIREWORK_TYPE_1_WHITE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_1_RED", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_1_BLUE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_2_WHITE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_2_RED", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_2_BLUE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_3_WHITE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_3_RED", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_3_BLUE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_4_WHITE", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_4_RED", 1000)
-                                stats.set_int(mpx.."FIREWORK_TYPE_4_BLUE", 1000)
-                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH", -1)
-                            for i = 2, 19 do
-                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH"..i, -1)
-                            end
-                            for i = 1, 19 do
-                                stats.set_int(mpx.."CHAR_FM_WEAP_ADDON_"..i.."_UNLCK", -1)
-                            end
-                            for i = 1, 41 do
-                                stats.set_int(mpx.."CHAR_KIT_"..i.."_FM_UNLCK", -1)
-                            end
-                            for i = 2, 41 do
-                                stats.set_int(mpx.."CHAR_KIT_FM_PURCHASE"..i, -1)
-                            end
-                            end)
-                        end
-
                         if ImGui.Button("Very much things") then
                             yu.add_task(function()
                                 local mpx = yu.mpx()
@@ -2535,18 +2487,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
 
                                 yu.notify(1, "Success!")
-                            end)
-                        end
-
-                        if ImGui.Button("Unlock gunvan guns") then
-                            yu.add_task(function()
-                                globals.set_int(296276, 0)
-                                globals.set_int(296242, -22923932) -- Railgun
-                                globals.set_int(296243, 1171102963) -- Stungun
-                                globals.set_int(296244, -1355376991) -- Up-n-Atomizer
-                                globals.set_int(296245, -1238556825) -- Widowmaker
-                                globals.set_int(296246, 1198256469) -- Hellbringer
-                                globals.set_int(296247, -1786099057) -- Bat
                             end)
                         end
                     end
@@ -2710,6 +2650,96 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     tab2.sub[2] = tab3
                 end -- !SECTION
+
+                do -- ANCHOR Weapons
+                    local tab3 = SussySpt.rendering.new_tab("Weapons")
+
+                    tab3.render = function()
+                        if ImGui.SmallButton("Unlock guns") then
+                            yu.add_task(function()
+                                local mpx = yu.mpx()
+                                for i in pairs({
+                                        "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
+                                        "CHAR_WEAP_ADDON_2_UNLCK","CHAR_WEAP_ADDON_3_UNLCK","CHAR_WEAP_ADDON_4_UNLCK","CHAR_WEAP_FREE","CHAR_WEAP_FREE2",
+                                        "CHAR_FM_WEAP_FREE","CHAR_FM_WEAP_FREE2","CHAR_FM_WEAP_FREE3","CHAR_FM_WEAP_FREE4","CHAR_WEAP_PURCHASED",
+                                        "CHAR_WEAP_PURCHASED2","WEAPON_PICKUP_BITSET","WEAPON_PICKUP_BITSET2","CHAR_FM_WEAP_UNLOCKED","NO_WEAPONS_UNLOCK",
+                                        "NO_WEAPON_MODS_UNLOCK","NO_WEAPON_CLR_MOD_UNLOCK","CHAR_FM_WEAP_UNLOCKED2","CHAR_FM_WEAP_UNLOCKED3",
+                                        "CHAR_FM_WEAP_UNLOCKED4","CHAR_KIT_1_FM_UNLCK","CHAR_KIT_2_FM_UNLCK","CHAR_KIT_3_FM_UNLCK","CHAR_KIT_4_FM_UNLCK",
+                                        "CHAR_KIT_5_FM_UNLCK","CHAR_KIT_6_FM_UNLCK","CHAR_KIT_7_FM_UNLCK","CHAR_KIT_8_FM_UNLCK","CHAR_KIT_9_FM_UNLCK",
+                                        "CHAR_KIT_10_FM_UNLCK","CHAR_KIT_11_FM_UNLCK","CHAR_KIT_12_FM_UNLCK","CHAR_KIT_FM_PURCHASE","CHAR_WEAP_FM_PURCHASE",
+                                        "CHAR_WEAP_FM_PURCHASE2","CHAR_WEAP_FM_PURCHASE3","CHAR_WEAP_FM_PURCHASE4"}) do
+                                    stats.set_int(mpx..i, -1)
+                                end
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_1_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_2_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_3_BLUE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_WHITE", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_RED", 1000)
+                                stats.set_int(mpx.."FIREWORK_TYPE_4_BLUE", 1000)
+                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH", -1)
+                            for i = 2, 19 do
+                                stats.set_int(mpx.."WEAP_FM_ADDON_PURCH"..i, -1)
+                            end
+                            for i = 1, 19 do
+                                stats.set_int(mpx.."CHAR_FM_WEAP_ADDON_"..i.."_UNLCK", -1)
+                            end
+                            for i = 1, 41 do
+                                stats.set_int(mpx.."CHAR_KIT_"..i.."_FM_UNLCK", -1)
+                            end
+                            for i = 2, 41 do
+                                stats.set_int(mpx.."CHAR_KIT_FM_PURCHASE"..i, -1)
+                            end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock baseball bat and knife skins in gunvan") then
+                            yu.add_task(function()
+                                globals.set_int(262145 + 34131, 0)
+                                globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
+                                globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock Double Action Revolver") then
+                            local mpx = yu.mpx()
+                            if stats.get_masked_int(mpx.."GANGOPSPSTAT_INT102", 24, 8) < 3 then
+                                stats.set_masked_int(mpx.."GANGOPSPSTAT_INT102", 3, 24, 8)
+                            end
+                            if stats.get_masked_int(mpx.."GANGOPSPSTAT_INT102", 24, 8) > 3 then
+                                stats.set_masked_int(mpx.."GANGOPSPSTAT_INT102", 0, 24, 8)
+                            end
+                        end
+
+                        if ImGui.SmallButton("Unlock Stone Hatchet") then
+                            if stats.get_masked_int("MP_NGDLCPSTAT_INT0", 16, 8) < 5 then
+                                stats.set_masked_int("MP_NGDLCPSTAT_INT0", 5, 16, 8)
+                            end
+                            if stats.get_masked_int("MP_NGDLCPSTAT_INT0", 16, 8) > 5 then
+                                stats.set_masked_int("MP_NGDLCPSTAT_INT0", 0, 16, 8)
+                            end
+                        end
+
+                        if ImGui.SmallButton("Unlock gunvan guns") then
+                            yu.add_task(function()
+                                globals.set_int(296276, 0)
+                                globals.set_int(296242, -22923932) -- Railgun
+                                globals.set_int(296243, 1171102963) -- Stungun
+                                globals.set_int(296244, -1355376991) -- Up-n-Atomizer
+                                globals.set_int(296245, -1238556825) -- Widowmaker
+                                globals.set_int(296246, 1198256469) -- Hellbringer
+                                globals.set_int(296247, -1786099057) -- Bat
+                            end)
+                        end
+                    end
+
+                    tab2.sub[3] = tab3
+                end
 
                 tab.sub[5] = tab2
             end -- !SECTION
