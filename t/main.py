@@ -22,8 +22,8 @@ def convertLines(lines, config={}):
     type = type[1]
 
     if type == "SussySpt":
-        lines[5] = lines[5].replace("0--[[VERSIONTYPE]]", str(config["versionType"]))
-        lines[6] = lines[6].replace("0--[[BUILD]]", str(time.time()).split(".")[0])
+        lines[4] = lines[4].replace("0--[[VERSIONTYPE]]", str(config["versionType"]))
+        lines[5] = lines[5].replace("0--[[BUILD]]", str(time.time()).split(".")[0])
 
     elif type == "yimutils":
         pass
