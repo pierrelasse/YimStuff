@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2244,
+    versionid = 2245,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -447,6 +447,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 -- ANCHOR Refresh playerlist
                 local function refreshPlayerlist()
+                    local allStartTime = yu.cputms()
+
                     SussySpt.players = yu.get_all_players()
 
                     local selfppid = yu.ppid()
@@ -669,7 +671,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         SussySpt.players[k] = v
                     end
 
-                    if SussySpt.dev then
+                    do
                         local lines = {}
                         local function append(str)
                             lines[#lines + 1] = str
@@ -682,6 +684,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if fmHostName ~= nil then
                             append("Script host: "..fmHostName)
                         end
+
+                        append("Calc time: "..(yu.cputms() - allStartTime).."ms")
 
                         a.playersTooltip = table.join(lines, "\n")
                     end
