@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2253,
+    versionid = 2279,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -409,7 +409,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         vehicle = {201, 247, 255},
                         cutscene = {83, 75, 115},
                         host = {255, 181, 101},
-                        scripthost = {255, 226, 171}
+                        scripthost = {255, 226, 171},
+                        unknownpos = {227, 223, 237}
                     },
 
                     ramoptions = {
@@ -548,17 +549,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if not v.noped then
-                            local c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                            v.c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
                             v.collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
 
-                            v.interior = INTERIOR.GET_INTERIOR_AT_COORDS(c.x, c.y, c.z)
+                            v.interior = INTERIOR.GET_INTERIOR_AT_COORDS(v.c.x, v.c.y, v.c.z)
 
                             v.health = ENTITY.GET_ENTITY_HEALTH(v.ped)
                             v.maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
                             v.armor = PED.GET_PED_ARMOUR(v.ped)
-                            local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, true)
-                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(c.x, c.y, c.z))
+                            local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, v.c.x, v.c.y, v.c.z, true)
+                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(v.c.x, v.c.y, v.c.z))
                             v.speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
                             v.wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
@@ -686,32 +687,39 @@ function SussySpt:init() -- SECTION SussySpt:init
                             v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
                         end
 
-                        v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
-                        v.tooltip = v.tooltip:replace("  ", " ")
-
-                        if SussySpt.dev then
+                        do
                             if v.info.friend ~= nil then
-                                v.textcolor = a.namecolors.friend
+                                v.namecolor = a.namecolors.friend
                             elseif v.info.modder ~= nil then
-                                v.textcolor = a.namecolors.modder
+                                v.namecolor = a.namecolors.modder
                             elseif v.noped then
-                                v.textcolor = a.namecolors.noped
+                                v.namecolor = a.namecolors.noped
                             elseif v.info.dead ~= nil then
-                                v.textcolor = a.namecolors.dead
+                                v.namecolor = a.namecolors.dead
                             elseif v.info.noblip ~= nil then
-                                v.textcolor = a.namecolors.noblip
+                                v.namecolor = a.namecolors.noblip
                             elseif v.info.ghost ~= nil then
-                                v.textcolor = a.namecolors.ghost
+                                v.namecolor = a.namecolors.ghost
                             elseif v.info.vehicle ~= nil then
-                                v.textcolor = a.namecolors.vehicle
+                                v.namecolor = a.namecolors.vehicle
                             elseif v.info.cutscene ~= nil then
-                                v.textcolor = a.namecolors.cutscene
+                                v.namecolor = a.namecolors.cutscene
                             elseif v.info.host ~= nil then
-                                v.textcolor = a.namecolors.host
+                                v.namecolor = a.namecolors.host
                             elseif v.info.scripthost ~= nil then
-                                v.textcolor = a.namecolors.scripthost
+                                v.namecolor = a.namecolors.scripthost
+                            elseif v.c.z == -50 then
+                                v.namecolor = a.namecolors.unknownpos
+                            end
+
+                            local nameColorKey = yu.get_key_from_table(a.namecolors, v.namecolor, nil)
+                            if nameColorKey ~= nil then
+                                v.tooltip = v.tooltip.."\n  - Name color: "..nameColorKey
                             end
                         end
+
+                        v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
+                        v.tooltip = v.tooltip:replace("  ", " ")
 
                         SussySpt.players[k] = v
                     end
@@ -808,15 +816,15 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v = SussySpt.players[v]
                                 if v.display then
 
-                                    if v.textcolor ~= nil then
-                                        ImGui.PushStyleColor(ImGuiCol.Text, v.textcolor[1] / 255, v.textcolor[2] / 255, v.textcolor[3] / 255, 1)
+                                    if v.namecolor ~= nil then
+                                        ImGui.PushStyleColor(ImGuiCol.Text, v.namecolor[1] / 255, v.namecolor[2] / 255, v.namecolor[3] / 255, 1)
                                     end
 
                                     if ImGui.Selectable(v.displayName, false) then
                                         a.selectedplayer = v.name
                                     end
 
-                                    if v.textcolor ~= nil then
+                                    if v.namecolor ~= nil then
                                         ImGui.PopStyleColor()
                                     end
 
