@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2245,
+    versionid = 2253,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -389,11 +389,29 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 local a = {
                     playerlistwidth = 211,
+
                     searchtext = "",
+
                     players = {},
+
                     open = 0,
+
                     selectedplayer = nil,
                     selectedplayerinfo = {},
+
+                    namecolors = {
+                        modder = {209, 13, 13},
+                        friend = {103, 246, 92},
+                        noped = {87, 87, 87},
+                        dead = {81, 0, 8},
+                        noblip = {151, 151, 151},
+                        ghost = {201, 201, 201},
+                        vehicle = {201, 247, 255},
+                        cutscene = {83, 75, 115},
+                        host = {255, 181, 101},
+                        scripthost = {255, 226, 171}
+                    },
+
                     ramoptions = {
                         ["bus"] = "Bus",
                         ["adder"] = "Adder",
@@ -408,7 +426,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ["metrotrain"] = "Metro"
                     },
                     ramoption = "bus",
+
                     givecustomweaponammo = 999,
+
                     pickupoptions = {
                         ["Casino Playing Card"] = "vw_prop_vw_lux_card_01a",
                         ["Action Figure - Boxeddoll (Not falling)"] = "bkr_prop_coke_boxeddoll",
@@ -425,6 +445,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     pickupamount = 1,
                     cashamount = 1,
                     cashvalue = 100,
+
                     attachoptions = {
                         [joaat("prop_beach_fire")] = "Beach fire",
                         [-2007231801] = "Gas pump",
@@ -668,6 +689,30 @@ function SussySpt:init() -- SECTION SussySpt:init
                         v.tooltip = v.tooltip.."\n  - Calc time: "..(yu.cputms() - startTime).."ms"
                         v.tooltip = v.tooltip:replace("  ", " ")
 
+                        if SussySpt.dev then
+                            if v.info.friend ~= nil then
+                                v.textcolor = a.namecolors.friend
+                            elseif v.info.modder ~= nil then
+                                v.textcolor = a.namecolors.modder
+                            elseif v.noped then
+                                v.textcolor = a.namecolors.noped
+                            elseif v.info.dead ~= nil then
+                                v.textcolor = a.namecolors.dead
+                            elseif v.info.noblip ~= nil then
+                                v.textcolor = a.namecolors.noblip
+                            elseif v.info.ghost ~= nil then
+                                v.textcolor = a.namecolors.ghost
+                            elseif v.info.vehicle ~= nil then
+                                v.textcolor = a.namecolors.vehicle
+                            elseif v.info.cutscene ~= nil then
+                                v.textcolor = a.namecolors.cutscene
+                            elseif v.info.host ~= nil then
+                                v.textcolor = a.namecolors.host
+                            elseif v.info.scripthost ~= nil then
+                                v.textcolor = a.namecolors.scripthost
+                            end
+                        end
+
                         SussySpt.players[k] = v
                     end
 
@@ -762,9 +807,19 @@ function SussySpt:init() -- SECTION SussySpt:init
                             for k, v in pairs(SussySpt.sortedPlayers) do
                                 v = SussySpt.players[v]
                                 if v.display then
+
+                                    if v.textcolor ~= nil then
+                                        ImGui.PushStyleColor(ImGuiCol.Text, v.textcolor[1] / 255, v.textcolor[2] / 255, v.textcolor[3] / 255, 1)
+                                    end
+
                                     if ImGui.Selectable(v.displayName, false) then
                                         a.selectedplayer = v.name
                                     end
+
+                                    if v.textcolor ~= nil then
+                                        ImGui.PopStyleColor()
+                                    end
+
                                     if v.tooltip ~= nil then
                                         yu.rendering.tooltip(v.tooltip)
                                     end
