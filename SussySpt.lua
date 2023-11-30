@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2317,
+    versionid = 2318,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -805,7 +805,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     a.open = 2
                     ImGui.BeginGroup()
                     ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
-                    if a.playersTooltip ~= nil and SussySpt.dev then
+                    if a.playersTooltip ~= nil then
                         yu.rendering.tooltip(a.playersTooltip)
                     end
 
@@ -902,7 +902,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
 
                                 if not player.noped then
-
                                     if ImGui.TreeNodeEx("General") then
                                         if ImGui.SmallButton("Goto") then
                                             SussySpt.addTask(function()
@@ -949,18 +948,20 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         end
                                         yu.rendering.tooltip("Sets a waypoint to them")
 
-                                        ImGui.SameLine()
+                                        if SussySpt.dev then
+                                            ImGui.SameLine()
 
-                                        if ImGui.SmallButton("Waypoint") then
-                                            SussySpt.addTask(function()
-                                                local blip = 8 -- radar_waypoint
-                                                if HUD.DOES_BLIP_EXIST(blip) then
-                                                    local c = HUD.GET_BLIP_COORDS(blip)
-                                                    network.set_player_coords(player.player, c.x, c.y, c.z)
-                                                end
-                                            end)
+                                            if ImGui.SmallButton("Waypoint") then
+                                                SussySpt.addTask(function()
+                                                    local blip = 8 -- radar_waypoint
+                                                    if HUD.DOES_BLIP_EXIST(blip) then
+                                                        local c = HUD.GET_BLIP_COORDS(blip)
+                                                        network.set_player_coords(player.player, c.x, c.y, c.z)
+                                                    end
+                                                end)
+                                            end
+                                            yu.rendering.tooltip("Does not work well / teleports them under the map")
                                         end
-                                        yu.rendering.tooltip("Does not work well / teleports them under the map")
 
                                         if ImGui.SmallButton("Mark as modder") then
                                             network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, "Marked as modder by the user")
