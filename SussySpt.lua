@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2280,
+    versionid = 2281,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -2233,7 +2233,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock xmas liveries") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int("MPPLY_XMASLIVERIES", -1)
                                 for i = 1, 20 do
                                     stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
@@ -2242,7 +2242,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock LSCarMeet podium prize") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CHLLGE_CMPLT", true)
                                 stats.set_bool(yu.mpx().."CARMEET_PV_CLMED", false)
                             end)
@@ -2250,7 +2250,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.tooltip("Go in LSCarMeet to claim in interaction menu")
 
                         if ImGui.Button("LSCarMeet unlocks") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 for i = 293419, 293446 do
                                     globals.set_float(i, 100000)
                                 end
@@ -2258,7 +2258,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock flightschool stuff") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int("MPPLY_NUM_CAPTURES_CREATED", math.max(stats.get_int("MPPLY_NUM_CAPTURES_CREATED") or 0, 100))
                                 for i = 0, 9 do
                                     stats.set_int("MPPLY_PILOT_SCHOOL_MEDAL_"..i , -1)
@@ -2270,7 +2270,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
 
                         if ImGui.Button("Unlock shooting range") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int(yu.mpx().."SR_HIGHSCORE_1", 690)
                                 stats.set_int(yu.mpx().."SR_HIGHSCORE_2", 1860)
                                 stats.set_int(yu.mpx().."SR_HIGHSCORE_3", 2690)
@@ -2287,7 +2287,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.tooltip("Bunker thingy")
 
                         if ImGui.Button("Unlock trade prices for arenawar vehicles") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 for i = 1, 16 do
                                     stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
                                 end
@@ -2298,7 +2298,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock colored headlights") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 for i = 18, 29 do
                                     stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
                                 end
@@ -2306,7 +2306,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock fast run and reload") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 for i = 1, 3 do
                                     stats.set_int(yu.mpx().."CHAR_ABILITY_"..i.."_UNLCK", -1)
                                     stats.set_int(yu.mpx().."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
@@ -2316,7 +2316,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.tooltip("Makes you run and reload weapons faster")
 
                         if ImGui.Button("Unlock all tattos") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
                                 for i = 0, 47 do
@@ -2326,7 +2326,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("CEO & MC money clutter") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 for k, v in pairs({
                                     ["LIFETIME_BUY_COMPLETE"]=1000,["LIFETIME_BUY_UNDERTAKEN"]=1000,["LIFETIME_SELL_COMPLETE"]=1000,["LIFETIME_SELL_UNDERTAKEN"]=1000,["LIFETIME_CONTRA_EARNINGS"]=20000000,["LIFETIME_BIKER_BUY_COMPLET"]=1000,
@@ -2355,7 +2355,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.tooltip("Money on floor")
 
                         if ImGui.Button("Skip Lamar missions") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_bool(yu.mpx().."LOW_FLOW_CS_DRV_SEEN", true)
                                 stats.set_bool(yu.mpx().."LOW_FLOW_CS_TRA_SEEN", true)
                                 stats.set_bool(yu.mpx().."LOW_FLOW_CS_FUN_SEEN", true)
@@ -2370,7 +2370,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Skip yacht missions") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int(yu.mpx("YACHT_MISSION_PROG"), 0)
                                 stats.set_int(yu.mpx("YACHT_MISSION_FLOW"), 21845)
                                 stats.set_int(yu.mpx("CASINO_DECORATION_GIFT_1"), -1)
@@ -2378,14 +2378,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Skip ULP missions") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int(yu.mpx("ULP_MISSION_PROGRESS"), 127)
                                 stats.set_int(yu.mpx("ULP_MISSION_CURRENT"), 0)
                             end)
                         end
 
                         if ImGui.Button("Unlock LSC stuff & paints") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 stats.set_int(mpx.."CHAR_FM_CARMOD_1_UNLCK", -1)
                                 stats.set_int(mpx.."CHAR_FM_CARMOD_2_UNLCK", -1)
@@ -2422,7 +2422,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock phone contracts") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 stats.set_int(mpx.."FM_ACT_PHN", -1)
                                 stats.set_int(mpx.."FM_ACT_PH2", -1)
@@ -2440,7 +2440,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock all trade prices") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 stats.set_int(mpx.."GANGOPS_FLOW_BITSET_MISS0", -1)
                                 stats.set_int(mpx.."LFETIME_HANGAR_BUY_UNDETAK", 42)
@@ -2492,7 +2492,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock bunker research (temp?)") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 for j = 0, 63 do
                                     stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, j)
@@ -2525,7 +2525,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Unlock diamond casino heist outfits") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL1", true, 63) -- Refuse Collectors
                                 stats.set_bool_masked(mpx.."CASINOHSTPSTAT_BOOL2", true, 0) -- Undertakers
@@ -2553,7 +2553,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Very much things") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
 
                                 for k, v in pairs(much.ints) do
@@ -2569,7 +2569,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.Button("Allow gender change") then
-                            SussySpt.add_task(function()
+                            SussySpt.addTask(function()
                                 stats.set_int(yu.mpx("ALLOW_GENDER_CHANGE"), 52)
                             end)
                         end
@@ -2614,7 +2614,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     function refreshCrewRank()
                         if not a.crank_checking then
                             a.crank_checking = true
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 a.crank_rank = a.getRankFromRP(stats.get_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew))
                                 a.crank_min = a.crank_rank
                                 a.crank_checking = false
@@ -2719,7 +2719,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
 
                             if ImGui.Button("Set") then
-                                yu.add_task(function()
+                                SussySpt.addTask(function()
                                     if a.crank_rank >= a.crank_min then
                                         stats.set_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew, SussySpt.xp_to_rank[a.crank_rank] + 100)
                                         yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
@@ -2740,7 +2740,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     tab3.render = function()
                         if ImGui.SmallButton("Unlock guns") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 local mpx = yu.mpx()
                                 for i in pairs({
                                         "CHAR_WEAP_UNLOCKED","CHAR_WEAP_UNLOCKED2","CHAR_WEAP_UNLOCKED3","CHAR_WEAP_UNLOCKED4","CHAR_WEAP_ADDON_1_UNLCK",
@@ -2783,7 +2783,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.SmallButton("Unlock baseball bat and knife skins in gunvan") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 globals.set_int(262145 + 34131, 0)
                                 globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
                                 globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
@@ -2810,7 +2810,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if ImGui.SmallButton("Unlock gunvan guns") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 globals.set_int(296276, 0)
                                 globals.set_int(296242, -22923932) -- Railgun
                                 globals.set_int(296243, 1171102963) -- Stungun
@@ -2862,7 +2862,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.SameLine()
 
                         if ImGui.Button("Apply##rpmultiplier") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 globals.set_float(SussySpt.pointers.tunables_rpmultiplier, a.rpmultiplier)
                                 refreshRPMultiplier()
                             end)
@@ -3434,7 +3434,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.Spacing()
 
                         if ImGui.Button("Go airplane mode :)") then
-                            yu.add_task(function()
+                            SussySpt.addTask(function()
                                 STREAMING.REQUEST_ANIM_DICT("missfbi1")
                                 TASK.TASK_PLAY_ANIM(yu.ppid(), "missfbi1", "ledge_loop", 2.0, 2.0, -1, 51, 0, false, false, false)
                             end)
@@ -3989,7 +3989,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Apply##stats") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local changes = 0
 
                         -- Primary Target
@@ -4174,7 +4174,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##stats") then
-                    yu.add_task(refreshStats)
+                    SussySpt.addTask(refreshStats)
                 end
 
                 ImGui.SameLine()
@@ -4186,7 +4186,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Unlock accesspoints & approaches") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."H4CNF_BS_GEN", -1)
                         stats.set_int(yu.mpx().."H4CNF_BS_ENTR", 63)
                         stats.set_int(yu.mpx().."H4CNF_APPROACH", -1)
@@ -4197,7 +4197,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Remove fencing fee & pavel cut") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_float(262145 + 29470, -.1)
                         globals.set_float(291786, 0)
                         globals.set_float(291787, 0)
@@ -4206,7 +4206,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("I think no one wants to add them back...")
 
                 if ImGui.Button("Complete Preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."H4CNF_UNIFORM", -1)
                         stats.set_int(yu.mpx().."H4CNF_GRAPPEL", -1)
                         stats.set_int(yu.mpx().."H4CNF_TROJAN", 5)
@@ -4219,7 +4219,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset heist") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."H4_MISSIONS", 0)
                         stats.set_int(yu.mpx().."H4_PROGRESS", 0)
                         stats.set_int(yu.mpx().."H4CNF_APPROACH", 0)
@@ -4253,7 +4253,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##cuts") then
-                    yu.add_task(refreshCuts)
+                    SussySpt.addTask(refreshCuts)
                 end
 
                 ImGui.EndGroup()
@@ -4263,14 +4263,14 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.bigText("Extra")
 
                 if ImGui.Button("Remove all cameras") then
-                    yu.add_task(removeAllCameras)
+                    SussySpt.addTask(removeAllCameras)
                 end
                 yu.rendering.tooltip("This can make your game crash. Be careful")
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip printing cutscene") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if locals.get_int("fm_mission_controller", 22032) == 4 then
                             locals.set_int("fm_mission_controller", 22032, 5)
                         end
@@ -4279,7 +4279,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("Idfk what this is or what this does")
 
                 if ImGui.Button("Skip sewer tunnel cut") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020")
                             and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
                                 or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
@@ -4292,7 +4292,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip door hack") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020")
                             and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
                             locals.set_int("fm_mission_controller_2020", 54024, 5)
@@ -4302,7 +4302,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020")
                             and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
                             locals.set_int("fm_mission_controller_2020", 23669, 5)
@@ -4314,7 +4314,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip plasmacutter cut") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
                             yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
@@ -4323,7 +4323,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Obtain the primary target") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 29684, 5)
                             locals.set_int("fm_mission_controller_2020", 29685, 3)
@@ -4348,7 +4348,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("This is good")
 
                 if ImGui.Button("Instant finish") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45450, 9)
                             locals.set_int("fm_mission_controller_2020", 46829, 50)
@@ -4361,7 +4361,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Refresh##extra") then
-                    yu.add_task(refreshExtra)
+                    SussySpt.addTask(refreshExtra)
                 end
 
                 ImGui.PushItemWidth(390)
@@ -4398,7 +4398,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 for i = 1, 4 do
                     ImGui.SameLine()
                     if ImGui.Button(i.." Player"..yu.shc(i == 1, "", "s")) then
-                        yu.add_task(function()
+                        SussySpt.addTask(function()
                             globals.set_int(292084, 1800 * i)
                         end)
                     end
@@ -4408,7 +4408,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Separator()
 
                 if ImGui.Button("Refresh##cooldowns") then
-                    yu.add_task(refreshCooldowns)
+                    SussySpt.addTask(refreshCooldowns)
                 end
 
                 for k, v in pairs(cooldowns) do
@@ -4647,7 +4647,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Apply") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local changes = 0
 
                         -- Approach
@@ -4741,19 +4741,19 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##stats") then
-                    yu.add_task(refreshStats)
+                    SussySpt.addTask(refreshStats)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Reload planning board") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local oldBS0 = stats.get_int("H3OPT_BITSET0")
                         local oldBS1 = stats.get_int("H3OPT_BITSET1")
                         local integerLimit = 2147483647
                         stats.set_int("H3OPT_BITSET0", math.random(integerLimit))
                         stats.set_int("H3OPT_BITSET1", math.random(integerLimit))
-                        yu.add_task(function()
+                        SussySpt.addTask(function()
                             stats.set_int("H3OPT_BITSET0", oldBS0)
                             stats.set_int("H3OPT_BITSET1", oldBS1)
                         end)
@@ -4762,7 +4762,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("I think this only works when opened")
 
                 if ImGui.Button("Unlock POI & accesspoints") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."H3OPT_POI", -1)
                         stats.set_int(yu.mpx().."H3OPT_ACCESSPOINTS", -1)
                     end)
@@ -4771,7 +4771,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Remove npc cuts") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local tuneable = 262145
 
                         -- Lester
@@ -4787,7 +4787,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Complete Preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."H3OPT_DISRUPTSHIP", a.guardstrength)
                         stats.set_int(yu.mpx().."H3OPT_KEYLEVELS", a.splvl)
                         stats.set_int(yu.mpx().."H3OPT_VEHS", 3)
@@ -4802,7 +4802,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset heist") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local mpx = yu.mpx()
                         stats.set_int(mpx.."H3OPT_BITSET1", 0)
                         stats.set_int(mpx.."H3OPT_BITSET0", 0)
@@ -4814,7 +4814,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Unlock cancellation") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."CAS_HEIST_NOTS", -1)
                         stats.set_int(yu.mpx().."CAS_HEIST_FLOW", -1)
                     end)
@@ -4845,7 +4845,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##cuts") then
-                    yu.add_task(refreshCuts)
+                    SussySpt.addTask(refreshCuts)
                 end
 
                 ImGui.EndGroup()
@@ -4855,7 +4855,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.bigText("Extra")
 
                 if ImGui.Button("Set all players ready") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         for i = 0, 3 do
                             globals.set_int(1974016 + i, -1)
                         end
@@ -4863,7 +4863,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
                             locals.set_int("fm_mission_controller", 52964, 5)
                         end
@@ -4873,7 +4873,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip keypad hack") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller")
                             and locals.get_int("fm_mission_controller", 54026) ~= 4 then
                             locals.set_int("fm_mission_controller", 54026, 5)
@@ -4884,7 +4884,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip vault door drill") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int(
                                 "fm_mission_controller",
@@ -4898,7 +4898,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Refresh##extra") then
-                    yu.add_task(refreshExtra)
+                    SussySpt.addTask(refreshExtra)
                 end
 
                 local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
@@ -4918,7 +4918,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Separator()
 
                 if ImGui.Button("Refresh cooldowns") then
-                    yu.add_task(updateCooldowns)
+                    SussySpt.addTask(updateCooldowns)
                 end
 
                 for k, v in pairs(cooldowns) do
@@ -5041,7 +5041,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Apply##sm") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
                         stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
                     end)
@@ -5177,7 +5177,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         addToRender(4, function()
             if (ImGui.BeginTabItem("Nightclub")) then
                 if ImGui.Button("Refresh") then
-                    yu.add_task(refresh)
+                    SussySpt.addTask(refresh)
                 end
 
                 ImGui.Separator()
@@ -5195,7 +5195,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Set##popularity") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."CLUB_POPULARITY", a.popularity)
                         refresh()
                     end)
@@ -5205,7 +5205,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refill##popularity") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."CLUB_POPULARITY", 1000)
                         a.popularity = 1000
                         refresh()
@@ -5214,7 +5214,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("Set the popularity to 1000")
 
                 if ImGui.Button("Pay now") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("CLUB_PAY_TIME_LEFT"), -1)
                     end)
                 end
@@ -5223,7 +5223,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Collect money") then
-                    yu.add_task(ensureScriptAndCollectSafe)
+                    SussySpt.addTask(ensureScriptAndCollectSafe)
                 end
                 yu.rendering.tooltip("Experimental")
 
@@ -5264,7 +5264,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.bigText("Other")
 
                 yu.rendering.renderCheckbox("Remove Tony's cut", "hbo_nightclub_tony", function(state)
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_float(286403, yu.shc(state, 0, .025))
                     end)
                 end)
@@ -5328,7 +5328,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.BeginGroup()
 
                 if ImGui.Button("Refresh") then
-                    yu.add_task(refresh)
+                    SussySpt.addTask(refresh)
                 end
 
                 yu.rendering.bigText("Preperations")
@@ -5340,7 +5340,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Apply") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local changes = 0
 
                         -- Heist
@@ -5361,7 +5361,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Complete preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", -1)
                     end)
                 end
@@ -5369,7 +5369,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx().."HEIST_PLANNING_STAGE", 0)
                     end)
                 end
@@ -5385,7 +5385,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip hack##fleeca") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 11760 + 24, 7)
                         end
@@ -5396,7 +5396,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip drill##fleeca") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 10072, 100)
                         end
@@ -5407,7 +5407,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Instant finish (solo only)##fleeca") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
                             locals.set_int("fm_mission_controller", 19710, 12)
                             locals.set_int("fm_mission_controller", 28331 + 1, 99999)
@@ -5489,7 +5489,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.BeginGroup()
 
                 if ImGui.Button("Refresh") then
-                    yu.add_task(refresh)
+                    SussySpt.addTask(refresh)
                 end
 
                 yu.rendering.bigText("Preperations")
@@ -5508,7 +5508,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Apply##stats") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local changes = 0
 
                         -- Heist
@@ -5528,7 +5528,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 if ImGui.Button("Complete Preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("TUNER_GEN_BS"), -1)
                     end)
                 end
@@ -5536,7 +5536,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset Preps") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("TUNER_GEN_BS"), 12467)
                     end)
                 end
@@ -5544,7 +5544,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset contract") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("TUNER_GEN_BS"), 8371)
                         stats.set_int(yu.mpx("TUNER_CURRENT"), -1)
                     end)
@@ -5553,7 +5553,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset stats") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("TUNER_COUNT"), 0)
                         stats.set_int(yu.mpx("TUNER_EARNINGS"), 0)
                     end)
@@ -5561,7 +5561,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
 
                 if ImGui.Button("Instant finish") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020") then
                             locals.set_int("fm_mission_controller_2020", 45451, 51338977)
                             locals.set_int("fm_mission_controller_2020", 46829, 101)
@@ -5577,7 +5577,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##cooldowns") then
-                    yu.add_task(refreshCooldowns)
+                    SussySpt.addTask(refreshCooldowns)
                 end
 
                 for k, v in pairs(cooldowns) do
@@ -5606,14 +5606,14 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.BeginGroup()
 
                 if ImGui.Button("Refresh") then
-                    yu.add_task(refresh)
+                    SussySpt.addTask(refresh)
                 end
 
                 ImGui.Spacing()
 
                 ImGui.Text("Cooldown: "..yu.format_seconds(a.daxcooldown))
                 if ImGui.Button("Remove Dax cooldown") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         stats.set_int(yu.mpx("XM22JUGGALOWORKCDTIMER"), os.time() - 17)
                     end)
                 end
@@ -5625,7 +5625,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reset") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_int(a.productiondelayp, 135000)
                         refresh()
                     end)
@@ -5634,7 +5634,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Set to 1") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_int(a.productiondelayp, 1)
                         refresh()
                     end)
@@ -5703,7 +5703,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.Spacing()
 
                 if ImGui.Button("Apply##stats") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local changes = 0
 
                         -- The Dr. Dre VIP Contract
@@ -5733,13 +5733,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Refresh##stats") then
-                    yu.add_task(refreshStats)
+                    SussySpt.addTask(refreshStats)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Complete all missions") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
                             stats.set_int(yu.mpx(v), -1)
                         end
@@ -5760,13 +5760,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
 
                 yu.rendering.renderCheckbox("Remove contracts & payphone hits cooldown", "hbo_agency_cphcd", function(state)
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_int(293490, yu.shc(state, 0, 300000))
                     end)
                 end)
 
                 yu.rendering.renderCheckbox("Remove security mission cooldown", "hbo_agency_smcd", function(state)
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         globals.set_int(294134, yu.shc(state, 0, 1200000))
                     end)
                 end)
@@ -5836,7 +5836,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
         if yu.rendering.isCheckboxChecked("cat_qa") then
             if ImGui.Begin("Quick actions") then
                 if ImGui.Button("Heal") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0)
 			            PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
                     end)
@@ -5846,7 +5846,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Refill health") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0)
                     end)
                 end
@@ -5855,7 +5855,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Refill armor") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
                     end)
                 end
@@ -5864,14 +5864,14 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Clear wanted level") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
                     end)
                 end
                 yu.rendering.tooltip("CLEAR_PLAYER_WANTED_LEVEL")
 
                 if ImGui.Button("Refresh interior") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
 				        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
                     end)
                 end
@@ -5880,7 +5880,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip cutscene") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
                         if NETWORK.NETWORK_IS_IN_MP_CUTSCENE() then
                             NETWORK.NETWORK_SET_IN_MP_CUTSCENE(false, true)
@@ -5892,14 +5892,14 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Remove blackscreen") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         CAM.DO_SCREEN_FADE_IN(0)
                     end)
                 end
                 yu.rendering.tooltip("Remove the blackscreen :D")
 
                 if ImGui.Button("Repair vehicle") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         local veh = yu.veh()
                         if veh ~= nil and entities.take_control_of(veh) then
                             VEHICLE.SET_VEHICLE_FIXED(veh)
@@ -5912,7 +5912,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 ImGui.SameLine()
 
                 if ImGui.Button("Clear ped tasks") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         TASK.CLEAR_PED_TASKS_IMMEDIATELY(yu.ppid())
                     end)
                 end
@@ -5938,7 +5938,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 yu.rendering.tooltip("Tries to stop the blah blah from npcs")
 
                 if ImGui.Button("Stop player switch") then
-                    yu.add_task(function()
+                    SussySpt.addTask(function()
                         if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
                             STREAMING.STOP_PLAYER_SWITCH()
                             if CAM.IS_SCREEN_FADED_OUT() then
@@ -5964,7 +5964,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                     ImGui.SameLine()
 
                     if ImGui.Button("Deposit wallet") then
-                        yu.add_task(function()
+                        SussySpt.addTask(function()
                             local ch = yu.playerindex()
                             local amount = MONEY.NETWORK_GET_VC_WALLET_BALANCE(ch)
                             if amount > 0 then
