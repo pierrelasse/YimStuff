@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2281,
+    versionid = 2317,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -688,31 +688,41 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         do
+                            local namecolor
                             if v.info.friend ~= nil then
-                                v.namecolor = a.namecolors.friend
+                                namecolor = a.namecolors.friend
                             elseif v.info.modder ~= nil then
-                                v.namecolor = a.namecolors.modder
+                                namecolor = a.namecolors.modder
                             elseif v.noped then
-                                v.namecolor = a.namecolors.noped
+                                namecolor = a.namecolors.noped
                             elseif v.info.dead ~= nil then
-                                v.namecolor = a.namecolors.dead
+                                namecolor = a.namecolors.dead
                             elseif v.info.noblip ~= nil then
-                                v.namecolor = a.namecolors.noblip
+                                namecolor = a.namecolors.noblip
                             elseif v.info.ghost ~= nil then
-                                v.namecolor = a.namecolors.ghost
+                                namecolor = a.namecolors.ghost
                             elseif v.info.vehicle ~= nil then
-                                v.namecolor = a.namecolors.vehicle
+                                namecolor = a.namecolors.vehicle
                             elseif v.info.cutscene ~= nil then
-                                v.namecolor = a.namecolors.cutscene
+                                namecolor = a.namecolors.cutscene
                             elseif v.info.host ~= nil then
-                                v.namecolor = a.namecolors.host
+                                namecolor = a.namecolors.host
                             elseif v.info.scripthost ~= nil then
-                                v.namecolor = a.namecolors.scripthost
+                                namecolor = a.namecolors.scripthost
                             elseif v.c.z == -50 then
-                                v.namecolor = a.namecolors.unknownpos
+                                namecolor = a.namecolors.unknownpos
                             end
 
-                            local nameColorKey = yu.get_key_from_table(a.namecolors, v.namecolor, nil)
+                            if namecolor ~= nil then
+                                if v.namecolor == nil then
+                                    v.namecolor = {}
+                                end
+                                for i = 1, 3 do
+                                    v.namecolor[i] = namecolor[i] / 255
+                                end
+                            end
+
+                            local nameColorKey = yu.get_key_from_table(a.namecolors, namecolor, nil)
                             if nameColorKey ~= nil then
                                 v.tooltip = v.tooltip.."\n  - Name color: "..nameColorKey
                             end
@@ -812,19 +822,31 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.PushItemWidth(a.playerlistwidth)
                         local _, y = ImGui.GetContentRegionAvail()
                         if ImGui.BeginListBox("##playerlist", 0, y) then
-                            for k, v in pairs(SussySpt.sortedPlayers) do
-                                v = SussySpt.players[v]
+                            for _, k in pairs(SussySpt.sortedPlayers) do
+                                v = SussySpt.players[k]
                                 if v.display then
+                                    local hasNameColor = v.namecolor ~= nil
 
-                                    if v.namecolor ~= nil then
-                                        ImGui.PushStyleColor(ImGuiCol.Text, v.namecolor[1] / 255, v.namecolor[2] / 255, v.namecolor[3] / 255, 1)
+                                    if hasNameColor then
+                                        local r, g, b = v.namecolor[1], v.namecolor[2], v.namecolor[3]
+                                        ImGui.PushStyleColor(ImGuiCol.Text, r, g, b, 1)
                                     end
+
+                                    -- local isSelected = a.selectedplayer == k
+                                    -- if isSelected then
+                                    --     local r, g, b = 1, 0, 0--ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
+                                    --     ImGui.PushStyleColor(ImGuiCol.FrameBg, r, g, b, 1)
+                                    -- end
 
                                     if ImGui.Selectable(v.displayName, false) then
-                                        a.selectedplayer = v.name
+                                        a.selectedplayer = k
                                     end
 
-                                    if v.namecolor ~= nil then
+                                    -- if isSelected then
+                                    --     ImGui.PopStyleColor()
+                                    -- end
+
+                                    if hasNameColor then
                                         ImGui.PopStyleColor()
                                     end
 
@@ -844,7 +866,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         local key
                         local player
                         for k, v in pairs(SussySpt.players) do
-                            if v.name == a.selectedplayer then
+                            if k == a.selectedplayer then
                                 key = k
                                 player = v
                                 break
@@ -876,8 +898,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         text = text.." - "..player.tags
                                     end
                                     ImGui.Text(text)
+                                    yu.rendering.tooltip(player.tooltip)
                                 end
-                                yu.rendering.tooltip(player.tooltip)
 
                                 if not player.noped then
 
@@ -2288,11 +2310,12 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         if ImGui.Button("Unlock trade prices for arenawar vehicles") then
                             SussySpt.addTask(function()
+                                local mpx = yu.mpx()
                                 for i = 1, 16 do
-                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL0", true, i)
+                                    stats.set_bool_masked(mpx.."ARENAWARSPSTAT_BOOL0", true, i)
                                 end
                                 for i = 11, 19 do
-                                    stats.set_bool_masked(yu.mpx().."ARENAWARSPSTAT_BOOL2", true, i)
+                                    stats.set_bool_masked(mpx.."ARENAWARSPSTAT_BOOL2", true, i)
                                 end
                             end)
                         end
