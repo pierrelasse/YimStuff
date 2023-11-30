@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2279,
+    versionid = 2280,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -2565,6 +2565,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
 
                                 yu.notify(1, "Success!")
+                            end)
+                        end
+
+                        if ImGui.Button("Allow gender change") then
+                            SussySpt.add_task(function()
+                                stats.set_int(yu.mpx("ALLOW_GENDER_CHANGE"), 52)
                             end)
                         end
                     end
