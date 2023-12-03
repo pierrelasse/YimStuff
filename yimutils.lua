@@ -315,8 +315,11 @@ return (function() -- Made by pierrelasse <:D
                 end
 
                 local height
-                if done and WATER.GET_WATER_HEIGHT(pos.x, pos.y, pos.z, height) then
-                    pos.z = height + 1
+                if done then
+                    local ok, height = WATER.GET_WATER_HEIGHT(pos.x, pos.y, pos.z, height)
+                    if ok then
+                        pos.z = height + 1
+                    end
                 end
 
                 if done then
