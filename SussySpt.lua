@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2318,
+    versionid = 2344,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -126,6 +126,16 @@ function SussySpt:init() -- SECTION SussySpt:init
         tabs = {}
     }
 
+    for k, v in pairs(SussySpt.rendering.themes) do
+        if v.ImGuiCol then
+            for k, v2 in pairs(v.ImGuiCol) do
+                for k3, v3 in pairs(v2) do
+                    if k3 ~= 4 then v2[k3] = v3 / 255 end
+                end
+            end
+        end
+    end
+
     SussySpt.pointers = {
         bounty_self_value = 1 + 2359296 + 5150 + 14,
         bounty_self_time = 1 + 2359296 + 5150 + 13,
@@ -191,10 +201,6 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end
 
-    local function twcr(c)
-        return c / 255
-    end
-
     SussySpt.render_pops = {}
     SussySpt.render = function()
         for k, v in pairs(SussySpt.rendercb) do
@@ -214,7 +220,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 if type(k) == "string" and type(v) == "table" then
                     for k1, v1 in pairs(v) do
                         if k == "ImGuiCol" then
-                            ImGui.PushStyleColor(ImGuiCol[k1], twcr(v1[1]), twcr(v1[2]), twcr(v1[3]), v1[4])
+                            ImGui.PushStyleColor(ImGuiCol[k1], v1[1], v1[2], v1[3], v1[4])
                             SussySpt.render_pops.PopStyleColor = (SussySpt.render_pops.PopStyleColor or 0) + 1
                         elseif k == "ImGuiStyleVar" then
                             if v1[2] == nil then
@@ -930,7 +936,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     local seatIndex = yu.get_free_vehicle_seat(veh)
                                                     if seatIndex ~= nil then
                                                         local c = ENTITY.GET_ENTITY_COORDS(veh)
-                                                        yu.load_ground_at_coord(rs, c)
                                                         local ped = yu.ppid()
                                                         ENTITY.SET_ENTITY_COORDS(ped, c.x, c.y, c.z, false, false, false, false)
                                                         rs:yield()
@@ -1426,6 +1431,18 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         end)
                                         yu.rendering.tooltip("Sets the vehicle in godmode")
 
+                                        ImGui.SameLine()
+
+                                        yu.rendering.renderCheckbox("Invsisibility", "online_player_vehicleinvis", function(state)
+                                            SussySpt.addTask(function()
+                                                local veh = yu.veh(player.ped)
+                                                if veh ~= nil and entities.take_control_of(veh)  then
+                                                    ENTITY.SET_ENTITY_VISIBLE(veh, not state)
+                                                end
+                                            end)
+                                        end)
+                                        yu.rendering.tooltip("Sets the vehicle in godmode")
+
                                         if ImGui.SmallButton("Repair") then
                                             SussySpt.addTask(function()
                                                 local veh = yu.veh(player.ped)
@@ -1735,167 +1752,6 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- SECTION Stats
                 local tab2 = SussySpt.rendering.newTab("Stats")
 
-                do -- ANCHOR Loader
-                    local tab3 = SussySpt.rendering.newTab("Loader")
-
-                    local a = {
-                        input = "# This is a comment\nbool SOME_STAT 0\nbool MPX_SOME_STAT 1\nbool SOME_STAT true\nbool MPX_SOME_STAT false\nint SOME_STAT 1\nfloat MPX_SOME_STAT 1.23",
-                        types = {
-                            "bool",
-                            "int",
-                            "float"
-                        }
-                    }
-
-                    -- TODO Support for masked, globals?
-
-                    local function load()
-                        if type(a.input) ~= "string" then
-                            return
-                        end
-
-                        local tokens = {}
-                        local mpx = yu.mpx()
-
-                        local lines = string.split(a.input, "\n")
-                        for k, v in pairs(lines) do
-                            local text = v:strip()
-                            if text:len() ~= 0 and not text:startswith("#") then
-                                text = text:split("#")[1]
-                                local parts = text:split(" ")
-
-                                local type = parts[1]
-                                local stat = parts[2]
-                                local value = parts[3]
-
-                                if type == nil then
-                                    lines[k] = "#"..v.." # Could not read type"
-                                elseif stat == nil then
-                                    lines[k] = "#"..v.." # Could not read stat"
-                                elseif value == nil then
-                                    lines[k] = "#"..v.." # Could not read value"
-                                else
-                                    type = yu.get_key_from_table(a.types, type, nil)
-                                    if type == nil then
-                                        lines[k] = "#"..v.." # Invalid type"
-                                        goto continue
-                                    end
-
-                                    if stat:startswith("MPX_") then
-                                        stat = mpx..stat:sub(5)
-                                    end
-
-                                    if type == 1 then
-                                        if value == "false" or value == "0" then
-                                            value = false
-                                        elseif value == "true" or value == "1" then
-                                            value = true
-                                        else
-                                            lines[k] = "#"..v.." # Invalid value for bool type"
-                                            goto continue
-                                        end
-                                    elseif type == 2 then
-                                        if string.contains(value, ".") then
-                                            lines[k] = "#"..v.." # An integer as value is required"
-                                            goto continue
-                                        end
-                                        value = tonumber(value)
-                                        if value == nil then
-                                            lines[k] = "#"..v.." # Invalid value for int type"
-                                            goto continue
-                                        end
-                                    elseif type == 3 then
-                                        value = tonumber(value)
-                                        if value == nil then
-                                            lines[k] = "#"..v.." # Invalid value for float type"
-                                            goto continue
-                                        end
-                                    end
-
-                                    table.insert(tokens, {type, stat, value})
-                                end
-                            end
-                            ::continue::
-                        end
-                        a.input = table.join(lines, "\n")
-                        a.tokens = tokens
-                        a.tokenlength = yu.len(tokens).." stat/s loaded"
-                    end
-
-                    local function apply()
-                        local applied = 0
-
-                        for k, v in pairs(a.tokens) do
-                            local type = v[1]
-                            local stat = v[2]
-                            local value = v[3]
-
-                            if type == 1 then
-                                stats.set_bool(stat, value)
-                                applied = applied + 1
-                            elseif type == 2 then
-                                stats.set_int(stat, value)
-                                applied = applied + 1
-                            elseif type == 3 then
-                                stats.set_float(stat, value)
-                                applied = applied + 1
-                            end
-                        end
-
-                        yu.notify(1, applied.." stat/s where applied", "Online->Stats->Loader")
-                    end
-
-                    tab3.render = function()
-                        if ImGui.Button("Load") then
-                            yu.rif(load)
-                        end
-
-                        if a.tokens ~= nil then
-                            ImGui.SameLine()
-
-                            if ImGui.Button("Apply") then
-                                yu.rif(apply)
-                            end
-
-                            if SussySpt.dev then
-                                ImGui.SameLine()
-
-                                if ImGui.Button("Dump tokens") then
-                                    SussySpt.addTask(function()
-                                        log.info("===[ TOKEN DUMP ]===")
-
-                                        for k, v in pairs(a.tokens) do
-                                            local type = v[1]
-                                            local stat = v[2]
-                                            local value = tostring(v[3])
-                                            log.info(k..": {type="..a.types[type].."["..type.."],stat="..stat..",value="..value.."}")
-                                        end
-
-                                        log.info("====================")
-                                    end)
-                                end
-                            end
-                        end
-
-                        if a.tokenlength ~= nil then
-                            ImGui.Text(a.tokenlength)
-                        end
-
-                        do
-                            local x, y = ImGui.GetContentRegionAvail()
-                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 2500000, x, y)
-                            if a.input ~= text then
-                                a.input = text
-                                a.tokens = nil
-                                a.tokenlength = nil
-                            end
-                        end
-                        SussySpt.pushDisableControls(ImGui.IsItemActive())
-                    end
-
-                    tab2.sub[1] = tab3
-                end
-
                 do -- ANCHOR Other
                     local tab3 = SussySpt.rendering.newTab("Other")
 
@@ -2107,6 +1963,167 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             ImGui.TreePop()
                         end
+                    end
+
+                    tab2.sub[1] = tab3
+                end
+
+                do -- ANCHOR Loader
+                    local tab3 = SussySpt.rendering.newTab("Loader")
+
+                    local a = {
+                        input = "# This is a comment\nbool SOME_STAT 0\nbool MPX_SOME_STAT 1\nbool SOME_STAT true\nbool MPX_SOME_STAT false\nint SOME_STAT 1\nfloat MPX_SOME_STAT 1.23",
+                        types = {
+                            "bool",
+                            "int",
+                            "float"
+                        }
+                    }
+
+                    -- TODO Support for masked, globals?
+
+                    local function load()
+                        if type(a.input) ~= "string" then
+                            return
+                        end
+
+                        local tokens = {}
+                        local mpx = yu.mpx()
+
+                        local lines = string.split(a.input, "\n")
+                        for k, v in pairs(lines) do
+                            local text = v:strip()
+                            if text:len() ~= 0 and not text:startswith("#") then
+                                text = text:split("#")[1]
+                                local parts = text:split(" ")
+
+                                local type = parts[1]
+                                local stat = parts[2]
+                                local value = parts[3]
+
+                                if type == nil then
+                                    lines[k] = "#"..v.." # Could not read type"
+                                elseif stat == nil then
+                                    lines[k] = "#"..v.." # Could not read stat"
+                                elseif value == nil then
+                                    lines[k] = "#"..v.." # Could not read value"
+                                else
+                                    type = yu.get_key_from_table(a.types, type, nil)
+                                    if type == nil then
+                                        lines[k] = "#"..v.." # Invalid type"
+                                        goto continue
+                                    end
+
+                                    if stat:startswith("MPX_") then
+                                        stat = mpx..stat:sub(5)
+                                    end
+
+                                    if type == 1 then
+                                        if value == "false" or value == "0" then
+                                            value = false
+                                        elseif value == "true" or value == "1" then
+                                            value = true
+                                        else
+                                            lines[k] = "#"..v.." # Invalid value for bool type"
+                                            goto continue
+                                        end
+                                    elseif type == 2 then
+                                        if string.contains(value, ".") then
+                                            lines[k] = "#"..v.." # An integer as value is required"
+                                            goto continue
+                                        end
+                                        value = tonumber(value)
+                                        if value == nil then
+                                            lines[k] = "#"..v.." # Invalid value for int type"
+                                            goto continue
+                                        end
+                                    elseif type == 3 then
+                                        value = tonumber(value)
+                                        if value == nil then
+                                            lines[k] = "#"..v.." # Invalid value for float type"
+                                            goto continue
+                                        end
+                                    end
+
+                                    table.insert(tokens, {type, stat, value})
+                                end
+                            end
+                            ::continue::
+                        end
+                        a.input = table.join(lines, "\n")
+                        a.tokens = tokens
+                        a.tokenlength = yu.len(tokens).." stat/s loaded"
+                    end
+
+                    local function apply()
+                        local applied = 0
+
+                        for k, v in pairs(a.tokens) do
+                            local type = v[1]
+                            local stat = v[2]
+                            local value = v[3]
+
+                            if type == 1 then
+                                stats.set_bool(stat, value)
+                                applied = applied + 1
+                            elseif type == 2 then
+                                stats.set_int(stat, value)
+                                applied = applied + 1
+                            elseif type == 3 then
+                                stats.set_float(stat, value)
+                                applied = applied + 1
+                            end
+                        end
+
+                        yu.notify(1, applied.." stat/s where applied", "Online->Stats->Loader")
+                    end
+
+                    tab3.render = function()
+                        if ImGui.Button("Load") then
+                            yu.rif(load)
+                        end
+
+                        if a.tokens ~= nil then
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Apply") then
+                                yu.rif(apply)
+                            end
+
+                            if SussySpt.dev then
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Dump tokens") then
+                                    SussySpt.addTask(function()
+                                        log.info("===[ TOKEN DUMP ]===")
+
+                                        for k, v in pairs(a.tokens) do
+                                            local type = v[1]
+                                            local stat = v[2]
+                                            local value = tostring(v[3])
+                                            log.info(k..": {type="..a.types[type].."["..type.."],stat="..stat..",value="..value.."}")
+                                        end
+
+                                        log.info("====================")
+                                    end)
+                                end
+                            end
+                        end
+
+                        if a.tokenlength ~= nil then
+                            ImGui.Text(a.tokenlength)
+                        end
+
+                        do
+                            local x, y = ImGui.GetContentRegionAvail()
+                            local text, _ = ImGui.InputTextMultiline("##input", a.input, 2500000, x, y)
+                            if a.input ~= text then
+                                a.input = text
+                                a.tokens = nil
+                                a.tokenlength = nil
+                            end
+                        end
+                        SussySpt.pushDisableControls(ImGui.IsItemActive())
                     end
 
                     tab2.sub[2] = tab3
@@ -3283,6 +3300,8 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Peds
                 local tab2 = SussySpt.rendering.newTab("Peds")
 
+                tab2.should_display = SussySpt.getDev
+
                 yu.rif(function(rs)
                     while true do
                         if yu.rendering.isCheckboxChecked("world_peds_pedsblind") then
@@ -3416,14 +3435,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.Text("Made by pierrelasse.")
                     ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
 
-                    ImGui.Spacing()
+                    ImGui.Separator()
 
                     ImGui.Text("Version: "..SussySpt.version)
                     ImGui.Text("Version id: "..SussySpt.versionid)
                     ImGui.Text("Version type: "..SussySpt.versiontype)
                     ImGui.Text("Build: "..SussySpt.build)
 
-                    ImGui.Spacing()
+                    ImGui.Separator()
 
                     ImGui.Text("Theme: "..SussySpt.rendering.theme)
                     ImGui.PushItemWidth(265)
@@ -3438,7 +3457,32 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                     ImGui.PopItemWidth()
 
-                    ImGui.Spacing()
+                    if ImGui.TreeNodeEx("Edit theme") then
+                        ImGui.Spacing()
+                        ImGui.Text("Reload the script to revert changes")
+
+                        ImGui.PushItemWidth(267)
+                        local sameLine = false
+                        for k, v in pairs(SussySpt.rendering.getTheme()) do
+                            if k == "ImGuiCol" then
+                                for k1, k2 in pairs(v) do
+                                    if sameLine then
+                                        ImGui.SameLine()
+                                    end
+                                    sameLine = not sameLine
+                                    local col, used = ImGui.ColorPicker4(k1, k2)
+                                    if used then
+                                        v[k1] = col
+                                    end
+                                end
+                            end
+                        end
+                        ImGui.PopItemWidth()
+
+                        ImGui.TreePop()
+                    end
+
+                    ImGui.Separator()
 
                     if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
                         local x, y = ImGui.GetContentRegionAvail()
@@ -3446,7 +3490,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.TreePop()
                     end
 
-                    ImGui.Spacing()
+                    ImGui.Separator()
 
                     yu.rendering.renderCheckbox("Dev mode", "dev", function(state)
                         SussySpt.dev = state
