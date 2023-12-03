@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2344,
+    versionid = 2356,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -115,11 +115,21 @@ function SussySpt:init() -- SECTION SussySpt:init
                     Button = {239, 7, 73, .3},
                     FrameBg = {26, 29, 48, .67},
                     FrameBgHovered = {16, 22, 48, .67},
-                    FrameBgActive = {13, 15, 48, .67}
+                    FrameBgActive = {13, 15, 48, .67},
+                    Border = {32, 20, 60, .76}
                 },
                 ImGuiStyleVar = {
                     WindowRounding = {5},
                     FrameRounding = {2.5}
+                }
+            },
+            FatalityBorderTest = {
+                parent = "Fatality",
+                ImGuiCol = {
+                    BorderShadow = {0, 0, 0, 0}
+                },
+                ImGuiStyleVar = {
+                    FrameBorderSize = {4.05}
                 }
             }
         },
@@ -2708,6 +2718,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     end
                                 end)
                             end
+                            yu.rendering.tooltip("Your game can crash from high diffrences. Use 'Gift admin' to bypass")
 
                             ImGui.SameLine()
 
@@ -2734,6 +2745,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
 
                             yu.rendering.renderCheckbox("Gift admin", "online_unlocks_rank_giftadmin")
+                            yu.rendering.tooltip("This makes rockstar 'correct' your level when joining a new session")
                         end
 
                         ImGui.Spacing()
