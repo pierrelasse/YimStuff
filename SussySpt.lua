@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.11",
-    versionid = 2356,
+    versionid = 2363,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -589,14 +589,21 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                 if vehicle ~= nil then
                                     v.info.vehicle[2] = "The player is in a vehicle. Type: "
-                                        ..VEHICLE.GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(ENTITY.GET_ENTITY_MODEL(vehicle))
+                                        ..vehicles.get_vehicle_display_name(ENTITY.GET_ENTITY_MODEL(vehicle))
                                 else
                                     v.info.vehicle[2] = "The player is in a vehicle"
                                 end
                             end
 
-                            v.weapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
-                            v.weaponModel = WEAPON.GET_WEAPONTYPE_MODEL(v.weapon)
+                            v.selectedWeapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
+                            v.weapon = WEAPON.GET_WEAPONTYPE_MODEL(v.selectedWeapon)
+
+                            if v.weapon > 0 then
+                                v.info.weapon = {
+                                    "W",
+                                    "Holding a weapon: "..weapons.get_weapon_display_name(v.selectedWeapon).." ["..v.weapon.."]"
+                                }
+                            end
 
                             if SussySpt.dev and v.interior ~= 0 then
                                 v.info.interior = {
@@ -699,7 +706,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
                             end
 
-                            v.tooltip = v.tooltip.."\n  - Weapon: "..v.weaponModel
                             v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
                         end
 
