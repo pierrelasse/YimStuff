@@ -95,6 +95,18 @@ def main():
             if not should_merge:
                 shutil.copy(root + "/yimutils.lua", cfg["scriptsPath"] + "/yimutils.lua")
 
+        elif cmd == "release":
+            ensureDir(root + "/out")
+
+            lines = convertLines(increaseSussySptVersionId(), {"versionType": 1})
+
+            with open(root + "/out/SussySpt.lua", "w") as f:
+                f.write("\n".join(lines))
+
+            with open(root + "/out/SussySpt.Merged.lua", "w") as f:
+                from merge import merge as _merge
+                f.write("\n".join(_merge(os.path.abspath("SussySpt.lua"), lines)))
+
         else:
             printHelp()
 
