@@ -6,6 +6,7 @@
         "ImGuiCol",
         "ImGuiStyleVar",
         "ImGuiInputTextFlags",
+
         "infraction",
         "command",
         "entities",
@@ -22,6 +23,9 @@
         "script",
         "stats",
         "tunables",
+        "vehicles",
+        "weapons",
+
         "APP",
         "AUDIO",
         "BRAIN",
