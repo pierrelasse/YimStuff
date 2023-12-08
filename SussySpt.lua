@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2374,
+    versionid = 2468,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -39,11 +39,17 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
 
+    if SussySpt:setupConfig() == false then
+        return
+    end
+
     yu.set_notification_title_prefix("[SussySpt] ")
 
     SussySpt.tab = gui.get_tab("SussySpt")
 
     SussySpt.in_online = false
+
+    SussySpt:createCache()
 
     -- ANCHOR Define rendering
     SussySpt.rendering = {
@@ -163,7 +169,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.xp_to_rank = yu.xp_to_rank()
 
-    SussySpt.rendering.theme = "Fatality"
+    SussySpt.rendering.theme = SussySpt.cfg.get("theme", "Fatality")
+    if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
+        SussySpt.rendering.theme = next(SussySpt.rendering.themes)
+    end
+
     SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
 
     SussySpt.rendering.getTheme = function()
@@ -295,9 +305,11 @@ function SussySpt:init() -- SECTION SussySpt:init
             end
 
             for k, v in pairs(SussySpt.tasks) do
-                v()
+                v(rs)
                 SussySpt.tasks[k] = nil
             end
+
+            SussySpt.cfg.autosave()
         end
     end
 
@@ -363,7 +375,7 @@ function SussySpt:init() -- SECTION SussySpt:init
             end
 
             local function networkent(ent)
-                if ent and ent ~= 0 and yu.does_entity_exist(ent) then
+                if type(ent) == "number" and ent ~= 0 and ENTITY.DOES_ENTITY_EXIST(ent) then
                     NETWORK.NETWORK_REGISTER_ENTITY_AS_NETWORKED(ent)
                     local netId = NETWORK.NETWORK_GET_NETWORK_ID_FROM_ENTITY(ent)
                     NETWORK.SET_NETWORK_ID_CAN_MIGRATE(netId, true)
@@ -440,7 +452,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ["firetruk"] = "Firetruk",
                         ["luxor"] = "Luxor",
                         ["blimp"] = "Blimp - Atomic",
-                        ["metrotrain"] = "Metro"
+                        ["metrotrain"] = "Metro",
+                        ["tug"] = "Tug"
                     },
                     ramoption = "bus",
 
@@ -584,14 +597,20 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if vehicle ~= nil or PED.IS_PED_IN_ANY_VEHICLE(v.ped, false) then
                                 v.info.vehicle = {
                                     "V",
-                                    nil
+                                    "The player is in a vehicle"
                                 }
 
                                 if vehicle ~= nil then
-                                    v.info.vehicle[2] = "The player is in a vehicle. Type: "
-                                        ..vehicles.get_vehicle_display_name(ENTITY.GET_ENTITY_MODEL(vehicle))
-                                else
-                                    v.info.vehicle[2] = "The player is in a vehicle"
+                                    local vehicleHash = ENTITY.GET_ENTITY_MODEL(vehicle)
+                                    local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
+                                    local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
+
+                                    local passengers = " Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
+
+                                    v.info.vehicle[2] = v.info.vehicle[2].."."
+                                        .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
+                                        .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+                                        ..passengers
                                 end
                             end
 
@@ -822,6 +841,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end)
 
+                yu.rendering.setCheckboxChecked("online_players_ram_delete")
+
                 -- ANCHOR Render
                 tab2.render = function()
                     a.open = 2
@@ -953,7 +974,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     if seatIndex ~= nil then
                                                         local c = ENTITY.GET_ENTITY_COORDS(veh)
                                                         local ped = yu.ppid()
-                                                        ENTITY.SET_ENTITY_COORDS(ped, c.x, c.y, c.z, false, false, false, false)
+                                                        ENTITY.SET_ENTITY_COORDS_NO_OFFSET(ped, c.x, c.y, c.z - 2, false, false, false)
                                                         rs:yield()
                                                         PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
                                                     end
@@ -1286,10 +1307,16 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                             VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 50.0)
                                                             runscript:sleep(100)
                                                         end
-                                                        VEHICLE.DELETE_VEHICLE(veh)
+                                                        if yu.rendering.isCheckboxChecked("online_players_ram_delete") then
+                                                            VEHICLE.DELETE_VEHICLE(veh)
+                                                        end
                                                     end
                                                 end)
                                             end
+
+                                            ImGui.SameLine()
+
+                                            yu.rendering.renderCheckbox("Delete afterwards", "online_players_ram_delete")
                                         end
 
                                         do -- Attach
@@ -3468,6 +3495,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         for k, v in pairs(SussySpt.rendering.themes) do
                             if ImGui.Selectable(k, false) then
                                 SussySpt.rendering.theme = k
+                                SussySpt.cfg.set("theme", k)
                                 SussySpt.debug("Set theme to '"..k.."'")
                             end
                         end
@@ -3517,6 +3545,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rendering.tooltip("This just enables testing and not serious things")
 
                     if SussySpt.dev then
+                        if SussySpt.cfg.data ~= nil then
+                            ImGui.Spacing()
+                            if ImGui.Button("Unload config") then
+                                SussySpt.cfg.save()
+                                SussySpt.cfg.data = nil
+                            end
+                        end
+
                         ImGui.Spacing()
 
                         if ImGui.Button("Go airplane mode :)") then
@@ -3733,6 +3769,111 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
+end -- !SECTION
+
+function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
+    if io.open == nil then
+        log.warning("Error: Could not access io.open. Is yimmenu updated?")
+        return false
+    end
+
+    SussySpt.cfg = {
+        file = "sussyspt",
+        changed = false,
+        lastAutosave = os.time()
+    }
+
+    SussySpt.cfg.has = function(path)
+        return SussySpt.cfg.data ~= nil and SussySpt.cfg.data[path] ~= nil
+    end
+
+    SussySpt.cfg.get = function(path, default, set)
+        if SussySpt.cfg.data == nil then return default end
+
+        if set == nil then
+            set = false
+        end
+
+        if type(path) == "string" then
+            return SussySpt.cfg.data[path] or default
+        end
+
+        return nil
+    end
+
+    SussySpt.cfg.set = function(path, value)
+        if SussySpt.cfg.data == nil then return end
+
+        if type(path) == "string" then
+            SussySpt.cfg.data[path] = value
+            SussySpt.cfg.changed = true
+        end
+    end
+
+    SussySpt.cfg.save = function()
+        SussySpt.cfg.changed = false
+
+        local content = yu.json.encode(SussySpt.cfg.data)
+        if type(content) ~= "string" then
+            log.warning("Could not encode config")
+            return false
+        end
+
+        local f = io.open("sussyspt", "w")
+        if f then
+            f:write(content)
+            f:flush()
+            f:close()
+            return true
+        else
+            log.warning("Failed to open config file")
+            return false
+        end
+    end
+
+    SussySpt.cfg.autosave = function()
+        if not SussySpt.cfg.changed or SussySpt.cfg.data == nil then
+            return
+        end
+
+        local time = os.time()
+        if time - SussySpt.cfg.lastAutosave < 5 then
+            return false
+        end
+        SussySpt.cfg.lastAutosave = time
+
+        if SussySpt.cfg.save() then
+            SussySpt.debug("Config automaticly saved")
+        else
+            log.warning("Failed to autosave the config")
+        end
+    end
+
+    local f = io.open("sussyspt", "r")
+    if f ~= nil then
+        local content = f:read("*all")
+        if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
+            SussySpt.cfg.data = yu.json.decode(content)
+            SussySpt.debug("Config loaded")
+        else
+            log.warning("Unable to load config")
+        end
+    else
+        log.info("You can ignore the warning above")
+        SussySpt.cfg.data = {}
+        SussySpt.cfg.save()
+    end
+end -- !SECTION
+
+function SussySpt:createCache() -- SECTION SussySpt:createCache
+    SussySpt.cache = {}
+
+    SussySpt.cache.vehicleClasses = {
+        "Compacts", "Sedans", "SUVs", "Coupes", "Muscle", "Sports Classics",
+        "Sports", "Super", "Motorcycles", "Off-road", "Industrial", "Utility",
+        "Vans", "Cycles", "Boats", "Helicopters", "Planes", "Service",
+        "Emergency", "Military", "Commercial", "Trains"
+    }
 end -- !SECTION
 
 function SussySpt:initCategories() -- SECTION SussySpt:initCategories
