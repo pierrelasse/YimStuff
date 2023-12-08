@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2468,
+    versionid = 2473,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -3378,7 +3378,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     }
                 }
 
-                script.run_in_fiber(function(rs)
+                yu.rif(function()
                     CExplosionInfoManager = memory.scan_pattern(a.blockexplosionshake.pattern):add(3):rip()
                     exp_list_base = CExplosionInfoManager:deref()
                     exp_count = CExplosionInfoManager:add(0x8):get_word()
@@ -3810,8 +3810,19 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         end
     end
 
+    SussySpt.cfg.updateCheckboxes = function()
+        if SussySpt.cfg.data == nil then return end
+
+        SussySpt.cfg.data.checkboxes = {}
+        for k, v in pairs(yu.internal_data().rendering.checkboxstates) do
+            SussySpt.cfg.data.checkboxes[k] = v
+        end
+    end
+
     SussySpt.cfg.save = function()
         SussySpt.cfg.changed = false
+
+        SussySpt.cfg.updateCheckboxes()
 
         local content = yu.json.encode(SussySpt.cfg.data)
         if type(content) ~= "string" then
@@ -3832,7 +3843,8 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
     end
 
     SussySpt.cfg.autosave = function()
-        if not SussySpt.cfg.changed or SussySpt.cfg.data == nil then
+        if SussySpt.cfg.data == nil
+                or (not SussySpt.cfg.changed and yu.internal_data().rendering.checkboxstates == SussySpt.cfg.data.checkboxes) then
             return
         end
 
@@ -3854,6 +3866,13 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         local content = f:read("*all")
         if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
             SussySpt.cfg.data = yu.json.decode(content)
+
+            if SussySpt.cfg.data.checkboxes ~= nil then
+                for k, v in pairs(SussySpt.cfg.data.checkboxes) do
+                    yu.internal_data().rendering.checkboxstates[k] = v == true
+                end
+            end
+
             SussySpt.debug("Config loaded")
         else
             log.warning("Unable to load config")
