@@ -1,18 +1,17 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2473,
+    versionid = 2507,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
-    doDebug = false,
     debugtext = "",
     debug = function(s)
         if type(s) == "string" then
-            if SussySpt.doDebug then
+            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
+            if yu ~= nil and yu.rendering.isCheckboxChecked("debug_console") then
                 log.debug(s)
             end
-            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
         end
     end
 }
@@ -37,11 +36,13 @@ function SussySpt:init() -- SECTION SussySpt:init
         return SussySpt.dev
     end
 
-    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
-
     if SussySpt:setupConfig() == false then
         return
     end
+
+    yu.rendering.setCheckboxChecked("debug_console", SussySpt.cfg.get("debug_console", false))
+
+    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
@@ -2178,19 +2179,19 @@ function SussySpt:init() -- SECTION SussySpt:init
             do -- ANCHOR Chatlog
                 local tab2 = SussySpt.rendering.newTab("Chatlog")
 
-                yu.rendering.setCheckboxChecked("online_chatlog_enabled")
-                yu.rendering.setCheckboxChecked("online_chatlog_console")
-                yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp")
+                yu.rendering.setCheckboxChecked("online_chatlog_enabled", SussySpt.cfg.get("chatlog_enabled", true))
+                yu.rendering.setCheckboxChecked("online_chatlog_console", SussySpt.cfg.get("chatlog_console", true))
+                yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", SussySpt.cfg.get("chatlog_timestamp", true))
 
                 tab2.render = function()
-                    if yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled") then
+                    if SussySpt.cfg.set("chatlog_enabled", yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled")) then
                         ImGui.Spacing()
-                        yu.rendering.renderCheckbox("Log to console", "online_chatlog_console")
+                        SussySpt.cfg.set("chatlog_console", yu.rendering.renderCheckbox("Log to console", "online_chatlog_console"))
                     end
 
                     if SussySpt.chatlog.text ~= nil then
                         if ImGui.TreeNodeEx("Logs") then
-                            yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog)
+                            SussySpt.cfg.set("chatlog_timestamp", yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog))
 
                             do
                                 local x, y = ImGui.GetContentRegionAvail()
@@ -3051,6 +3052,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                 }
 
                 tab2.render = function()
+                    ImGui.Text("tHIS feature is instable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
+                    ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected for over a month now")
+                    ImGui.Spacing()
+
                     if a.moneyMade > 0 then
                         ImGui.Text("Money made: "..yu.format_num(a.moneyMade))
                     end
@@ -3378,6 +3383,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     }
                 }
 
+                yu.rendering.setCheckboxChecked("world_other_blockexplosionshake", SussySpt.cfg.get("world_blockexplosionshake", false))
+
                 yu.rif(function()
                     CExplosionInfoManager = memory.scan_pattern(a.blockexplosionshake.pattern):add(3):rip()
                     exp_list_base = CExplosionInfoManager:deref()
@@ -3398,7 +3405,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 tab2.render = function()
                     yu.rendering.renderCheckbox("Block explosion shake", "world_other_blockexplosionshake", function(state)
-                        enabled = state
+                        enabled = SussySpt.cfg.set("world_blockexplosionshake", state)
 
                         local i = 0
                         for k, v in ipairs(a.blockexplosionshake.patch_registry) do
@@ -3411,6 +3418,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                         SussySpt.debug((state and "Block" or "Restor").."ed "..i.." explosion shakes")
                     end)
+                    yu.rendering.tooltip("This prevents the camera from shaking by explosions")
                 end
 
                 tab.sub[5] = tab2
@@ -3531,6 +3539,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.Separator()
 
                     if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
+                        yu.rendering.renderCheckbox("Log to console", "debug_console", function(state)
+                            SussySpt.cfg.set("debug_console", state)
+                        end)
+
                         local x, y = ImGui.GetContentRegionAvail()
                         ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), x, math.min(140, y), ImGuiInputTextFlags.ReadOnly)
                         ImGui.TreePop()
@@ -3787,27 +3799,22 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         return SussySpt.cfg.data ~= nil and SussySpt.cfg.data[path] ~= nil
     end
 
-    SussySpt.cfg.get = function(path, default, set)
-        if SussySpt.cfg.data == nil then return default end
-
-        if set == nil then
-            set = false
-        end
-
-        if type(path) == "string" then
-            return SussySpt.cfg.data[path] or default
-        end
-
-        return nil
+    SussySpt.cfg.get = function(path, default)
+        if SussySpt.cfg.data == nil then error("No config data is present") end
+        local v = SussySpt.cfg.data[path]
+        if v == nil then return default end
+        return v
     end
 
     SussySpt.cfg.set = function(path, value)
-        if SussySpt.cfg.data == nil then return end
+        if SussySpt.cfg.data == nil then return value end
 
-        if type(path) == "string" then
+        if SussySpt.cfg.data[path] ~= value then
             SussySpt.cfg.data[path] = value
             SussySpt.cfg.changed = true
         end
+
+        return value
     end
 
     SussySpt.cfg.save = function()
@@ -3837,8 +3844,8 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         end
 
         local time = os.time()
-        if time - SussySpt.cfg.lastAutosave < 5 then
-            return false
+        if time - SussySpt.cfg.lastAutosave <= 2 then
+            return
         end
         SussySpt.cfg.lastAutosave = time
 
