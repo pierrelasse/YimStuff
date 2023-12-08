@@ -3810,19 +3810,8 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         end
     end
 
-    SussySpt.cfg.updateCheckboxes = function()
-        if SussySpt.cfg.data == nil then return end
-
-        SussySpt.cfg.data.checkboxes = {}
-        for k, v in pairs(yu.internal_data().rendering.checkboxstates) do
-            SussySpt.cfg.data.checkboxes[k] = v
-        end
-    end
-
     SussySpt.cfg.save = function()
         SussySpt.cfg.changed = false
-
-        SussySpt.cfg.updateCheckboxes()
 
         local content = yu.json.encode(SussySpt.cfg.data)
         if type(content) ~= "string" then
@@ -3843,8 +3832,7 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
     end
 
     SussySpt.cfg.autosave = function()
-        if SussySpt.cfg.data == nil
-                or (not SussySpt.cfg.changed and yu.internal_data().rendering.checkboxstates == SussySpt.cfg.data.checkboxes) then
+        if not SussySpt.cfg.changed or SussySpt.cfg.data == nil then
             return
         end
 
@@ -3866,13 +3854,6 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         local content = f:read("*all")
         if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
             SussySpt.cfg.data = yu.json.decode(content)
-
-            if SussySpt.cfg.data.checkboxes ~= nil then
-                for k, v in pairs(SussySpt.cfg.data.checkboxes) do
-                    yu.internal_data().rendering.checkboxstates[k] = v == true
-                end
-            end
-
             SussySpt.debug("Config loaded")
         else
             log.warning("Unable to load config")
