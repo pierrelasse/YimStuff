@@ -3052,7 +3052,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 }
 
                 tab2.render = function()
-                    ImGui.Text("tHIS feature is instable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
+                    ImGui.Text("This feature is instable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
                     ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected for over a month now")
                     ImGui.Spacing()
 
