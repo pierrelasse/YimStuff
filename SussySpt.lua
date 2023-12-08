@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2507,
+    versionid = 2511,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -358,6 +358,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 chat_message,
                 os.date("%H:%M:%S")
             }
+
+            -- SussySpt.cfg.set("chatlog_messages", SussySpt.chatlog.messages, false)
 
             if yu.rendering.isCheckboxChecked("online_chatlog_console") then
                 log.info("[CHAT] "..name..": "..chat_message)
@@ -3806,12 +3808,12 @@ function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
         return v
     end
 
-    SussySpt.cfg.set = function(path, value)
+    SussySpt.cfg.set = function(path, value, setchanged)
         if SussySpt.cfg.data == nil then return value end
 
         if SussySpt.cfg.data[path] ~= value then
             SussySpt.cfg.data[path] = value
-            SussySpt.cfg.changed = true
+            SussySpt.cfg.changed = setchanged ~= false
         end
 
         return value
@@ -3896,6 +3898,10 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
         SussySpt:initTabHeist()
     end
 
+    for k, v in pairs({"hbo", "qa"}) do
+        yu.rendering.setCheckboxChecked("cat_"..v, SussySpt.cfg.get("cat_"..v, false))
+    end
+
     tab:add_text("Categories")
     tab:add_imgui(function()
         ImGui.SameLine()
@@ -3907,9 +3913,9 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
         end
 
         if SussySpt.in_online then
-            yu.rendering.renderCheckbox("HBO", "cat_hbo")
+            SussySpt.cfg.set("cat_hbo", yu.rendering.renderCheckbox("HBO", "cat_hbo"))
         end
-        yu.rendering.renderCheckbox("Quick actions", "cat_qa")
+        SussySpt.cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
     end)
 end -- !SECTION
 
