@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2511,
+    versionid = 2538,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -3499,47 +3499,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     ImGui.Separator()
 
-                    ImGui.Text("Theme: "..SussySpt.rendering.theme)
-                    ImGui.PushItemWidth(265)
-                    if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
-                        for k, v in pairs(SussySpt.rendering.themes) do
-                            if ImGui.Selectable(k, false) then
-                                SussySpt.rendering.theme = k
-                                SussySpt.cfg.set("theme", k)
-                                SussySpt.debug("Set theme to '"..k.."'")
-                            end
-                        end
-                        ImGui.EndCombo()
-                    end
-                    ImGui.PopItemWidth()
-
-                    if ImGui.TreeNodeEx("Edit theme") then
-                        ImGui.Spacing()
-                        ImGui.Text("Reload the script to revert changes")
-
-                        ImGui.PushItemWidth(267)
-                        local sameLine = false
-                        for k, v in pairs(SussySpt.rendering.getTheme()) do
-                            if k == "ImGuiCol" then
-                                for k1, k2 in pairs(v) do
-                                    if sameLine then
-                                        ImGui.SameLine()
-                                    end
-                                    sameLine = not sameLine
-                                    local col, used = ImGui.ColorPicker4(k1, k2)
-                                    if used then
-                                        v[k1] = col
-                                    end
-                                end
-                            end
-                        end
-                        ImGui.PopItemWidth()
-
-                        ImGui.TreePop()
-                    end
-
-                    ImGui.Separator()
-
                     if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
                         yu.rendering.renderCheckbox("Log to console", "debug_console", function(state)
                             SussySpt.cfg.set("debug_console", state)
@@ -3581,6 +3540,119 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[1] = tab2
             end
 
+            do -- ANCHOR Theme
+                local tab2 = SussySpt.rendering.newTab("Theme")
+
+                local a = {
+                    customthemetext = ""
+                }
+
+                tab2.render = function()
+                    ImGui.Text("Theme: "..SussySpt.rendering.theme)
+                    ImGui.PushItemWidth(265)
+                    if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
+                        for k, v in pairs(SussySpt.rendering.themes) do
+                            if ImGui.Selectable(k, false) then
+                                SussySpt.rendering.theme = k
+                                SussySpt.cfg.set("theme", k)
+                                SussySpt.debug("Set theme to '"..k.."'")
+                            end
+                        end
+                        ImGui.EndCombo()
+                    end
+                    ImGui.PopItemWidth()
+
+                    ImGui.Separator()
+
+                    if ImGui.TreeNodeEx("Edit theme") then
+                        ImGui.Spacing()
+                        ImGui.Text("Reload the script to revert changes")
+
+                        ImGui.PushItemWidth(267)
+                        local sameLine = false
+                        for k, v in pairs(SussySpt.rendering.getTheme()) do
+                            if k == "ImGuiCol" then
+                                for k1, k2 in pairs(v) do
+                                    if sameLine then
+                                        ImGui.SameLine()
+                                    end
+                                    sameLine = not sameLine
+                                    local col, used = ImGui.ColorPicker4(k1, k2)
+                                    if used then
+                                        v[k1] = col
+                                    end
+                                end
+                            end
+                        end
+                        ImGui.PopItemWidth()
+
+                        ImGui.TreePop()
+                    end
+
+                    ImGui.Separator()
+
+                    if ImGui.TreeNodeEx("Custom theme") then
+                        if ImGui.Button("Load") then
+                            local success, result = pcall(yu.json.decode, a.customthemetext)
+                            if not success then
+                                a.message = {"Error: "..result:sub(result:find(":", result:find(":", result:find(":") + 1) + 1) + 2):strip(), 255, 25, 25}
+
+                            elseif type(result) == "table" then
+                                if result.parent == "Custom" then
+                                    result.parent = nil
+                                end
+                                if result.ImGuiCol then
+                                    for k, v2 in pairs(result.ImGuiCol) do
+                                        for k3, v3 in pairs(v2) do
+                                            if k3 ~= 4 then v2[k3] = v3 / 255 end
+                                        end
+                                    end
+                                end
+                                SussySpt.rendering.themes["Custom"] = result
+                                a.message = {"Success! You can now select the 'Custom' theme above", 60, 222, 22}
+                            end
+                        end
+
+                        ImGui.SameLine()
+
+                        if ImGui.Button("Get") then
+                            SussySpt.addTask(function()
+                                local data = {
+                                    ImGuiCol = {}
+                                }
+
+                                for k, v in pairs(ImGuiCol) do
+                                    if k ~= "COUNT" then
+                                        local r, g, b, a = ImGui.GetStyleColorVec4(v)
+                                        data["ImGuiCol"][k] = {math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), a}
+                                    end
+                                end
+
+                                a.customthemetext = yu.json.encode(data)
+                                a.message = {"Success! You can now put the text into a json formatter :D", 60, 222, 22}
+                            end)
+                        end
+
+                        if a.message ~= nil then
+                            yu.rendering.coloredtext(table.unpck(a.message, 4))
+                        end
+
+                        do
+                            local x, y = ImGui.GetContentRegionAvail()
+                            local text, _ = ImGui.InputTextMultiline("##input", a.customthemetext, 2500000, x, y)
+                            SussySpt.pushDisableControls(ImGui.IsItemActive())
+                            if text ~= a.customthemetext then
+                                a.customthemetext = text
+                                a.message = nil
+                            end
+                        end
+                        ImGui.TreePop()
+                    end
+                end
+
+                tab.sub[2] = tab2
+            end
+
             do -- ANCHOR Weird ESP
                 local tab2 = SussySpt.rendering.newTab("Weird ESP")
 
@@ -3594,7 +3666,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rendering.renderCheckbox("Super cool rgb gamer spotlight", "config_esp_spotlight_enabled")
                 end
 
-                tab.sub[2] = tab2
+                tab.sub[3] = tab2
             end
 
             do -- ANCHOR Invisible
@@ -3687,7 +3759,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     ImGui.PopItemWidth()
                 end
 
-                tab.sub[3] = tab2
+                tab.sub[4] = tab2
             end
 
             SussySpt.rendering.tabs[4] = tab
