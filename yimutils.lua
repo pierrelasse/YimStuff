@@ -685,8 +685,7 @@ return (function() -- Made by pierrelasse <:D
                     callback(enabled)
                 end
             end
-
-            return enabled
+            return enabled == true
         end
 
         api.rendering.isCheckboxChecked = function(id)
@@ -816,12 +815,12 @@ return (function() -- Made by pierrelasse <:D
         end
         function string.strip(str)
             if type(str) == "string" then
-                return str:gsub("%s+", " ")
+                return str:gsub("^%s*(.-)%s*$", "%1")
             end
         end
         function string.trim(str)
             if type(str) == "string" then
-                return str:gsub("^%s*(.-)%s*$", "%1")
+                return str:gsub("%s+", " ")
             end
         end
         function string.substring(str, startIndex, endIndex)
