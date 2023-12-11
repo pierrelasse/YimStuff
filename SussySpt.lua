@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.13",
-    versionid = 2552,
+    versionid = 2563,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -506,7 +506,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     SussySpt.players = yu.get_all_players()
 
                     local selfppid = yu.ppid()
-                    local lc = ENTITY.GET_ENTITY_COORDS(selfppid)
+                    local lc = yu.coords(selfppid)
 
                     local hostIndex = NETWORK.NETWORK_GET_HOST_PLAYER_INDEX()
                     local hostName
@@ -521,8 +521,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                         table.insert(SussySpt.sortedPlayers, k)
 
                         local isSelf = v.ped == selfppid
-
-                        v.networkHandle = NETWORK.NETWORK_HANDLE_FROM_PLAYER(v.player, nil, 13)
 
                         v.noped = type(v.ped) ~= "number" or v.ped == 0
                         v.tooltip = emptystr
@@ -581,10 +579,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
 
                         if not v.noped then
-                            v.c = ENTITY.GET_ENTITY_COORDS(v.ped)
+                            v.c = yu.coords(v.ped)
 
                             local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, v.c.x, v.c.y, v.c.z, true)
-                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(v.c.x, v.c.y, v.c.z))
+                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(v.c.x, v.c.y, v.c.z, 0, 0))
                             v.speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
                             v.wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
                             v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
@@ -598,6 +596,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             v.maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
                             v.armor = PED.GET_PED_ARMOUR(v.ped)
 
+                            v.selectedWeapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
                             v.weapon = WEAPON.GET_WEAPONTYPE_MODEL(v.selectedWeapon)
 
                             local vehicle = yu.veh(v.ped)
@@ -621,8 +620,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
                             end
 
-                            v.selectedWeapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
-
                             if not v.visible then
                                 v.info.invisible = {
                                     "I",
@@ -644,7 +641,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 }
                             end
 
-                            if ENTITY.IS_ENTITY_DEAD(v.ped) or PED.IS_PED_DEAD_OR_DYING(v.ped, 1) then
+                            if ENTITY.IS_ENTITY_DEAD(v.ped, false) or PED.IS_PED_DEAD_OR_DYING(v.ped, true) then
                                 v.info.dead = {
                                     "D",
                                     "Player seems to be dead"
@@ -732,7 +729,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.tooltip = v.tooltip.."\n  - The player might be in an interior. Id: "..v.interior
                             end
                         end
-                        v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
 
                         do
                             local namecolor
@@ -821,7 +817,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     WEAPON.REQUEST_WEAPON_ASSET(weaponHash, 31, 0)
                     repeat rs:yield() until WEAPON.HAS_WEAPON_ASSET_LOADED(weaponHash)
 
-                    local c = ENTITY.GET_ENTITY_COORDS(ped)
+                    local c = yu.coords(ped)
                     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS(
                         c.x, c.y, c.z - .5,
                         c.x, c.y, c.z + .5,
@@ -954,7 +950,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     if ImGui.TreeNodeEx("General") then
                                         if ImGui.SmallButton("Goto") then
                                             SussySpt.addTask(function()
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
                                             end)
                                         end
@@ -964,7 +960,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         if ImGui.SmallButton("Bring") then
                                             SussySpt.addTask(function()
-                                                local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                                local c = yu.coords(yu.ppid())
                                                 network.set_player_coords(player.player, c.x, c.y, c.z)
                                             end)
                                         end
@@ -978,7 +974,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 if veh ~= nil then
                                                     local seatIndex = yu.get_free_vehicle_seat(veh)
                                                     if seatIndex ~= nil then
-                                                        local c = ENTITY.GET_ENTITY_COORDS(veh)
+                                                        local c = yu.coords(veh)
                                                         local ped = yu.ppid()
                                                         ENTITY.SET_ENTITY_COORDS_NO_OFFSET(ped, c.x, c.y, c.z - 2, false, false, false)
                                                         rs:yield()
@@ -990,7 +986,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         if ImGui.SmallButton("Set waypoint") then
                                             SussySpt.addTask(function()
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 HUD.SET_NEW_WAYPOINT(c.x, c.y)
                                             end)
                                         end
@@ -1050,7 +1046,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 local hash = joaat("cargoplane")
                                                 STREAMING.REQUEST_MODEL(hash)
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
                                                 STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
                                                 if networkent(veh) then
@@ -1092,7 +1088,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 STREAMING.REQUEST_MODEL(hash)
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 c.z = c.z - 2.4
 
                                                 local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
@@ -1138,7 +1134,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 STREAMING.REQUEST_MODEL(hash)
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 local distance = TASK.IS_PED_STILL(player.ped) and 0 or 2.5
 
                                                 local vehicles = {}
@@ -1182,7 +1178,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Invisible") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
                                                 end)
                                             end
@@ -1190,21 +1186,21 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Normal") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
                                                 end)
                                             end
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Huge") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
                                                 end)
                                             end
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Car") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
                                                 end)
                                             end
@@ -1214,7 +1210,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             if ImGui.SmallButton("Normal") then
                                                 SussySpt.addTask(function()
                                                     local modelHash = joaat("prop_gold_cont_01b")
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     for i = 0, 1 do
                                                         local obj = OBJECT.CREATE_OBJECT(modelHash, c.x, c.y, c.z - .7, true, false, false)
                                                         networkobj(obj)
@@ -1226,7 +1222,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Cage") then
                                                 yu.rif(function(runscript)
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     local x = tonumber(string.format('%.2f', c.x))
                                                     local y = tonumber(string.format('%.2f', c.y))
                                                     local z = tonumber(string.format('%.2f', c.z))
@@ -1253,7 +1249,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             if ImGui.SmallButton("Rub Cage") then
                                                 SussySpt.addTask(function()
                                                     local hash = joaat("prop_rub_cage01a")
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     for i = 0, 1 do
                                                         local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z - 1, true, true, false)
                                                         networkobj(obj)
@@ -1266,7 +1262,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                             if ImGui.SmallButton("Race tube") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                                     networkobj(obj)
                                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
@@ -1277,7 +1273,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Invisible race tube") then
                                                 SussySpt.addTask(function()
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     local obj = OBJECT.CREATE_OBJECT(joaat("stt_prop_stunt_tube_crn_5d"), c.x, c.y, c.z, true, true, false)
                                                     networkobj(obj)
                                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
@@ -1694,7 +1690,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                             STREAMING.REQUEST_MODEL(hash)
                                                             repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
                                                             yu.loop(a.pickupamount, function()
-                                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                                local c = yu.coords(player.ped)
                                                                 OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
                                                                 rs:sleep(4)
                                                             end)
@@ -1736,7 +1732,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         if ImGui.Button("Spawn cash") then
                                             SussySpt.addTask(function()
                                                 if yu.is_num_between(a.cashamount, 0, 10000) then
-                                                    local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                    local c = yu.coords(player.ped)
                                                     OBJECT.CREATE_MONEY_PICKUPS(c.x, c.y, c.z, a.cashvalue, a.cashamount, 2628187989)
                                                 end
                                             end)
@@ -1752,7 +1748,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         if ImGui.SmallButton("Owned explosion") then
                                             SussySpt.addTask(function()
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
                                                 local killer = SussySpt.players[a.killer]
                                                 if killer ~= nil then
                                                     FIRE.ADD_OWNED_EXPLOSION(killer.ped, c.x, c.y, c.z, 6, 1, true, false, 0)
@@ -1762,7 +1758,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         if ImGui.SmallButton("Explode veh") then
                                             yu.rif(function(rs)
-                                                local c = ENTITY.GET_ENTITY_COORDS(player.ped)
+                                                local c = yu.coords(player.ped)
 
                                                 local hash = joaat("adder")
                                                 STREAMING.REQUEST_MODEL(hash)
@@ -3196,7 +3192,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     ENTITY.DELETE_ENTITY(a.entity)
                                 end
 
-                                local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                                local c = yu.coords(yu.ppid())
                                 a.entity = OBJECT.CREATE_OBJECT_NO_OFFSET(
                                     hash,
                                     c.x,
@@ -3338,7 +3334,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             repeat rs:yield() until STREAMING.HAS_NAMED_PTFX_ASSET_LOADED(a.dict)
                             GRAPHICS.USE_PARTICLE_FX_ASSET(a.dict)
 
-                            local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                            local c = yu.coords(yu.ppid())
                             local x, y, z = c.x, c.y, c.z
                             GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, 1, 1, 1)
 
@@ -3811,12 +3807,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                 local spotLightEnabled = yu.rendering.isCheckboxChecked("config_esp_spotlight_enabled")
 
                 if (espEnabled or spotLightEnabled) and not DLC.GET_IS_LOADING_SCREEN_ACTIVE() then
-                    local lc = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+                    local lc = yu.coords(yu.ppid())
 
                     if espEnabled then
                         for k, v in pairs(SussySpt.players) do
                             local ped = v.ped
-                            local c = ENTITY.GET_ENTITY_COORDS(ped)
+                            local c = yu.coords(ped)
                             local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
                             if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z) then
                                 -- Head Bones
@@ -3864,7 +3860,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 end -- !SECTION
 
 function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
-    if io.open == nil then
+    if io == nil or io.open == nil then
         log.warning("Error: Could not access io.open. Is yimmenu updated?")
         return false
     end
@@ -6240,7 +6236,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 if ImGui.Button("RI2") then
                     SussySpt.addTask(function()
-				        local c = ENTITY.GET_ENTITY_COORDS(yu.ppid())
+				        local c = yu.coords(yu.ppid())
                         PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
                     end)
                 end
