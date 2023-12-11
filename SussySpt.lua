@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.13",
-    versionid = 2563,
+    versionid = 2584,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -391,7 +391,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     local id = NETWORK.OBJ_TO_NET(obj)
                     NETWORK.NETWORK_USE_HIGH_PRECISION_BLENDING(id, true)
                     NETWORK.SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES(id, true)
-                    NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id)
+                    NETWORK.SET_NETWORK_ID_CAN_MIGRATE(id, true)
                     return obj
                 end
             end
@@ -521,6 +521,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         table.insert(SussySpt.sortedPlayers, k)
 
                         local isSelf = v.ped == selfppid
+                        local isSelected = k == a.selectedplayer
 
                         v.noped = type(v.ped) ~= "number" or v.ped == 0
                         v.tooltip = emptystr
@@ -606,17 +607,15 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     "The player is in a vehicle"
                                 }
 
-                                if vehicle ~= nil then
-                                    local vehicleHash = ENTITY.GET_ENTITY_MODEL(vehicle)
-                                    if vehicleHash > 0 then
-                                        local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
-                                        local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
+                                local vehicleHash = ENTITY.GET_ENTITY_MODEL(vehicle)
+                                if vehicleHash > 0 then
+                                    local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
+                                    local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
 
-                                        v.info.vehicle[2] = v.info.vehicle[2].."."
-                                            .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
-                                            .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
-                                            .." Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
-                                    end
+                                    v.info.vehicle[2] = v.info.vehicle[2].."."
+                                        .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
+                                        .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+                                        .." Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
                                 end
                             end
 
@@ -681,7 +680,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
 
                             if v.weapon > 0 then
-                                v.tooltip = v.tooltip.."Holding a weapon: "..weapons.get_weapon_display_name(v.selectedWeapon).." ["..v.weapon.."]"
+                                v.tooltip = v.tooltip.."\nHolding a weapon: "..weapons.get_weapon_display_name(v.selectedWeapon).." ["..v.weapon.."]"
                             end
 
                             v.proofs = yu.get_entity_proofs(v.ped)
@@ -1016,7 +1015,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 for k, v in pairs(SussySpt.players) do
                                                     if v.ped ~= player.ped then
                                                         if NETWORK.NETWORK_IS_PLAYER_ACTIVE(v.player) then
-                                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, player.ped, 1)
+                                                            NETWORK.NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(false, player.ped, true)
                                                             NETWORK.NETWORK_SET_IN_SPECTATOR_MODE(false, player.ped)
                                                         end
                                                     end
@@ -1047,7 +1046,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 STREAMING.REQUEST_MODEL(hash)
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
                                                 local c = yu.coords(player.ped)
-                                                local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                                local veh = yu.create_vehicle(c.x, c.y, c.z, hash, ENTITY.GET_ENTITY_HEADING(player.ped), true)
                                                 STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
                                                 if networkent(veh) then
                                                     VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
@@ -1069,9 +1068,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
                                                 local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, 1, -3)
-                                                local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z, ENTITY.GET_ENTITY_HEADING(player.ped))
+                                                local veh = yu.create_vehicle(c.x, c.y, c.z, hash, ENTITY.GET_ENTITY_HEADING(player.ped))
                                                 networkent(veh)
-                                                ENTITY.SET_ENTITY_VISIBLE(veh, true, 0)
+                                                ENTITY.SET_ENTITY_VISIBLE(veh, true, false)
                                                 ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
                                                 rs:sleep(250)
                                                 ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 1000, 0, 0, 0, 0, true, true, true, false, true)
@@ -1092,7 +1091,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 c.z = c.z - 2.4
 
                                                 local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
-                                                ENTITY.SET_ENTITY_VISIBLE(obj, true, 0)
+                                                ENTITY.SET_ENTITY_VISIBLE(obj, true, false)
                                                 ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
 
                                                 local pos = {
@@ -1111,7 +1110,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     pos.y = pos.y + c.y
                                                     pos.z = pos.z + c.z
                                                     objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
-                                                    ENTITY.SET_ENTITY_VISIBLE(objects[i], true, 0)
+                                                    ENTITY.SET_ENTITY_VISIBLE(objects[i], true, false)
                                                     ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
                                                     ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(objects[i])
                                                 end
@@ -1142,14 +1141,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 for i = 1, 1 do
                                                     local pos = (i == 1) and ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, distance, 2.8) or c
                                                     local heading = (i == 1) and ENTITY.GET_ENTITY_HEADING(player.ped) or 0
-                                                    vehicles[i] = networkent(VEHICLE.CREATE_VEHICLE(hash, pos.x, pos.y, pos.z, heading))
+                                                    vehicles[i] = networkent(yu.create_vehicle(pos.x, pos.y, pos.z, hash, heading))
                                                 end
 
                                                 for k, v in pairs(vehicles) do
                                                     if k ~= 1 and v ~= nil then
-                                                        ENTITY.ATTACH_ENTITY_TO_ENTITY(v, vehicles[1], 0, k == 4 and 0 or 3, k >= 3 and 0, 0, 0, 0, k == 2 and -180 or 0, 0, false, true, false, 0, true)
+                                                        ENTITY.ATTACH_ENTITY_TO_ENTITY(v, vehicles[1], 0, k == 4 and 0 or 3, k >= 3 and 0, 0, 0, 0, k == 2 and -180 or 0, false, false, true, false, 0, true, 1)
                                                     end
-                                                    ENTITY.SET_ENTITY_VISIBLE(v, false)
+                                                    ENTITY.SET_ENTITY_VISIBLE(v, false, false)
                                                     ENTITY.SET_ENTITY_ALPHA(v, 0, true)
                                                 end
                                                 ENTITY.APPLY_FORCE_TO_ENTITY(vehicles[1], 1, 0, 0, -10, 0, 0, 0, 0, true, true, true, false, true)
@@ -1179,7 +1178,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             if ImGui.SmallButton("Invisible") then
                                                 SussySpt.addTask(function()
                                                     local c = yu.coords(player.ped)
-                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0)
+                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 72, 80, false, true, 0, false)
                                                 end)
                                             end
                                             yu.rendering.tooltip("\"Random\" death")
@@ -1187,21 +1186,21 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             if ImGui.SmallButton("Normal") then
                                                 SussySpt.addTask(function()
                                                     local c = yu.coords(player.ped)
-                                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0)
+                                                    FIRE.ADD_EXPLOSION(c.x + 1, c.y + 1, c.z + 1, 4, 100, true, false, 0, false)
                                                 end)
                                             end
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Huge") then
                                                 SussySpt.addTask(function()
                                                     local c = yu.coords(player.ped)
-                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 20, true, false, 1)
+                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 82, 80, true, false, 1, false)
                                                 end)
                                             end
                                             ImGui.SameLine()
                                             if ImGui.SmallButton("Car") then
                                                 SussySpt.addTask(function()
                                                     local c = yu.coords(player.ped)
-                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0)
+                                                    FIRE.ADD_EXPLOSION(c.x, c.y, c.z, 7, 1, true, false, 0, false)
                                                 end)
                                             end
                                         end
@@ -1278,7 +1277,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     networkobj(obj)
                                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                                     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                                    ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                                    ENTITY.SET_ENTITY_VISIBLE(obj, false, false)
                                                     ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
                                                 end)
                                             end
@@ -1301,7 +1300,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                         STREAMING.REQUEST_MODEL(hash)
                                                         repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(hash)
                                                         local c = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(player.ped, 0, -15.0, 0)
-                                                        local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z - 1, ENTITY.GET_ENTITY_HEADING(player.ped), true, true)
+                                                        local veh = yu.create_vehicle(c.x, c.y, c.z - 1, hash, ENTITY.GET_ENTITY_HEADING(player.ped), true)
                                                         networkent(veh)
                                                         VEHICLE.SET_VEHICLE_FORWARD_SPEED(veh, 1)
                                                         runscript:sleep(100)
@@ -1321,7 +1320,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             yu.rendering.renderCheckbox("Delete afterwards", "online_players_ram_delete")
                                         end
 
-                                        do -- Attach
+                                        if SussySpt.dev then -- Attach
                                             ImGui.PushItemWidth(237)
                                             local resp = yu.rendering.renderList(a.attachoptions, a.attachoption, "online_player_attach", "")
                                             if resp.changed then
@@ -1341,9 +1340,9 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                                         local obj = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, 0, 0, 0, true, true, false)
                                                         if networkobj(obj) ~= nil then
-                                                            ENTITY.ATTACH_ENTITY_TO_ENTITY(obj, player.ped, 57597, 0, 0, 0, 0, 0, 0, false, false, false, false, 2, true)
+                                                            ENTITY.ATTACH_ENTITY_TO_ENTITY(obj, player.ped, 57597, 0, 0, 0, 0, 0, 0, false, false, false, false, 2, true, 1)
                                                             if yu.rendering.isCheckboxChecked("online_players_attach_invis") then
-                                                                ENTITY.SET_ENTITY_VISIBLE(obj, false)
+                                                                ENTITY.SET_ENTITY_VISIBLE(obj, false, false)
                                                                 ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
                                                             end
                                                             ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
@@ -1478,11 +1477,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         ImGui.SameLine()
 
-                                        yu.rendering.renderCheckbox("Invsisibility", "online_player_vehicleinvis", function(state)
+                                        yu.rendering.renderCheckbox("Invisibility", "online_player_vehicleinvis", function(state)
                                             SussySpt.addTask(function()
                                                 local veh = yu.veh(player.ped)
                                                 if veh ~= nil and entities.take_control_of(veh)  then
-                                                    ENTITY.SET_ENTITY_VISIBLE(veh, not state)
+                                                    ENTITY.SET_ENTITY_VISIBLE(veh, not state, false)
                                                 end
                                             end)
                                         end)
@@ -1506,7 +1505,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 local veh = yu.veh(player.ped)
                                                 if veh ~= nil and entities.take_control_of(veh) then
                                                     VEHICLE.SET_VEHICLE_HAS_BEEN_OWNED_BY_PLAYER(veh, false)
-                                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false)
+                                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(veh, false, false)
                                                     VEHICLE.DELETE_VEHICLE(veh)
                                                     if yu.does_entity_exist(veh) then
                                                         ENTITY.DELETE_ENTITY(veh)
@@ -1535,6 +1534,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 end
                                             end)
                                         end
+                                        yu.rendering.tooltip("The player will automaticly turn on the engine again so it's kinda useless")
 
                                         ImGui.SameLine()
 
@@ -1551,7 +1551,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             SussySpt.addTask(function()
                                                 local veh = yu.veh(player.ped)
                                                 if veh ~= nil and entities.take_control_of(veh) then
-                                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 50000, 0, 0, 0, 0, 0, 1, 1, 0, 1)
+                                                    ENTITY.APPLY_FORCE_TO_ENTITY(veh, 1, 0, 0, 10000, 0, 0, 0, 0, false, true, true, false, true, true)
                                                 end
                                             end)
                                         end
@@ -1764,11 +1764,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 STREAMING.REQUEST_MODEL(hash)
                                                 repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
-                                                local veh = VEHICLE.CREATE_VEHICLE(hash, c.x, c.y, c.z + 1.5, 0, true, true)
+                                                local veh = yu.create_vehicle(c.x, c.y, c.z + 1.5, hash, 0, true)
                                                 ENTITY.FREEZE_ENTITY_POSITION(veh, true)
                                                 ENTITY.SET_ENTITY_COLLISION(veh, false, false)
                                                 ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
-                                                ENTITY.SET_ENTITY_VISIBLE(veh, false)
+                                                ENTITY.SET_ENTITY_VISIBLE(veh, false, false)
 
                                                 rs:sleep(5)
 
@@ -2916,51 +2916,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[5] = tab2
             end -- !SECTION
 
-            do -- ANCHOR Tunables
-                local tab2 = SussySpt.rendering.newTab("Tunables")
-
-                local a = {}
-
-                local function refreshRPMultiplier()
-                    a.rpmultiplier = globals.get_float(SussySpt.pointers.tunables_rpmultiplier)
-                end
-
-                local function refresh()
-                    refreshRPMultiplier()
-                end
-                yu.rif(refresh)
-
-                tab2.render = function()
-                    do -- RP Multiplier
-                        ImGui.Text("RP Multiplier")
-
-                        ImGui.SameLine()
-
-                        ImGui.PushItemWidth(100)
-                        local resp = yu.rendering.input("int", {
-                            label = "##rp_multiplier",
-                            value = a.rpmultiplier
-                        })
-                        ImGui.PopItemWidth()
-                        if resp ~= nil and resp.changed then
-                            a.rpmultiplier = resp.value
-                        end
-                        yu.rendering.tooltip("Max is 140 for some reason")
-
-                        ImGui.SameLine()
-
-                        if ImGui.Button("Apply##rpmultiplier") then
-                            SussySpt.addTask(function()
-                                globals.set_float(SussySpt.pointers.tunables_rpmultiplier, a.rpmultiplier)
-                                refreshRPMultiplier()
-                            end)
-                        end
-                    end
-                end
-
-                tab.sub[6] = tab2
-            end
-
             do -- ANCHOR Misc
                 local tab2 = SussySpt.rendering.newTab("Misc")
 
@@ -2978,7 +2933,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end)
                 end
 
-                tab.sub[7] = tab2
+                tab.sub[6] = tab2
             end
 
             do -- ANCHOR Session
@@ -2998,7 +2953,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rendering.tooltip("This really just puts the players client-side under the map")
                 end
 
-                tab.sub[8] = tab2
+                tab.sub[7] = tab2
             end
 
             do -- ANCHOR Money
@@ -3118,7 +3073,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end
 
-                tab.sub[9] = tab2
+                tab.sub[8] = tab2
             end
 
             SussySpt.rendering.tabs[1] = tab
@@ -3249,13 +3204,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
                         yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
-                        yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent", function(state)
-                            SussySpt.addTask(function()
-                                if a.entity ~= nil and yu.does_entity_exist(a.entity) then
-                                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(a.entity, state)
-                                end
-                            end)
-                        end)
+                        yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent")
 
                         ImGui.TreePop()
                     end
@@ -3336,7 +3285,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             local c = yu.coords(yu.ppid())
                             local x, y, z = c.x, c.y, c.z
-                            GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, 1, 1, 1)
+                            GRAPHICS.START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(a.effect, x, y, z, 90, -100, 90, 1, true, true, true, false)
 
                             STREAMING.REMOVE_PTFX_ASSET()
 
@@ -3683,13 +3632,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                         return nil
                     end
                     if id ~= nil and yu.rendering.isCheckboxChecked("invisible_self") then
-                        ENTITY.SET_ENTITY_VISIBLE(id, state, 0)
+                        ENTITY.SET_ENTITY_VISIBLE(id, state, false)
                     end
                     if not makingVehicleInivs and yu.rendering.isCheckboxChecked("invisible_vehicle") then
                         SussySpt.addTask(function()
                             makingVehicleInivs = true
                             if veh ~= nil and entities.take_control_of(veh) then
-                                ENTITY.SET_ENTITY_VISIBLE(veh, state, 0)
+                                ENTITY.SET_ENTITY_VISIBLE(veh, state, false)
                             end
                             makingVehicleInivs = false
                         end)
@@ -3814,7 +3763,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             local ped = v.ped
                             local c = yu.coords(ped)
                             local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, c.x, c.y, c.z, false)
-                            if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z) then
+                            if distance < 120 and GRAPHICS.GET_SCREEN_COORD_FROM_WORLD_COORD(c.x, c.y, c.z, 0, 0) then
                                 -- Head Bones
                                 drawLine(ped, 31086, 39317) -- Head, Neck
                                 -- Left Arm Bones
@@ -4042,7 +3991,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 joaat("hei_prop_bank_cctv_02"), joaat("ch_prop_ch_cctv_cam_02a"),
                 joaat("xm_prop_x17_server_farm_cctv_01")}) do
                 if ENTITY.GET_ENTITY_MODEL(entity) == hash then
-                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(entity, true, true)
+                    ENTITY.SET_ENTITY_AS_MISSION_ENTITY(entity, false, false)
                     ENTITY.DELETE_ENTITY(entity)
                 end
             end
@@ -4653,7 +4602,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                         local hash = joaat("prop_chem_grill_bit")
                         for k, v in pairs(entities.get_all_objects_as_handles()) do
                             if ENTITY.GET_ENTITY_MODEL(v) == hash then
-                                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(v, true, true)
+                                ENTITY.SET_ENTITY_AS_MISSION_ENTITY(v, false, false)
                                 ENTITY.DELETE_ENTITY(v)
                             end
                         end
