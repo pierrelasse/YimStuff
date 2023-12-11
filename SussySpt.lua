@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2538,
+    versionid = 2542,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -3554,7 +3554,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                         for k, v in pairs(SussySpt.rendering.themes) do
                             if ImGui.Selectable(k, false) then
                                 SussySpt.rendering.theme = k
-                                SussySpt.cfg.set("theme", k)
+                                if k ~= "Custom" then
+                                    SussySpt.cfg.set("theme", k)
+                                end
                                 SussySpt.debug("Set theme to '"..k.."'")
                             end
                         end
@@ -3571,7 +3573,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ImGui.PushItemWidth(267)
                         local sameLine = false
                         for k, v in pairs(SussySpt.rendering.getTheme()) do
-                            if k == "ImGuiCol" then
+                            if k == "ImGuiCol" and type(v) == "table" then
                                 for k1, k2 in pairs(v) do
                                     if sameLine then
                                         ImGui.SameLine()
@@ -3673,10 +3675,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 local tab2 = SussySpt.rendering.newTab("Invisible")
 
                 local a = {
-                    key = "L"
+                    key = SussySpt.cfg.get("invisible_key", "L")
                 }
-
-                yu.rendering.setCheckboxChecked("invisible_hotkey")
 
                 local makingVehicleInivs = false
                 SussySpt.ensureVis = function(state, id, veh)
@@ -3722,8 +3722,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
                 bindHotkey(yu.keys[a.key])
 
-                yu.rendering.setCheckboxChecked("invisible_self")
-                yu.rendering.setCheckboxChecked("invisible_vehicle")
+                yu.rendering.setCheckboxChecked("invisible_hotkey", SussySpt.cfg.get("invisible_hotkey", true))
+                yu.rendering.setCheckboxChecked("invisible_log", SussySpt.cfg.get("invisible_hotkey", false))
+                yu.rendering.setCheckboxChecked("invisible_self", SussySpt.cfg.get("invisible_hotkey", true))
+                yu.rendering.setCheckboxChecked("invisible_vehicle", SussySpt.cfg.get("invisible_hotkey", true))
 
                 tab2.render = function()
                     yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
@@ -3736,13 +3738,13 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     ImGui.Spacing()
 
-                    yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey")
-                    yu.rendering.renderCheckbox("Log", "invisible_log")
+                    SussySpt.cfg.set("invisible_hotkey", yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey"))
+                    SussySpt.cfg.set("invisible_log", yu.rendering.renderCheckbox("Log", "invisible_log"))
 
                     ImGui.Spacing()
 
-                    yu.rendering.renderCheckbox("Self", "invisible_self")
-                    yu.rendering.renderCheckbox("Vehicle", "invisible_vehicle")
+                    SussySpt.cfg.set("invisible_self", yu.rendering.renderCheckbox("Self", "invisible_self"))
+                    SussySpt.cfg.set("invisible_vehicle", yu.rendering.renderCheckbox("Vehicle", "invisible_vehicle"))
 
                     ImGui.Spacing()
 
@@ -3752,6 +3754,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Selectable(k, false) then
                                 a.key = k
                                 bindHotkey(yu.keys[k])
+                                SussySpt.cfg.set("invisible_key", k)
                             end
                         end
                         ImGui.EndCombo()
@@ -5710,7 +5713,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 if ImGui.Button("Skip drill##fleeca") then
                     SussySpt.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_int("fm_mission_controller", 10072, 100)
+                            locals.set_float("fm_mission_controller", 10061 + 11, 100)
                         end
                     end)
                 end
