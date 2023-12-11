@@ -3723,9 +3723,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                 bindHotkey(yu.keys[a.key])
 
                 yu.rendering.setCheckboxChecked("invisible_hotkey", SussySpt.cfg.get("invisible_hotkey", true))
-                yu.rendering.setCheckboxChecked("invisible_log", SussySpt.cfg.get("invisible_hotkey", false))
-                yu.rendering.setCheckboxChecked("invisible_self", SussySpt.cfg.get("invisible_hotkey", true))
-                yu.rendering.setCheckboxChecked("invisible_vehicle", SussySpt.cfg.get("invisible_hotkey", true))
+                yu.rendering.setCheckboxChecked("invisible_log", SussySpt.cfg.get("invisible_log", false))
+                yu.rendering.setCheckboxChecked("invisible_self", SussySpt.cfg.get("invisible_self", true))
+                yu.rendering.setCheckboxChecked("invisible_vehicle", SussySpt.cfg.get("invisible_vehicle", true))
 
                 tab2.render = function()
                     yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
