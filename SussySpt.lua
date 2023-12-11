@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.12",
-    versionid = 2542,
+    versionid = 2550,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -583,18 +583,22 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if not v.noped then
                             v.c = ENTITY.GET_ENTITY_COORDS(v.ped)
 
+                            local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, v.c.x, v.c.y, v.c.z, true)
+                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(v.c.x, v.c.y, v.c.z))
+                            v.speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
+                            v.wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
+                            v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
+
                             v.collisionDisabled = ENTITY.GET_ENTITY_COLLISION_DISABLED(v.ped)
+                            v.visible = ENTITY.IS_ENTITY_VISIBLE(v.ped)
 
                             v.interior = INTERIOR.GET_INTERIOR_AT_COORDS(v.c.x, v.c.y, v.c.z)
 
                             v.health = ENTITY.GET_ENTITY_HEALTH(v.ped)
                             v.maxhealth = ENTITY.GET_ENTITY_MAX_HEALTH(v.ped)
                             v.armor = PED.GET_PED_ARMOUR(v.ped)
-                            local distance = MISC.GET_DISTANCE_BETWEEN_COORDS(lc.x, lc.y, lc.z, v.c.x, v.c.y, v.c.z, true)
-                            local road = HUD.GET_STREET_NAME_FROM_HASH_KEY(PATHFIND.GET_STREET_NAME_AT_COORD(v.c.x, v.c.y, v.c.z))
-                            v.speed = ENTITY.GET_ENTITY_SPEED(v.ped) * 3.6
-                            v.wantedLevel = PLAYER.GET_PLAYER_WANTED_LEVEL(v.player)
-                            v.blip = HUD.GET_BLIP_FROM_ENTITY(v.ped)
+
+                            v.weapon = WEAPON.GET_WEAPONTYPE_MODEL(v.selectedWeapon)
 
                             local vehicle = yu.veh(v.ped)
                             if vehicle ~= nil or PED.IS_PED_IN_ANY_VEHICLE(v.ped, false) then
@@ -605,32 +609,24 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                 if vehicle ~= nil then
                                     local vehicleHash = ENTITY.GET_ENTITY_MODEL(vehicle)
-                                    local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
-                                    local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
+                                    if vehicleHash > 0 then
+                                        local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
+                                        local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
 
-                                    local passengers = " Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
-
-                                    v.info.vehicle[2] = v.info.vehicle[2].."."
-                                        .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
-                                        .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
-                                        ..passengers
+                                        v.info.vehicle[2] = v.info.vehicle[2].."."
+                                            .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
+                                            .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+                                            .." Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
+                                    end
                                 end
                             end
 
                             v.selectedWeapon = WEAPON.GET_SELECTED_PED_WEAPON(v.ped)
-                            v.weapon = WEAPON.GET_WEAPONTYPE_MODEL(v.selectedWeapon)
 
-                            if v.weapon > 0 then
-                                v.info.weapon = {
-                                    "W",
-                                    "Holding a weapon: "..weapons.get_weapon_display_name(v.selectedWeapon).." ["..v.weapon.."]"
-                                }
-                            end
-
-                            if SussySpt.dev and v.interior ~= 0 then
-                                v.info.interior = {
+                            if not v.visible then
+                                v.info.invisible = {
                                     "I",
-                                    "The player might be in an interior. Interior id: "..v.interior
+                                    "Seems to be invisible"
                                 }
                             end
 
@@ -687,6 +683,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.tooltip = v.tooltip.."\nWanted level: "..v.wantedLevel
                             end
 
+                            if v.weapon > 0 then
+                                v.tooltip = v.tooltip.."Holding a weapon: "..weapons.get_weapon_display_name(v.selectedWeapon).." ["..v.weapon.."]"
+                            end
+
                             v.proofs = yu.get_entity_proofs(v.ped)
                             if v.proofs.success and v.proofs.anytrue then
                                 v.tooltip = v.tooltip.."\nProofs: "
@@ -728,8 +728,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 v.tooltip = v.tooltip.."\n  - Blip sprite: "..HUD.GET_BLIP_SPRITE(v.blip)
                             end
 
-                            v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
+                            if v.interior ~= 0 then
+                                v.tooltip = v.tooltip.."\n  - The player might be in an interior. Id: "..v.interior
+                            end
                         end
+                        v.tooltip = v.tooltip.."\n  - NetworkHandle: "..v.networkHandle
 
                         do
                             local namecolor
