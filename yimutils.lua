@@ -342,6 +342,14 @@ return (function() -- Made by pierrelasse <:D
                 end
             end
         end
+
+        api.coords = function(entity, force)
+            if not force and ENTITY.DOES_ENTITY_EXIST(entity) == false then
+                return {x = 0, y = 0, z = 0}
+            end
+            local c = ENTITY.GET_ENTITY_COORDS(entity, false)
+            return {x = c.x, y = c.y, z = c.z}
+        end
     end
 
     local function initStats()
@@ -419,7 +427,7 @@ return (function() -- Made by pierrelasse <:D
 
         api.veh = function(ped)
             local ped_ = ped or api.ppid()
-            if PED.IS_PED_IN_ANY_VEHICLE(ped_, 0) then
+            if PED.IS_PED_IN_ANY_VEHICLE(ped_, false) then
                 return PED.GET_VEHICLE_PED_IS_IN(ped_, false)
             end
         end
