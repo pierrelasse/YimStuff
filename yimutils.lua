@@ -337,7 +337,7 @@ return (function() -- Made by pierrelasse <:D
                 return nil
             end
             for i = -1, VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(veh) - 1 do
-                if VEHICLE.IS_VEHICLE_SEAT_FREE(veh, i) then
+                if VEHICLE.IS_VEHICLE_SEAT_FREE(veh, i, false) then
                     return i
                 end
             end
@@ -349,6 +349,10 @@ return (function() -- Made by pierrelasse <:D
             end
             local c = ENTITY.GET_ENTITY_COORDS(entity, false)
             return {x = c.x, y = c.y, z = c.z}
+        end
+
+        api.create_vehicle = function(x, y, z, hash, heading, networked)
+            return VEHICLE.CREATE_VEHICLE(hash, x, y, z, heading, networked == true, networked == true, false)
         end
     end
 
@@ -709,7 +713,7 @@ return (function() -- Made by pierrelasse <:D
 
         api.rendering.tooltip = function(text)
             if ImGui.IsItemHovered() then
-                ImGui.SetTooltip(text)
+                ImGui.SetTooltip(tostring(text))
             end
         end
 
