@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.13",
-    versionid = 2596,
+    versionid = 2600,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -6164,7 +6164,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
             if ImGui.Begin("Quick actions") then
                 if ImGui.Button("Heal") then
                     SussySpt.addTask(function()
-                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0)
+                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
 			            PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
                     end)
                 end
@@ -6174,7 +6174,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 if ImGui.Button("Refill health") then
                     SussySpt.addTask(function()
-                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0)
+                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
                     end)
                 end
                 yu.rendering.tooltip("Refill health")
@@ -6195,14 +6195,17 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                         PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
                     end)
                 end
-                yu.rendering.tooltip("CLEAR_PLAYER_WANTED_LEVEL")
+                yu.rendering.tooltip("Removes (clears) your wanted level")
 
-                if ImGui.Button("Refresh interior") then
+                if ImGui.Button("RI2") then
                     SussySpt.addTask(function()
-				        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(yu.ppid()))
+                        local ppid = yu.ppid()
+				        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
+                        local c = yu.coords(ppid)
+                        PED.SET_PED_COORDS_KEEP_VEHICLE(ppid, c.x, c.y, c.z - 1)
                     end)
                 end
-                yu.rendering.tooltip("Refreshes the interior you are currently in.\nGood for when interior is invisible or not rendering correctly.\nMay not always work.")
+                yu.rendering.tooltip("Refreshes the interior you are currently in\nClears the ped's tasks\n\nThis is good for when you can't see anything")
 
                 ImGui.SameLine()
 
@@ -6214,7 +6217,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                         end
                     end)
                 end
-                yu.rendering.tooltip("There are some unskippable cutscenes where this doesn't work.")
+                yu.rendering.tooltip("There are some unskippable \"cutscenes\" where this doesn't work")
 
                 ImGui.SameLine()
 
@@ -6238,25 +6241,6 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Clear ped tasks") then
-                    SussySpt.addTask(function()
-                        TASK.CLEAR_PED_TASKS_IMMEDIATELY(yu.ppid())
-                    end)
-                end
-                yu.rendering.tooltip("Makes the player stop what it's doing")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("RI2") then
-                    SussySpt.addTask(function()
-				        local c = yu.coords(yu.ppid())
-                        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), c.x, c.y, c.z - 1)
-                    end)
-                end
-                yu.rendering.tooltip("Other way of refreshing the interior")
-
-                ImGui.SameLine()
-
                 if ImGui.Button("Stop conversation") then
                     SussySpt.addTask(function()
                         AUDIO.STOP_SCRIPTED_CONVERSATION(false)
@@ -6264,25 +6248,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 end
                 yu.rendering.tooltip("Tries to stop the blah blah from npcs")
 
-                if ImGui.Button("Stop player switch") then
-                    SussySpt.addTask(function()
-                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
-                            STREAMING.STOP_PLAYER_SWITCH()
-                            if CAM.IS_SCREEN_FADED_OUT() then
-                                CAM.DO_SCREEN_FADE_IN(0)
-                            end
-                            HUD.CLEAR_HELP(true)
-                            HUD.SET_FRONTEND_ACTIVE(true)
-                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
-                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
-
                 if SussySpt.in_online then
-                    ImGui.SameLine()
-
                     if ImGui.Button("Instant BST") then
                         globals.set_int(2672524 + 3690, 1)
                     end
@@ -6303,7 +6269,25 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                         end)
                     end
                     yu.rendering.tooltip("Puts all your money in the bank")
+
+                    ImGui.SameLine()
                 end
+
+                if ImGui.Button("Stop player switch") then
+                    SussySpt.addTask(function()
+                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
+                            STREAMING.STOP_PLAYER_SWITCH()
+                            if CAM.IS_SCREEN_FADED_OUT() then
+                                CAM.DO_SCREEN_FADE_IN(0)
+                            end
+                            HUD.CLEAR_HELP(true)
+                            HUD.SET_FRONTEND_ACTIVE(true)
+                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
+                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
+                        end
+                    end)
+                end
+                yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
             end
             ImGui.End()
         end
