@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.13",
-    versionid = 2584,
+    versionid = 2596,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -876,19 +876,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.PushStyleColor(ImGuiCol.Text, r, g, b, 1)
                                     end
 
-                                    -- local isSelected = a.selectedplayer == k
-                                    -- if isSelected then
-                                    --     local r, g, b = 1, 0, 0--ImGui.GetStyleColorVec4(ImGuiCol.FrameBgActive)
-                                    --     ImGui.PushStyleColor(ImGuiCol.FrameBg, r, g, b, 1)
-                                    -- end
-
                                     if ImGui.Selectable(v.displayName, false) then
                                         a.selectedplayer = k
                                     end
-
-                                    -- if isSelected then
-                                    --     ImGui.PopStyleColor()
-                                    -- end
 
                                     if hasNameColor then
                                         ImGui.PopStyleColor()
@@ -965,22 +955,24 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         end
                                         yu.rendering.tooltip("Bring the player to you")
 
-                                        ImGui.SameLine()
+                                        if player.info.vehicle ~= nil then
+                                            ImGui.SameLine()
 
-                                        if ImGui.SmallButton("Tp into vehicle") then
-                                            yu.rif(function(rs)
-                                                local veh = yu.veh(player.ped)
-                                                if veh ~= nil then
-                                                    local seatIndex = yu.get_free_vehicle_seat(veh)
-                                                    if seatIndex ~= nil then
-                                                        local c = yu.coords(veh)
-                                                        local ped = yu.ppid()
-                                                        ENTITY.SET_ENTITY_COORDS_NO_OFFSET(ped, c.x, c.y, c.z - 2, false, false, false)
-                                                        rs:yield()
-                                                        PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
+                                            if ImGui.SmallButton("Tp into vehicle") then
+                                                yu.rif(function(rs)
+                                                    local veh = yu.veh(player.ped)
+                                                    if veh ~= nil then
+                                                        local seatIndex = yu.get_free_vehicle_seat(veh)
+                                                        if seatIndex ~= nil then
+                                                            local c = yu.coords(veh)
+                                                            local ped = yu.ppid()
+                                                            ENTITY.SET_ENTITY_COORDS_NO_OFFSET(ped, c.x, c.y, c.z - 2, false, false, false)
+                                                            rs:yield()
+                                                            PED.SET_PED_INTO_VEHICLE(ped, veh, seatIndex)
+                                                        end
                                                     end
-                                                end
-                                            end)
+                                                end)
+                                            end
                                         end
 
                                         if ImGui.SmallButton("Set waypoint") then
@@ -1464,7 +1456,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if ImGui.TreeNodeEx("Vehicle") then
+                                    if player.info.vehicle ~= nil and ImGui.TreeNodeEx("Vehicle") then
                                         yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
                                             SussySpt.addTask(function()
                                                 local veh = yu.veh(player.ped)
@@ -1794,6 +1786,65 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[1] = tab2
             end -- !SECTION
 
+            do -- SECTION Thing
+                local tab2 = SussySpt.rendering.newTab("Thing")
+
+                tab2.should_display = SussySpt.dev
+
+                do -- ANCHOR Apartment
+                    local tab3 = SussySpt.rendering.newTab("Apartment")
+
+                    local a = {
+                        cuts15m = {
+                            heists = {
+                                ["The Freeca Job"] = 7453,
+                                ["The Prison Break"] = 2142,
+                                ["The Humane Labs Raid"] = 1587,
+                                ["The Pacific Standard Job"] = 1000,
+                                ["Series A Funding"] = 2121
+                            },
+                            set = {
+                                crew = function(v)
+                                    globals.set_int(1936397 + 1 + 1, 100 - (v * 4))
+                                    globals.set_int(1936397 + 1 + 2, v)
+                                    globals.set_int(1936397 + 1 + 3, v)
+                                    globals.set_int(1936397 + 1 + 4, v)
+                                end,
+                                self = function(v)
+                                    globals.set_int(1938365 + 3008 + 1, v)
+                                end
+                            }
+                        }
+                    }
+
+                    tab3.render = function()
+                        SussySpt.displayUpdateWarning()
+
+                        for k, v in pairs(a.cuts15m.heists) do
+                            if ImGui.Button(k) then
+                                yu.rif(function(rs)
+                                    a.cuts15m.set.crew(v)
+                                    rs:sleep(1000)
+                                    -- menu.send_key_press(13) -- MOUSE RIGHT
+                                    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 13, 1)
+                                    log.info("MOUSE RIGHT")
+                                    rs:sleep(1000)
+                                    -- menu.send_key_press(27) -- ARROW UP
+                                    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 27, 1)
+                                    log.info("ARROW UP")
+                                    rs:sleep(1000)
+                                    a.cuts15m.set.self(v)
+                                end)
+                            end
+                        end
+                    end
+
+                    tab2.sub[1] = tab3
+                end
+
+                tab.sub[2] = tab2
+            end -- !SECTION
+
             do -- SECTION Stats
                 local tab2 = SussySpt.rendering.newTab("Stats")
 
@@ -1873,6 +1924,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rif(refresh)
 
                     tab3.render = function()
+                        SussySpt.displayUpdateWarning()
+
                         if ImGui.SmallButton("Refresh") then
                             yu.rif(refresh)
                         end
@@ -2174,7 +2227,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     tab2.sub[2] = tab3
                 end
 
-                tab.sub[2] = tab2
+                tab.sub[3] = tab2
             end -- !SECTION
 
             do -- ANCHOR Chatlog
@@ -2208,7 +2261,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end
 
-                tab.sub[3] = tab2
+                tab.sub[4] = tab2
             end
 
             do -- ANCHOR CMM
@@ -2239,6 +2292,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
 
                 tab2.render = function()
+                    SussySpt.displayUpdateWarning()
+
                     ImGui.Text("Works best when low ping / session host")
 
                     for k, v in pairs(a.apps) do
@@ -2250,7 +2305,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end
 
-                tab.sub[4] = tab2
+                tab.sub[5] = tab2
             end
 
             do -- SECTION Unlocks
@@ -2304,6 +2359,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     }
 
                     tab3.render = function()
+                        SussySpt.displayUpdateWarning()
+
                         if ImGui.Button("Unlock all achievements") then
                             SussySpt.addTask(function()
                                 yu.loop(59, function(i)
@@ -2827,6 +2884,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     local tab3 = SussySpt.rendering.newTab("Weapons")
 
                     tab3.render = function()
+                        SussySpt.displayUpdateWarning()
+
                         if ImGui.SmallButton("Unlock guns") then
                             SussySpt.addTask(function()
                                 local mpx = yu.mpx()
@@ -2913,13 +2972,15 @@ function SussySpt:init() -- SECTION SussySpt:init
                     tab2.sub[3] = tab3
                 end
 
-                tab.sub[5] = tab2
+                tab.sub[6] = tab2
             end -- !SECTION
 
             do -- ANCHOR Misc
                 local tab2 = SussySpt.rendering.newTab("Misc")
 
                 tab2.render = function()
+                    SussySpt.displayUpdateWarning()
+
                     yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
                         SussySpt.addTask(function()
                             globals.set_int(292539, yu.shc(state, 0, 60000))
@@ -2933,7 +2994,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end)
                 end
 
-                tab.sub[6] = tab2
+                tab.sub[7] = tab2
             end
 
             do -- ANCHOR Session
@@ -2953,7 +3014,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rendering.tooltip("This really just puts the players client-side under the map")
                 end
 
-                tab.sub[7] = tab2
+                tab.sub[8] = tab2
             end
 
             do -- ANCHOR Money
@@ -3008,6 +3069,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 }
 
                 tab2.render = function()
+                    SussySpt.displayUpdateWarning()
+
                     ImGui.Text("This feature is instable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
                     ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected for over a month now")
                     ImGui.Spacing()
@@ -3073,7 +3136,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                 end
 
-                tab.sub[8] = tab2
+                tab.sub[9] = tab2
             end
 
             SussySpt.rendering.tabs[1] = tab
@@ -3808,6 +3871,13 @@ function SussySpt:init() -- SECTION SussySpt:init
     yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
 end -- !SECTION
 
+function SussySpt.displayUpdateWarning() -- ANCHOR SussySpt.displayUpdateWarning
+    ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
+    ImGui.Text("This feature is currently under maintenance and not working")
+    ImGui.PopStyleColor()
+    ImGui.Spacing()
+end
+
 function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
     if io == nil or io.open == nil then
         log.warning("Error: Could not access io.open. Is yimmenu updated?")
@@ -3936,7 +4006,10 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
         end
 
         if SussySpt.in_online then
+            ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
             SussySpt.cfg.set("cat_hbo", yu.rendering.renderCheckbox("HBO", "cat_hbo"))
+            yu.rendering.tooltip("Most of the things wont work due to the latest gta update.\nUse with caution")
+            ImGui.PopStyleColor()
         end
         SussySpt.cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
     end)
@@ -5697,15 +5770,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                             globals.set_int(1937644 + k, v)
                         end
                     end
-                end
-
-                if SussySpt.dev and ImGui.Button("15m Test") then
-                    SussySpt.addTask(function()
-                        globals.set_int(1936397 + 1 + 1, 7453)
-                        globals.set_int(1936397 + 1 + 1 + 1, 7453)
-                        globals.set_int(1936397 + 1 + 1 + 1 + 1, 100 - (7453 * 2))
-                        globals.set_int(1938365 + 3008 + 1, 7453)
-                    end)
                 end
 
                 ImGui.EndGroup()
