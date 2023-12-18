@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2602,
+    versionid = 2611,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -156,16 +156,8 @@ function SussySpt:init() -- SECTION SussySpt:init
     SussySpt.pointers = {
         bounty_self_value = 1 + 2359296 + 5150 + 14,
         bounty_self_time = 1 + 2359296 + 5150 + 13,
-        bounty_other_amount = function(pid)
-            return 1 + 1895156 + (pid * 609) + 600
-        end,
-        bounty_other_by = function(pid)
-            return 1 + 1895156 + (pid * 609) + 601
-        end,
-        tunables_rpmultiplier = 262145 + 1,
-        tunables_apmultiplier = 288259,
-        halloween_unlock = 2765084 + 591,
-        halloween_pumpkin_picked_up = 2765084 + 591
+
+        agency_maxpayout = 262145 + 32466
     }
 
     SussySpt.xp_to_rank = yu.xp_to_rank()
@@ -1805,13 +1797,14 @@ function SussySpt:init() -- SECTION SussySpt:init
                             },
                             set = {
                                 crew = function(v)
+                                    -- TODO Update globals
                                     globals.set_int(1936397 + 1 + 1, 100 - (v * 4))
                                     globals.set_int(1936397 + 1 + 2, v)
                                     globals.set_int(1936397 + 1 + 3, v)
                                     globals.set_int(1936397 + 1 + 4, v)
                                 end,
                                 self = function(v)
-                                    globals.set_int(1938365 + 3008 + 1, v)
+                                    globals.set_int(1930201 + 3008 + 1, v)
                                 end
                             }
                         }
@@ -1901,6 +1894,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
                             end
                         end
+
+                        a.ischeater = NETWORK.NETWORK_PLAYER_IS_CHEATER()
                     end
 
                     local function refreshAbilityValues()
@@ -1924,8 +1919,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                     yu.rif(refresh)
 
                     tab3.render = function()
-                        SussySpt.displayUpdateWarning()
-
                         if ImGui.SmallButton("Refresh") then
                             yu.rif(refresh)
                         end
@@ -1935,9 +1928,49 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 yu.rif(refreshStats)
                             end
 
+                            if a.ischeater then
+                                ImGui.Text("You are marked as a cheater!")
+                            end
+
                             for k, v in pairs(a.stats) do
                                 if v[4] ~= nil then
                                     ImGui.Text(v[3]..": "..v[4])
+                                end
+                            end
+
+                            if SussySpt.dev then
+                                ImGui.Spacing()
+
+                                if ImGui.Button("Clear reports (test)") then
+                                    SussySpt.addTask(function()
+                                        stats.set_int("MPPLY_REPORT_STRENGTH", 0)
+                                        stats.set_int("MPPLY_COMMEND_STRENGTH", 0)
+                                        stats.set_int("MPPLY_GRIEFING", 0)
+                                        stats.set_int("MPPLY_VC_ANNOYINGME", 0)
+                                        stats.set_int("MPPLY_VC_HATE", 0)
+                                        stats.set_int("MPPLY_TC_ANNOYINGME", 0)
+                                        stats.set_int("MPPLY_TC_HATE", 0)
+                                        stats.set_int("MPPLY_OFFENSIVE_LANGUAGE", 0)
+                                        stats.set_int("MPPLY_OFFENSIVE_TAGPLATE", 0)
+                                        stats.set_int("MPPLY_OFFENSIVE_UGC", 0)
+                                        stats.set_int("MPPLY_BAD_CREW_NAME", 0)
+                                        stats.set_int("MPPLY_BAD_CREW_MOTTO", 0)
+                                        stats.set_int("MPPLY_BAD_CREW_STATUS", 0)
+                                        stats.set_int("MPPLY_BAD_CREW_EMBLEM", 0)
+                                        stats.set_int("MPPLY_GAME_EXPLOITS", 0)
+                                        stats.set_int("MPPLY_EXPLOITS", 0)
+                                        stats.set_int("MPPLY_BECAME_CHEATER_NUM", 0)
+                                        stats.set_int("MPPLY_GAME_EXPLOITS", 0)
+                                        stats.set_int("MPPLY_PLAYER_MENTAL_STATE", 0)
+                                        stats.set_int("MPPLY_PLAYERMADE_TITLE", 0)
+                                        stats.set_int("MPPLY_PLAYERMADE_DESC", 0)
+                                        stats.set_int("MPPLY_KILLS_PLAYERS_CHEATER", 0)
+                                        stats.set_int("MPPLY_DEATHS_PLAYERS_CHEATER", 0)
+                                        stats.set_bool("MPPLY_ISPUNISHED", false)
+                                        stats.set_bool("MPPLY_WAS_I_CHEATER", false)
+                                        stats.set_int("MPPLY_OVERALL_BADSPORT", 0)
+                                        stats.set_int("MPPLY_OVERALL_CHEAT", 0)
+                                    end)
                                 end
                             end
 
@@ -1986,7 +2019,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.TreePop()
                         end
 
-                        if ImGui.TreeNodeEx("Badsport") then
+                        if SussySpt.dev and ImGui.TreeNodeEx("Badsport") then
                             if ImGui.SmallButton("Add##badsport") then
                                 SussySpt.addTask(function()
                                     stats.set_int("MPPLY_BADSPORT_MESSAGE", -1)
@@ -2010,53 +2043,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.TreePop()
                         end
 
-                        if ImGui.TreeNodeEx("Bounty") then
+                        if SussySpt.dev and ImGui.TreeNodeEx("Bounty") then
                             if ImGui.SmallButton("Remove bounty") then
                                 SussySpt.addTask(function()
                                     globals.set_int(SussySpt.pointers.bounty_self_time, 2880000)
                                 end)
-                            end
-
-                            ImGui.TreePop()
-                        end
-
-                        if ImGui.TreeNodeEx("Jack O' Lantern") then
-                            if ImGui.SmallButton("Unlock Mask") then
-                                SussySpt.addTask(function()
-                                    globals.set_int(SussySpt.pointers.halloween_unlock, 9)
-                                end)
-                            end
-
-                            if ImGui.SmallButton("Unlock T-Shirt") then
-                                SussySpt.addTask(function()
-                                    globals.set_int(SussySpt.pointers.halloween_unlock, 199)
-                                end)
-                            end
-
-                            ImGui.Spacing()
-
-                            do
-                                ImGui.PushItemWidth(150)
-                                local resp = yu.rendering.input("int", {
-                                    label = "##pumpkin",
-                                    value = a.pumpkinspickedup or 1
-                                })
-                                ImGui.PopItemWidth()
-                                if resp ~= nil and resp.changed then
-                                    a.pumpkinspickedup = resp.value
-                                end
-
-                                ImGui.SameLine()
-
-                                if ImGui.Button("Set") then
-                                    SussySpt.addTask(function()
-                                        if yu.is_num_between(a.pumpkinspickedup, 0, 199) then
-                                            globals.set_int(SussySpt.pointers.halloween_pumpkin_picked_up, a.pumpkinspickedup)
-                                        else
-                                            yu.notify(3, "Invalid number! Number must be between 0 and 199", "Online->Stats")
-                                        end
-                                    end)
-                                end
                             end
 
                             ImGui.TreePop()
@@ -2369,7 +2360,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     end
                                 end)
                                 for i = 1, 78 do
-                                    globals.set_int(4542602 + 1, i)
+                                    globals.set_int(4543283 + 1, i)
                                 end
                             end)
                         end
@@ -5173,7 +5164,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                         if k == -2 then
                             globals.set_int(2691426, v)
                         else
-                            globals.set_int(1974021 + k, v)
+                            globals.set_int(1963945 + 1497 + 736 + 92 + k, v)
                         end
                     end
                 end
@@ -5270,7 +5261,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
     local function initCasino()
         local rigSlotMachinesId = "hbo_casinoresort_rsm"
-        -- local rigSlotMachinesSmartId = "hbo_casinoresort_rsms"
 
         local luckyWheelPrizes = {
             [0] = "CLOTHING (1)",
@@ -5310,8 +5300,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.notify(2, "Try going near the lucky wheel", "Diamond Casino & Resort")
             end
         end
-
-        yu.set_default_stat("RIGSLOTMACHINES_LAST", false)
 
         local storyMissions = {
             [1048576] = "Loose Cheng",
@@ -6011,7 +5999,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
         SussySpt.addTask(function()
             if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
-                globals.set_int(294496, 2000000)
+                globals.set_int(SussySpt.pointers.agency_maxpayout, 2000000)
             end
         end)
 
@@ -6081,22 +6069,10 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 yu.rendering.renderCheckbox("$2M finale", "hbo_agency_smthmfinale", function(state)
                     if not state then
-                        globals.set_int(294496, 1000000)
+                        globals.set_int(SussySpt.pointers.agency_maxpayout, 1000000)
                     end
                 end)
                 yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
-
-                yu.rendering.renderCheckbox("Remove contracts & payphone hits cooldown", "hbo_agency_cphcd", function(state)
-                    SussySpt.addTask(function()
-                        globals.set_int(293490, yu.shc(state, 0, 300000))
-                    end)
-                end)
-
-                yu.rendering.renderCheckbox("Remove security mission cooldown", "hbo_agency_smcd", function(state)
-                    SussySpt.addTask(function()
-                        globals.set_int(294134, yu.shc(state, 0, 1200000))
-                    end)
-                end)
 
                 ImGui.EndGroup()
                 ImGui.EndTabItem()
