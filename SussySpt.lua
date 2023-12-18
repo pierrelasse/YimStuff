@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2611,
+    versionid = 2615,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -607,7 +607,10 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     v.info.vehicle[2] = v.info.vehicle[2].."."
                                         .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
                                         .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
-                                        .." Passengers: "..(vehiclePassengers or -1).."/"..(vehicleMaxPassengers or -1)
+
+                                    if vehiclePassengers ~= nil and vehicleMaxPassengers ~= nil then
+                                        v.info.vehicle[2] = v.info.vehicle[2].." Passengers: "..(vehiclePassengers).."/"..(vehicleMaxPassengers)
+                                    end
                                 end
                             end
 
