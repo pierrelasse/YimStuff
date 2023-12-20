@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2615,
+    versionid = 2616,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -3727,7 +3727,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
                 bindHotkey(yu.keys[a.key])
 
-                yu.rendering.setCheckboxChecked("invisible_hotkey", SussySpt.cfg.get("invisible_hotkey", true))
+                yu.rendering.setCheckboxChecked("invisible_hotkey", SussySpt.cfg.get("invisible_hotkey", false))
                 yu.rendering.setCheckboxChecked("invisible_log", SussySpt.cfg.get("invisible_log", false))
                 yu.rendering.setCheckboxChecked("invisible_self", SussySpt.cfg.get("invisible_self", true))
                 yu.rendering.setCheckboxChecked("invisible_vehicle", SussySpt.cfg.get("invisible_vehicle", true))
