@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2616,
+    versionid = 2649,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1901,17 +1901,28 @@ function SussySpt:init() -- SECTION SussySpt:init
                         a.ischeater = NETWORK.NETWORK_PLAYER_IS_CHEATER()
                     end
 
+                    local function refreshAbilityValue(mpx, i)
+                        local data = a.abilitystats[i]
+                        if data == nil then
+                            return
+                        end
+
+                        local stat = mpx..data[1]
+
+                        if i == 8 then
+                            a.abilityvalues[i] = stats.get_float(stat)
+                        else
+                            a.abilityvalues[i] = stats.get_int(stat)
+                        end
+                        a.abilitynewvalues[i] = nil
+                    end
+
                     local function refreshAbilityValues()
                         local mpx = yu.mpx()
                         a.abilityvalues = {}
                         a.abilitynewvalues = {}
                         for k, v in pairs(a.abilitystats) do
-                            local stat = mpx..v[1]
-                            if k == 8 then
-                                a.abilityvalues[k] = stats.get_float(stat)
-                            else
-                                a.abilityvalues[k] = stats.get_int(stat)
-                            end
+                            refreshAbilityValue(mpx, k)
                         end
                     end
 
@@ -1988,11 +1999,19 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.Spacing()
 
                             ImGui.PushItemWidth(331)
-                            for k, v in pairs(a.abilities) do
+                            for k, v in pairs(a.abilityvalues) do
                                 do
-                                    local value, changed = ImGui.DragInt(v, a.abilitynewvalues[k] or a.abilityvalues[k], .2, 0, 100, "%d", 5)
-                                    if changed then
-                                        a.abilitynewvalues[k] = value
+                                    local value = a.abilitynewvalues[k] or v
+                                    if k == 8 then
+                                        local newvalue, used = ImGui.DragFloat(a.abilities[k], value, .2, 0, 100)
+                                        if used then
+                                            a.abilitynewvalues[k] = newvalue
+                                        end
+                                    else
+                                        local newvalue, used = ImGui.DragInt(a.abilities[k], value, .2, 0, 100)
+                                        if used then
+                                            a.abilitynewvalues[k] = newvalue
+                                        end
                                     end
                                 end
 
@@ -2003,15 +2022,16 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     if ImGui.SmallButton("Apply##abilities_"..k) then
                                         SussySpt.addTask(function()
                                             if yu.is_num_between(value, 0, 100) then
+                                                local mpx = yu.mpx()
                                                 for k1, v2 in pairs(a.abilitystats[k]) do
-                                                    local stat = yu.mpx(v2)
+                                                    local stat = mpx..v2
                                                     if k == 8 then
                                                         stats.set_float(stat, value)
                                                     else
                                                         stats.set_int(stat, value)
                                                     end
-                                                    refreshAbilityValues()
                                                 end
+                                                refreshAbilityValue(mpx, k)
                                             end
                                         end)
                                     end
@@ -3862,7 +3882,7 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
 
     SussySpt.debug("Loaded successfully!")
-    yu.notify(1, "Loaded! v"..SussySpt.version.." ["..SussySpt.versionid.."]", "Loaded!")
+    yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
 
 function SussySpt.displayUpdateWarning() -- ANCHOR SussySpt.displayUpdateWarning
@@ -6256,14 +6276,14 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                     SussySpt.addTask(function()
                         if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
                             STREAMING.STOP_PLAYER_SWITCH()
-                            if CAM.IS_SCREEN_FADED_OUT() then
-                                CAM.DO_SCREEN_FADE_IN(0)
-                            end
                             HUD.CLEAR_HELP(true)
-                            HUD.SET_FRONTEND_ACTIVE(true)
                             SCRIPT.SHUTDOWN_LOADING_SCREEN()
-                            GRAPHICS.ANIMPOSTFX_STOP_ALL()
                         end
+                        if CAM.IS_SCREEN_FADED_OUT() then
+                            CAM.DO_SCREEN_FADE_IN(0)
+                        end
+                        GRAPHICS.ANIMPOSTFX_STOP_ALL()
+                        HUD.SET_FRONTEND_ACTIVE(true)
                     end)
                 end
                 yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
