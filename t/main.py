@@ -82,7 +82,7 @@ def main():
                 from merge import merge as _merge
                 merge = _merge
 
-            with open(root + "/out/SussySpt.luao", "w") as f:
+            with open(root + "/out/SussySpt.lua", "w") as f:
                 lines = convertLines(increaseSussySptVersionId(), {"versionType": 2})
 
                 if should_merge:
@@ -91,7 +91,7 @@ def main():
 
                 f.write("\n".join(lines))
 
-            shutil.copy(root + "/out/SussySpt.luao", cfg["scriptsPath"] + "/SussySpt.lua")
+            shutil.copy(root + "/out/SussySpt.lua", cfg["scriptsPath"] + "/SussySpt.lua")
             if not should_merge:
                 shutil.copy(root + "/yimutils.lua", cfg["scriptsPath"] + "/yimutils.lua")
 
