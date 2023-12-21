@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
-    version = "1.3.14",
-    versionid = 2719,
+    version = "1.3.15",
+    versionid = 2723,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1798,8 +1798,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             do -- SECTION Thing
                 local tab2 = SussySpt.rendering.newTab("Thing")
-
-                tab2.should_display = SussySpt.dev
 
                 local function addUnknownValue(tbl, v)
                     if tbl[v] == nil then
