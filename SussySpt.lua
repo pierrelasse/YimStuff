@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2649,
+    versionid = 2657,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -467,9 +467,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
                     },
                     pickupoption = "Action Figure - UWU",
-                    pickupamount = 1,
-                    cashamount = 1,
-                    cashvalue = 100,
 
                     attachoptions = {
                         [joaat("prop_beach_fire")] = "Beach fire",
@@ -1039,7 +1036,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     VEHICLE.SET_VEHICLE_CUSTOM_PRIMARY_COLOUR(veh, 255, 0, 192)
                                                     VEHICLE.SET_VEHICLE_CUSTOM_SECONDARY_COLOUR(veh, 198, 0, 255)
                                                     ENTITY.SET_ENTITY_COLLISION(veh, false, true)
-                                                    ENTITY.SET_VEHICLE_AS_NO_LONGER_NEEDED(veh)
+                                                    ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(veh)
                                                     rs:sleep(2)
                                                     ENTITY.SET_ENTITY_COLLISION(veh, true, true)
                                                 end
@@ -1099,7 +1096,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
                                                     ENTITY.SET_ENTITY_VISIBLE(objects[i], true, false)
                                                     ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
-                                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(objects[i])
+                                                    ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(objects[i])
                                                 end
                                             end)
                                         end
@@ -1222,7 +1219,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                         networkobj(obj)
                                                         ENTITY.SET_ENTITY_HEADING(obj, heading)
                                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                        ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(obj)
                                                     end
 
                                                     createObject(-1.70, -1.70, -90.0)
@@ -1241,7 +1238,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                         networkobj(obj)
                                                         ENTITY.SET_ENTITY_ROTATION(obj, 0, 0, yu.shc(i == 0, 0, 90), 2, true)
                                                         ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                                        ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                        ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(obj)
                                                     end
                                                 end)
                                             end
@@ -1253,7 +1250,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     networkobj(obj)
                                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                                     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
-                                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                    ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(obj)
                                                 end)
                                             end
                                             ImGui.SameLine()
@@ -1265,7 +1262,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                     ENTITY.SET_ENTITY_ROTATION(obj, 0, 90, 0, 2, true)
                                                     ENTITY.FREEZE_ENTITY_POSITION(obj, true)
                                                     ENTITY.SET_ENTITY_VISIBLE(obj, false, false)
-                                                    ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                    ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(obj)
                                                 end)
                                             end
 
@@ -1332,7 +1329,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                                 ENTITY.SET_ENTITY_VISIBLE(obj, false, false)
                                                                 ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
                                                             end
-                                                            ENTITY.SET_OBJECT_AS_NO_LONGER_NEEDED(obj)
+                                                            ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(obj)
                                                         end
 
                                                         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
@@ -1653,34 +1650,20 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                         ImGui.SameLine()
 
-                                        ImGui.PushItemWidth(35)
-                                        local par = yu.rendering.input("int", {
-                                            label = "##pa",
-                                            value = a.pickupamount
-                                        })
-                                        yu.rendering.tooltip("How many times the pickup should get spawned")
-                                        SussySpt.pushDisableControls(ImGui.IsItemActive())
-                                        ImGui.PopItemWidth()
-                                        if par ~= nil and par.changed then
-                                            a.pickupamount = par.value
-                                        end
-
                                         if not a.givepickupblocked then
                                             ImGui.SameLine()
-                                            if ImGui.Button("Give pickup") then
+                                            if ImGui.Button("Spawn") then
                                                 a.givepickupblocked = true
                                                 yu.rif(function(rs)
                                                     local value = a.pickupoptions[a.pickupoption]
-                                                    if yu.is_num_between(a.pickupamount, 0, 20) and type(value) == "string" then
-                                                        local hash = joaat(value)
-                                                        if STREAMING.IS_MODEL_VALID(hash) then
-                                                            STREAMING.REQUEST_MODEL(hash)
-                                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-                                                            yu.loop(a.pickupamount, function()
-                                                                local c = yu.coords(player.ped)
-                                                                OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.5, 0, 0, hash, true, false)
-                                                                rs:sleep(4)
-                                                            end)
+                                                    if type(value) == "string" then
+                                                        local modelHash = joaat(value)
+                                                        if STREAMING.IS_MODEL_VALID(modelHash) then
+                                                            STREAMING.REQUEST_MODEL(modelHash)
+                                                            repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
+                                                            local c = yu.coords(player.ped)
+                                                            OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.2, 0, 0, modelHash, true, false)
+                                                            STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(modelHash)
                                                         end
                                                     end
                                                     a.givepickupblocked = nil
@@ -1688,42 +1671,28 @@ function SussySpt:init() -- SECTION SussySpt:init
                                             end
                                         end
 
-                                        ImGui.PushItemWidth(78)
-
-                                        local car = yu.rendering.input("int", {
-                                            label = "##ca",
-                                            value = a.cashamount
-                                        })
-                                        yu.rendering.tooltip("How much cash to spawn")
-                                        SussySpt.pushDisableControls(ImGui.IsItemActive())
-                                        if car ~= nil and car.changed then
-                                            a.cashamount = car.value
-                                        end
-
                                         ImGui.SameLine()
 
-                                        local cvr = yu.rendering.input("int", {
-                                            label = "##cv",
-                                            value = a.cashvalue
-                                        })
-                                        yu.rendering.tooltip("How much money per cash")
-                                        SussySpt.pushDisableControls(ImGui.IsItemActive())
-                                        if cvr ~= nil and cvr.changed then
-                                            a.cashvalue = cvr.value
-                                        end
+                                        yu.rendering.renderCheckbox("Loop##pickup", "online_players_pickuploop", function(state)
+                                            if state then
+                                                yu.rif(function(rs)
+                                                    local modelHash = joaat(a.pickupoptions[a.pickupoption])
+                                                    if STREAMING.IS_MODEL_VALID(modelHash) then
+                                                        STREAMING.REQUEST_MODEL(modelHash)
+                                                        repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
 
-                                        ImGui.PopItemWidth()
+                                                        while yu.rendering.isCheckboxChecked("online_players_pickuploop") do
+                                                            local c = yu.coords(player.ped)
+                                                            local pickup = OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_CUSTOM_SCRIPT"), c.x, c.y, c.z + 1.2, 0, 0, modelHash, true, false)
+                                                            ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(pickup)
+                                                            rs:sleep(100)
+                                                        end
 
-                                        ImGui.SameLine()
-
-                                        if ImGui.Button("Spawn cash") then
-                                            SussySpt.addTask(function()
-                                                if yu.is_num_between(a.cashamount, 0, 10000) then
-                                                    local c = yu.coords(player.ped)
-                                                    OBJECT.CREATE_MONEY_PICKUPS(c.x, c.y, c.z, a.cashvalue, a.cashamount, 2628187989)
-                                                end
-                                            end)
-                                        end
+                                                        STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(modelHash)
+                                                    end
+                                                end)
+                                            end
+                                        end)
 
                                         ImGui.TreePop()
                                     end
@@ -3298,28 +3267,35 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab2.should_display = SussySpt.getDev
 
                 tab2.render = function()
-                    ImGui.Text("Door controller")
+                    ImGui.Text("This is not finished!")
 
-                    for i = 0, 10 do
-                        ImGui.Text(i..":")
-                        ImGui.SameLine()
-                        if ImGui.SmallButton("Open##"..i) then
-                            SussySpt.addTask(function()
-                                local veh = yu.veh(yu.ppid())
-                                if veh ~= nil then
-                                    VEHICLE.SET_VEHICLE_DOOR_OPEN(veh, i, false, true)
-                                end
-                            end)
+                    ImGui.Spacing()
+
+                    if ImGui.TreeNodeEx("Door controller") then
+
+                        for i = 0, 10 do
+                            ImGui.Text(i..":")
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Open##"..i) then
+                                SussySpt.addTask(function()
+                                    local veh = yu.veh(yu.ppid())
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOOR_OPEN(veh, i, false, true)
+                                    end
+                                end)
+                            end
+                            ImGui.SameLine()
+                            if ImGui.SmallButton("Closed##"..i) then
+                                SussySpt.addTask(function()
+                                    local veh = yu.veh(yu.ppid())
+                                    if veh ~= nil then
+                                        VEHICLE.SET_VEHICLE_DOOR_SHUT(veh, i, true)
+                                    end
+                                end)
+                            end
                         end
-                        ImGui.SameLine()
-                        if ImGui.SmallButton("Closed##"..i) then
-                            SussySpt.addTask(function()
-                                local veh = yu.veh(yu.ppid())
-                                if veh ~= nil then
-                                    VEHICLE.SET_VEHICLE_DOOR_SHUT(veh, i, true)
-                                end
-                            end)
-                        end
+
+                        ImGui.TreePop()
                     end
                 end
 
