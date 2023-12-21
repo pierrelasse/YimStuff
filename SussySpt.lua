@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.15",
-    versionid = 2723,
+    versionid = 2725,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -580,7 +580,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if network.is_player_flagged_as_modder(v.player) then
                             v.info.modder = {
                                 "M",
-                                "This player was detected as a modder"
+                                "This player was detected as a modder: "..network.get_flagged_modder_reason(v.player)
                             }
                         end
 
