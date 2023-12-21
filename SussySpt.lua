@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2668,
+    versionid = 2719,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -153,12 +153,37 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end
 
-    SussySpt.pointers = {
-        bounty_self_value = 1 + 2359296 + 5150 + 14,
+    -- SECTION p
+    SussySpt.p = {
+        g = { -- ANCHOR Globals
+            fm = 262145, -- freemode
+
+            agency_payout = 32466, -- CLO_FXM_L_1_0
+            agency_instantfinish1 = 38397,
+            agency_instantfinish2 = 39772,
+            agency_cooldown = 32500, -- CLO_FXM_L_3_5
+
+            autoshop_payout1 = 31602,
+            autoshop_payout2 = 31610,
+
+            autoshop_instantfinish1 = 48513 + 1,
+            autoshop_instantfinish2 = 48513 + 1378 + 1,
+            apartment_cuts_other = 1928233 + 1,
+            apartment_cuts_self = 1930201 + 3008 + 1,
+            apartment_replay = 2635522 -- HEIST_REPLAY_FIN
+        },
+        l = { -- ANCHOR Locals
+            apartment_fleeca_hackstage = 11776 + 24,
+            apartment_fleeca_drillstage = 10067 + 11,
+            apartment_instantfinish1 = 19728,
+            apartment_instantfinish2 = 28347 + 1,
+            apartment_instantfinish3 = 31603 + 69
+        },
+
         bounty_self_time = 1 + 2359296 + 5150 + 13,
 
         agency_maxpayout = 262145 + 32466
-    }
+    } -- !SECTION
 
     SussySpt.xp_to_rank = yu.xp_to_rank()
 
@@ -215,6 +240,26 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
 
     SussySpt.render_pops = {}
+    -- ANCHOR Render
+
+    local function renderTabs()
+        if ImGui.Begin(SussySpt.rendering.title) then
+            ImGui.BeginTabBar("##tabbar")
+            for k, v in pairs(SussySpt.rendering.tabs) do
+                renderTab(v)
+            end
+            ImGui.EndTabBar()
+        end
+        ImGui.End()
+        return true
+    end
+
+    function SussySpt.removeErrorPath(s)
+        local maxAmount = yu.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
+        local values = s:split(":", maxAmount)
+        return { values[0], values[3], values[4]:strip() }
+    end
+
     SussySpt.render = function()
         for k, v in pairs(SussySpt.rendercb) do
             v()
@@ -249,14 +294,14 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
         pushTheme(SussySpt.rendering.getTheme())
 
-        if ImGui.Begin(SussySpt.rendering.title) then
-            ImGui.BeginTabBar("##tabbar")
-            for k, v in pairs(SussySpt.rendering.tabs) do
-                renderTab(v)
-            end
-            ImGui.EndTabBar()
+        local success, result = pcall(renderTabs)
+        if not success then
+            local err = SussySpt.removeErrorPath(result)
+            ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
+            ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
+            log.info("Error while rendering (line "..err[2].."): "..err[3])
+            ImGui.PopStyleColor()
         end
-        ImGui.End()
 
         for k, v in pairs(SussySpt.render_pops) do
             ImGui[k](v)
@@ -277,6 +322,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end
 
+    -- ANCHOR mainLoop
     SussySpt.mainLoop = function(rs)
         while true do
             rs:yield()
@@ -1755,7 +1801,13 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 tab2.should_display = SussySpt.dev
 
-                do -- ANCHOR Apartment
+                local function addUnknownValue(tbl, v)
+                    if tbl[v] == nil then
+                        tbl[v] = "??? ["..(v or "<null>").."]"
+                    end
+                end
+
+                do -- SECTION Apartment
                     local tab3 = SussySpt.rendering.newTab("Apartment")
 
                     local a = {
@@ -1768,44 +1820,499 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 ["Series A Funding"] = 2121
                             },
                             set = {
-                                crew = function(v)
-                                    -- TODO Update globals
-                                    globals.set_int(1936397 + 1 + 1, 100 - (v * 4))
-                                    globals.set_int(1936397 + 1 + 2, v)
-                                    globals.set_int(1936397 + 1 + 3, v)
-                                    globals.set_int(1936397 + 1 + 4, v)
+                                crew = function(v, amount)
+                                    globals.set_int(SussySpt.p.g.apartment_cuts_other + 1, 100 - (v * 4))
+                                    globals.set_int(SussySpt.p.g.apartment_cuts_other + 2, v)
+                                    globals.set_int(SussySpt.p.g.apartment_cuts_other + 3, v)
+                                    globals.set_int(SussySpt.p.g.apartment_cuts_other + 4, v)
+
+                                    -- for i = 1, amount do
+                                    -- end
                                 end,
                                 self = function(v)
-                                    globals.set_int(1930201 + 3008 + 1, v)
+                                    globals.set_int(SussySpt.p.g.apartment_cuts_self, v)
                                 end
                             }
                         }
                     }
 
-                    tab3.render = function()
-                        SussySpt.displayUpdateWarning()
+                    do -- ANCHOR Preperations
+                        local tab4 = SussySpt.rendering.newTab("Preperations")
 
-                        for k, v in pairs(a.cuts15m.heists) do
-                            if ImGui.Button(k) then
-                                yu.rif(function(rs)
-                                    a.cuts15m.set.crew(v)
-                                    rs:sleep(1000)
-                                    -- menu.send_key_press(13) -- MOUSE RIGHT
-                                    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 13, 1)
-                                    log.info("MOUSE RIGHT")
-                                    rs:sleep(1000)
-                                    -- menu.send_key_press(27) -- ARROW UP
-                                    PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 27, 1)
-                                    log.info("ARROW UP")
-                                    rs:sleep(1000)
-                                    a.cuts15m.set.self(v)
+                        tab4.render = function()
+                            if ImGui.Button("Complete preps") then
+                                SussySpt.addTask(function()
+                                    stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Reset preps") then
+                                SussySpt.addTask(function()
+                                    stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), 0)
                                 end)
                             end
                         end
+
+                        tab3.sub[1] = tab4
+                    end
+
+                    do -- ANCHOR Extra
+                        local tab4 = SussySpt.rendering.newTab("Extra")
+
+                        tab4.render = function()
+                            if ImGui.Button("Unlock replay screen") then
+                                SussySpt.addTask(function()
+                                    globals.set_int(SussySpt.p.g.apartment_replay, 27)
+                                end)
+                            end
+                            yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
+
+                            if ImGui.Button("Instant finish (solo)") then
+                                SussySpt.addTask(function()
+                                    local script = "fm_mission_controller"
+                                    if SussySpt.requireScript(script) then
+                                        locals.set_int(script, SussySpt.p.l.apartment_instantfinish1, 12)
+                                        locals.set_int(script, SussySpt.p.l.apartment_instantfinish2, 99999)
+                                        locals.set_int(script, SussySpt.p.l.apartment_instantfinish3, 99999)
+                                    end
+                                end)
+                            end
+
+                            ImGui.Spacing()
+
+                            ImGui.Text("Fleeca")
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Skip hack##fleeca") then
+                                SussySpt.addTask(function()
+                                    if SussySpt.requireScript("fm_mission_controller") then
+                                        locals.set_int("fm_mission_controller", SussySpt.p.l.apartment_fleeca_hackstage, 7)
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Skip drill##fleeca") then
+                                SussySpt.addTask(function()
+                                    if SussySpt.requireScript("fm_mission_controller") then
+                                        locals.set_float("fm_mission_controller", SussySpt.p.l.apartment_fleeca_drillstage, 100)
+                                    end
+                                end)
+                            end
+                        end
+
+                        tab3.sub[2] = tab4
+                    end
+
+                    do -- ANCHOR Cuts
+                        local tab4 = SussySpt.rendering.newTab("Cuts")
+
+                        tab4.render = function()
+                            ImGui.Text("$15m cuts")
+                            ImGui.Spacing()
+
+                            if a.cuts15mactive ~= true then
+                                for k, v in pairs(a.cuts15m.heists) do
+                                    if ImGui.Button(k) then
+                                        a.cuts15mactive = true
+                                        yu.rif(function(rs)
+                                            a.cuts15m.set.crew(v, yu.shc(k == 7453, 2, 4))
+
+                                            rs:sleep(1000)
+                                            -- menu.send_key_press(13) -- MOUSE RIGHT
+                                            rs:sleep(1000)
+                                            -- menu.send_key_press(27) -- ARROW UP / SCROLLWHEEL BUTTON (PRESS)
+                                            rs:sleep(1000)
+
+                                            -- PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1) -- ENTER / LEFT MOUSE BUTTON
+
+                                            a.cuts15m.set.self(v)
+
+                                            a.cuts15mactive = nil
+                                        end)
+                                    end
+                                end
+                            else
+                                ImGui.Text("Applying. Please wait")
+                            end
+                        end
+
+                        tab3.sub[3] = tab4
                     end
 
                     tab2.sub[1] = tab3
-                end
+                end -- !SECTION
+
+                do -- SECTION Agency
+                    local tab3 = SussySpt.rendering.newTab("Agency")
+
+                    do -- ANCHOR Preperations
+                        local tab4 = SussySpt.rendering.newTab("Preperations")
+
+                        local a = {
+                            vipcontracts = {
+                                [3] = "Nightlife Leak -> Investigation: The Nightclub",
+                                [4] = "Nightlife Leak -> Investigation: The Marina",
+                                [12] = "Nightlife Leak -> Nightlife Leak/Finale",
+                                [28] = "High Society Leak -> Investigation: The Country Club",
+                                [60] = "High Society Leak -> Investigation: Guest List",
+                                [124] = "High Society Leak -> High Society Leak/Finale",
+                                [252] = "South Central Leak -> Investigation: Davis",
+                                [508] = "South Central Leak -> Investigation: The Ballas",
+                                [2044] = "South Central Leak -> South Central Leak/Finale",
+                                [-1] = "Studio Time",
+                                [4092] = "Don't Fuck With Dre"
+                            },
+                            vipcontractssort = {
+                                [1] = 3,
+                                [2] = 4,
+                                [3] = 12,
+                                [4] = 28,
+                                [5] = 60,
+                                [6] = 124,
+                                [7] = 252,
+                                [8] = 508,
+                                [9] = 2044,
+                                [10] = -1,
+                                [11] = 4092
+                            }
+                        }
+
+                        local function refresh()
+                            local mpx = yu.mpx()
+
+                            a.vipcontract = stats.get_int(mpx.."FIXER_STORY_BS")
+                        end
+                        SussySpt.addTask(refresh)
+
+                        tab4.render = function()
+                            if ImGui.SmallButton("Refresh") then
+                                SussySpt.addTask(refresh)
+                            end
+
+                            ImGui.Separator()
+
+                            local re = yu.rendering.renderList(a.vipcontracts, a.vipcontract, "vipcontract", "The Dr. Dre VIP Contract", a.vipcontractssort)
+                            if re.changed then
+                                a.vipcontract = re.key
+                                a.vipcontractchanged = true
+                            end
+
+                            ImGui.Spacing()
+
+                            if ImGui.Button("Apply##stats") then
+                                SussySpt.addTask(function()
+                                    local changes = 0
+
+                                    -- The Dr. Dre VIP Contract
+                                    if a.vipcontractchanged then
+                                        changes = yu.add(changes, 1)
+
+                                        stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
+
+                                        for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_STRAND","FIXER_STORY_COOLDOWN"}) do
+                                            stats.set_int(yu.mpx(v), -1)
+                                        end
+
+                                        if a.vipcontract == -1 then
+                                            stats.set_int(yu.mpx("FIXER_STORY_STRAND"), -1)
+                                        end
+                                    end
+
+                                    yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Agency")
+                                    for k, v in pairs(a) do
+                                        if tostring(k):endswith("changed") then
+                                            a[k] = nil
+                                        end
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Complete preps") then
+                                SussySpt.addTask(function()
+                                    for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
+                                        stats.set_int(yu.mpx(v), -1)
+                                    end
+                                end)
+                            end
+                        end
+
+                        tab3.sub[1] = tab4
+                    end
+
+                    do -- ANCHOR Extra
+                        local tab4 = SussySpt.rendering.newTab("Extra")
+
+                        tab4.render = function()
+                            if ImGui.Button("Instant finish (solo)") then
+                                SussySpt.addTask(function()
+                                    locals.set_int("fm_mission_controller_2020", SussySpt.p.g.agency_instantfinish1, 51338752)
+                                    locals.set_int("fm_mission_controller_2020", SussySpt.p.g.agency_instantfinish2, 50)
+                                end)
+                            end
+
+                            ImGui.Spacing()
+
+                            if ImGui.Button("Remove cooldown") then
+                                SussySpt.addTask(function()
+                                    globals.set_int(SussySpt.p.g.fm + SussySpt.p.g.agency_cooldown, 0)
+                                end)
+                            end
+
+                            ImGui.Spacing()
+
+                            yu.rendering.renderCheckbox("$2m finale", "online_thing_agency_2mfinale", function(state)
+                                local p = SussySpt.p.g.fm + SussySpt.p.g.agency_payout
+                                if state then
+                                    while yu.rendering.isCheckboxChecked("online_thing_agency_2mfinale") do
+                                        if SussySpt.in_online then
+                                            globals.set_int(p, 2500000)
+                                        end
+                                    end
+                                else
+                                    globals.set_int(p, 1000000)
+                                end
+                            end)
+                        end
+
+                        tab3.sub[2] = tab4
+                    end
+
+                    tab2.sub[2] = tab3
+                end -- !SECTION
+
+                do -- SECTION AutoShop
+                    local tab3 = SussySpt.rendering.newTab("AutoShop")
+
+                    local a = {
+                        heists = {
+                            [0] = "Union Depository",
+                            [1] = "The Superdollar Deal",
+                            [2] = "The Bank Contract",
+                            [3] = "The ECU Job",
+                            [4] = "The Prison Contract",
+                            [5] = "The Agency Deal",
+                            [6] = "The Lost Contract",
+                            [7] = "The Data Contract",
+                        },
+                        cooldowns = {}
+                    }
+
+                    do -- ANCHOR Preperations
+                        local tab4 = SussySpt.rendering.newTab("Preperations")
+
+                        local function refresh()
+                            local mpx = yu.mpx()
+
+                            a.heist = stats.get_int(mpx.."TUNER_CURRENT")
+                            addUnknownValue(a.heists, a.heist)
+                        end
+                        SussySpt.addTask(refresh)
+
+                        tab4.render = function()
+                            if ImGui.SmallButton("Refresh") then
+                                SussySpt.addTask(refresh)
+                            end
+
+                            ImGui.Separator()
+
+                            ImGui.PushItemWidth(360)
+                            local re = yu.rendering.renderList(a.heists, a.heist, "heist", "Heist")
+                            if re.changed then
+                                a.heist = re.key
+                                a.heistchanged = true
+                            end
+                            ImGui.PopItemWidth()
+
+                            ImGui.Spacing()
+
+                            if ImGui.Button("Apply##stats") then
+                                SussySpt.addTask(function()
+                                    local changes = 0
+                                    local mpx = yu.mpx()
+
+                                    -- Heist
+                                    if a.heistchanged then
+                                        changes = yu.add(changes, 1)
+                                        stats.set_int(mpx.."TUNER_GEN_BS", yu.shc(a.heist == 1, 4351, 12543))
+                                        stats.set_int(mpx.."TUNER_CURRENT", a.heist)
+                                    end
+
+                                    yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied")
+                                    for k, v in pairs(a) do
+                                        if tostring(k):endswith("changed") then
+                                            a[k] = nil
+                                        end
+                                    end
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Complete Preps") then
+                                SussySpt.addTask(function()
+                                    stats.set_int(yu.mpx("TUNER_GEN_BS"), -1)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Reset Preps") then
+                                SussySpt.addTask(function()
+                                    stats.set_int(yu.mpx("TUNER_GEN_BS"), 12467)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Reset contract") then
+                                SussySpt.addTask(function()
+                                    local mpx = yu.mpx()
+                                    stats.set_int(mpx.."TUNER_GEN_BS", 8371)
+                                    stats.set_int(mpx.."TUNER_CURRENT", -1)
+                                end)
+                            end
+
+                            ImGui.SameLine()
+
+                            if ImGui.Button("Reset stats") then
+                                SussySpt.addTask(function()
+                                    stats.set_int(yu.mpx("TUNER_COUNT"), 0)
+                                    stats.set_int(yu.mpx("TUNER_EARNINGS"), 0)
+                                end)
+                            end
+                            yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
+
+                            if ImGui.Button("Instant finish") then
+                                SussySpt.addTask(function()
+                                    if SussySpt.requireScript("fm_mission_controller_2020") then
+                                        locals.set_int("fm_mission_controller_2020", SussySpt.p.g.autoshop_instantfinish1, 51338977)
+                                        locals.set_int("fm_mission_controller_2020", SussySpt.p.g.autoshop_instantfinish2, 101)
+                                    end
+                                end)
+                            end
+                        end
+
+                        tab3.sub[1] = tab4
+                    end
+
+                    do -- ANCHOR Cooldowns
+                        local tab4 = SussySpt.rendering.newTab("Cooldowns")
+
+                        local function refreshCooldown(mpx, i)
+                            a.cooldowns[i] = {
+                                a.heists[i],
+                                yu.format_seconds(stats.get_int(mpx.."TUNER_CONTRACT"..i.."_POSIX") - os.time())
+                            }
+                        end
+
+                        local function refresh()
+                            local mpx = yu.mpx()
+                            for i = 0, 7 do
+                                refreshCooldown(mpx, i)
+                            end
+                        end
+                        SussySpt.addTask(refresh)
+
+                        tab4.render = function()
+                            if ImGui.SmallButton("Refresh") then
+                                SussySpt.addTask(refresh)
+                            end
+
+                            ImGui.Separator()
+
+                            if ImGui.BeginTable("cooldowns", 3, 3905) then
+                                ImGui.TableSetupColumn("Contract")
+                                ImGui.TableSetupColumn("Cooldown")
+                                ImGui.TableSetupColumn("Actions")
+                                ImGui.TableHeadersRow()
+
+                                local row = 0
+                                for k, v in pairs(a.cooldowns) do
+                                    ImGui.TableNextRow()
+
+                                    ImGui.PushID(row)
+
+                                    ImGui.TableSetColumnIndex(0)
+                                    ImGui.Text(v[1])
+
+                                    ImGui.TableSetColumnIndex(1)
+                                    ImGui.Text(v[2])
+
+                                    ImGui.TableSetColumnIndex(2)
+                                    if ImGui.Button("Clear##row_"..row) then
+                                        SussySpt.addTask(function()
+                                            stats.set_int(yu.mpx("TUNER_CONTRACT"..k.."_POSIX"), os.time())
+                                            refreshCooldown(yu.mpx(), k)
+                                        end)
+                                    end
+
+                                    ImGui.PopID()
+                                    row = row + 1
+                                end
+
+                                ImGui.EndTable()
+                            end
+                        end
+
+                        tab3.sub[2] = tab4
+                    end
+
+                    tab2.sub[3] = tab3
+                end -- !SECTION
+
+                do -- SECTION Kosatka
+                    local tab3 = SussySpt.rendering.newTab("Kosatka")
+
+                    local a = {
+                    }
+
+                    do -- SECTION Cayo Perico
+                        local tab4 = SussySpt.rendering.newTab("Cayo Perico")
+
+                        do -- ANCHOR Preperations
+                            local tab5 = SussySpt.rendering.newTab("Preperations")
+
+                            tab5.render = function()
+                                ImGui.Text("Preps")
+                            end
+
+                            tab4.sub[1] = tab5
+                        end
+
+                        tab3.sub[1] = tab4
+                    end -- !SECTION
+
+                    do -- ANCHOR Vehicle
+                        local tab4 = SussySpt.rendering.newTab("Vehicle")
+
+                        tab4.render = function()
+                            ImGui.Text("\\/ Placeholder. Does not work")
+
+                            yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "kosatka_nomisslecd", function(state)
+                                SussySpt.addTask(function()
+                                    -- globals.set_int(292539, yu.shc(state, 0, 60000))
+                                end)
+                            end)
+
+                            yu.rendering.renderCheckbox("Higher kosatka missle range", "kosatka_longermisslerange", function(state)
+                                SussySpt.addTask(function()
+                                    -- globals.set_int(292540, yu.shc(state, 4000, 99999))
+                                end)
+                            end)
+                        end
+
+                        tab3.sub[2] = tab4
+                    end
+
+                    tab2.sub[3] = tab3
+                end -- !SECTION
 
                 tab.sub[2] = tab2
             end -- !SECTION
@@ -2057,7 +2564,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if SussySpt.dev and ImGui.TreeNodeEx("Bounty") then
                             if ImGui.SmallButton("Remove bounty") then
                                 SussySpt.addTask(function()
-                                    globals.set_int(SussySpt.pointers.bounty_self_time, 2880000)
+                                    globals.set_int(SussySpt.p.bounty_self_time, 2880000)
                                 end)
                             end
 
@@ -2294,8 +2801,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                 end
 
                 tab2.render = function()
-                    SussySpt.displayUpdateWarning()
-
                     ImGui.Text("Works best when low ping / session host")
 
                     for k, v in pairs(a.apps) do
@@ -2977,28 +3482,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[6] = tab2
             end -- !SECTION
 
-            do -- ANCHOR Misc
-                local tab2 = SussySpt.rendering.newTab("Misc")
-
-                tab2.render = function()
-                    SussySpt.displayUpdateWarning()
-
-                    yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "misc_kmcd", function(state)
-                        SussySpt.addTask(function()
-                            globals.set_int(292539, yu.shc(state, 0, 60000))
-                        end)
-                    end)
-
-                    yu.rendering.renderCheckbox("Higher kosatka missle range", "misc_hkmr", function(state)
-                        SussySpt.addTask(function()
-                            globals.set_int(292540, yu.shc(state, 4000, 99999))
-                        end)
-                    end)
-                end
-
-                tab.sub[7] = tab2
-            end
-
             do -- ANCHOR Session
                 local tab2 = SussySpt.rendering.newTab("Session")
 
@@ -3617,7 +4100,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if ImGui.Button("Load") then
                             local success, result = pcall(yu.json.decode, a.customthemetext)
                             if not success then
-                                a.message = {"Error: "..result:sub(result:find(":", result:find(":", result:find(":") + 1) + 1) + 2):strip(), 255, 25, 25}
+                                a.message = {"Error: "..SussySpt.removeErrorPath(result)[2], 255, 25, 25}
 
                             elseif type(result) == "table" then
                                 if result.parent == "Custom" then
@@ -3795,8 +4278,7 @@ function SussySpt:init() -- SECTION SussySpt:init
     SussySpt.tab:add_imgui(SussySpt.render)
 
     SussySpt.debug("Creating esp thread")
-    -- ANCHOR ESP
-    do
+    do -- ANCHOR ESP
         local function drawLine(ped, index1, index2)
             local c1 = PED.GET_PED_BONE_COORDS(ped, index1, 0, 0, 0)
             local c2 = PED.GET_PED_BONE_COORDS(ped, index2, 0, 0, 0)
@@ -4233,15 +4715,15 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
         local function refreshExtra()
             if yu.is_script_running("fm_mission_controller_2020") then
-                a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
-                a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
+                -- a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
+                -- a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
             else
-                a.lifes = 0
-                a.realtake = 289700
+                -- a.lifes = 0
+                -- a.realtake = 289700
             end
 
         end
-        refreshExtra()
+        -- refreshExtra()
 
         local cooldowns = {}
         local function refreshCooldowns()
@@ -4525,9 +5007,9 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Reload planning board") then
-                    if SussySpt.requireScript("heist_island_planning") then
-                        locals.set_int("heist_island_planning", 1526, 2)
-                    end
+                --     if SussySpt.requireScript("heist_island_planning") then
+                --         locals.set_int("heist_island_planning", 1526, 2)
+                --     end
                 end
 
                 if ImGui.Button("Unlock accesspoints & approaches") then
@@ -4542,11 +5024,11 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Remove fencing fee & pavel cut") then
-                    SussySpt.addTask(function()
-                        globals.set_float(262145 + 29470, -.1)
-                        globals.set_float(291786, 0)
-                        globals.set_float(291787, 0)
-                    end)
+                --     SussySpt.addTask(function()
+                --         globals.set_float(262145 + 29470, -.1)
+                --         globals.set_float(291786, 0)
+                --         globals.set_float(291787, 0)
+                --     end)
                 end
                 yu.rendering.tooltip("I think no one wants to add them back...")
 
@@ -4586,13 +5068,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 renderCutsSlider(a.cuts, -2)
 
                 if ImGui.Button("Apply##cuts") then
-                    for k, v in pairs(a.cuts) do
-                        if k == -2 then
-                            globals.set_int(2684820 + 6606, v)
-                        else
-                            globals.set_int(1978495 + 825 + 56 + k, v)
-                        end
-                    end
+                --     for k, v in pairs(a.cuts) do
+                --         if k == -2 then
+                --             globals.set_int(2684820 + 6606, v)
+                --         else
+                --             globals.set_int(1978495 + 825 + 56 + k, v)
+                --         end
+                --     end
                 end
 
                 ImGui.SameLine()
@@ -4615,65 +5097,65 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip printing cutscene") then
-                    SussySpt.addTask(function()
-                        if locals.get_int("fm_mission_controller", 22032) == 4 then
-                            locals.set_int("fm_mission_controller", 22032, 5)
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if locals.get_int("fm_mission_controller", 22032) == 4 then
+                    --         locals.set_int("fm_mission_controller", 22032, 5)
+                    --     end
+                    -- end)
                 end
                 yu.rendering.tooltip("Idfk what this is or what this does")
 
                 if ImGui.Button("Skip sewer tunnel cut") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020")
-                            and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
-                                or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
-                            locals.set_int("fm_mission_controller_2020", 28446, 6)
-                            yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020")
+                    --         and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
+                    --             or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
+                    --         locals.set_int("fm_mission_controller_2020", 28446, 6)
+                    --         yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
+                    --     end
+                    -- end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip door hack") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020")
-                            and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
-                            locals.set_int("fm_mission_controller_2020", 54024, 5)
-                            yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020")
+                    --         and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
+                    --         locals.set_int("fm_mission_controller_2020", 54024, 5)
+                    --         yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
+                    --     end
+                    -- end)
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020")
-                            and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
-                            locals.set_int("fm_mission_controller_2020", 23669, 5)
-                            yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020")
+                    --         and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
+                    --         locals.set_int("fm_mission_controller_2020", 23669, 5)
+                    --         yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
+                    --     end
+                    -- end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip plasmacutter cut") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020") then
-                            locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
-                            yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
+                    --         locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
+                    --         yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
+                    --     end
+                    -- end)
                 end
 
                 if ImGui.Button("Obtain the primary target") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020") then
-                            locals.set_int("fm_mission_controller_2020", 29684, 5)
-                            locals.set_int("fm_mission_controller_2020", 29685, 3)
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
+                    --         locals.set_int("fm_mission_controller_2020", 29684, 5)
+                    --         locals.set_int("fm_mission_controller_2020", 29685, 3)
+                    --     end
+                    -- end)
                 end
                 yu.rendering.tooltip("It works i guess but the object will not get changed")
 
@@ -4693,13 +5175,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.tooltip("This is good")
 
                 if ImGui.Button("Instant finish") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller_2020") then
-                            locals.set_int("fm_mission_controller_2020", 45450, 9)
-                            locals.set_int("fm_mission_controller_2020", 46829, 50)
-                            yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
+                    --         locals.set_int("fm_mission_controller_2020", 45450, 9)
+                    --         locals.set_int("fm_mission_controller_2020", 46829, 50)
+                    --         yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                    --     end
+                    -- end)
                 end
                 yu.rendering.tooltip("This is really weird and only you get money i think")
 
@@ -4709,47 +5191,47 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                     SussySpt.addTask(refreshExtra)
                 end
 
-                ImGui.PushItemWidth(390)
+                -- ImGui.PushItemWidth(390)
 
-                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
-                yu.rendering.tooltip("Only works when you are playing alone (i think)")
-                if lifesChanged then
-                    a.lifes = lifesValue
-                end
+                -- local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                -- yu.rendering.tooltip("Only works when you are playing alone (i think)")
+                -- if lifesChanged then
+                --     a.lifes = lifesValue
+                -- end
 
-                ImGui.SameLine()
+                -- ImGui.SameLine()
 
-                if ImGui.Button("Apply##lifes") then
-                    if SussySpt.requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, a.lifes)
-                    end
-                end
+                -- if ImGui.Button("Apply##lifes") then
+                --     if SussySpt.requireScript("fm_mission_controller_2020") then
+                --         locals.set_int("fm_mission_controller_2020", 43059 + 865 + 1, a.lifes)
+                --     end
+                -- end
 
-                local realTakeValue, realTakeChanged = ImGui.SliderInt("Real take", a.realtake, 100000, 2897000, yu.format_num(a.realtake))
-                yu.rendering.tooltip("Set real take to 2,897,000 for 100% or smth")
-                if realTakeChanged then
-                    a.realtake = realTakeValue
-                end
+                -- local realTakeValue, realTakeChanged = ImGui.SliderInt("Real take", a.realtake, 100000, 2897000, yu.format_num(a.realtake))
+                -- yu.rendering.tooltip("Set real take to 2,897,000 for 100% or smth")
+                -- if realTakeChanged then
+                --     a.realtake = realTakeValue
+                -- end
 
-                ImGui.SameLine()
+                -- ImGui.SameLine()
 
-                if ImGui.Button("Apply##realtake") then
-                    if SussySpt.requireScript("fm_mission_controller_2020") then
-                        locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
-                    end
-                end
+                -- if ImGui.Button("Apply##realtake") then
+                --     if SussySpt.requireScript("fm_mission_controller_2020") then
+                --         locals.set_int("fm_mission_controller_2020", 40004 + 1392 + 53, a.realtake)
+                --     end
+                -- end
 
-                ImGui.Text("Simulate bag for:")
-                for i = 1, 4 do
-                    ImGui.SameLine()
-                    if ImGui.Button(i.." Player"..yu.shc(i == 1, "", "s")) then
-                        SussySpt.addTask(function()
-                            globals.set_int(292084, 1800 * i)
-                        end)
-                    end
-                end
+                -- ImGui.Text("Simulate bag for:")
+                -- for i = 1, 4 do
+                --     ImGui.SameLine()
+                --     if ImGui.Button(i.." Player"..yu.shc(i == 1, "", "s")) then
+                --         SussySpt.addTask(function()
+                --             globals.set_int(292084, 1800 * i)
+                --         end)
+                --     end
+                -- end
 
-                ImGui.PopItemWidth()
+                -- ImGui.PopItemWidth()
                 ImGui.Separator()
 
                 if ImGui.Button("Refresh##cooldowns") then
@@ -4897,14 +5379,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         refreshCuts()
 
         local function refreshExtra()
-            if yu.is_script_running("fm_mission_controller") then
-                a.lifes = locals.get_int("fm_mission_controller", 27400)
-            else
-                a.lifes = 0
-            end
-
+            -- if yu.is_script_running("fm_mission_controller") then
+            --     a.lifes = locals.get_int("fm_mission_controller", 27400)
+            -- else
+            --     a.lifes = 0
+            -- end
         end
-        refreshExtra()
+        -- refreshExtra()
 
         local cooldowns = {}
         local function updateCooldowns()
@@ -5178,13 +5659,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 renderCutsSlider(a.cuts, -2)
 
                 if ImGui.Button("Apply##cuts") then
-                    for k, v in pairs(a.cuts) do
-                        if k == -2 then
-                            globals.set_int(2691426, v)
-                        else
-                            globals.set_int(1963945 + 1497 + 736 + 92 + k, v)
-                        end
-                    end
+                    -- for k, v in pairs(a.cuts) do
+                    --     if k == -2 then
+                    --         globals.set_int(2691426, v)
+                    --     else
+                    --         globals.set_int(1963945 + 1497 + 736 + 92 + k, v)
+                    --     end
+                    -- end
                 end
 
                 ImGui.SameLine()
@@ -5200,44 +5681,44 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 yu.rendering.bigText("Extra")
 
                 if ImGui.Button("Set all players ready") then
-                    SussySpt.addTask(function()
-                        for i = 0, 3 do
-                            globals.set_int(1974016 + i, -1)
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     for i = 0, 3 do
+                    --         globals.set_int(1974016 + i, -1)
+                    --     end
+                    -- end)
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
-                            locals.set_int("fm_mission_controller", 52964, 5)
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller") and locals.get_int("fm_mission_controller", 52964) == 4 then
+                    --         locals.set_int("fm_mission_controller", 52964, 5)
+                    --     end
+                    -- end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip keypad hack") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller")
-                            and locals.get_int("fm_mission_controller", 54026) ~= 4 then
-                            locals.set_int("fm_mission_controller", 54026, 5)
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller")
+                    --         and locals.get_int("fm_mission_controller", 54026) ~= 4 then
+                    --         locals.set_int("fm_mission_controller", 54026, 5)
+                    --     end
+                    -- end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip vault door drill") then
-                    SussySpt.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_int(
-                                "fm_mission_controller",
-                                10108,
-                                locals.get_int("fm_mission_controller", 10138)
-                            )
-                        end
-                    end)
+                    -- SussySpt.addTask(function()
+                    --     if SussySpt.requireScript("fm_mission_controller") then
+                    --         locals.set_int(
+                    --             "fm_mission_controller",
+                    --             10108,
+                    --             locals.get_int("fm_mission_controller", 10138)
+                    --         )
+                    --     end
+                    -- end)
                 end
 
                 ImGui.Spacing()
@@ -5246,19 +5727,19 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                     SussySpt.addTask(refreshExtra)
                 end
 
-                local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
-                yu.rendering.tooltip("Not tested")
-                if lifesChanged then
-                    a.lifes = lifesValue
-                end
+                -- local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
+                -- yu.rendering.tooltip("Not tested")
+                -- if lifesChanged then
+                --     a.lifes = lifesValue
+                -- end
 
-                ImGui.SameLine()
+                -- ImGui.SameLine()
 
-                if ImGui.Button("Apply##lifes") then
-                    if SussySpt.requireScript("fm_mission_controller") then
-                        locals.set_int("fm_mission_controller", 27400, a.lifes)
-                    end
-                end
+                -- if ImGui.Button("Apply##lifes") then
+                --     if SussySpt.requireScript("fm_mission_controller") then
+                --         locals.set_int("fm_mission_controller", 27400, a.lifes)
+                --     end
+                -- end
 
                 ImGui.Separator()
 
@@ -5302,7 +5783,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             [18] = "VEHICLE"
         }
 
-        local prize_wheel_win_state = 276
+        local prize_wheel_win_state = 278
         local prize_wheel_prize = 14
         local prize_wheel_prize_state = 45
 
@@ -6017,7 +6498,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
         SussySpt.addTask(function()
             if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
-                globals.set_int(SussySpt.pointers.agency_maxpayout, 2000000)
+                globals.set_int(SussySpt.p.agency_maxpayout, 2000000)
             end
         end)
 
@@ -6087,7 +6568,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                 yu.rendering.renderCheckbox("$2M finale", "hbo_agency_smthmfinale", function(state)
                     if not state then
-                        globals.set_int(SussySpt.pointers.agency_maxpayout, 1000000)
+                        globals.set_int(SussySpt.p.agency_maxpayout, 1000000)
                     end
                 end)
                 yu.rendering.tooltip("This is for the 'Don't Fuck With Dre' VIP Contract")
@@ -6159,7 +6640,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 if ImGui.Button("Heal") then
                     SussySpt.addTask(function()
                         ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
-			            PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
+                        PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
                     end)
                 end
                 yu.rendering.tooltip("Refill health & armor")
@@ -6194,7 +6675,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
                 if ImGui.Button("RI2") then
                     SussySpt.addTask(function()
                         local ppid = yu.ppid()
-				        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
+                        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
                         local c = yu.coords(ppid)
                         PED.SET_PED_COORDS_KEEP_VEHICLE(ppid, c.x, c.y, c.z - 1)
                     end)
@@ -6269,16 +6750,14 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 if ImGui.Button("Stop player switch") then
                     SussySpt.addTask(function()
-                        if STREAMING.IS_PLAYER_SWITCH_IN_PROGRESS() then
-                            STREAMING.STOP_PLAYER_SWITCH()
-                            HUD.CLEAR_HELP(true)
-                            SCRIPT.SHUTDOWN_LOADING_SCREEN()
-                        end
+                        STREAMING.STOP_PLAYER_SWITCH()
+                        SCRIPT.SHUTDOWN_LOADING_SCREEN()
                         if CAM.IS_SCREEN_FADED_OUT() then
                             CAM.DO_SCREEN_FADE_IN(0)
                         end
                         GRAPHICS.ANIMPOSTFX_STOP_ALL()
                         HUD.SET_FRONTEND_ACTIVE(true)
+                        HUD.CLEAR_HELP(true)
                     end)
                 end
                 yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
