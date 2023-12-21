@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.14",
-    versionid = 2657,
+    versionid = 2668,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1818,9 +1818,17 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     local a = {
                         stats = {
-                            {"MPPLY_IS_CHEATER", 1, "Cheater"},
-                            {"MPPLY_WAS_I_BAD_SPORT", 1, "Was i badsport"},
+                            {"MPPLY_IS_CHEATER", 1, "Is cheater"},
+                            {"MPPLY_ISPUNISHED", 1, "Is punished"},
                             {"MPPLY_IS_HIGH_EARNER", 1, "High earner"},
+                            {"MPPLY_WAS_I_BAD_SPORT", 1, "Was i badsport"},
+                            {"MPPLY_CHAR_IS_BADSPORT", 1, "Is character badsport"},
+
+                            {"MPPLY_OVERALL_CHEAT", 2, "Overall cheat"},
+                            {"MPPLY_OVERALL_BADSPORT", 2, "Overall badsport"},
+                            {"MPPLY_PLAYERMADE_TITLE", 2, "Playermade title"},
+                            {"MPPLY_PLAYERMADE_DESC", 2, "Playermade description"},
+
                             {"MPPLY_GRIEFING", 2, "Reports -> Griefing"},
                             {"MPPLY_EXPLOITS", 2, "Reports -> Exploits"},
                             {"MPPLY_GAME_EXPLOITS", 2, "Reports -> Game exploits"},
@@ -1856,12 +1864,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                     }
 
                     local function refreshStats()
+                        local displayAll = yu.rendering.isCheckboxChecked("online_stats_other_stats_all") == true
                         for k, v in pairs(a.stats) do
+                            v[4] = nil
                             if v[2] == 1 then
-                                v[4] = tostring(stats.get_bool(v[1]))
+                                local value = stats.get_bool(v[1])
+                                if displayAll or value then
+                                    v[4] = tostring(value)
+                                end
                             elseif v[2] == 2 then
                                 local value = stats.get_int(v[1])
-                                if value ~= 0 then
+                                if displayAll or value ~= 0 then
                                     v[4] = yu.format_num(value)
                                 end
                             end
@@ -1899,17 +1912,23 @@ function SussySpt:init() -- SECTION SussySpt:init
                         refreshStats()
                         refreshAbilityValues()
                     end
-                    yu.rif(refresh)
+                    SussySpt.addTask(refresh)
 
                     tab3.render = function()
                         if ImGui.SmallButton("Refresh") then
-                            yu.rif(refresh)
+                            SussySpt.addTask(refresh)
                         end
 
                         if ImGui.TreeNodeEx("Stats") then
-                            if ImGui.SmallButton("Refresh##stats") then
-                                yu.rif(refreshStats)
+                            if ImGui.Button("Refresh##stats") then
+                                SussySpt.addTask(refreshStats)
                             end
+
+                            ImGui.SameLine()
+
+                            yu.rendering.renderCheckbox("Show all", "online_stats_other_stats_all", function()
+                                SussySpt.addTask(refreshStats)
+                            end)
 
                             if a.ischeater then
                                 ImGui.Text("You are marked as a cheater!")
