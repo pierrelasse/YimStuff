@@ -651,8 +651,7 @@ return (function() -- Made by pierrelasse <:D
             local newKey = key
             local newValue = nil
             local label = (name or "").."##"..labelId
-            local selectedValue = api.get_or_default(items, key, next(items))
-
+            local selectedValue = api.get_or_default(items, key, items[next(items)])
             if ImGui.BeginCombo(label, selectedValue) then
                 if sort ~= nil then
                     for k, v in pairs(sort) do
@@ -661,7 +660,7 @@ return (function() -- Made by pierrelasse <:D
                             newKey = v
                             newValue = v_
                         end
-                        api.rendering.tooltip(k)
+                        api.rendering.tooltip(v)
                     end
                 else
                     for k, v in pairs(items) do
@@ -810,16 +809,21 @@ return (function() -- Made by pierrelasse <:D
                 return string.len(str)
             end
         end
-        function string.split(str, delimiters)
+        function string.split(str, delimiters, max)
             local result = { [0] = str }
             if type(str) == "string" then
                 if type(delimiters) == "string" then
                     delimiters = {delimiters}
                 end
                 if type(delimiters) == "table" then
-                    local pattern = "("..table.concat(delimiters, "|")..")"
-                    for match in (str..table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
+                    local pattern = "(" .. table.concat(delimiters, "|") .. ")"
+                    local count = 1
+                    for match in (str .. table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
                         table.insert(result, match)
+                        count = count + 1
+                        if max > 0 and max and count > max then
+                            break
+                        end
                     end
                 end
             end
@@ -838,6 +842,11 @@ return (function() -- Made by pierrelasse <:D
         function string.substring(str, startIndex, endIndex)
             if type(str) == "string" then
                 return string.sub(str, startIndex, endIndex)
+            end
+        end
+        function string.getCharacterAtIndex(str, index)
+            if type(str) == "string" and type(index) == "number" and index >= 1 and index <= #str then
+                return str:sub(index, index)
             end
         end
 
