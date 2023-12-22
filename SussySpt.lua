@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.15",
-    versionid = 2825,
+    versionid = 2830,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -170,7 +170,9 @@ function SussySpt:init() -- SECTION SussySpt:init
             autoshop_instantfinish2 = 48513 + 1378 + 1,
             apartment_cuts_other = 1928233 + 1,
             apartment_cuts_self = 1930201 + 3008 + 1,
-            apartment_replay = 2635522 -- HEIST_REPLAY_FIN
+            apartment_replay = 2635522, -- HEIST_REPLAY_FIN
+
+            bullshark_stage = 2672741 + 3694
         },
         l = { -- ANCHOR Locals
             apartment_fleeca_hackstage = 11776 + 24,
@@ -655,7 +657,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                     v.info.vehicle[2] = v.info.vehicle[2].."."
                                         .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
-                                        .." Class: "..SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+
+                                    local vehicleClass = SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+                                    if type(vehicleClass) == "string" then
+                                        v.info.vehicle[2] = v.info.vehicle[2].." Class: "..vehicleClass
+                                    end
 
                                     if vehiclePassengers ~= nil and vehicleMaxPassengers ~= nil then
                                         v.info.vehicle[2] = v.info.vehicle[2].." Passengers: "..(vehiclePassengers).."/"..(vehicleMaxPassengers)
@@ -876,7 +882,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 yu.rif(function(rs)
                     while true do
-                        refreshPlayerlist()
+                        local success, result = pcall(refreshPlayerlist)
+                        if not success then
+                            SussySpt.sortedPlayers = {}
+                            log.warning("Error while updating the playerlist: "..result)
+                        end
 
                         local isOpen = a.open > 0
                         rs:sleep(isOpen and 250 or 1500)
@@ -6972,7 +6982,7 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 
                 if SussySpt.in_online then
                     if ImGui.Button("Instant BST") then
-                        globals.set_int(2672524 + 3690, 1)
+                        globals.set_int(SussySpt.p.g.bullshark_stage, 1)
                     end
                     yu.rendering.tooltip("Give bullshark testosterone.\nYou will receive less damage and do more damage.")
 
