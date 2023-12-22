@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.15",
-    versionid = 2823,
+    versionid = 2825,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -2736,12 +2736,20 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     if k == 8 then
                                         local newvalue, used = ImGui.DragFloat(a.abilities[k], value, .2, 0, 100)
                                         if used then
-                                            a.abilitynewvalues[k] = newvalue
+                                            if newvalue == v then
+                                                a.abilitynewvalues[k] = nil
+                                            else
+                                                a.abilitynewvalues[k] = newvalue
+                                            end
                                         end
                                     else
                                         local newvalue, used = ImGui.DragInt(a.abilities[k], value, .2, 0, 100)
                                         if used then
-                                            a.abilitynewvalues[k] = newvalue
+                                            if newvalue == v then
+                                                a.abilitynewvalues[k] = nil
+                                            else
+                                                a.abilitynewvalues[k] = newvalue
+                                            end
                                         end
                                     end
                                 end
