@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.15",
-    versionid = 2817,
+    versionid = 2820,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -442,7 +442,7 @@ function SussySpt:init() -- SECTION SussySpt:init
             end
 
             local function triggerTransaction(rs, hash, amount)
-                local b = 4536533
+                local b = 4537212
                 globals.set_int(b + 1, 2147483646)
                 globals.set_int(b + 7, 2147483647)
                 globals.set_int(b + 6, 0)
@@ -3790,10 +3790,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                 }
 
                 tab2.render = function()
-                    SussySpt.displayUpdateWarning()
-
                     ImGui.Text("This feature is unstable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
-                    ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected for over a month now")
+                    ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected")
                     ImGui.Spacing()
 
                     if a.moneyMade > 0 then
@@ -3840,6 +3838,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
                     end)
+                    yu.rendering.tooltip("You should only use the loop with the '1M (Juggalo Story Award)' transaction")
 
                     if SussySpt.dev and ImGui.Button("Dump globals") then
                         SussySpt.addTask(function()
