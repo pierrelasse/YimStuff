@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2832,
+    versionid = 2838,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -217,7 +217,6 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
 
     SussySpt.rendering.newTab = function(name, render)
-        SussySpt.debug("Requested new tab with name '"..name.."'")
         return {
             name = name,
             render = render,
@@ -1927,6 +1926,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         tab4.render = function()
                             ImGui.Text("$15m cuts")
+                            ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
                             ImGui.Spacing()
 
                             if a.cuts15mactive ~= true then
@@ -2458,7 +2458,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             if ImGui.BeginListBox("##vehicle_list", 180, 224) then
                                 for k, v in pairs(a.translatedVehicles) do
-                                    if v:lowercase():contains(a.vehicleSearch) then
+                                    if a.vehicles[k]:contains(a.vehicleSearch) or v:lowercase():contains(a.vehicleSearch) then
                                         local selected = a.vehicle == k
                                         if ImGui.Selectable(v, selected) and not selected then
                                             SussySpt.addTask(function()
@@ -4615,6 +4615,19 @@ function SussySpt:init() -- SECTION SussySpt:init
         end)
     end
 
+    do
+        local tabSize = 0
+
+        local function countTabs(tbl)
+            for k, v in pairs(tbl) do
+                tabSize = tabSize + 1
+                countTabs(v.sub)
+            end
+        end
+        countTabs(SussySpt.rendering.tabs)
+
+        SussySpt.debug("Created "..tabSize.." tabs")
+    end
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
