@@ -818,10 +818,11 @@ return (function() -- Made by pierrelasse <:D
                 if type(delimiters) == "table" then
                     local pattern = "(" .. table.concat(delimiters, "|") .. ")"
                     local count = 1
+                    local doMax = type(max) == "number" and max > 0
                     for match in (str .. table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
                         table.insert(result, match)
                         count = count + 1
-                        if max > 0 and max and count > max then
+                        if doMax and max and count > max then
                             break
                         end
                     end
