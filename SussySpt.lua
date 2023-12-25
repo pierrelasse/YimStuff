@@ -897,8 +897,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 yu.rendering.setCheckboxChecked("online_players_ram_delete")
 
-                -- ANCHOR Render
-                tab2.render = function()
+                tab2.render = function() -- SECTION Render
                     a.open = 2
                     ImGui.BeginGroup()
                     ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
@@ -915,7 +914,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
                     ImGui.PopItemWidth()
 
-                    do
+                    do -- ANCHOR Playerlist
                         ImGui.PushItemWidth(a.playerlistwidth)
                         local _, y = ImGui.GetContentRegionAvail()
                         if ImGui.BeginListBox("##playerlist", 0, y) then
@@ -989,7 +988,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
 
                                 if not player.noped then
-                                    if ImGui.TreeNodeEx("General") then
+                                    if ImGui.TreeNodeEx("General") then -- ANCHOR General
                                         if ImGui.SmallButton("Goto") then
                                             SussySpt.addTask(function()
                                                 local c = yu.coords(player.ped)
@@ -1076,7 +1075,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if ImGui.TreeNodeEx("Trolling") then
+                                    if ImGui.TreeNodeEx("Trolling") then -- ANCHOR Trolling
                                         if ImGui.SmallButton("Taze") then
                                             yu.rif(function(rs)
                                                 shootPlayer(rs, player.ped, joaat("weapon_stungun"), 0)
@@ -1406,7 +1405,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if ImGui.TreeNodeEx("Weapons") then
+                                    if ImGui.TreeNodeEx("Weapons") then -- ANCHOR Weapons
                                         if ImGui.SmallButton("Remove all weapons") then
                                             SussySpt.addTask(function()
                                                 WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
@@ -1509,7 +1508,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if player.info.vehicle ~= nil and ImGui.TreeNodeEx("Vehicle") then
+                                    if player.info.vehicle ~= nil and ImGui.TreeNodeEx("Vehicle") then -- ANCHOR Vehicle
                                         yu.rendering.renderCheckbox("Godmode", "online_player_vehiclegod", function(state)
                                             SussySpt.addTask(function()
                                                 local veh = yu.veh(player.ped)
@@ -1696,7 +1695,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if ImGui.TreeNodeEx("Online") then
+                                    if ImGui.TreeNodeEx("Online") then -- ANCHOR Online
                                         ImGui.PushItemWidth(243)
                                         if ImGui.BeginCombo("##online_player_pickups", a.pickupoption) then
                                             for k, v in pairs(a.pickupoptions) do
@@ -1758,7 +1757,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         ImGui.TreePop()
                                     end
 
-                                    if SussySpt.dev and ImGui.TreeNodeEx("Test") then
+                                    if SussySpt.dev and ImGui.TreeNodeEx("Test") then -- ANCHOR Test
                                         if ImGui.SmallButton("Set killer") then
                                             a.killer = key
                                         end
@@ -1806,7 +1805,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.EndGroup()
                         end
                     end
-                end
+                end -- !SECTION
 
                 tab.sub[1] = tab2
             end -- !SECTION
@@ -2350,9 +2349,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                             set = function(self, secs)
                                 STATS.STAT_SET_INT(self.getStatHashForCharStat(), NETWORK.GET_CLOUD_TIME_AS_INT() + secs, false)
                             end,
-                            has = function(self)--Position - 0xE0E8
-                                return NETWORK.GET_CLOUD_TIME_AS_INT() < self:get()
-                            end
+                            -- has = function(self)--Position - 0xE0E8
+                            --     return NETWORK.GET_CLOUD_TIME_AS_INT() < self:get()
+                            -- end
                         },
 
                         planningScript = joaat("vehrob_planning"),
@@ -3841,6 +3840,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end)
                     end
 
+                    ImGui.SameLine()
+
                     yu.rendering.renderCheckbox("Loop", "online_money_loop", function(state)
                         if state then
                             yu.rif(function(rs)
@@ -4628,6 +4629,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
         SussySpt.debug("Created "..tabSize.." tabs")
     end
+
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
