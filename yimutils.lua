@@ -812,7 +812,7 @@ return (function() -- Made by pierrelasse <:D
             end
         end
         function string.split(str, delimiters, max)
-            local result = { [0] = str }
+            local result = {} -- [0] = str
             if type(str) == "string" then
                 if type(delimiters) == "string" then
                     delimiters = {delimiters}
