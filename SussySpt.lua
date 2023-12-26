@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2838,
+    versionid = 2862,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -260,8 +260,19 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     function SussySpt.removeErrorPath(s)
         local maxAmount = yu.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
-        local values = s:split(":", maxAmount)
-        return { values[0], values[3], values[4]:strip() }
+        local values = string.split(s, ":", maxAmount)
+        if yu.len(values) < 4 then
+            return {
+                s,
+                -1,
+                s
+            }
+        end
+        return {
+            s, -- full error
+            values[3], -- line
+            values[4]:strip() -- error
+        }
     end
 
     SussySpt.render = function()
@@ -1796,6 +1807,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(hash)
                                             end)
                                         end
+
+                                        if ImGui.SmallButton("Xmas truck") then
+                                            SussySpt.addTask(function()
+                                                -- local pickupHash = func_5947(iParam0)
+                                                -- local x, y, z = Var0
+                                                -- local placeOnGround = true --!func_5946(iParam0, 0)
+                                                -- local modelHash = Local_228.f_19.f_5[iParam0 /*13*/].f_2
+                                                -- OBJECT.CREATE_PORTABLE_PICKUP(pickupHash, x, y, z, placeOnGround, modelHash)
+                                                log.info(tostring(locals.get_int("fm_content_xmas_truck", 228 + 19 + 5 + 0 + 13 + 2)))
+                                            end)
+                                        end
                                     end
                                 end
 
@@ -1926,6 +1948,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         tab4.render = function()
                             ImGui.Text("$15m cuts")
                             ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
+                            ImGui.Text(" > Fleeca currently works the best")
                             ImGui.Spacing()
 
                             if a.cuts15mactive ~= true then
@@ -1935,11 +1958,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                         yu.rif(function(rs)
                                             a.cuts15m.set.crew(v, yu.shc(k == 7453, 2, 4))
 
-                                            rs:sleep(1000)
-                                            -- menu.send_key_press(13) -- MOUSE RIGHT
-                                            rs:sleep(1000)
-                                            -- menu.send_key_press(27) -- ARROW UP / SCROLLWHEEL BUTTON (PRESS)
-                                            rs:sleep(1000)
+                                            -- rs:sleep(1000)
+                                            -- -- menu.send_key_press(13) -- MOUSE RIGHT
+                                            -- rs:sleep(1000)
+                                            -- -- menu.send_key_press(27) -- ARROW UP / SCROLLWHEEL BUTTON (PRESS)
+                                            -- rs:sleep(1000)
 
                                             -- PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1) -- ENTER / LEFT MOUSE BUTTON
 
@@ -2081,16 +2104,19 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.Spacing()
 
                             yu.rendering.renderCheckbox("$2m finale", "online_thing_agency_2mfinale", function(state)
-                                local p = SussySpt.p.g.fm + SussySpt.p.g.agency_payout
-                                if state then
-                                    while yu.rendering.isCheckboxChecked("online_thing_agency_2mfinale") do
-                                        if SussySpt.in_online then
-                                            globals.set_int(p, 2500000)
+                                yu.rif(function(rs)
+                                    local p = SussySpt.p.g.fm + SussySpt.p.g.agency_payout
+                                    if state then
+                                        while yu.rendering.isCheckboxChecked("online_thing_agency_2mfinale") do
+                                            if SussySpt.in_online then
+                                                globals.set_int(p, 2500000)
+                                            end
+                                            rs:sleep(10)
                                         end
+                                    else
+                                        globals.set_int(p, 1000000)
                                     end
-                                else
-                                    globals.set_int(p, 1000000)
-                                end
+                                end)
                             end)
                         end
 
@@ -2219,9 +2245,12 @@ function SussySpt:init() -- SECTION SussySpt:init
                         local tab4 = SussySpt.rendering.newTab("Cooldowns")
 
                         local function refreshCooldown(mpx, i)
+                            local cooldown = math.max(0,
+                                stats.get_int(mpx.."TUNER_CONTRACT"..i.."_POSIX") - os.time())
+
                             a.cooldowns[i] = {
                                 a.heists[i],
-                                yu.format_seconds(stats.get_int(mpx.."TUNER_CONTRACT"..i.."_POSIX") - os.time())
+                                yu.format_seconds(cooldown)
                             }
                         end
 
@@ -2324,7 +2353,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         tab3.sub[2] = tab4
                     end
 
-                    tab2.sub[3] = tab3
+                    tab2.sub[4] = tab3
                 end -- !SECTION
 
                 do -- SECTION Salvage Yard
@@ -2348,13 +2377,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end,
                             set = function(self, secs)
                                 STATS.STAT_SET_INT(self.getStatHashForCharStat(), NETWORK.GET_CLOUD_TIME_AS_INT() + secs, false)
-                            end,
-                            -- has = function(self)--Position - 0xE0E8
-                            --     return NETWORK.GET_CLOUD_TIME_AS_INT() < self:get()
-                            -- end
+                            end
                         },
-
-                        planningScript = joaat("vehrob_planning"),
 
                         vehicleSearch = "",
                         vehicles = {"lm87","cinquemila","autarch","tigon","champion","tenf","sm722","omnisegt","growler","deity","italirsx","coquette4",
@@ -2387,8 +2411,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                         local function tick() -- ANCHOR tick
                             local mpx = yu.mpx()
 
-                            a.planningScriptRunning = yu.is_script_running_hash(a.planningScript)
-
                             a.savlv23 = stats.get_int(mpx.."SALV23_GEN_BS")
                             a.canSkipPreps = (a.savlv23 & (1 << 0)) ~= 0
                             a.robbery = tunables.get_int("SALV23_VEHICLE_ROBBERY_"..a.slot)
@@ -2403,11 +2425,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                             if a.loaded == false then
                                 return
-                            end
-
-                            if a.planningScriptRunning then
-                                yu.rendering.coloredtext("It is recommended to make all of your changes outside!", 250, 145, 33, 255)
-                                ImGui.Spacing()
                             end
 
                             do
@@ -2556,7 +2573,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         tab3.sub[1] = tab4
                     end -- !SECTION
-                    tab2.sub[4] = tab3
+
+                    tab2.sub[5] = tab3
                 end -- !SECTION
 
                 tab.sub[2] = tab2
