@@ -64,11 +64,13 @@ return (function() -- Made by pierrelasse <:D
             return api.get_or_default(get, defaultValue)
         end
 
-        api.format_seconds = function(s, format)
-            local hours = math.floor(s / 3600)
-            local minutes = math.floor((s % 3600) / 60)
-            local seconds = s % 60
-            return string.format(format or "%02dH %02dM %02dS", hours, minutes, seconds)
+        api.format_seconds = function(sec, format)
+            local hours = math.floor(sec / 3600)
+            local minutes = math.floor((sec % 3600) / 60)
+            return string.format(
+                format or (hours > 0 and "%02dH " or "")..(minutes > 0 and "%02dM " or "").."%02dS",
+                hours, minutes, sec % 60
+            )
         end
 
         api.copy_table = function(tbl)
