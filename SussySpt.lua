@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2862,
+    versionid = 2875,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -314,7 +314,7 @@ function SussySpt:init() -- SECTION SussySpt:init
             local err = SussySpt.removeErrorPath(result)
             ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
             ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
-            log.info("Error while rendering (line "..err[2].."): "..err[3])
+            log.warning("Error while rendering (line "..err[2].."): "..err[3])
             ImGui.PopStyleColor()
         end
 
@@ -598,7 +598,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if network.is_player_flagged_as_modder(v.player) then
                             v.info.modder = {
                                 "M",
-                                "This player was detected as a modder: "..network.get_flagged_modder_reason(v.player)
+                                "This player was detected as a modder"
                             }
                         end
 
@@ -773,6 +773,17 @@ function SussySpt:init() -- SECTION SussySpt:init
                             v.displayName = header and v.name or v.name.." ["..v.tags.."]"
                         end
 
+                        if v.info.modder ~= nil then
+                            local reasons = string.split(network.get_flagged_modder_reason(v.player), ", ")
+                            if table.length(reasons) > 0 then
+                                v.tooltip = v.tooltip.."\n\nInfractions:"
+
+                                for k2, v2 in pairs(reasons) do
+                                    v.tooltip = v.tooltip.."\n  - "..v2
+                                end
+                            end
+                        end
+
                         v.tooltip = v.tooltip
                             .."\n\nFor nerds:"
                             .."\n  - Player: "..v.player
@@ -895,7 +906,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                         local success, result = pcall(refreshPlayerlist)
                         if not success then
                             SussySpt.sortedPlayers = {}
-                            log.warning("Error while updating the playerlist: "..result)
+
+                            local err = SussySpt.removeErrorPath(result)
+                            log.warning("Error while updating the playerlist(line "..err[2].."): "..err[3])
                         end
 
                         local isOpen = a.open > 0
