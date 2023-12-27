@@ -6884,12 +6884,14 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
     local function initOffice()
         local function getCrates(amount)
-            if SussySpt.requireScript("gb_contraband_buy") then
-                locals.set_int("gb_contraband_buy", 604, 1)
-                locals.set_int("gb_contraband_buy", 600, amount)
-                locals.set_int("gb_contraband_buy", 790, 6)
-                locals.set_int("gb_contraband_buy", 791, 4)
-            end
+            SussySpt.addTask(function()
+                if SussySpt.requireScript("gb_contraband_buy") then
+                    locals.set_int("gb_contraband_buy", 604, 1)
+                    locals.set_int("gb_contraband_buy", 600, amount)
+                    locals.set_int("gb_contraband_buy", 790, 6)
+                    locals.set_int("gb_contraband_buy", 791, 4)
+                end
+            end)
         end
 
         addToRender(9, function()
