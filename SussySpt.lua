@@ -4665,13 +4665,6 @@ function SussySpt:init() -- SECTION SussySpt:init
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
 
-function SussySpt.displayUpdateWarning() -- ANCHOR SussySpt.displayUpdateWarning
-    ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
-    ImGui.Text("This feature is currently under maintenance and not working")
-    ImGui.PopStyleColor()
-    ImGui.Spacing()
-end
-
 function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
     if io == nil or io.open == nil then
         log.warning("Error: Could not access io.open. Is yimmenu updated?")
