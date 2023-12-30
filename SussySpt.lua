@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2875,
+    versionid = 2930,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -1828,7 +1828,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 -- local placeOnGround = true --!func_5946(iParam0, 0)
                                                 -- local modelHash = Local_228.f_19.f_5[iParam0 /*13*/].f_2
                                                 -- OBJECT.CREATE_PORTABLE_PICKUP(pickupHash, x, y, z, placeOnGround, modelHash)
-                                                log.info(tostring(locals.get_int("fm_content_xmas_truck", 228 + 19 + 5 + 0 + 13 + 2)))
+                                                for i = 0, 10 do
+                                                    log.info(tostring(locals.get_int("fm_content_xmas_truck", 228 + 19 + 5 + i + 13 + 2)))
+                                                end
                                             end)
                                         end
                                     end
@@ -2601,6 +2603,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     local a = {
                         stats = {
+                            -- {Stat, Type, Display}
                             {"MPPLY_IS_CHEATER", 1, "Is cheater"},
                             {"MPPLY_ISPUNISHED", 1, "Is punished"},
                             {"MPPLY_IS_HIGH_EARNER", 1, "High earner"},
@@ -2630,19 +2633,15 @@ function SussySpt:init() -- SECTION SussySpt:init
                             {"MPPLY_HELPFUL", 2, "Commend -> Helpful"},
                         },
                         abilities = {
-                            "Stamina", "Strength", "Shooting",
-                            "Stealth", "Flying", "Driving",
-                            "Diving", "Mental State"
-                        },
-                        abilitystats = {
-                            {"STAMINA", "SCRIPT_INCREASE_STAM"},
-                            {"STRENGTH", "SCRIPT_INCREASE_STRN"},
-                            {"SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
-                            {"STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
-                            {"FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
-                            {"WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
-                            {"LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
-                            {"PLAYER_MENTAL_STATE"}
+                            -- {Display, Getter, Setter, Value, Changed value}
+                            {"Stamina", "STAMINA", "SCRIPT_INCREASE_STAM"},
+                            {"Strength", "STRENGTH", "SCRIPT_INCREASE_STRN"},
+                            {"Shooting", "SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
+                            {"Stealth", "STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
+                            {"Flying", "FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
+                            {"Driving", "WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
+                            {"Diving", "LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
+                            {"Mental State", "PLAYER_MENTAL_STATE", nil}
                         }
                     }
 
@@ -2667,26 +2666,19 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end
 
                     local function refreshAbilityValue(mpx, i)
-                        local data = a.abilitystats[i]
+                        local data = a.abilities[i]
                         if data == nil then
                             return
                         end
 
-                        local stat = mpx..data[1]
-
-                        if i == 8 then
-                            a.abilityvalues[i] = stats.get_float(stat)
-                        else
-                            a.abilityvalues[i] = stats.get_int(stat)
-                        end
-                        a.abilitynewvalues[i] = nil
+                        local stat = mpx..data[2]
+                        a.abilities[i][4] = i == 8 and stats.get_float(stat) or stats.get_int(stat)
+                        a.abilities[i][5] = nil
                     end
 
                     local function refreshAbilityValues()
                         local mpx = yu.mpx()
-                        a.abilityvalues = {}
-                        a.abilitynewvalues = {}
-                        for k, v in pairs(a.abilitystats) do
+                        for k, v in pairs(a.abilities) do
                             refreshAbilityValue(mpx, k)
                         end
                     end
@@ -2770,48 +2762,59 @@ function SussySpt:init() -- SECTION SussySpt:init
                             ImGui.Spacing()
 
                             ImGui.PushItemWidth(331)
-                            for k, v in pairs(a.abilityvalues) do
+                            for k, v in pairs(a.abilities) do
                                 do
-                                    local value = a.abilitynewvalues[k] or v
+                                    local value, used
                                     if k == 8 then
-                                        local newvalue, used = ImGui.DragFloat(a.abilities[k], value, .2, 0, 100)
-                                        if used then
-                                            if newvalue == v then
-                                                a.abilitynewvalues[k] = nil
-                                            else
-                                                a.abilitynewvalues[k] = newvalue
-                                            end
-                                        end
+                                        value, used = ImGui.DragFloat(v[1], v[5] or v[4], .2, 0, 100)
                                     else
-                                        local newvalue, used = ImGui.DragInt(a.abilities[k], value, .2, 0, 100)
-                                        if used then
-                                            if newvalue == v then
-                                                a.abilitynewvalues[k] = nil
-                                            else
-                                                a.abilitynewvalues[k] = newvalue
-                                            end
+                                        value, used = ImGui.DragInt(v[1], v[5] or v[4], .2, 0, 100)
+                                    end
+
+                                    if used then
+                                        if value == v[4] then
+                                            a.abilities[k][5] = nil
+                                        else
+                                            a.abilities[k][5] = value
                                         end
                                     end
                                 end
 
-                                local value = a.abilitynewvalues[k]
-                                if value ~= nil then
+                                if v[5] ~= nil then
                                     ImGui.SameLine()
 
                                     if ImGui.SmallButton("Apply##abilities_"..k) then
                                         SussySpt.addTask(function()
-                                            if yu.is_num_between(value, 0, 100) then
-                                                local mpx = yu.mpx()
-                                                for k1, v2 in pairs(a.abilitystats[k]) do
-                                                    local stat = mpx..v2
-                                                    if k == 8 then
-                                                        stats.set_float(stat, value)
-                                                    else
-                                                        stats.set_int(stat, value)
-                                                    end
-                                                end
-                                                refreshAbilityValue(mpx, k)
+                                            if not yu.is_num_between(v[5], 0, 100) then
+                                                return
                                             end
+
+                                            local mpx = yu.mpx()
+                                            for i = 2, 3 do
+                                                if k == 8 and i == 3 then
+                                                    break
+                                                end
+
+                                                local stat = mpx..v[i]
+
+                                                local val
+                                                if i == 3 then
+                                                    val = v[5] - v[4]
+                                                else
+                                                    val = v[5]
+                                                end
+
+                                                if k == 8 then
+                                                    if i == 2 then
+                                                        stats.set_float(stat, val)
+                                                    end
+                                                else
+                                                    stats.set_int(stat, val)
+                                                    -- log.info("SET "..stat.." TO "..val)
+                                                end
+                                            end
+
+                                            refreshAbilityValue(mpx, k)
                                         end)
                                     end
                                 end
@@ -3929,6 +3932,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 yu.rendering.setCheckboxChecked("world_objspawner_deleteprev")
                 yu.rendering.setCheckboxChecked("world_objspawner_missionent")
+                yu.rendering.setCheckboxChecked("world_objspawner_hashmodel")
 
                 local function temp_text(infotext, duration)
                     yu.rif(function(runscript)
@@ -3972,9 +3976,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rif(function(runscript)
                             a.blocked = true
 
-                            local hash = joaat(a.model)
+                            local hash = yu.rendering.isCheckboxChecked("world_objspawner_hashmodel") and joaat(a.model) or tonumber(a.model)
 
-                            if not STREAMING.IS_MODEL_VALID(hash) then
+                            if hash == nil or not STREAMING.IS_MODEL_VALID(hash) or not STREAMING.IS_MODEL_A_VEHICLE(hash) then
                                 a.invalidmodel = true
                             else
                                 STREAMING.REQUEST_MODEL(hash)
@@ -4042,6 +4046,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         yu.rendering.renderCheckbox("Delete previous", "world_objspawner_deleteprev")
                         yu.rendering.renderCheckbox("Place on ground correctly", "world_objspawner_groundplace")
                         yu.rendering.renderCheckbox("Mission entity", "world_objspawner_missionent")
+                        yu.rendering.renderCheckbox("Hash model", "world_objspawner_hashmodel")
 
                         ImGui.TreePop()
                     end
@@ -4768,7 +4773,6 @@ end -- !SECTION
 function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     local tab = SussySpt.tab
 
-    SussySpt.debug("Calling SussySpt:initTabHBO()")
     SussySpt:initTabHBO()
     SussySpt.debug("Calling SussySpt:initTabQA()")
     SussySpt:initTabQA()
@@ -4803,6 +4807,8 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
 end -- !SECTION
 
 function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
+    SussySpt.debug("Calling SussySpt:initTabHBO()")
+
     local toRender = {}
     local function addToRender(id, cb)
         toRender[id] = cb
@@ -5002,7 +5008,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
             yu.rendering.setCheckboxChecked("hbo_cayo_cuttingpowder", stats.get_int(yu.mpx().."H4CNF_TARGET") == 3)
         end
-        refreshStats()
+        SussySpt.addTask(refreshStats)
 
         local function refreshCuts()
             a.cuts = {}
@@ -5010,14 +5016,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         refreshCuts()
 
         local function refreshExtra()
-            if yu.is_script_running("fm_mission_controller_2020") then
-                -- a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
-                -- a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
-            else
-                -- a.lifes = 0
-                -- a.realtake = 289700
-            end
-
+            -- if yu.is_script_running("fm_mission_controller_2020") then
+            --     a.lifes = locals.get_int("fm_mission_controller_2020", 43059 + 865 + 1)
+            --     a.realtake = locals.get_int("fm_mission_controller_2020", 40004 + 1392 + 53)
+            -- else
+            --     a.lifes = 0
+            --     a.realtake = 289700
+            -- end
         end
         -- refreshExtra()
 
@@ -5027,7 +5032,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx()..v) - os.time())
             end
         end
-        refreshCooldowns()
+        SussySpt.addTask(refreshCooldowns)
 
         addToRender(1, function()
             if (ImGui.BeginTabItem("Cayo Perico Heist")) then
@@ -5667,7 +5672,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 a.splvl = 2
             end
         end
-        refreshStats()
+        SussySpt.addTask(refreshStats)
 
         local function refreshCuts()
             a.cuts = {}
@@ -5689,7 +5694,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 cooldowns[k] = " "..v..": "..yu.format_seconds(stats.get_int(yu.mpx(v)) - os.time())
             end
         end
-        updateCooldowns()
+        SussySpt.addTask(updateCooldowns)
 
         addToRender(2, function()
             if (ImGui.BeginTabItem("Diamond Casino Heist")) then
@@ -6117,7 +6122,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             storyMission = stats.get_int(yu.mpx("VCM_FLOW_PROGRESS"))
             addUnknownValue(storyMissions, storyMission)
         end
-        updateStoryMission()
+        SussySpt.addTask(updateStoryMission)
 
         addToRender(3, function()
             if (ImGui.BeginTabItem("Diamond Casino & Resort")) then
@@ -6268,8 +6273,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 }
             end
         end
-
-        refresh()
+        SussySpt.addTask(refresh)
 
         local nightclubScript = "am_mp_nightclub"
 
@@ -6439,8 +6443,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             a.heist = yu.get_key_from_table(a.heistsids, globals.get_int(a.heistpointer), 1)
             a.heistchanged = false
         end
-
-        refresh()
+        SussySpt.addTask(refresh)
 
         addToRender(5, function()
             if (ImGui.BeginTabItem("Apartment Heists")) then
@@ -6579,8 +6582,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             a.heist = stats.get_int(yu.mpx("TUNER_CURRENT"))
             addUnknownValue(a.heists, a.heist)
         end
-
-        refresh()
+        SussySpt.addTask(refresh)
 
         local function getBS()
             return yu.shc(a.heist == 1, 4351, 12543)
@@ -6592,7 +6594,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 cooldowns[i] = "  - "..a.heists[i]..": "..yu.format_seconds(stats.get_int(yu.mpx("TUNER_CONTRACT"..i.."_POSIX")) - os.time())
             end
         end
-        refreshCooldowns()
+        SussySpt.addTask(refreshCooldowns)
 
         addToRender(6, function()
             if (ImGui.BeginTabItem("AutoShop Heists")) then
@@ -6709,7 +6711,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             a.daxcooldown = stats.get_int(yu.mpx("XM22JUGGALOWORKCDTIMER"))
             a.productiondelay = globals.get_int(a.productiondelayp)
         end
-        refresh()
+        SussySpt.addTask(refresh)
 
         addToRender(7, function()
             if (ImGui.BeginTabItem("DrugWars")) then
@@ -6790,7 +6792,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
             a.vipcontract = stats.get_int(yu.mpx("FIXER_STORY_BS"))
             addUnknownValue(a.vipcontracts, a.vipcontract)
         end
-        refreshStats()
+        SussySpt.addTask(refreshStats)
 
         SussySpt.addTask(function()
             if yu.rendering.isCheckboxChecked("hbo_agency_smthmfinale") then
