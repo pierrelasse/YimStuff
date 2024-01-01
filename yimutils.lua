@@ -439,7 +439,7 @@ return (function() -- Made by pierrelasse <:D
         end
 
         api.is_script_running_hash = function(hash)
-            return SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) ~= 0
+            return SCRIPT.GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(hash) > 0
         end
 
         api.is_script_running = function(name)
