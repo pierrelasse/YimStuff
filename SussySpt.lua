@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2930,
+    versionid = 2972,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -228,16 +228,15 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     local function renderTab(v)
         if not (type(v.should_display) == "function" and v.should_display() == false) and ImGui.BeginTabItem(v.name) then
+            if type(v.render) == "function" then
+                v.render()
+            end
             if yu.len(v.sub) > 0 then
                 ImGui.BeginTabBar("##tabbar_"..v.id)
                 for k1, v1 in pairs(v.sub) do
                     renderTab(v1)
                 end
                 ImGui.EndTabBar()
-            end
-
-            if type(v.render) == "function" then
-                v.render()
             end
             ImGui.EndTabItem()
         end
@@ -248,6 +247,14 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     local function renderTabs()
         if ImGui.Begin(SussySpt.rendering.title) then
+            if yu.rendering.isCheckboxChecked("dev_times") then
+                ImGui.Text("Times: "
+                    .."render_time="..SussySpt.rendering.times.lastrendertime
+                    .." highest_render_time="..SussySpt.rendering.times.highestrendertime
+                )
+                ImGui.Separator()
+            end
+
             ImGui.BeginTabBar("##tabbar")
             for k, v in pairs(SussySpt.rendering.tabs) do
                 renderTab(v)
@@ -276,6 +283,12 @@ function SussySpt:init() -- SECTION SussySpt:init
     end
 
     SussySpt.render = function()
+        if SussySpt.rendering.times == nil then
+            SussySpt.rendering.times = {}
+        end
+
+        SussySpt.rendering.times.starttime = os.clock()
+
         for k, v in pairs(SussySpt.rendercb) do
             v()
         end
@@ -320,6 +333,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
         for k, v in pairs(SussySpt.render_pops) do
             ImGui[k](v)
+        end
+
+        SussySpt.rendering.times.lastrendertime = os.clock() - SussySpt.rendering.times.starttime
+        if SussySpt.rendering.times.lastrendertime > (SussySpt.rendering.times.highestrendertime or 0) then
+            SussySpt.rendering.times.highestrendertime = SussySpt.rendering.times.lastrendertime
         end
     end
 
@@ -574,21 +592,23 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         table.insert(SussySpt.sortedPlayers, k)
 
-                        local isSelf = v.ped == selfppid
+                        if v.ped == selfppid then
+                            v.isSelf = true
+                        end
 
                         v.noped = type(v.ped) ~= "number" or v.ped == 0
                         v.tooltip = emptystr
 
                         v.info = {}
 
-                        if not isSelf and NETWORK.NETWORK_IS_PLAYER_TALKING(v.player) then
+                        if not v.isSelf and NETWORK.NETWORK_IS_PLAYER_TALKING(v.player) then
                             v.info.talking = {
                                 "T",
                                 "The player is currently screaming or talking in the voicechat"
                             }
                         end
 
-                        if not isSelf and network.is_player_friend(v.player) then
+                        if not v.isSelf and network.is_player_friend(v.player) then
                             v.info.friend = {
                                 "F",
                                 "This player is your friend in socialclub"
@@ -625,7 +645,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             }
                         end
 
-                        if not isSelf and NETWORK.IS_PLAYER_IN_CUTSCENE(v.player) then
+                        if not v.isSelf and NETWORK.IS_PLAYER_IN_CUTSCENE(v.player) then
                             v.info.cutscene = {
                                 "Cs",
                                 "A cutscene is currently playing"
@@ -693,7 +713,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 }
                             end
 
-                            if not isSelf and v.blip == 0 then
+                            if not v.isSelf and v.blip == 0 then
                                 v.info.noblip = {
                                     "B",
                                     "The player has no blip. In interior/not spawned yet?"
@@ -707,7 +727,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 }
                             end
 
-                            if not isSelf and NETWORK.IS_ENTITY_A_GHOST(v.ped) or NETWORK.IS_ENTITY_IN_GHOST_COLLISION(v.ped) then
+                            if not v.isSelf and NETWORK.IS_ENTITY_A_GHOST(v.ped) or NETWORK.IS_ENTITY_IN_GHOST_COLLISION(v.ped) then
                                 v.info.ghost = {
                                     "G",
                                     "The player is a ghost. Passive mode?"
@@ -1833,6 +1853,69 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 end
                                             end)
                                         end
+
+                                        if (true or not v.isSelf) and ImGui.SmallButton("Gift vehicle") then
+                                            SussySpt.addTask(function()
+                                                local veh = yu.veh()
+                                                if veh == nil then
+                                                    yu.notify(3, "You need to be in a vehicle", "Gift vehicle")
+                                                    return
+                                                end
+
+                                                -- if DECORATOR.DECOR_IS_REGISTERED_AS_TYPE("Player_Vehicle", 3) then
+                                                --     if not DECORATOR.DECOR_EXIST_ON(veh, "Player_Vehicle") then
+                                                --         local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(yu.pid())
+                                                --         log.info("NWHASH: "..tostring(nwhash))
+                                                --         local hash = DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", nwhash)
+                                                --         log.info("HASH: "..tostring(hash))
+                                                --     end
+                                                -- end
+
+                                                local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(PLAYER.PLAYER_ID())
+                                                log.info("NWHASH: "..tostring(nwhash))
+
+                                                local function printDecor(decor, a)
+                                                    log.info("[GIFT VEHICLE] DECOR: "..decor.."="..DECORATOR.DECOR_GET_INT(veh, decor))
+                                                end
+
+                                                printDecor("Player_Vehicle", nwhash)
+                                                printDecor("Previous_Owner")
+                                                printDecor("PV_Slot")
+                                                printDecor("Veh_Modded_By_Player")
+                                                printDecor("Not_Allow_As_Saved_Veh")
+
+                                                DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", -251500684)
+                                                DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", 0)
+                                                DECORATOR.DECOR_SET_INT(veh, "PV_Slot", 43)
+                                                DECORATOR.DECOR_SET_INT(veh, "Veh_Modded_By_Player", 0)
+                                                DECORATOR.DECOR_SET_INT(veh, "Not_Allow_As_Saved_Veh", 0)
+                                            end)
+                                        end
+
+                                        if ImGui.SmallButton("Gooch present thing") then
+                                            SussySpt.addTask(function()
+                                                local modelHash = joaat("xm3_prop_xm3_present_01a")
+
+                                                STREAMING.REQUEST_MODEL(modelHash)
+                                                if (STREAMING.HAS_MODEL_LOADED(modelHash)) then
+                                                    local c = yu.coords(player.ped, true)
+
+                                                    local pickup = OBJECT.CREATE_AMBIENT_PICKUP(joaat("PICKUP_PORTABLE_FM_CONTENT_MISSION_ENTITY_SMALL"), c.x, c.y, c.z, 0, 0, modelHash, true, false);
+                                                    OBJECT.PLACE_OBJECT_ON_GROUND_PROPERLY(pickup)
+                                                    ENTITY.SET_ENTITY_LOD_DIST(pickup, 1200)
+                                                    ENTITY.SET_ENTITY_HEALTH(pickup, 50, 0, 0)
+                                                    ENTITY.SET_ENTITY_INVINCIBLE(pickup, true)
+                                                    ENTITY.SET_ENTITY_PROOFS(pickup, true, true, false, true, true, true, true, false)
+                                                    ENTITY.SET_ENTITY_LOAD_COLLISION_FLAG(pickup, true, 1)
+                                                    ENTITY.SET_ENTITY_SHOULD_FREEZE_WAITING_ON_COLLISION(pickup, true)
+                                                    OBJECT.SET_OBJECT_FORCE_VEHICLES_TO_AVOID(pickup, true)
+                                                    PHYSICS.ACTIVATE_PHYSICS(pickup)
+                                                    OBJECT.SET_ACTIVATE_OBJECT_PHYSICS_AS_SOON_AS_IT_IS_UNFROZEN(pickup, true)
+                                                    ENTITY.SET_ENTITY_DYNAMIC(pickup, true)
+                                                    STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(joaat("xm3_prop_xm3_present_01a"))
+                                                end
+                                            end)
+                                        end
                                     end
                                 end
 
@@ -2141,8 +2224,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                     tab2.sub[2] = tab3
                 end -- !SECTION
 
-                do -- SECTION AutoShop
-                    local tab3 = SussySpt.rendering.newTab("AutoShop")
+                do -- SECTION Auto Shop
+                    local tab3 = SussySpt.rendering.newTab("Auto Shop")
 
                     local a = {
                         heists = {
@@ -2327,9 +2410,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                 do -- SECTION Kosatka
                     local tab3 = SussySpt.rendering.newTab("Kosatka")
 
-                    local a = {
-                    }
-
                     do -- SECTION Cayo Perico
                         local tab4 = SussySpt.rendering.newTab("Cayo Perico")
 
@@ -2346,8 +2426,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         tab3.sub[1] = tab4
                     end -- !SECTION
 
-                    do -- ANCHOR Vehicle
-                        local tab4 = SussySpt.rendering.newTab("Vehicle")
+                    do -- ANCHOR Kosatka
+                        local tab4 = SussySpt.rendering.newTab("Kosatka")
 
                         tab4.render = function()
                             ImGui.Text("\\/ Placeholder. Does not work")
@@ -2590,6 +2670,60 @@ function SussySpt:init() -- SECTION SussySpt:init
                     end -- !SECTION
 
                     tab2.sub[5] = tab3
+                end -- !SECTION
+
+                do -- SECTION Motorcycle Club
+                    local tab3 = SussySpt.rendering.newTab("Motorcycle Club")
+
+                    tab2.sub[6] = tab3
+                end -- !SECTION
+
+                do -- SECTION Organization
+                    local tab3 = SussySpt.rendering.newTab("Organization")
+
+                    tab2.sub[7] = tab3
+                end -- !SECTION
+
+                do -- SECTION Bunker
+                    local tab3 = SussySpt.rendering.newTab("Bunker")
+
+                    tab2.sub[8] = tab3
+                end -- !SECTION
+
+                do -- SECTION Arcade
+                    local tab3 = SussySpt.rendering.newTab("Arcade")
+
+                    tab2.sub[9] = tab3
+                end -- !SECTION
+
+                do -- SECTION Nightclub
+                    local tab3 = SussySpt.rendering.newTab("Nightclub")
+
+                    tab2.sub[10] = tab3
+                end -- !SECTION
+
+                do -- SECTION Casino
+                    local tab3 = SussySpt.rendering.newTab("Casino")
+
+                    do -- SECTION Slots
+                        local tab4 = SussySpt.rendering.newTab("Slots")
+
+                        tab3.sub[1] = tab4
+                    end -- !SECTION
+
+                    do -- SECTION Lucky wheel
+                        local tab4 = SussySpt.rendering.newTab("Lucky wheel")
+
+                        tab3.sub[2] = tab4
+                    end -- !SECTION
+
+                    do -- SECTION Story missions
+                        local tab4 = SussySpt.rendering.newTab("Story missions")
+
+                        tab3.sub[3] = tab4
+                    end -- !SECTION
+
+                    tab2.sub[11] = tab3
                 end -- !SECTION
 
                 tab.sub[2] = tab2
@@ -4325,6 +4459,10 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                         ImGui.Spacing()
 
+                        yu.rendering.renderCheckbox("Display times", "dev_times")
+
+                        ImGui.Spacing()
+
                         if ImGui.Button("Go airplane mode :)") then
                             SussySpt.addTask(function()
                                 STREAMING.REQUEST_ANIM_DICT("missfbi1")
@@ -4656,9 +4794,17 @@ function SussySpt:init() -- SECTION SussySpt:init
         local tabSize = 0
 
         local function countTabs(tbl)
+            if type(tbl) ~= "table" then
+                return
+            end
             for k, v in pairs(tbl) do
                 tabSize = tabSize + 1
-                countTabs(v.sub)
+                if v.sub == tbl then
+                    tbl[k] = nil
+                    log.warning("Overflow for tab "..v.name)
+                else
+                    countTabs(v.sub)
+                end
             end
         end
         countTabs(SussySpt.rendering.tabs)
