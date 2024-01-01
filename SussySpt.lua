@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = {
     version = "1.3.16",
-    versionid = 2972,
+    versionid = 2987,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     doInit = true,
@@ -179,7 +179,11 @@ function SussySpt:init() -- SECTION SussySpt:init
             apartment_fleeca_drillstage = 10067 + 11,
             apartment_instantfinish1 = 19728,
             apartment_instantfinish2 = 28347 + 1,
-            apartment_instantfinish3 = 31603 + 69
+            apartment_instantfinish3 = 31603 + 69,
+
+            lucky_wheel_win_state = 278,
+            lucky_wheel_prize = 14,
+            lucky_wheel_prize_state = 45
         },
         t = { -- ANCHOR Tunables
             salvageyard_week = 488207018
@@ -2713,6 +2717,69 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                     do -- SECTION Lucky wheel
                         local tab4 = SussySpt.rendering.newTab("Lucky wheel")
+
+                        tab4.a = {}
+                        local a = tab4.a
+
+                        a.script = "casino_lucky_wheel"
+                        a.scriptHashed = joaat(a.script)
+
+                        a.prizes = {
+                            [0] = "CLOTHING (1)",
+                            [1] = "2,500 RP",
+                            [2] = "$20,000",
+                            [3] = "10,000 Chips",
+                            [4] = "DISCOUNT %",
+                            [5] = "5,000 RP",
+                            [6] = "$30,000",
+                            [7] = "15,000 Chips",
+                            [8] = "CLOTHING (2)",
+                            [9] = "7,500 RP",
+                            [10] = "20,000 Chips",
+                            [11] = "MYSTERY",
+                            [12] = "CLOTHING (3)",
+                            [13] = "10,000 RP",
+                            [14] = "$40,000",
+                            [15] = "25,000 Chips",
+                            [16] = "CLOTHING (4)",
+                            [17] = "15,000 RP",
+                            [18] = "VEHICLE"
+                        }
+
+                        function a.tick()
+                            a.scriptRunning = yu.is_script_running_hash(a.scriptHashed)
+                        end
+
+                        function a.win(prize)
+                            if a.scriptRunning then
+                                locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize, prize)
+                                locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize_state, 11)
+                            end
+                            return a.scriptRunning
+                        end
+
+                        tab4.render = function()
+                            SussySpt.tasks.online_thing_casino_lucky_wheel = a.tick
+
+                            if not a.scriptRunning then
+                                ImGui.Text("Please go near the lucky wheel at the Diamond Casino")
+                                return
+                            end
+
+                            ImGui.Text("Click on a prize to win it")
+
+                            local x, y = ImGui.GetContentRegionAvail()
+                            if ImGui.BeginListBox("##prizes", 150, y) then
+                                for k, v in pairs(a.prizes) do
+                                    if ImGui.Selectable(v, false) then
+                                        SussySpt.addTask(function()
+                                            a.win(k)
+                                        end)
+                                    end
+                                end
+                                ImGui.EndListBox()
+                            end
+                        end
 
                         tab3.sub[2] = tab4
                     end -- !SECTION
