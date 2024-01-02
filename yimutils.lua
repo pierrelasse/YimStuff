@@ -772,6 +772,10 @@ return (function(fnew)
             checkboxstates = {}
         }
 
+        local function getOrDefault(tbl, key, defaultValue)
+            return tbl[key] or (defaultValue or "nil")
+        end
+
         api.rendering.renderList = function(items, key, labelId, name, sort)
             if items == nil or labelId == nil then
                 return {
@@ -784,11 +788,11 @@ return (function(fnew)
             local newKey = key
             local newValue = nil
             local label = (name or "").."##"..labelId
-            local selectedValue = api.get_or_default(items, key, items[next(items)])
+            local selectedValue = getOrDefault(items, key, items[next(items)])
             if ImGui.BeginCombo(label, selectedValue) then
                 if sort ~= nil then
                     for k, v in pairs(sort) do
-                        local v_ = api.get_or_default(items, v, next(items))
+                        local v_ = getOrDefault(items, v, next(items))
                         if ImGui.Selectable(v_, false) then
                             newKey = v
                             newValue = v_
