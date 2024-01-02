@@ -1,30 +1,145 @@
 --[[ SussySpt ]]
-SussySpt = {
+SussySpt = { -- ANCHOR SussySpt
     version = "1.3.16",
-    versionid = 2987,
+    versionid = 3008,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
-    doInit = true,
-    debugtext = "",
-    debug = function(s)
-        if type(s) == "string" then
-            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
-            if yu ~= nil and yu.rendering.isCheckboxChecked("debug_console") then
-                log.debug(s)
-            end
-        end
-    end
+    needInit = true
 }
 
-SussySpt.debug("Loading yimutils")
-yu = require("yimutils")
-
 function SussySpt:init() -- SECTION SussySpt:init
-    if SussySpt.doInit ~= true then
+    if SussySpt.needInit ~= true then
         SussySpt.debug("SussySpt:init() was called after initialization")
         return
+    else
+        SussySpt.needInit = nil
     end
-    SussySpt.doInit = nil
+
+    do -- SECTION Load yimutils
+        local function load()
+            yu = require("yimutils")
+        end
+
+        local success, result = pcall(load)
+        local err
+        if not success then
+            err = result
+        elseif yu == nil then
+            err = "The returned value was nil"
+        elseif type(yu) ~= "table" then
+            err = "The returned value was not a table but from type "..type(yu)
+        end
+        if err ~= nil then
+            log.warning("Error: Could not load yimutils: "..err)
+            return
+        end
+    end -- !SECTION
+
+    do -- SECTION Debug
+        SussySpt.debugtext = ""
+
+        SussySpt.debug = function(s)
+            if type(s) == "string" then
+                SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
+                if yu.rendering.isCheckboxChecked("debug_console") then
+                    log.debug(s)
+                end
+            end
+        end
+
+        SussySpt.debug("Initialized debug logger")
+    end -- !SECTION
+
+    do -- SECTION Config
+        if io == nil or io.open == nil then
+            log.warning("Error: Could not access io.open. Is yimmenu updated?")
+            return
+        end
+
+        SussySpt.cfg = {
+            file = "sussyspt",
+            changed = false,
+            lastAutosave = os.time()
+        }
+
+        SussySpt.cfg.has = function(path) -- ANCHOR has
+            return SussySpt.cfg.data ~= nil and SussySpt.cfg.data[path] ~= nil
+        end
+
+        SussySpt.cfg.get = function(path, default) -- ANCHOR get
+            if SussySpt.cfg.data == nil then error("No config data is present") end
+            local v = SussySpt.cfg.data[path]
+            if v == nil then return default end
+            return v
+        end
+
+        SussySpt.cfg.set = function(path, value, setchanged) -- ANCHOR set
+            if SussySpt.cfg.data == nil then return value end
+
+            if SussySpt.cfg.data[path] ~= value then
+                SussySpt.cfg.data[path] = value
+                SussySpt.cfg.changed = setchanged ~= false
+            end
+
+            return value
+        end
+
+        SussySpt.cfg.save = function() -- ANCHOR save
+            SussySpt.cfg.changed = false
+
+            local content = yu.json.encode(SussySpt.cfg.data)
+            if type(content) ~= "string" then
+                log.warning("Could not encode config")
+                return false
+            end
+
+            local f = io.open("sussyspt", "w")
+            if f then
+                f:write(content)
+                f:flush()
+                f:close()
+                return true
+            else
+                log.warning("Failed to open config file")
+                return false
+            end
+        end
+
+        SussySpt.cfg.autosave = function() -- ANCHOR autosave
+            if not SussySpt.cfg.changed or SussySpt.cfg.data == nil then
+                return
+            end
+
+            local time = os.time()
+            if time - SussySpt.cfg.lastAutosave <= 2 then
+                return
+            end
+            SussySpt.cfg.lastAutosave = time
+
+            if SussySpt.cfg.save() then
+                SussySpt.debug("Config automaticly saved")
+            else
+                log.warning("Failed to autosave the config")
+            end
+        end
+
+        local f = io.open("sussyspt", "r")
+        if f ~= nil then
+            local content = f:read("*all")
+            if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
+                SussySpt.cfg.data = yu.json.decode(content)
+                SussySpt.debug("Config loaded")
+            else
+                log.warning("Unable to load config")
+            end
+        else
+            log.info("You can ignore the warning above")
+            SussySpt.cfg.data = {}
+            SussySpt.cfg.save()
+        end
+    end -- !SECTION
+
+    yu.rendering.setCheckboxChecked("debug_console", SussySpt.cfg.get("debug_console", false))
 
     if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
         log.warning("Fatal: Could not start due to an invalid version type. Are you using a source file?")
@@ -36,13 +151,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         return SussySpt.dev
     end
 
-    if SussySpt:setupConfig() == false then
-        return
-    end
-
-    yu.rendering.setCheckboxChecked("debug_console", SussySpt.cfg.get("debug_console", false))
-
-    SussySpt.debug("Starting SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
+    SussySpt.debug("Loading SussySpt v"..SussySpt.version.." ["..SussySpt.versionid.."] build "..SussySpt.build)
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
@@ -50,111 +159,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.in_online = false
 
-    SussySpt:createCache()
-
-    -- ANCHOR Define rendering
-    SussySpt.rendering = {
-        themes = {
-            Nightly = {
-                ImGuiCol = {
-                    TitleBg = {9, 27, 46, 1},
-                    TitleBgActive = {9, 27, 46, 1},
-                    WindowBg = {0, 19, 37, .95},
-                    Tab = {10, 30, 46, 1},
-                    TabActive = {14, 60, 90, 1},
-                    TabHovered = {52, 64, 71, 1},
-                    Button = {3, 45, 79, 1},
-                    FrameBg = {35, 38, 53, 1},
-                    FrameBgHovered = {37, 40, 55, 1},
-                    FrameBgActive = {37, 40, 55, 1},
-                    HeaderActive = {54, 55, 66, 1},
-                    HeaderHovered = {62, 63, 73, 1},
-                },
-                ImGuiStyleVar = {
-                    WindowRounding = {4},
-                    FrameRounding = {2}
-                }
-            },
-            Dark = {
-                ImGuiCol = {
-                    TitleBg = {18, 18, 18, .97},
-                    TitleBgActive = {21, 21, 22, .97},
-                    WindowBg = {18, 18, 18, .97},
-                    Tab = {42, 42, 42, .8},
-                    TabActive = {134, 134, 134, 1},
-                    TabHovered = {147, 147, 147, 1},
-                    Button = {42, 42, 42, .8},
-                    FrameBg = {32, 32, 32, 1},
-                    FrameBgHovered = {34, 34, 34, 1},
-                    FrameBgActive = {34, 34, 34, 1}
-                },
-                ImGuiStyleVar = {
-                    WindowRounding = {8},
-                    FrameRounding = {5}
-                }
-            },
-            Purple = {
-                ImGuiCol = {
-                    TitleBg = {11, 5, 37, .75},
-                    TitleBgActive = {21, 8, 47, .81},
-                    WindowBg = {21, 8, 47, .82},
-                    Tab = {41, 25, 80, .5},
-                    TabActive = {55, 29, 124, .5},
-                    TabHovered = {51, 35, 90, .55},
-                    Button = {94, 57, 186, .3},
-                    FrameBg = {41, 25, 80, .67},
-                    FrameBgHovered = {41, 35, 90, .67},
-                    FrameBgActive = {41, 35, 90, .67}
-                },
-                ImGuiStyleVar = {
-                    WindowRounding = {16},
-                    FrameRounding = {3}
-                }
-            },
-            Fatality = {
-                ImGuiCol = {
-                    TitleBg = {9, 6, 20, .75},
-                    TitleBgActive = {9, 6, 20, .85},
-                    WindowBg = {19, 13, 43, .87},
-                    Tab = {239, 7, 73, .5},
-                    TabActive = {255, 59, 115, .5},
-                    TabHovered = {255, 59, 115, .55},
-                    Button = {239, 7, 73, .3},
-                    FrameBg = {26, 29, 48, .67},
-                    FrameBgHovered = {16, 22, 48, .67},
-                    FrameBgActive = {13, 15, 48, .67},
-                    Border = {32, 20, 60, .76}
-                },
-                ImGuiStyleVar = {
-                    WindowRounding = {5},
-                    FrameRounding = {2.5}
-                }
-            },
-            FatalityBorderTest = {
-                parent = "Fatality",
-                ImGuiCol = {
-                    BorderShadow = {0, 0, 0, 0}
-                },
-                ImGuiStyleVar = {
-                    FrameBorderSize = {4.05}
-                }
-            }
-        },
-        tabs = {}
-    }
-
-    for k, v in pairs(SussySpt.rendering.themes) do
-        if v.ImGuiCol then
-            for k, v2 in pairs(v.ImGuiCol) do
-                for k3, v3 in pairs(v2) do
-                    if k3 ~= 4 then v2[k3] = v3 / 255 end
-                end
-            end
-        end
-    end
-
-    -- SECTION p
-    SussySpt.p = {
+    SussySpt.p = { -- SECTION p
         g = { -- ANCHOR Globals
             fm = 262145, -- freemode
 
@@ -194,173 +199,256 @@ function SussySpt:init() -- SECTION SussySpt:init
         agency_maxpayout = 262145 + 32466
     } -- !SECTION
 
-    SussySpt.xp_to_rank = yu.xp_to_rank()
-
-    SussySpt.rendering.theme = SussySpt.cfg.get("theme", "Fatality")
-    if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
-        SussySpt.rendering.theme = next(SussySpt.rendering.themes)
-    end
-
-    SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
-
-    SussySpt.rendering.getTheme = function()
-        return SussySpt.rendering.themes[SussySpt.rendering.theme] or {}
-    end
-
-    do
-        local title = "SussySpt"
-
-        if SussySpt.versiontype == 2 then
-            title = title.." vD"..SussySpt.version
-            title = title.."["..SussySpt.versionid.."]@"..SussySpt.build
-        else
-            title = title.." v"..SussySpt.version
-        end
-
-        SussySpt.rendering.title = title.."###sussyspt_mainwindow"
-    end
-
-    SussySpt.rendering.newTab = function(name, render)
-        return {
-            name = name,
-            render = render,
-            should_display = nil,
-            sub = {},
-            id = yu.gun()
+    do -- SECTION Rendering
+        SussySpt.rendering = {
+            themes = {
+                Nightly = {
+                    ImGuiCol = {
+                        TitleBg = {9, 27, 46, 1},
+                        TitleBgActive = {9, 27, 46, 1},
+                        WindowBg = {0, 19, 37, .95},
+                        Tab = {10, 30, 46, 1},
+                        TabActive = {14, 60, 90, 1},
+                        TabHovered = {52, 64, 71, 1},
+                        Button = {3, 45, 79, 1},
+                        FrameBg = {35, 38, 53, 1},
+                        FrameBgHovered = {37, 40, 55, 1},
+                        FrameBgActive = {37, 40, 55, 1},
+                        HeaderActive = {54, 55, 66, 1},
+                        HeaderHovered = {62, 63, 73, 1},
+                    },
+                    ImGuiStyleVar = {
+                        WindowRounding = {4},
+                        FrameRounding = {2}
+                    }
+                },
+                Dark = {
+                    ImGuiCol = {
+                        TitleBg = {18, 18, 18, .97},
+                        TitleBgActive = {21, 21, 22, .97},
+                        WindowBg = {18, 18, 18, .97},
+                        Tab = {42, 42, 42, .8},
+                        TabActive = {134, 134, 134, 1},
+                        TabHovered = {147, 147, 147, 1},
+                        Button = {42, 42, 42, .8},
+                        FrameBg = {32, 32, 32, 1},
+                        FrameBgHovered = {34, 34, 34, 1},
+                        FrameBgActive = {34, 34, 34, 1}
+                    },
+                    ImGuiStyleVar = {
+                        WindowRounding = {8},
+                        FrameRounding = {5}
+                    }
+                },
+                Purple = {
+                    ImGuiCol = {
+                        TitleBg = {11, 5, 37, .75},
+                        TitleBgActive = {21, 8, 47, .81},
+                        WindowBg = {21, 8, 47, .82},
+                        Tab = {41, 25, 80, .5},
+                        TabActive = {55, 29, 124, .5},
+                        TabHovered = {51, 35, 90, .55},
+                        Button = {94, 57, 186, .3},
+                        FrameBg = {41, 25, 80, .67},
+                        FrameBgHovered = {41, 35, 90, .67},
+                        FrameBgActive = {41, 35, 90, .67}
+                    },
+                    ImGuiStyleVar = {
+                        WindowRounding = {16},
+                        FrameRounding = {3}
+                    }
+                },
+                Fatality = {
+                    ImGuiCol = {
+                        TitleBg = {9, 6, 20, .75},
+                        TitleBgActive = {9, 6, 20, .85},
+                        WindowBg = {19, 13, 43, .87},
+                        Tab = {239, 7, 73, .5},
+                        TabActive = {255, 59, 115, .5},
+                        TabHovered = {255, 59, 115, .55},
+                        Button = {239, 7, 73, .3},
+                        FrameBg = {26, 29, 48, .67},
+                        FrameBgHovered = {16, 22, 48, .67},
+                        FrameBgActive = {13, 15, 48, .67},
+                        Border = {32, 20, 60, .76}
+                    },
+                    ImGuiStyleVar = {
+                        WindowRounding = {5},
+                        FrameRounding = {2.5}
+                    }
+                },
+                FatalityBorderTest = {
+                    parent = "Fatality",
+                    ImGuiCol = {
+                        BorderShadow = {0, 0, 0, 0}
+                    },
+                    ImGuiStyleVar = {
+                        FrameBorderSize = {4.05}
+                    }
+                }
+            },
+            tabs = {}
         }
-    end
 
-    local function renderTab(v)
-        if not (type(v.should_display) == "function" and v.should_display() == false) and ImGui.BeginTabItem(v.name) then
-            if type(v.render) == "function" then
-                v.render()
-            end
-            if yu.len(v.sub) > 0 then
-                ImGui.BeginTabBar("##tabbar_"..v.id)
-                for k1, v1 in pairs(v.sub) do
-                    renderTab(v1)
-                end
-                ImGui.EndTabBar()
-            end
-            ImGui.EndTabItem()
-        end
-    end
-
-    SussySpt.render_pops = {}
-    -- ANCHOR Render
-
-    local function renderTabs()
-        if ImGui.Begin(SussySpt.rendering.title) then
-            if yu.rendering.isCheckboxChecked("dev_times") then
-                ImGui.Text("Times: "
-                    .."render_time="..SussySpt.rendering.times.lastrendertime
-                    .." highest_render_time="..SussySpt.rendering.times.highestrendertime
-                )
-                ImGui.Separator()
-            end
-
-            ImGui.BeginTabBar("##tabbar")
-            for k, v in pairs(SussySpt.rendering.tabs) do
-                renderTab(v)
-            end
-            ImGui.EndTabBar()
-        end
-        ImGui.End()
-        return true
-    end
-
-    function SussySpt.removeErrorPath(s)
-        local maxAmount = yu.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
-        local values = string.split(s, ":", maxAmount)
-        if yu.len(values) < 4 then
-            return {
-                s,
-                -1,
-                s
-            }
-        end
-        return {
-            s, -- full error
-            values[3], -- line
-            values[4]:strip() -- error
-        }
-    end
-
-    SussySpt.render = function()
-        if SussySpt.rendering.times == nil then
-            SussySpt.rendering.times = {}
-        end
-
-        SussySpt.rendering.times.starttime = os.clock()
-
-        for k, v in pairs(SussySpt.rendercb) do
-            v()
-        end
-
-        local function pushTheme(theme)
-            if type(theme) ~= "table" then
-                return
-            end
-
-            if theme.parent ~= nil then
-                pushTheme(SussySpt.rendering.themes[theme.parent])
-            end
-
-            for k, v in pairs(theme) do
-                if type(k) == "string" and type(v) == "table" then
-                    for k1, v1 in pairs(v) do
-                        if k == "ImGuiCol" then
-                            ImGui.PushStyleColor(ImGuiCol[k1], v1[1], v1[2], v1[3], v1[4])
-                            SussySpt.render_pops.PopStyleColor = (SussySpt.render_pops.PopStyleColor or 0) + 1
-                        elseif k == "ImGuiStyleVar" then
-                            if v1[2] == nil then
-                                ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
-                            else
-                                ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
-                            end
-                            SussySpt.render_pops.PopStyleVar = (SussySpt.render_pops.PopStyleVar or 0) + 1
-                        end
+        for k, v in pairs(SussySpt.rendering.themes) do
+            if v.ImGuiCol then
+                for k, v2 in pairs(v.ImGuiCol) do
+                    for k3, v3 in pairs(v2) do
+                        if k3 ~= 4 then v2[k3] = v3 / 255 end
                     end
                 end
             end
         end
-        pushTheme(SussySpt.rendering.getTheme())
 
-        local success, result = pcall(renderTabs)
-        if not success then
-            local err = SussySpt.removeErrorPath(result)
-            ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
-            ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
-            log.warning("Error while rendering (line "..err[2].."): "..err[3])
-            ImGui.PopStyleColor()
+        SussySpt.rendering.theme = SussySpt.cfg.get("theme", "Fatality")
+        if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
+            SussySpt.rendering.theme = next(SussySpt.rendering.themes)
         end
 
-        for k, v in pairs(SussySpt.render_pops) do
-            ImGui[k](v)
+        SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
+
+        SussySpt.rendering.getTheme = function()
+            return SussySpt.rendering.themes[SussySpt.rendering.theme] or {}
         end
 
-        SussySpt.rendering.times.lastrendertime = os.clock() - SussySpt.rendering.times.starttime
-        if SussySpt.rendering.times.lastrendertime > (SussySpt.rendering.times.highestrendertime or 0) then
-            SussySpt.rendering.times.highestrendertime = SussySpt.rendering.times.lastrendertime
+        do -- ANCHOR Title
+            local title = "SussySpt"
+            if SussySpt.versiontype == 2 then
+                title = title.." vD"..SussySpt.version
+                title = title.."["..SussySpt.versionid.."]@"..SussySpt.build
+            else
+                title = title.." v"..SussySpt.version
+            end
+            SussySpt.rendering.title = title.."###sussyspt_mainwindow"
         end
-    end
 
-    SussySpt.tasks = {}
-    SussySpt.addTask = function(cb)
-        local id = #SussySpt.tasks + 1
-        SussySpt.tasks[id] = cb
-        return id
-    end
-
-    SussySpt.disableControls = 0
-    SussySpt.pushDisableControls = function(a)
-        if a ~= false then
-            SussySpt.disableControls = 4
+        SussySpt.rendering.newTab = function(name, render)
+            return {
+                name = name,
+                render = render,
+                should_display = nil,
+                sub = {},
+                id = yu.gun()
+            }
         end
-    end
 
-    -- ANCHOR mainLoop
-    SussySpt.mainLoop = function(rs)
+        local function renderTab(v)
+            if not (type(v.should_display) == "function" and v.should_display() == false) and ImGui.BeginTabItem(v.name) then
+                if type(v.render) == "function" then
+                    v.render()
+                end
+                if yu.len(v.sub) > 0 then
+                    ImGui.BeginTabBar("##tabbar_"..v.id)
+                    for k1, v1 in pairs(v.sub) do
+                        renderTab(v1)
+                    end
+                    ImGui.EndTabBar()
+                end
+                ImGui.EndTabItem()
+            end
+        end
+
+        SussySpt.render_pops = {}
+
+        local function renderTabs()
+            if ImGui.Begin(SussySpt.rendering.title) then
+                if yu.rendering.isCheckboxChecked("dev_times") then
+                    ImGui.Text("Times: "
+                        .."render_time="..SussySpt.rendering.times.lastrendertime
+                        .." highest_render_time="..SussySpt.rendering.times.highestrendertime
+                    )
+                    ImGui.Separator()
+                end
+
+                ImGui.BeginTabBar("##tabbar")
+                for k, v in pairs(SussySpt.rendering.tabs) do
+                    renderTab(v)
+                end
+                ImGui.EndTabBar()
+            end
+            ImGui.End()
+            return true
+        end
+
+        SussySpt.render = function()
+            if SussySpt.rendering.times == nil then
+                SussySpt.rendering.times = {}
+            end
+
+            SussySpt.rendering.times.starttime = os.clock()
+
+            for k, v in pairs(SussySpt.rendercb) do
+                v()
+            end
+
+            local function pushTheme(theme)
+                if type(theme) ~= "table" then
+                    return
+                end
+
+                if theme.parent ~= nil then
+                    pushTheme(SussySpt.rendering.themes[theme.parent])
+                end
+
+                for k, v in pairs(theme) do
+                    if type(k) == "string" and type(v) == "table" then
+                        for k1, v1 in pairs(v) do
+                            if k == "ImGuiCol" then
+                                ImGui.PushStyleColor(ImGuiCol[k1], v1[1], v1[2], v1[3], v1[4])
+                                SussySpt.render_pops.PopStyleColor = (SussySpt.render_pops.PopStyleColor or 0) + 1
+                            elseif k == "ImGuiStyleVar" then
+                                if v1[2] == nil then
+                                    ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
+                                else
+                                    ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
+                                end
+                                SussySpt.render_pops.PopStyleVar = (SussySpt.render_pops.PopStyleVar or 0) + 1
+                            end
+                        end
+                    end
+                end
+            end
+            pushTheme(SussySpt.rendering.getTheme())
+
+            local success, result = pcall(renderTabs)
+            if not success then
+                local err = SussySpt.removeErrorPath(result)
+                ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
+                ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
+                log.warning("Error while rendering (line "..err[2].."): "..err[3])
+                ImGui.PopStyleColor()
+            end
+
+            for k, v in pairs(SussySpt.render_pops) do
+                ImGui[k](v)
+            end
+
+            SussySpt.rendering.times.lastrendertime = os.clock() - SussySpt.rendering.times.starttime
+            if SussySpt.rendering.times.lastrendertime > (SussySpt.rendering.times.highestrendertime or 0) then
+                SussySpt.rendering.times.highestrendertime = SussySpt.rendering.times.lastrendertime
+            end
+        end
+    end -- !SECTION
+
+    do -- SECTION Tasks
+        SussySpt.tasks = {}
+        SussySpt.addTask = function(cb)
+            local id = #SussySpt.tasks + 1
+            SussySpt.tasks[id] = cb
+            return id
+        end
+    end -- !SECTION
+
+    do -- SECTION Disable controls
+        SussySpt.disableControls = 0
+        SussySpt.pushDisableControls = function(a)
+            if a ~= false then
+                SussySpt.disableControls = 4
+            end
+        end
+    end -- !SECTION
+
+    SussySpt.mainLoop = function(rs) -- ANCHOR mainLoop
         while true do
             rs:yield()
 
@@ -410,7 +498,6 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end
 
-    SussySpt.debug("Calling SussySpt:initCategories()")
     SussySpt:initCategories()
 
     SussySpt.debug("Initializing chatlog")
@@ -692,7 +779,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     v.info.vehicle[2] = v.info.vehicle[2].."."
                                         .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
 
-                                    local vehicleClass = SussySpt.cache.vehicleClasses[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
+                                    local vehicleClass = yu.cache.vehicle_classes[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
                                     if type(vehicleClass) == "string" then
                                         v.info.vehicle[2] = v.info.vehicle[2].." Class: "..vehicleClass
                                     end
@@ -2746,11 +2833,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                             [18] = "VEHICLE"
                         }
 
-                        function a.tick()
+                        a.tick = function()
                             a.scriptRunning = yu.is_script_running_hash(a.scriptHashed)
                         end
 
-                        function a.win(prize)
+                        a.win = function(prize)
                             if a.scriptRunning then
                                 locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize, prize)
                                 locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize_state, 11)
@@ -3737,9 +3824,9 @@ function SussySpt:init() -- SECTION SussySpt:init
                         crank_checking = false
                     }
 
-                    function a.getRankFromRP(rp)
+                    a.getRankFromRP = function(rp)
                         local rank = 0
-                        for k, v in pairs(SussySpt.xp_to_rank) do
+                        for k, v in pairs(yu.cache.xp_to_rank) do
                             if v < rp then
                                 rank = k
                             else
@@ -3755,7 +3842,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         a.rank = a.getRankFromRP(a.rank_rp)
                     end
 
-                    function refreshCrewRank()
+                    local function refreshCrewRank()
                         if not a.crank_checking then
                             a.crank_checking = true
                             SussySpt.addTask(function()
@@ -3832,7 +3919,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Get##rank_get") then
                                 SussySpt.addTask(function()
                                     if yu.is_num_between(a.rank, 0, 8000) then
-                                        a.rank_rp = SussySpt.xp_to_rank[a.rank] or a.rank_rp
+                                        a.rank_rp = yu.cache.xp_to_rank[a.rank] or a.rank_rp
                                     end
                                 end)
                             end
@@ -3867,7 +3954,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             if ImGui.Button("Set") then
                                 SussySpt.addTask(function()
                                     if a.crank_rank >= a.crank_min then
-                                        stats.set_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew, SussySpt.xp_to_rank[a.crank_rank] + 100)
+                                        stats.set_int("MPPLY_CREW_LOCAL_XP_"..a.crank_crew, yu.cache.xp_to_rank[a.crank_rank] + 100)
                                         yu.notify(2, "You will need to switch sessions to see changes", "Crew rank")
                                         yu.notify(1, "Set rank to "..a.crank_rank.."!!!!1 :DDD", "It's fine... No ban!!!11")
                                     end
@@ -4789,7 +4876,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         local counter = 0
         local frequency = .6
 
-        function rgbGamerColor()
+        local function rgbGamerColor()
             counter = counter + 1
             local elapsedTime = counter / 20
             local r = math.sin(frequency * elapsedTime + phaseShift) * amplitude + amplitude
@@ -4883,115 +4970,13 @@ function SussySpt:init() -- SECTION SussySpt:init
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
 
-function SussySpt:setupConfig() -- SECTION SussySpt:setupConfig
-    if io == nil or io.open == nil then
-        log.warning("Error: Could not access io.open. Is yimmenu updated?")
-        return false
-    end
-
-    SussySpt.cfg = {
-        file = "sussyspt",
-        changed = false,
-        lastAutosave = os.time()
-    }
-
-    SussySpt.cfg.has = function(path)
-        return SussySpt.cfg.data ~= nil and SussySpt.cfg.data[path] ~= nil
-    end
-
-    SussySpt.cfg.get = function(path, default)
-        if SussySpt.cfg.data == nil then error("No config data is present") end
-        local v = SussySpt.cfg.data[path]
-        if v == nil then return default end
-        return v
-    end
-
-    SussySpt.cfg.set = function(path, value, setchanged)
-        if SussySpt.cfg.data == nil then return value end
-
-        if SussySpt.cfg.data[path] ~= value then
-            SussySpt.cfg.data[path] = value
-            SussySpt.cfg.changed = setchanged ~= false
-        end
-
-        return value
-    end
-
-    SussySpt.cfg.save = function()
-        SussySpt.cfg.changed = false
-
-        local content = yu.json.encode(SussySpt.cfg.data)
-        if type(content) ~= "string" then
-            log.warning("Could not encode config")
-            return false
-        end
-
-        local f = io.open("sussyspt", "w")
-        if f then
-            f:write(content)
-            f:flush()
-            f:close()
-            return true
-        else
-            log.warning("Failed to open config file")
-            return false
-        end
-    end
-
-    SussySpt.cfg.autosave = function()
-        if not SussySpt.cfg.changed or SussySpt.cfg.data == nil then
-            return
-        end
-
-        local time = os.time()
-        if time - SussySpt.cfg.lastAutosave <= 2 then
-            return
-        end
-        SussySpt.cfg.lastAutosave = time
-
-        if SussySpt.cfg.save() then
-            SussySpt.debug("Config automaticly saved")
-        else
-            log.warning("Failed to autosave the config")
-        end
-    end
-
-    local f = io.open("sussyspt", "r")
-    if f ~= nil then
-        local content = f:read("*all")
-        if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
-            SussySpt.cfg.data = yu.json.decode(content)
-            SussySpt.debug("Config loaded")
-        else
-            log.warning("Unable to load config")
-        end
-    else
-        log.info("You can ignore the warning above")
-        SussySpt.cfg.data = {}
-        SussySpt.cfg.save()
-    end
-end -- !SECTION
-
-function SussySpt:createCache() -- SECTION SussySpt:createCache
-    SussySpt.cache = {}
-
-    SussySpt.cache.vehicleClasses = {
-        "Compacts", "Sedans", "SUVs", "Coupes", "Muscle", "Sports Classics",
-        "Sports", "Super", "Motorcycles", "Off-road", "Industrial", "Utility",
-        "Vans", "Cycles", "Boats", "Helicopters", "Planes", "Service",
-        "Emergency", "Military", "Commercial", "Trains"
-    }
-end -- !SECTION
-
 function SussySpt:initCategories() -- SECTION SussySpt:initCategories
-    local tab = SussySpt.tab
+    SussySpt.debug("Initializing categories")
 
     SussySpt:initTabHBO()
-    SussySpt.debug("Calling SussySpt:initTabQA()")
     SussySpt:initTabQA()
 
     if SussySpt.dev then
-        SussySpt.debug("Calling SussySpt:initTabHeist()")
         SussySpt:initTabHeist()
     end
 
@@ -4999,15 +4984,8 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
         yu.rendering.setCheckboxChecked("cat_"..v, SussySpt.cfg.get("cat_"..v, false))
     end
 
-    tab:add_text("Categories")
-    tab:add_imgui(function()
-        ImGui.SameLine()
-
-        if ImGui.SmallButton("Show all") then
-            for k, v in pairs({"hbo", "qa"}) do
-                yu.rendering.setCheckboxChecked("cat_"..v)
-            end
-        end
+    SussySpt.tab:add_imgui(function()
+        ImGui.Text("Categories")
 
         if SussySpt.in_online then
             ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
@@ -6304,7 +6282,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
         local winPrize = 0
         local winPrizeChanged = false
 
-        function winLuckyWheel(prize)
+        local function winLuckyWheel(prize)
             if SussySpt.requireScript("casino_lucky_wheel") and yu.is_num_between(prize, 0, 18) then
                 yu.notify(1, "Winning "..luckyWheelPrizes[prize].." from the lucky wheel!", "Diamond Casino & Resort")
                 locals.set_int("casino_lucky_wheel", (prize_wheel_win_state) + (prize_wheel_prize), prize)
@@ -7147,6 +7125,8 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 end -- !SECTION
 
 function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
+    SussySpt.debug("Calling SussySpt:initTabQA()")
+
     SussySpt.add_render(function()
         if yu.rendering.isCheckboxChecked("cat_qa") then
             if ImGui.Begin("Quick actions") then
@@ -7281,6 +7261,8 @@ function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
 end -- !SECTION
 
 function SussySpt:initTabHeist() -- SECTION SussySpt:initTabHeist
+    SussySpt.debug("Calling SussySpt:initTabHeist()")
+
     local tab = SussySpt.tab:add_tab(" Heists & Stuff idk")
     tab:clear()
 
@@ -7352,5 +7334,3 @@ function SussySpt:initTabHeist() -- SECTION SussySpt:initTabHeist
 end -- !SECTION
 
 SussySpt:init()
-
--- ANCHOR EOF
