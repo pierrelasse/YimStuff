@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.16",
-    versionid = 3015,
+    versionid = 3035,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -2050,14 +2050,11 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 ["Series A Funding"] = 2121
                             },
                             set = {
-                                crew = function(v, amount)
+                                crew = function(v)
                                     globals.set_int(SussySpt.p.g.apartment_cuts_other + 1, 100 - (v * 4))
                                     globals.set_int(SussySpt.p.g.apartment_cuts_other + 2, v)
                                     globals.set_int(SussySpt.p.g.apartment_cuts_other + 3, v)
                                     globals.set_int(SussySpt.p.g.apartment_cuts_other + 4, v)
-
-                                    -- for i = 1, amount do
-                                    -- end
                                 end,
                                 self = function(v)
                                     globals.set_int(SussySpt.p.g.apartment_cuts_self, v)
@@ -2152,15 +2149,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                     if ImGui.Button(k) then
                                         a.cuts15mactive = true
                                         yu.rif(function(rs)
-                                            a.cuts15m.set.crew(v, yu.shc(k == 7453, 2, 4))
-
-                                            -- rs:sleep(1000)
-                                            -- -- menu.send_key_press(13) -- MOUSE RIGHT
-                                            -- rs:sleep(1000)
-                                            -- -- menu.send_key_press(27) -- ARROW UP / SCROLLWHEEL BUTTON (PRESS)
-                                            -- rs:sleep(1000)
-
-                                            -- PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 176, 1) -- ENTER / LEFT MOUSE BUTTON
+                                            a.cuts15m.set.crew(v)
 
                                             a.cuts15m.set.self(v)
 
@@ -3448,28 +3437,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                     }
 
                     tab3.render = function()
-                        if ImGui.Button("Unlock all achievements") then
-                            SussySpt.addTask(function()
-                                yu.loop(59, function(i)
-                                    if not PLAYER.HAS_ACHIEVEMENT_BEEN_PASSED(i) then
-                                        PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
-                                    end
-                                end)
-                                -- for i = 1, 78 do
-                                --     globals.set_int(4543283 + 1, i)
-                                -- end
-                            end)
-                        end
-
-                        if ImGui.Button("Unlock xmas liveries") then
-                            SussySpt.addTask(function()
-                                stats.set_int("MPPLY_XMASLIVERIES", -1)
-                                for i = 1, 20 do
-                                    stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
-                                end
-                            end)
-                        end
-
                         if ImGui.Button("Unlock LSCarMeet podium prize") then
                             SussySpt.addTask(function()
                                 local mpx = yu.mpx()
@@ -3500,23 +3467,16 @@ function SussySpt:init() -- SECTION SussySpt:init
                         end
                         yu.rendering.tooltip("MPPLY_NUM_CAPTURES_CREATED > 100\nMPPLY_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_SCHOOL_MEDAL_[0-9] = -1\n$MPX_PILOT_ASPASSEDLESSON_[0-9] = true")
 
-                        if ImGui.Button("Unlock shooting range") then
+                        if ImGui.Button("Arena wars bools") then
                             SussySpt.addTask(function()
                                 local mpx = yu.mpx()
-                                stats.set_int(mpx.."SR_HIGHSCORE_1", 690)
-                                stats.set_int(mpx.."SR_HIGHSCORE_2", 1860)
-                                stats.set_int(mpx.."SR_HIGHSCORE_3", 2690)
-                                stats.set_int(mpx.."SR_HIGHSCORE_4", 2660)
-                                stats.set_int(mpx.."SR_HIGHSCORE_5", 2650)
-                                stats.set_int(mpx.."SR_HIGHSCORE_6", 450)
-                                stats.set_int(mpx.."SR_TARGETS_HIT", 269)
-                                stats.set_int(mpx.."SR_WEAPON_BIT_SET", -1)
-                                stats.set_bool(mpx.."SR_TIER_1_REWARD", true)
-                                stats.set_bool(mpx.."SR_TIER_3_REWARD", true)
-                                stats.set_bool(mpx.."SR_INCREASE_THROW_CAP", true)
+                                for i = 0, 63 do
+                                    for j = 0, 8 do
+                                        stats.set_bool_masked(mpx.."ARENAWARSPSTAT_BOOL"..j, true, i)
+                                    end
+                                end
                             end)
                         end
-                        yu.rendering.tooltip("Bunker thingy")
 
                         if ImGui.Button("Unlock trade prices for arenawar vehicles") then
                             SussySpt.addTask(function()
@@ -3535,27 +3495,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 local mpx = yu.mpx()
                                 for i = 18, 29 do
                                     stats.set_bool_masked(mpx.."ARENAWARSPSTAT_BOOL0", true, i)
-                                end
-                            end)
-                        end
-
-                        if ImGui.Button("Unlock fast run and reload") then
-                            SussySpt.addTask(function()
-                                local mpx = yu.mpx()
-                                for i = 1, 3 do
-                                    stats.set_int(mpx.."CHAR_ABILITY_"..i.."_UNLCK", -1)
-                                    stats.set_int(mpx.."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
-                                end
-                            end)
-                        end
-                        yu.rendering.tooltip("Makes you run and reload weapons faster")
-
-                        if ImGui.Button("Unlock all tattos") then
-                            SussySpt.addTask(function()
-                                local mpx = yu.mpx()
-                                stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
-                                for i = 0, 47 do
-                                    stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
                                 end
                             end)
                         end
@@ -3622,43 +3561,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
 
-                        if ImGui.Button("Unlock LSC stuff & paints") then
-                            SussySpt.addTask(function()
-                                local mpx = yu.mpx()
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_1_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_2_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_3_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_4_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_5_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_6_UNLCK", -1)
-                                stats.set_int(mpx.."CHAR_FM_CARMOD_7_UNLCK", -1)
-                                stats.set_int(mpx.."AWD_WIN_CAPTURES", 50)
-                                stats.set_int(mpx.."AWD_DROPOFF_CAP_PACKAGES", 100)
-                                stats.set_int(mpx.."AWD_KILL_CARRIER_CAPTURE", 100)
-                                stats.set_int(mpx.."AWD_FINISH_HEISTS", 50)
-                                stats.set_int(mpx.."AWD_FINISH_HEIST_SETUP_JOB", 50)
-                                stats.set_int(mpx.."AWD_NIGHTVISION_KILLS", 100)
-                                stats.set_int(mpx.."AWD_WIN_LAST_TEAM_STANDINGS", 50)
-                                stats.set_int(mpx.."AWD_ONLY_PLAYER_ALIVE_LTS", 50)
-                                stats.set_int(mpx.."AWD_FMRALLYWONDRIVE", 25)
-                                stats.set_int(mpx.."AWD_FMRALLYWONNAV", 25)
-                                stats.set_int(mpx.."AWD_FMWINSEARACE", 25)
-                                stats.set_int(mpx.."AWD_RACES_WON", 50)
-                                stats.set_int(mpx.."MOST_FLIPS_IN_ONE_JUMP", 5)
-                                stats.set_int(mpx.."MOST_SPINS_IN_ONE_JUMP", 5)
-                                stats.set_int(mpx.."NUMBER_SLIPSTREAMS_IN_RACE", 100)
-                                stats.set_int(mpx.."NUMBER_TURBO_STARTS_IN_RACE", 50)
-                                stats.set_int(mpx.."RACES_WON", 50)
-                                stats.set_int(mpx.."USJS_COMPLETED", 50)
-                                stats.set_int(mpx.."AWD_FM_GTA_RACES_WON", 50)
-                                stats.set_int(mpx.."AWD_FM_RACE_LAST_FIRST", 25)
-                                stats.set_int(mpx.."AWD_FM_RACES_FASTEST_LAP", 50)
-                                stats.set_int(mpx.."AWD_FMBASEJMP", 25)
-                                stats.set_int(mpx.."AWD_FMWINAIRRACE", 25)
-                                stats.set_int("MPPLY_TOTAL_RACES_WON", 50)
-                            end)
-                        end
-
                         if ImGui.Button("Unlock phone contracts") then
                             SussySpt.addTask(function()
                                 local mpx = yu.mpx()
@@ -3674,58 +3576,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 stats.set_int(mpx.."FM_ACT_PH9", -1)
                                 stats.set_int(mpx.."FM_CUT_DONE", -1)
                                 stats.set_int(mpx.."FM_CUT_DONE_2", -1)
-                            end)
-                        end
-
-                        if ImGui.Button("Unlock all trade prices") then
-                            SussySpt.addTask(function()
-                                local mpx = yu.mpx()
-                                stats.set_int(mpx.."GANGOPS_FLOW_BITSET_MISS0", -1)
-                                stats.set_int(mpx.."LFETIME_HANGAR_BUY_UNDETAK", 42)
-                                stats.set_int(mpx.."LFETIME_HANGAR_BUY_COMPLET", 42)
-                                stats.set_int(mpx.."AT_FLOW_IMPEXP_NUM", 32)
-                                stats.set_int(mpx.."AT_FLOW_VEHICLE_BS", -1)
-                                stats.set_int(mpx.."WVM_FLOW_VEHICLE_BS", -1)
-                                stats.set_int(mpx.."H3_BOARD_DIALOGUE0", -1)
-                                stats.set_int(mpx.."H3_BOARD_DIALOGUE1", -1)
-                                stats.set_int(mpx.."H3_BOARD_DIALOGUE2", -1)
-                                stats.set_int(mpx.."H3_VEHICLESUSED", -1)
-                                stats.set_int(mpx.."WAM_FLOW_VEHICLE_BS", -1)
-                                stats.set_bool(mpx.."HELP_VEHUNHEISTISL", true)
-                                stats.set_bool(mpx.."HELP_VEHICLESUNLOCK", true)
-                                stats.set_bool(mpx.."HELP_VETO", true)
-                                stats.set_bool(mpx.."HELP_VETO2", true)
-                                stats.set_bool(mpx.."HELP_ITALIRSX", true)
-                                stats.set_bool(mpx.."HELP_BRIOSO2", true)
-                                stats.set_bool(mpx.."HELP_MANCHEZ2", true)
-                                stats.set_bool(mpx.."HELP_SLAMTRUCK", true)
-                                stats.set_bool(mpx.."HELP_VETIR", true)
-                                stats.set_bool(mpx.."HELP_SQUADDIE", true)
-                                stats.set_bool(mpx.."HELP_DINGY5", true)
-                                stats.set_bool(mpx.."HELP_VERUS", true)
-                                stats.set_bool(mpx.."HELP_WEEVIL", true)
-                                stats.set_bool(mpx.."HELP_VEHUNTUNER", true)
-                                stats.set_bool(mpx.."FIXER_VEH_HELP", true)
-                                stats.set_bool(mpx.."HELP_DOMINATOR7", true)
-                                stats.set_bool(mpx.."HELP_JESTER4", true)
-                                stats.set_bool(mpx.."HELP_FUTO2", true)
-                                stats.set_bool(mpx.."HELP_DOMINATOR8", true)
-                                stats.set_bool(mpx.."HELP_PREVION", true)
-                                stats.set_bool(mpx.."HELP_GROWLER", true)
-                                stats.set_bool(mpx.."HELP_COMET6", true)
-                                stats.set_bool(mpx.."HELP_VECTRE", true)
-                                stats.set_bool(mpx.."HELP_SULTAN3", true)
-                                stats.set_bool(mpx.."HELP_CYPHER", true)
-                                stats.set_bool(mpx.."HELP_VEHUNFIXER", true)
-                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_VETIR", true)
-                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_LONGFIN", true)
-                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
-                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
-                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
-                                if stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5 then
-                                    stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
-                                end
-                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
                             end)
                         end
 
@@ -3790,6 +3640,29 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
 
+                        if ImGui.SmallButton("Some cool things yay") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+
+                                for i = 0, 9 do
+                                    stats.set_int(mpx.."IAP_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."IAP_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."IAP_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."SCGW_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."DG_DEFENDER_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."DG_DEFENDER_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."DG_MONKEY_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."DG_MONKEY_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."DG_PENETRATOR_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."DG_PENETRATOR_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."GGSM_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."GGSM_SCORE_"..i, 0)
+                                    stats.set_int(mpx.."TWR_INITIALS_"..i, 0)
+                                    stats.set_int(mpx.."TWR_SCORE_"..i, 0)
+                                end
+                            end)
+                        end
+
                         if ImGui.Button("Very much things") then
                             SussySpt.addTask(function()
                                 local mpx = yu.mpx()
@@ -3803,12 +3676,6 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 end
 
                                 yu.notify(1, "Success!")
-                            end)
-                        end
-
-                        if ImGui.Button("Allow gender change") then
-                            SussySpt.addTask(function()
-                                stats.set_int(yu.mpx("ALLOW_GENDER_CHANGE"), 52)
                             end)
                         end
                     end
@@ -3975,6 +3842,72 @@ function SussySpt:init() -- SECTION SussySpt:init
                     tab2.sub[2] = tab3
                 end -- !SECTION
 
+                do -- ANCHOR Player
+                    local tab3 = SussySpt.rendering.newTab("Player")
+
+                    tab3.render = function()
+                        if ImGui.SmallButton("Allow gender change") then
+                            SussySpt.addTask(function()
+                                stats.set_int(yu.mpx("ALLOW_GENDER_CHANGE"), 52)
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock fast run and reload") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                for i = 1, 3 do
+                                    stats.set_int(mpx.."CHAR_ABILITY_"..i.."_UNLCK", -1)
+                                    stats.set_int(mpx.."CHAR_FM_ABILITY_"..i.."_UNLCK", -1)
+                                end
+                            end)
+                        end
+                        yu.rendering.tooltip("Makes you run and reload weapons faster")
+
+                        if ImGui.SmallButton("Unlock all achievements") then
+                            SussySpt.addTask(function()
+                                yu.loop(59, function(i)
+                                    if not PLAYER.HAS_ACHIEVEMENT_BEEN_PASSED(i) then
+                                        PLAYER.GIVE_ACHIEVEMENT_TO_PLAYER(i)
+                                    end
+                                end)
+                                -- for i = 1, 78 do
+                                --     globals.set_int(4543283 + 1, i)
+                                -- end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock shooting range") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."SR_HIGHSCORE_1", 690)
+                                stats.set_int(mpx.."SR_HIGHSCORE_2", 1860)
+                                stats.set_int(mpx.."SR_HIGHSCORE_3", 2690)
+                                stats.set_int(mpx.."SR_HIGHSCORE_4", 2660)
+                                stats.set_int(mpx.."SR_HIGHSCORE_5", 2650)
+                                stats.set_int(mpx.."SR_HIGHSCORE_6", 450)
+                                stats.set_int(mpx.."SR_TARGETS_HIT", 269)
+                                stats.set_int(mpx.."SR_WEAPON_BIT_SET", -1)
+                                stats.set_bool(mpx.."SR_TIER_1_REWARD", true)
+                                stats.set_bool(mpx.."SR_TIER_3_REWARD", true)
+                                stats.set_bool(mpx.."SR_INCREASE_THROW_CAP", true)
+                            end)
+                        end
+                        yu.rendering.tooltip("Bunker thingy")
+
+                        if ImGui.SmallButton("Unlock all tattos") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."TATTOO_FM_CURRENT_32", -1)
+                                for i = 0, 47 do
+                                    stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
+                                end
+                            end)
+                        end
+                    end
+
+                    tab2.sub[3] = tab3
+                end
+
                 do -- ANCHOR Weapons
                     local tab3 = SussySpt.rendering.newTab("Weapons")
 
@@ -4022,13 +3955,13 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end)
                         end
 
-                        -- if ImGui.SmallButton("Unlock baseball bat and knife skins in gunvan") then
-                        --     SussySpt.addTask(function()
-                        --         globals.set_int(262145 + 34131, 0)
-                        --         globals.set_int(262145 + 34094 + 9, -1716189206) -- Knife
-                        --         globals.set_int(262145 + 34094 + 10, -1786099057) -- Baseball bat
-                        --     end)
-                        -- end
+                        if ImGui.SmallButton("Unlock baseball bat and knife skins in gunvan") then
+                            SussySpt.addTask(function()
+                                globals.set_int(262145 + 34365, 0)
+                                globals.set_int(262145 + 34328 + 9, -1716189206) -- Knife
+                                globals.set_int(262145 + 34328 + 10, -1786099057) -- Baseball bat
+                            end)
+                        end
 
                         if ImGui.SmallButton("Unlock Double Action Revolver") then
                             local mpx = yu.mpx()
@@ -4049,20 +3982,132 @@ function SussySpt:init() -- SECTION SussySpt:init
                             end
                         end
 
-                        -- if ImGui.SmallButton("Unlock gunvan guns") then
-                        --     SussySpt.addTask(function()
-                        --         globals.set_int(296276, 0)
-                        --         globals.set_int(296242, -22923932) -- Railgun
-                        --         globals.set_int(296243, 1171102963) -- Stungun
-                        --         globals.set_int(296244, -1355376991) -- Up-n-Atomizer
-                        --         globals.set_int(296245, -1238556825) -- Widowmaker
-                        --         globals.set_int(296246, 1198256469) -- Hellbringer
-                        --         globals.set_int(296247, -1786099057) -- Bat
-                        --     end)
-                        -- end
+                        if ImGui.SmallButton("Unlock missed gunvan guns") then
+                            SussySpt.addTask(function()
+                                globals.set_int(262145 + 34328 + 5, -22923932) -- railgun
+                                globals.set_int(262145 + 34328 + 6, -1238556825) -- widowmaker
+                                globals.set_int(262145 + 34328 + 7, -1355376991) ----- raygun
+                                globals.set_int(262145 + 34328 + 8, 1198256469) ----- unholy hellbringer
+                                globals.set_int(262145 + 34328 + 9, 350597077) -- tazer
+                                globals.set_int(262145 + 34328 + 10, 2138347493) -- firework launcher
+                            end)
+                        end
                     end
 
-                    tab2.sub[3] = tab3
+                    tab2.sub[4] = tab3
+                end
+
+                do -- ANCHOR Vehicles
+                    local tab3 = SussySpt.rendering.newTab("Vehicles")
+
+                    tab3.render = function()
+                        if ImGui.SmallButton("Unlock xmas liveries") then
+                            SussySpt.addTask(function()
+                                stats.set_int("MPPLY_XMASLIVERIES", -1)
+                                for i = 1, 20 do
+                                    stats.set_int("MPPLY_XMASLIVERIES"..i, -1)
+                                end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock LSC stuff & paints") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_1_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_2_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_3_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_4_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_5_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_6_UNLCK", -1)
+                                stats.set_int(mpx.."CHAR_FM_CARMOD_7_UNLCK", -1)
+                                stats.set_int(mpx.."AWD_WIN_CAPTURES", 50)
+                                stats.set_int(mpx.."AWD_DROPOFF_CAP_PACKAGES", 100)
+                                stats.set_int(mpx.."AWD_KILL_CARRIER_CAPTURE", 100)
+                                stats.set_int(mpx.."AWD_FINISH_HEISTS", 50)
+                                stats.set_int(mpx.."AWD_FINISH_HEIST_SETUP_JOB", 50)
+                                stats.set_int(mpx.."AWD_NIGHTVISION_KILLS", 100)
+                                stats.set_int(mpx.."AWD_WIN_LAST_TEAM_STANDINGS", 50)
+                                stats.set_int(mpx.."AWD_ONLY_PLAYER_ALIVE_LTS", 50)
+                                stats.set_int(mpx.."AWD_FMRALLYWONDRIVE", 25)
+                                stats.set_int(mpx.."AWD_FMRALLYWONNAV", 25)
+                                stats.set_int(mpx.."AWD_FMWINSEARACE", 25)
+                                stats.set_int(mpx.."AWD_RACES_WON", 50)
+                                stats.set_int(mpx.."MOST_FLIPS_IN_ONE_JUMP", 5)
+                                stats.set_int(mpx.."MOST_SPINS_IN_ONE_JUMP", 5)
+                                stats.set_int(mpx.."NUMBER_SLIPSTREAMS_IN_RACE", 100)
+                                stats.set_int(mpx.."NUMBER_TURBO_STARTS_IN_RACE", 50)
+                                stats.set_int(mpx.."RACES_WON", 50)
+                                stats.set_int(mpx.."USJS_COMPLETED", 50)
+                                stats.set_int(mpx.."AWD_FM_GTA_RACES_WON", 50)
+                                stats.set_int(mpx.."AWD_FM_RACE_LAST_FIRST", 25)
+                                stats.set_int(mpx.."AWD_FM_RACES_FASTEST_LAP", 50)
+                                stats.set_int(mpx.."AWD_FMBASEJMP", 25)
+                                stats.set_int(mpx.."AWD_FMWINAIRRACE", 25)
+                                stats.set_int("MPPLY_TOTAL_RACES_WON", 50)
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock all trade prices") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."GANGOPS_FLOW_BITSET_MISS0", -1)
+                                stats.set_int(mpx.."LFETIME_HANGAR_BUY_UNDETAK", 42)
+                                stats.set_int(mpx.."LFETIME_HANGAR_BUY_COMPLET", 42)
+                                stats.set_int(mpx.."AT_FLOW_IMPEXP_NUM", 32)
+                                stats.set_int(mpx.."AT_FLOW_VEHICLE_BS", -1)
+                                stats.set_int(mpx.."WVM_FLOW_VEHICLE_BS", -1)
+                                stats.set_int(mpx.."H3_BOARD_DIALOGUE0", -1)
+                                stats.set_int(mpx.."H3_BOARD_DIALOGUE1", -1)
+                                stats.set_int(mpx.."H3_BOARD_DIALOGUE2", -1)
+                                stats.set_int(mpx.."H3_VEHICLESUSED", -1)
+                                stats.set_int(mpx.."WAM_FLOW_VEHICLE_BS", -1)
+                                stats.set_bool(mpx.."HELP_VEHUNHEISTISL", true)
+                                stats.set_bool(mpx.."HELP_VEHICLESUNLOCK", true)
+                                stats.set_bool(mpx.."HELP_VETO", true)
+                                stats.set_bool(mpx.."HELP_VETO2", true)
+                                stats.set_bool(mpx.."HELP_ITALIRSX", true)
+                                stats.set_bool(mpx.."HELP_BRIOSO2", true)
+                                stats.set_bool(mpx.."HELP_MANCHEZ2", true)
+                                stats.set_bool(mpx.."HELP_SLAMTRUCK", true)
+                                stats.set_bool(mpx.."HELP_VETIR", true)
+                                stats.set_bool(mpx.."HELP_SQUADDIE", true)
+                                stats.set_bool(mpx.."HELP_DINGY5", true)
+                                stats.set_bool(mpx.."HELP_VERUS", true)
+                                stats.set_bool(mpx.."HELP_WEEVIL", true)
+                                stats.set_bool(mpx.."HELP_VEHUNTUNER", true)
+                                stats.set_bool(mpx.."FIXER_VEH_HELP", true)
+                                stats.set_bool(mpx.."HELP_DOMINATOR7", true)
+                                stats.set_bool(mpx.."HELP_JESTER4", true)
+                                stats.set_bool(mpx.."HELP_FUTO2", true)
+                                stats.set_bool(mpx.."HELP_DOMINATOR8", true)
+                                stats.set_bool(mpx.."HELP_PREVION", true)
+                                stats.set_bool(mpx.."HELP_GROWLER", true)
+                                stats.set_bool(mpx.."HELP_COMET6", true)
+                                stats.set_bool(mpx.."HELP_VECTRE", true)
+                                stats.set_bool(mpx.."HELP_SULTAN3", true)
+                                stats.set_bool(mpx.."HELP_CYPHER", true)
+                                stats.set_bool(mpx.."HELP_VEHUNFIXER", true)
+                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_VETIR", true)
+                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_LONGFIN", true)
+                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_ANNIH", true)
+                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_ALKONOS", true)
+                                stats.set_bool(mpx.."COMPLETE_H4_F_USING_PATROLB", true)
+                                if stats.get_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 0, 8) < 5 then
+                                    stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 0, 8)
+                                end
+                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT380", 20, 40, 8)
+                                stats.set_masked_int(mpx.."BUSINESSBATPSTAT_INT379", 5, 5, 55)
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock Ecola and Sprunk plates") then
+                            SussySpt.addTask(function()
+                                stats.set_int("MPPLY_XMAS23_PLATES0", -1)
+                            end)
+                        end
+                    end
+
+                    tab2.sub[5] = tab3
                 end
 
                 tab.sub[6] = tab2
