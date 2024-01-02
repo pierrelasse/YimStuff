@@ -2235,7 +2235,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                     -- The Dr. Dre VIP Contract
                                     if a.vipcontractchanged then
-                                        changes = yu.add(changes, 1)
+                                        changes = changes + 1
 
                                         stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
 
@@ -2367,7 +2367,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                     -- Heist
                                     if a.heistchanged then
-                                        changes = yu.add(changes, 1)
+                                        changes = changes + 1
                                         stats.set_int(mpx.."TUNER_GEN_BS", yu.shc(a.heist == 1, 4351, 12543))
                                         stats.set_int(mpx.."TUNER_CURRENT", a.heist)
                                     end
@@ -5313,13 +5313,13 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Primary Target
                         if a.primarytargetchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H4CNF_TARGET", a.primarytarget)
                         end
 
                         -- Fill Compound Storages
                         if a.compoundstoragechanged or a.compoundstorageamountchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             local amount = a.compoundstorageamounts[a.compoundstorageamount]
                             if a.compoundstorage == 1 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_C", 0)
@@ -5375,7 +5375,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Fill Island Storages
                         if a.islandstoragechanged or a.islandstorageamountchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             local amount = a.islandstorageamounts[a.islandstorageamount]
                             if a.islandstorage == 1 then
                                 stats.set_int(yu.mpx().."H4LOOT_CASH_I", 0)
@@ -5431,7 +5431,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Paintings
                         if a.paintingschanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             -- stats.set_int(yu.mpx("H4LOOT_PAINT"), a.paintings)
                             -- stats.set_int(yu.mpx("H4LOOT_PAINT_SCOPED"), a.paintings)
                             -- stats.set_int(yu.mpx("H4LOOT_PAINT_C"), 127)
@@ -5449,31 +5449,31 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Difficulty
                         if a.difficultychanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H4_PROGRESS", a.difficulty)
                         end
 
                         -- Approach
                         if a.approachchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H4_MISSIONS", a.approach)
                         end
 
                         -- Weapons
                         if a.weaponchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H4CNF_WEAPONS", a.weapon)
                         end
 
                         -- Truck Location
                         if a.supplytrucklocationchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H4CNF_TROJAN", a.supplytrucklocation)
                         end
 
                         -- Cutting Powder
                         if a.cuttingpowderchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             if yu.rendering.isCheckboxChecked("hbo_cayo_cuttingpowder") then
                                 stats.set_int(yu.mpx().."H4CNF_TARGET", 3)
                             else
@@ -5970,7 +5970,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Approach
                         if a.approachchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             local k = a.approach
                             if k == 1 then
                                 stats.set_int(yu.mpx().."H3_LAST_APPROACH", 3)
@@ -6007,43 +6007,43 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Target
                         if a.targetchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx("H3OPT_TARGET"), a.target)
                         end
 
                         -- Gunman
                         if a.gunmanchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx("H3OPT_CREWWEAP"), a.gunman)
                         end
 
                         -- Weapon variation
                         if a.weaponvariationchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx("H3OPT_WEAPS"), a.weaponvariation)
                         end
 
                         -- Driver
                         if a.driverchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H3OPT_CREWDRIVER", a.driver)
                         end
 
                         -- Vehicle variation
                         if a.vehiclevariationchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx("H3OPT_VEHS"), a.vehiclevariation)
                         end
 
                         -- Hacker
                         if a.hackerchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H3OPT_CREWHACKER", a.hacker)
                         end
 
                         -- Mask
                         if a.maskchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx().."H3OPT_MASKS", a.mask)
                         end
 
@@ -6658,7 +6658,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Heist
                         if a.heistchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             globals.set_int(a.heistpointer, a.heistsids[a.heist])
                         end
 
@@ -6816,7 +6816,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- Heist
                         if a.heistchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
                             stats.set_int(yu.mpx("TUNER_GEN_BS"), getBS())
                             stats.set_int(yu.mpx("TUNER_CURRENT"), a.heist)
                         end
@@ -7011,7 +7011,7 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
 
                         -- The Dr. Dre VIP Contract
                         if a.vipcontractchanged then
-                            changes = yu.add(changes, 1)
+                            changes = changes + 1
 
                             stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
 
