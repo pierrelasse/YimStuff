@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.16",
-    versionid = 3008,
+    versionid = 3015,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -35,6 +35,11 @@ function SussySpt:init() -- SECTION SussySpt:init
         end
     end -- !SECTION
 
+    if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
+        log.warning("Fatal: Could not start due to an invalid version type. Are you using a source file?")
+        return
+    end
+
     do -- SECTION Debug
         SussySpt.debugtext = ""
 
@@ -52,9 +57,11 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     do -- SECTION Config
         if io == nil or io.open == nil then
-            log.warning("Error: Could not access io.open. Is yimmenu updated?")
+            log.warning("Error: Could not access io.open")
             return
         end
+
+        SussySpt.debug("Loading config system")
 
         SussySpt.cfg = {
             file = "sussyspt",
@@ -141,11 +148,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     yu.rendering.setCheckboxChecked("debug_console", SussySpt.cfg.get("debug_console", false))
 
-    if not yu.is_num_between(SussySpt.versiontype, 1, 2) then
-        log.warning("Fatal: Could not start due to an invalid version type. Are you using a source file?")
-        return
-    end
-
     SussySpt.dev = SussySpt.versiontype == 2
     SussySpt.getDev = function()
         return SussySpt.dev
@@ -201,100 +203,100 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     do -- SECTION Rendering
         SussySpt.rendering = {
-            themes = {
-                Nightly = {
-                    ImGuiCol = {
-                        TitleBg = {9, 27, 46, 1},
-                        TitleBgActive = {9, 27, 46, 1},
-                        WindowBg = {0, 19, 37, .95},
-                        Tab = {10, 30, 46, 1},
-                        TabActive = {14, 60, 90, 1},
-                        TabHovered = {52, 64, 71, 1},
-                        Button = {3, 45, 79, 1},
-                        FrameBg = {35, 38, 53, 1},
-                        FrameBgHovered = {37, 40, 55, 1},
-                        FrameBgActive = {37, 40, 55, 1},
-                        HeaderActive = {54, 55, 66, 1},
-                        HeaderHovered = {62, 63, 73, 1},
-                    },
-                    ImGuiStyleVar = {
-                        WindowRounding = {4},
-                        FrameRounding = {2}
-                    }
-                },
-                Dark = {
-                    ImGuiCol = {
-                        TitleBg = {18, 18, 18, .97},
-                        TitleBgActive = {21, 21, 22, .97},
-                        WindowBg = {18, 18, 18, .97},
-                        Tab = {42, 42, 42, .8},
-                        TabActive = {134, 134, 134, 1},
-                        TabHovered = {147, 147, 147, 1},
-                        Button = {42, 42, 42, .8},
-                        FrameBg = {32, 32, 32, 1},
-                        FrameBgHovered = {34, 34, 34, 1},
-                        FrameBgActive = {34, 34, 34, 1}
-                    },
-                    ImGuiStyleVar = {
-                        WindowRounding = {8},
-                        FrameRounding = {5}
-                    }
-                },
-                Purple = {
-                    ImGuiCol = {
-                        TitleBg = {11, 5, 37, .75},
-                        TitleBgActive = {21, 8, 47, .81},
-                        WindowBg = {21, 8, 47, .82},
-                        Tab = {41, 25, 80, .5},
-                        TabActive = {55, 29, 124, .5},
-                        TabHovered = {51, 35, 90, .55},
-                        Button = {94, 57, 186, .3},
-                        FrameBg = {41, 25, 80, .67},
-                        FrameBgHovered = {41, 35, 90, .67},
-                        FrameBgActive = {41, 35, 90, .67}
-                    },
-                    ImGuiStyleVar = {
-                        WindowRounding = {16},
-                        FrameRounding = {3}
-                    }
-                },
-                Fatality = {
-                    ImGuiCol = {
-                        TitleBg = {9, 6, 20, .75},
-                        TitleBgActive = {9, 6, 20, .85},
-                        WindowBg = {19, 13, 43, .87},
-                        Tab = {239, 7, 73, .5},
-                        TabActive = {255, 59, 115, .5},
-                        TabHovered = {255, 59, 115, .55},
-                        Button = {239, 7, 73, .3},
-                        FrameBg = {26, 29, 48, .67},
-                        FrameBgHovered = {16, 22, 48, .67},
-                        FrameBgActive = {13, 15, 48, .67},
-                        Border = {32, 20, 60, .76}
-                    },
-                    ImGuiStyleVar = {
-                        WindowRounding = {5},
-                        FrameRounding = {2.5}
-                    }
-                },
-                FatalityBorderTest = {
-                    parent = "Fatality",
-                    ImGuiCol = {
-                        BorderShadow = {0, 0, 0, 0}
-                    },
-                    ImGuiStyleVar = {
-                        FrameBorderSize = {4.05}
-                    }
-                }
-            },
             tabs = {}
         }
 
+        SussySpt.rendering.themes = { -- SECTION Standard themes
+            Nightly = { -- ANCHOR Nightly
+                ImGuiCol = {
+                    TitleBg         = {9, 27, 46, 255},
+                    TitleBgActive   = {9, 27, 46, 255},
+                    WindowBg        = {0, 19, 37, 242},
+                    Tab             = {10, 30, 46, 255},
+                    TabActive       = {14, 60, 90, 255},
+                    TabHovered      = {52, 64, 71, 255},
+                    Button          = {3, 45, 79, 255},
+                    FrameBg         = {35, 38, 53, 255},
+                    FrameBgHovered  = {37, 40, 55, 255},
+                    FrameBgActive   = {37, 40, 55, 255},
+                    HeaderActive    = {54, 55, 66, 255},
+                    HeaderHovered   = {62, 63, 73, 255}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding  = {4},
+                    FrameRounding   = {2}
+                }
+            },
+            Dark = { -- ANCHOR Dark
+                ImGuiCol = {
+                    TitleBg         = {18, 18, 18, 247},
+                    TitleBgActive   = {21, 21, 22, 247},
+                    WindowBg        = {18, 18, 18, 247},
+                    Tab             = {42, 42, 42, 204},
+                    TabActive       = {134, 134, 134, 255},
+                    TabHovered      = {147, 147, 147, 255},
+                    Button          = {42, 42, 42, 204},
+                    FrameBg         = {32, 32, 32, 255},
+                    FrameBgHovered  = {34, 34, 34, 255},
+                    FrameBgActive   = {34, 34, 34, 255}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding  = {8},
+                    FrameRounding   = {5}
+                }
+            },
+            Purple = { -- ANCHOR Purple
+                ImGuiCol = {
+                    TitleBg         = {11, 5, 37, 191},
+                    TitleBgActive   = {21, 8, 47, 206},
+                    WindowBg        = {21, 8, 47, 209},
+                    Tab             = {41, 25, 80, 127},
+                    TabActive       = {55, 29, 124, 127},
+                    TabHovered      = {51, 35, 90, 128},
+                    Button          = {94, 57, 186, 76},
+                    FrameBg         = {41, 25, 80, 171},
+                    FrameBgHovered  = {41, 35, 90, 171},
+                    FrameBgActive   = {41, 35, 90, 171}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding  = {16},
+                    FrameRounding   = {3}
+                }
+            },
+            Fatality = { -- ANCHOR Fatality
+                ImGuiCol = {
+                    TitleBg         = {9, 6, 20, 191},
+                    TitleBgActive   = {9, 6, 20, 217},
+                    WindowBg        = {19, 13, 43, 222},
+                    Tab             = {239, 7, 73, 127},
+                    TabActive       = {255, 59, 115, 127},
+                    TabHovered      = {255, 59, 115, 128},
+                    Button          = {239, 7, 73, 76},
+                    FrameBg         = {26, 29, 48, 171},
+                    FrameBgHovered  = {16, 22, 48, 171},
+                    FrameBgActive   = {13, 15, 48, 171},
+                    Border          = {32, 20, 60, 193}
+                },
+                ImGuiStyleVar = {
+                    WindowRounding  = {5},
+                    FrameRounding   = {2.5}
+                }
+            },
+            FatalityBorderTest = { -- ANCHOR FatalityBorderTest
+                parent = "Fatality",
+                ImGuiCol = {
+                    BorderShadow    = {0, 0, 0, 0}
+                },
+                ImGuiStyleVar = {
+                    FrameBorderSize = {4.05}
+                }
+            }
+        } -- !SECTION
         for k, v in pairs(SussySpt.rendering.themes) do
             if v.ImGuiCol then
                 for k, v2 in pairs(v.ImGuiCol) do
                     for k3, v3 in pairs(v2) do
-                        if k3 ~= 4 then v2[k3] = v3 / 255 end
+                        v2[k3] = v3 / 255
                     end
                 end
             end
@@ -302,6 +304,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
         SussySpt.rendering.theme = SussySpt.cfg.get("theme", "Fatality")
         if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
+            SussySpt.debug("Theme "..SussySpt.rendering.theme.." does not exist. Selecting a different one")
             SussySpt.rendering.theme = next(SussySpt.rendering.themes)
         end
 
@@ -500,40 +503,44 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt:initCategories()
 
-    SussySpt.debug("Initializing chatlog")
-    SussySpt.chatlog = {
-        messages = {},
-        rebuildLog = function()
-            local text = ""
-            local newline = ""
-            local doTimestamp = yu.rendering.isCheckboxChecked("online_chatlog_log_timestamp")
-            for k, v in pairs(SussySpt.chatlog.messages) do
-                text = text..newline..(doTimestamp and ("["..v[4].."] ") or "")..v[2]..": "..v[3]
-                newline = "\n"
+    do -- SECTION Chatlog
+        SussySpt.debug("Initializing chatlog")
+
+        SussySpt.chatlog = {
+            messages = {},
+            rebuildLog = function()
+                local text = ""
+                local newline = ""
+                local doTimestamp = yu.rendering.isCheckboxChecked("online_chatlog_log_timestamp")
+                for k, v in pairs(SussySpt.chatlog.messages) do
+                    text = text..newline..(doTimestamp and ("["..v[4].."] ") or "")..v[2]..": "..v[3]
+                    newline = "\n"
+                end
+
+                SussySpt.chatlog.text = text
             end
+        }
 
-            SussySpt.chatlog.text = text
-        end
-    }
-    event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
-        if yu.rendering.isCheckboxChecked("online_chatlog_enabled") then
-            local name = PLAYER.GET_PLAYER_NAME(player_id)
-            SussySpt.chatlog.messages[#SussySpt.chatlog.messages + 1] = {
-                player_id,
-                name,
-                chat_message,
-                os.date("%H:%M:%S")
-            }
+        event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_message)
+            if yu.rendering.isCheckboxChecked("online_chatlog_enabled") then
+                local name = PLAYER.GET_PLAYER_NAME(player_id)
+                SussySpt.chatlog.messages[#SussySpt.chatlog.messages + 1] = {
+                    player_id,
+                    name,
+                    chat_message,
+                    os.date("%H:%M:%S")
+                }
 
-            -- SussySpt.cfg.set("chatlog_messages", SussySpt.chatlog.messages, false)
+                -- SussySpt.cfg.set("chatlog_messages", SussySpt.chatlog.messages, false)
 
-            if yu.rendering.isCheckboxChecked("online_chatlog_console") then
-                log.info("[CHAT] "..name..": "..chat_message)
+                if yu.rendering.isCheckboxChecked("online_chatlog_console") then
+                    log.info("[CHAT] "..name..": "..chat_message)
+                end
+
+                SussySpt.chatlog.rebuildLog()
             end
-
-            SussySpt.chatlog.rebuildLog()
-        end
-    end)
+        end)
+    end -- !SECTION
 
     do -- SECTION Define tabs
         do -- SECTION Online
@@ -597,15 +604,15 @@ function SussySpt:init() -- SECTION SussySpt:init
                     selectedplayerinfo = {},
 
                     namecolors = {
-                        modder = {209, 13, 13},
-                        friend = {103, 246, 92},
-                        noped = {87, 87, 87},
-                        dead = {81, 0, 8},
-                        noblip = {151, 151, 151},
-                        ghost = {201, 201, 201},
-                        vehicle = {201, 247, 255},
-                        cutscene = {83, 75, 115},
-                        host = {255, 181, 101},
+                        modder     = {209, 13, 13},
+                        friend     = {103, 246, 92},
+                        noped      = {87, 87, 87},
+                        dead       = {81, 0, 8},
+                        noblip     = {151, 151, 151},
+                        ghost      = {201, 201, 201},
+                        vehicle    = {201, 247, 255},
+                        cutscene   = {83, 75, 115},
+                        host       = {255, 181, 101},
                         scripthost = {255, 226, 171},
                         unknownpos = {227, 223, 237}
                     },
@@ -4695,7 +4702,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 if result.ImGuiCol then
                                     for k, v2 in pairs(result.ImGuiCol) do
                                         for k3, v3 in pairs(v2) do
-                                            if k3 ~= 4 then v2[k3] = v3 / 255 end
+                                            v2[k3] = v3 / 255
                                         end
                                     end
                                 end
@@ -4860,6 +4867,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.debug("Registering mainloop")
     yu.rif(SussySpt.mainLoop)
+
     SussySpt.debug("Adding render callback ")
     SussySpt.tab:add_imgui(SussySpt.render)
 
@@ -4944,7 +4952,7 @@ function SussySpt:init() -- SECTION SussySpt:init
         end)
     end
 
-    do
+    do -- ANCHOR Verify tabs
         local tabSize = 0
 
         local function countTabs(tbl)
