@@ -16,12 +16,6 @@ def convertLines(lines, config={}):
         lines[4] = lines[4].replace("0--[[VERSIONTYPE]]", str(config["versionType"]))
         lines[5] = lines[5].replace("0--[[BUILD]]", str(_time()).split(".")[0])
 
-    elif type == "yimutils":
-        pass
-
-    else:
-        raise Exception("Content has an invalid type")
-
     return lines
 
 def increaseSussySptVersionId():
