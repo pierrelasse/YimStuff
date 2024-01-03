@@ -328,6 +328,22 @@ return (function(fnew)
             end
             return result
         end
+        function table.swap(tbl, index1, index2)
+            if type(tbl) == "table" and type(index1) == "number" and type(index2) == "number" then
+                tbl[index1], tbl[index2] = tbl[index2], tbl[index1]
+                return tbl
+            end
+        end
+        function table.compare(tbl, tbl2)
+            if type(tbl) == "table" and type(tbl2) == "table" then
+                for k, v in pairs(tbl) do
+                    if v ~= tbl2[k] then
+                        return false
+                    end
+                end
+                return true
+            end
+        end
     end -- !SECTION
 
     do -- SECTION Lua - Math
