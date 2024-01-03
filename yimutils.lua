@@ -102,13 +102,29 @@ return (function(fnew)
             return defaultValue
         end
 
-        api.format_seconds = function(sec, format) -- ANCHOR format_seconds
-            local hours = math.floor(sec / 3600)
-            local minutes = math.floor((sec % 3600) / 60)
-            return string.format(
-                format or (hours > 0 and "%02dH " or "")..(minutes > 0 and "%02dM " or "").."%02dS",
-                hours, minutes, sec % 60
-            )
+        api.format_seconds = function(seconds, _) -- ANCHOR format_seconds
+            if seconds < 0 then
+                return -seconds.." ago"
+            end
+
+            local days = math.floor(seconds / (24 * 3600))
+            local hours = math.floor((seconds % (24 * 3600)) / 3600)
+            local minutes = math.floor((seconds % 3600) / 60)
+            local secs = seconds % 60
+
+            local t = ""
+
+            if days > 0 then
+                t = t..days.."d "
+            end
+            if hours > 0 then
+                t = t..hours.."h "
+            end
+            if minutes > 0 then
+                t = t..minutes.."m "
+            end
+
+            return t..secs.."s"
         end
 
         api.copy_table = function(tbl) -- ANCHOR copy_table
@@ -271,10 +287,10 @@ return (function(fnew)
                     delimiters = {delimiters}
                 end
                 if type(delimiters) == "table" then
-                    local pattern = "(" .. table.concat(delimiters, "|") .. ")"
+                    local pattern = "("..table.concat(delimiters, "|")..")"
                     local count = 1
                     local doMax = type(max) == "number" and max > 0
-                    for match in (str .. table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
+                    for match in (str..table.concat(delimiters, "|")):gmatch("(.-)"..pattern) do
                         table.insert(result, match)
                         count = count + 1
                         if doMax and max and count > max then
@@ -975,24 +991,24 @@ return (function(fnew)
                     table.insert(res, encode(v, stack))
                 end
                 stack[val] = nil
-                return "[" .. table.concat(res, ",") .. "]"
+                return "["..table.concat(res, ",").."]"
             else
                 for k, v in pairs(val) do
                     if type(k) ~= "string" then
                         error("invalid table: mixed or invalid key types")
                     end
-                    table.insert(res, encode(k, stack) .. ":" .. encode(v, stack))
+                    table.insert(res, encode(k, stack)..":"..encode(v, stack))
                 end
                 stack[val] = nil
-                return "{" .. table.concat(res, ",") .. "}"
+                return "{"..table.concat(res, ",").."}"
             end
         end
         local function encode_string(val)
-            return '"' .. val:gsub('[%z\1-\31\\"]', escape_char) .. '"'
+            return '"'..val:gsub('[%z\1-\31\\"]', escape_char)..'"'
         end
         local function encode_number(val)
             if val ~= val or val <= -math.huge or val >= math.huge then
-                error("unexpected number value '" .. tostring(val) .. "'")
+                error("unexpected number value '"..tostring(val).."'")
             end
             return string.format("%.14g", val)
         end
@@ -1009,7 +1025,7 @@ return (function(fnew)
             local t = type(val)
             local f = type_func_map[t]
             if f then return f(val, stack) end
-            error("unexpected type '" .. t .. "'")
+            error("unexpected type '"..t.."'")
         end
 
         local function create_set(...)
@@ -1083,7 +1099,7 @@ return (function(fnew)
                 if x < 32 then
                     decode_error(str, j, "control character in string")
                 elseif x == 92 then
-                    res = res .. str:sub(k, j - 1)
+                    res = res..str:sub(k, j - 1)
                     j = j + 1
                     local c = str:sub(j, j)
                     if c == "u" then
@@ -1092,18 +1108,18 @@ return (function(fnew)
                                 str:match("^%x%x%x%x", j + 1) or
                                 decode_error(str, j - 1,
                                             "invalid unicode escape in string")
-                        res = res .. parse_unicode_escape(hex)
+                        res = res..parse_unicode_escape(hex)
                         j = j + #hex
                     else
                         if not escape_chars[c] then
-                            decode_error(str, j - 1, "invalid escape char '" .. c ..
+                            decode_error(str, j - 1, "invalid escape char '"..c ..
                                             "' in string")
                         end
-                        res = res .. escape_char_map_inv[c]
+                        res = res..escape_char_map_inv[c]
                     end
                     k = j + 1
                 elseif x == 34 then
-                    res = res .. str:sub(k, j - 1)
+                    res = res..str:sub(k, j - 1)
                     return res, j + 1
                 end
 
@@ -1117,7 +1133,7 @@ return (function(fnew)
             local s = str:sub(i, x - 1)
             local n = tonumber(s)
             if not n then
-                decode_error(str, i, "invalid number '" .. s .. "'")
+                decode_error(str, i, "invalid number '"..s.."'")
             end
             return n, x
         end
@@ -1125,7 +1141,7 @@ return (function(fnew)
             local x = next_char(str, i, delim_chars)
             local word = str:sub(i, x - 1)
             if not literals[word] then
-                decode_error(str, i, "invalid literal '" .. word .. "'")
+                decode_error(str, i, "invalid literal '"..word.."'")
             end
             return literal_map[word], x
         end
@@ -1220,12 +1236,12 @@ return (function(fnew)
             local chr = str:sub(idx, idx)
             local f = char_func_map[chr]
             if f then return f(str, idx) end
-            decode_error(str, idx, "unexpected character '" .. chr .. "'")
+            decode_error(str, idx, "unexpected character '"..chr.."'")
         end
 
         decode = function(str)
             if type(str) ~= "string" then
-                error("expected argument of type string, got " .. type(str))
+                error("expected argument of type string, got "..type(str))
             end
             local res, idx = parse(str, next_char(str, 1, space_chars, true))
             idx = next_char(str, idx, space_chars, true)
