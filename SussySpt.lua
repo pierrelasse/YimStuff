@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.16",
-    versionid = 3035,
+    versionid = 3100,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -373,7 +373,7 @@ function SussySpt:init() -- SECTION SussySpt:init
             return true
         end
 
-        SussySpt.render = function()
+        SussySpt.render = function() -- ANCHOR render
             if SussySpt.rendering.times == nil then
                 SussySpt.rendering.times = {}
             end
@@ -383,6 +383,8 @@ function SussySpt:init() -- SECTION SussySpt:init
             for k, v in pairs(SussySpt.rendercb) do
                 v()
             end
+
+            SussySpt.qa.render()
 
             local function pushTheme(theme)
                 if type(theme) ~= "table" then
@@ -415,7 +417,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             local success, result = pcall(renderTabs)
             if not success then
-                local err = SussySpt.removeErrorPath(result)
+                local err = yu.removeErrorPath(result)
                 ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
                 ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
                 log.warning("Error while rendering (line "..err[2].."): "..err[3])
@@ -1025,7 +1027,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if not success then
                             SussySpt.sortedPlayers = {}
 
-                            local err = SussySpt.removeErrorPath(result)
+                            local err = yu.removeErrorPath(result)
                             log.warning("Error while updating the playerlist(line "..err[2].."): "..err[3])
                         end
 
@@ -4615,6 +4617,91 @@ function SussySpt:init() -- SECTION SussySpt:init
             SussySpt.rendering.tabs[3] = tab
         end -- !SECTION
 
+        do -- SECTION Quick Actions
+            local tab = SussySpt.rendering.newTab("Quick Actions")
+
+            tab.render = function()
+                if ImGui.Button("Save") then
+                    SussySpt.qa.config.save()
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.Button("Reset") then
+                    SussySpt.qa.config.sort = yu.copy_table(SussySpt.qa.config.default)
+                end
+
+                if ImGui.BeginTable("##actions", 2) then
+                    -- ImGui.TableSetupColumn("##1")
+                    -- ImGui.TableSetupColumn("##2")
+                    ImGui.TableHeadersRow()
+
+                    local row = 0
+                    for k, v in pairs(SussySpt.qa.config.sort) do
+                        ImGui.TableNextRow()
+                        ImGui.PushID(row)
+                        ImGui.TableSetColumnIndex(0)
+
+                        local ok = false
+                        if type(v) == "number" then
+                            if v == 0 then
+                                yu.rendering.coloredtext("[Newline]", 106, 106, 106, 255)
+                                ok = true
+                            end
+
+                        elseif type(v) == "string" then
+                            local b = SussySpt.qa.actions[v]
+                            if b ~= nil then
+                                ImGui.Text(b[2])
+                                ok = true
+                            end
+                        end
+
+                        if not ok then
+                            yu.rendering.coloredtext("[Invalid]", 255, 50, 50, 255)
+                        end
+
+                        ImGui.TableSetColumnIndex(1)
+
+                        if ImGui.Button("<##"..k) then
+                            local newIndex = k - 1
+                            if newIndex <= 0 then
+                                newIndex = #SussySpt.qa.config.sort
+                            end
+                            table.swap(SussySpt.qa.config.sort, k, newIndex)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.Button(">##"..k) then
+                            local newIndex = k + 1
+                            if newIndex > #SussySpt.qa.config.sort then
+                                newIndex = 1
+                            end
+                            table.swap(SussySpt.qa.config.sort, k, newIndex)
+                        end
+                        ImGui.SameLine()
+                        if ImGui.Button("X##"..k) then
+                            local tbl = {}
+                            local i = 1
+                            for k2, v2 in pairs(SussySpt.qa.config.sort) do
+                                if k2 ~= k then
+                                    tbl[i] = v2
+                                    i = i + 1
+                                end
+                            end
+                            SussySpt.qa.config.sort = tbl
+                        end
+
+                        ImGui.PopID()
+                        row = row + 1
+                    end
+
+                    ImGui.EndTable()
+                end
+            end
+
+            SussySpt.rendering.tabs[4] = tab
+        end -- !SECTION
+
         do -- SECTION Config
             local tab = SussySpt.rendering.newTab("Config")
 
@@ -4738,7 +4825,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                         if ImGui.Button("Load") then
                             local success, result = pcall(yu.json.decode, a.customthemetext)
                             if not success then
-                                a.message = {"Error: "..SussySpt.removeErrorPath(result)[2], 255, 25, 25}
+                                a.message = {"Error: "..yu.removeErrorPath(result)[2], 255, 25, 25}
 
                             elseif type(result) == "table" then
                                 if result.parent == "Custom" then
@@ -4906,15 +4993,216 @@ function SussySpt:init() -- SECTION SussySpt:init
                 tab.sub[4] = tab2
             end
 
-            SussySpt.rendering.tabs[4] = tab
+            SussySpt.rendering.tabs[5] = tab
         end -- !SECTION
     end -- !SECTION
 
-    SussySpt.debug("Registering mainloop")
-    yu.rif(SussySpt.mainLoop)
+    do -- SECTION Quick Actions
+        SussySpt.qa = {}
 
-    SussySpt.debug("Adding render callback ")
-    SussySpt.tab:add_imgui(SussySpt.render)
+        do -- SECTION Actions
+            SussySpt.qa.actions = {
+                -- { Func, DisplayName, [Description], [Cond] }
+            }
+
+            SussySpt.qa.onlineCond = function()
+                return SussySpt.in_online
+            end
+
+            SussySpt.qa.actions.heal = { -- ANCHOR heal
+                function()
+                    SussySpt.qa.actions.refillHealth[1]()
+                    SussySpt.qa.actions.refillArmor[1]()
+                end,
+                "Heal",
+                "Refills your health and armor"
+            }
+
+            SussySpt.qa.actions.refillHealth = { -- ANCHOR refillHealth
+                function()
+                    ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
+                end,
+                "Refill health",
+                "Refills your health"
+            }
+
+            SussySpt.qa.actions.refillArmor = { -- ANCHOR refillArmor
+                function()
+                    PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
+                end,
+                "Refill armor",
+                "Refills your armor"
+            }
+
+            SussySpt.qa.actions.clearWantedLevel = { -- ANCHOR clearWantedLevel
+                function()
+                    PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
+                end,
+                "Clear wanted level",
+                "Sets your current wanted level to 0"
+            }
+
+            SussySpt.qa.actions.ri2 = { -- ANCHOR ri2
+                function()
+                    local ppid = yu.ppid()
+                    INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
+                    local c = yu.coords(ppid)
+                    PED.SET_PED_COORDS_KEEP_VEHICLE(ppid, c.x, c.y, c.z - 1)
+                end,
+                "RI2",
+                "Refreshes the interior you are currently in\nClears the ped's tasks\n\nThis is good for when you can't see anything"
+            }
+
+            SussySpt.qa.actions.skipCutscene = { -- ANCHOR skipCutscene
+                function()
+                    CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
+                    if NETWORK.NETWORK_IS_IN_MP_CUTSCENE() then
+                        NETWORK.NETWORK_SET_IN_MP_CUTSCENE(false, true)
+                    end
+                end,
+                "Skip cutscene",
+                "There are some unskippable \"cutscenes\" where this doesn't work"
+            }
+
+            SussySpt.qa.actions.removeBlackscreen = { -- ANCHOR removeBlackscreen
+                function()
+                    CAM.DO_SCREEN_FADE_IN(0)
+                end,
+                "Remove blackscreen"
+            }
+
+            SussySpt.qa.actions.repairVehicle = { -- ANCHOR repairVehicle
+                function()
+                    local veh = yu.veh()
+                    if veh ~= nil and entities.take_control_of(veh) then
+                        VEHICLE.SET_VEHICLE_FIXED(veh)
+                        VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
+                    end
+                end,
+                "Repair vehicle",
+                "Repairs the vehicle.\nUse with caution because this closes doors and stuff"
+            }
+
+            SussySpt.qa.actions.stfu = { -- ANCHOR stfu
+                function()
+                    AUDIO.STOP_SCRIPTED_CONVERSATION(false)
+                end,
+                "Stop conversation",
+                "Tries to stop the blah blah from npcs"
+            }
+
+            SussySpt.qa.actions.instantBST = { -- ANCHOR instantBST
+                function()
+                    globals.set_int(SussySpt.p.g.bullshark_stage, 1)
+                end,
+                "Instant BST",
+                "You will receive less damage and do more damage while the effect is active",
+                SussySpt.qa.onlineCond
+            }
+
+            SussySpt.qa.actions.depositWallet = { -- ANCHOR depositWallet
+                function()
+                    local pi = yu.playerindex()
+                    local amount = MONEY.NETWORK_GET_VC_WALLET_BALANCE(pi)
+                    if amount > 0 then
+                        NETSHOPPING.NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(
+                            pi,
+                            amount
+                        )
+                    end
+                end,
+                "Deposit wallet",
+                "Puts all your money in the bank",
+                SussySpt.qa.onlineCond
+            }
+
+            SussySpt.qa.actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
+                function()
+                    STREAMING.STOP_PLAYER_SWITCH()
+                    SCRIPT.SHUTDOWN_LOADING_SCREEN()
+                    if CAM.IS_SCREEN_FADED_OUT() then
+                        CAM.DO_SCREEN_FADE_IN(0)
+                    end
+                    GRAPHICS.ANIMPOSTFX_STOP_ALL()
+                    HUD.SET_FRONTEND_ACTIVE(true)
+                    HUD.CLEAR_HELP(true)
+                end,
+                "Stop player switch"
+            }
+        end -- !SECTION
+
+        do -- SECTION Config
+            SussySpt.qa.config = {
+                default = {
+                    "heal", "refillHealth", "refillArmor", "clearWantedLevel", 0,
+                    "ri2", "skipCutscene", "removeBlackscreen", 0,
+                    "repairVehicle", "stfu", 0,
+                    "instantBST", "depositWallet", "stopPlayerSwitch"
+                }
+            }
+
+            SussySpt.qa.config.load = function()
+                local sort = SussySpt.cfg.get("qa_sort")
+                if sort == nil then
+                    sort = yu.copy_table(SussySpt.qa.config.default)
+                end
+                SussySpt.qa.config.sort = sort
+            end
+
+            SussySpt.qa.config.save = function()
+                if type(SussySpt.qa.config.sort) ~= "table" then
+                    return
+                end
+                if table.compare(SussySpt.qa.config.default, SussySpt.qa.config.sort) then
+                    SussySpt.cfg.set("qa_sort", nil)
+                else
+                    SussySpt.cfg.set("qa_sort", SussySpt.qa.config.sort)
+                end
+                SussySpt.cfg.save()
+            end
+
+            SussySpt.qa.config.load()
+        end -- !SECTION
+
+        SussySpt.qa.render = function() -- ANCHOR Render
+            if not yu.rendering.isCheckboxChecked("cat_qa") then
+                return
+            end
+
+            local sameline = false
+
+            if ImGui.Begin("Quick actions") then
+                for k, v in pairs(SussySpt.qa.config.sort) do
+                    if type(v) == "number" then
+                        if v == 0 then
+                            sameline = false
+                        end
+
+                    elseif type(v) == "string" then
+                        local b = SussySpt.qa.actions[v]
+                        if b ~= nil then
+                            if type(b[4]) ~= "function" or b[4]() ~= false then
+                                if sameline then
+                                    ImGui.SameLine()
+                                end
+                                sameline = true
+
+                                if ImGui.Button(b[2]) then
+                                    SussySpt.addTask(function()
+                                        b[1]()
+                                    end)
+                                end
+                                if b[3] ~= nil and ImGui.IsItemHovered() then
+                                    ImGui.SetTooltip(b[3])
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            ImGui.End()
+        end
+    end -- !SECTION
 
     SussySpt.debug("Creating esp thread")
     do -- ANCHOR ESP
@@ -5019,6 +5307,12 @@ function SussySpt:init() -- SECTION SussySpt:init
         SussySpt.debug("Created "..tabSize.." tabs")
     end
 
+    SussySpt.debug("Registering mainloop")
+    yu.rif(SussySpt.mainLoop)
+
+    SussySpt.debug("Adding render callback")
+    SussySpt.tab:add_imgui(SussySpt.render)
+
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
 end -- !SECTION
@@ -5027,7 +5321,6 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     SussySpt.debug("Initializing categories")
 
     SussySpt:initTabHBO()
-    SussySpt:initTabQA()
 
     if SussySpt.dev then
         SussySpt:initTabHeist()
@@ -7171,142 +7464,6 @@ function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
                 end
 
                 ImGui.EndTabBar()
-            end
-            ImGui.End()
-        end
-    end)
-end -- !SECTION
-
-function SussySpt:initTabQA() -- SECTION SussySpt:initTabQA
-    SussySpt.debug("Calling SussySpt:initTabQA()")
-
-    SussySpt.add_render(function()
-        if yu.rendering.isCheckboxChecked("cat_qa") then
-            if ImGui.Begin("Quick actions") then
-                if ImGui.Button("Heal") then
-                    SussySpt.addTask(function()
-                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
-                        PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
-                    end)
-                end
-                yu.rendering.tooltip("Refill health & armor")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Refill health") then
-                    SussySpt.addTask(function()
-                        ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
-                    end)
-                end
-                yu.rendering.tooltip("Refill health")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Refill armor") then
-                    SussySpt.addTask(function()
-                        PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
-                    end)
-                end
-                yu.rendering.tooltip("Refill armor")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Clear wanted level") then
-                    SussySpt.addTask(function()
-                        PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
-                    end)
-                end
-                yu.rendering.tooltip("Removes (clears) your wanted level")
-
-                if ImGui.Button("RI2") then
-                    SussySpt.addTask(function()
-                        local ppid = yu.ppid()
-                        INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
-                        local c = yu.coords(ppid)
-                        PED.SET_PED_COORDS_KEEP_VEHICLE(ppid, c.x, c.y, c.z - 1)
-                    end)
-                end
-                yu.rendering.tooltip("Refreshes the interior you are currently in\nClears the ped's tasks\n\nThis is good for when you can't see anything")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Skip cutscene") then
-                    SussySpt.addTask(function()
-                        CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
-                        if NETWORK.NETWORK_IS_IN_MP_CUTSCENE() then
-                            NETWORK.NETWORK_SET_IN_MP_CUTSCENE(false, true)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("There are some unskippable \"cutscenes\" where this doesn't work")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Remove blackscreen") then
-                    SussySpt.addTask(function()
-                        CAM.DO_SCREEN_FADE_IN(0)
-                    end)
-                end
-                yu.rendering.tooltip("Remove the blackscreen :D")
-
-                if ImGui.Button("Repair vehicle") then
-                    SussySpt.addTask(function()
-                        local veh = yu.veh()
-                        if veh ~= nil and entities.take_control_of(veh) then
-                            VEHICLE.SET_VEHICLE_FIXED(veh)
-                            VEHICLE.SET_VEHICLE_DIRT_LEVEL(veh, .0)
-                        end
-                    end)
-                end
-                yu.rendering.tooltip("Repairs the vehicle.\nUse with caution because this closes doors and stuff.")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Stop conversation") then
-                    SussySpt.addTask(function()
-                        AUDIO.STOP_SCRIPTED_CONVERSATION(false)
-                    end)
-                end
-                yu.rendering.tooltip("Tries to stop the blah blah from npcs")
-
-                if SussySpt.in_online then
-                    if ImGui.Button("Instant BST") then
-                        globals.set_int(SussySpt.p.g.bullshark_stage, 1)
-                    end
-                    yu.rendering.tooltip("Give bullshark testosterone.\nYou will receive less damage and do more damage.")
-
-                    ImGui.SameLine()
-
-                    if ImGui.Button("Deposit wallet") then
-                        SussySpt.addTask(function()
-                            local ch = yu.playerindex()
-                            local amount = MONEY.NETWORK_GET_VC_WALLET_BALANCE(ch)
-                            if amount > 0 then
-                                NETSHOPPING.NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(
-                                    ch,
-                                    amount
-                                )
-                            end
-                        end)
-                    end
-                    yu.rendering.tooltip("Puts all your money in the bank")
-
-                    ImGui.SameLine()
-                end
-
-                if ImGui.Button("Stop player switch") then
-                    SussySpt.addTask(function()
-                        STREAMING.STOP_PLAYER_SWITCH()
-                        SCRIPT.SHUTDOWN_LOADING_SCREEN()
-                        if CAM.IS_SCREEN_FADED_OUT() then
-                            CAM.DO_SCREEN_FADE_IN(0)
-                        end
-                        GRAPHICS.ANIMPOSTFX_STOP_ALL()
-                        HUD.SET_FRONTEND_ACTIVE(true)
-                        HUD.CLEAR_HELP(true)
-                    end)
-                end
-                yu.rendering.tooltip("Tries to make you able to interact with your surroundings")
             end
             ImGui.End()
         end
