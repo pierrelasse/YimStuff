@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
-    version = "1.3.16",
-    versionid = 3172,
+    version = "1.3.17",
+    versionid = 3173,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
