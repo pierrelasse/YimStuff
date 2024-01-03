@@ -203,7 +203,7 @@ return (function(fnew)
             return os.clock() * 1000
         end
 
-        function api.removeErrorPath(s) -- ANCHOR removeErrorPath
+        api.removeErrorPath = function(s) -- ANCHOR removeErrorPath
             local maxAmount = yu.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
             local values = string.split(s, ":", maxAmount)
             if yu.len(values) < 4 then
@@ -218,6 +218,12 @@ return (function(fnew)
                 values[3], -- line
                 values[4]:strip() -- error
             }
+        end
+
+        api.rgbToHex = function(r, g, b) -- ANCHOR rgbToHex
+            if type(r) == "number" and type(g) == "number" and type(b) == "number" then
+                return string.format("%02X%02X%02X", r, g, b)
+            end
         end
     end -- !SECTION
 
