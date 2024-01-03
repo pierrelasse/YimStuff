@@ -236,7 +236,7 @@ return (function(fnew)
             }
         end
 
-        api.rgbToHex = function(r, g, b) -- ANCHOR rgbToHex
+        api.rgb_to_hex = function(r, g, b) -- ANCHOR rgb_to_hex
             if type(r) == "number" and type(g) == "number" and type(b) == "number" then
                 return string.format("%02X%02X%02X", r, g, b)
             end
