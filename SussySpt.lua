@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.16",
-    versionid = 3100,
+    versionid = 3172,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -325,6 +325,26 @@ function SussySpt:init() -- SECTION SussySpt:init
             SussySpt.rendering.title = title.."###sussyspt_mainwindow"
         end
 
+        do -- ANCHOR Update
+            SussySpt.update = {
+                start = 60 * 60 * 24 * 7,
+                max = 60 * 60 * 24 * 100
+            }
+
+            SussySpt.update.updateAgo = function()
+                SussySpt.update.ago = (os.time() - SussySpt.build) - SussySpt.update.start
+            end
+
+            SussySpt.update.colors = function()
+                if SussySpt.update.ago < 0 then
+                    return 255, 255, 255
+                end
+                return 250, 250 * (1 - SussySpt.update.ago / SussySpt.update.max), 50
+            end
+
+            SussySpt.update.updateAgo()
+        end
+
         SussySpt.rendering.newTab = function(name, render)
             return {
                 name = name,
@@ -379,6 +399,13 @@ function SussySpt:init() -- SECTION SussySpt:init
             end
 
             SussySpt.rendering.times.starttime = os.clock()
+
+            if SussySpt.update.ago > 0 then
+                SussySpt.update.updateAgo()
+                local r, g, b = SussySpt.update.colors()
+                yu.rendering.coloredtext("Your version is "..yu.format_seconds(SussySpt.update.ago).." old. Maybe try updating", r, g, b, 255)
+                ImGui.Spacing()
+            end
 
             for k, v in pairs(SussySpt.rendercb) do
                 v()
@@ -502,8 +529,6 @@ function SussySpt:init() -- SECTION SussySpt:init
             SussySpt.rendercb[id] = cb
         end
     end
-
-    SussySpt:initCategories()
 
     do -- SECTION Chatlog
         SussySpt.debug("Initializing chatlog")
@@ -5312,6 +5337,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     SussySpt.debug("Adding render callback")
     SussySpt.tab:add_imgui(SussySpt.render)
+
+    SussySpt:initCategories()
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..SussySpt.version.." ["..SussySpt.versionid.."]!", "Welcome")
