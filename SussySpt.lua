@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.17",
-    versionid = 3173,
+    versionid = 3183,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -453,6 +453,18 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             for k, v in pairs(SussySpt.render_pops) do
                 ImGui[k](v)
+            end
+
+            do
+                ImGui.Text("Categories")
+
+                if SussySpt.in_online then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
+                    SussySpt.cfg.set("cat_hbo", yu.rendering.renderCheckbox("HBO", "cat_hbo"))
+                    yu.rendering.tooltip("Most of the things wont work due to the latest gta update.\nUse with caution")
+                    ImGui.PopStyleColor()
+                end
+                SussySpt.cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
             end
 
             SussySpt.rendering.times.lastrendertime = os.clock() - SussySpt.rendering.times.starttime
@@ -2008,12 +2020,16 @@ function SussySpt:init() -- SECTION SussySpt:init
                                                 printDecor("PV_Slot")
                                                 printDecor("Veh_Modded_By_Player")
                                                 printDecor("Not_Allow_As_Saved_Veh")
+                                                log.info("[GIFT VEHICLE] DECOR: ".."IgnoredByQuickSave".."="..tostring(DECORATOR.DECOR_GET_BOOL(veh, "IgnoredByQuickSave")))
+                                                printDecor("MPBitset")
 
                                                 DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", -251500684)
-                                                DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", 0)
-                                                DECORATOR.DECOR_SET_INT(veh, "PV_Slot", 43)
+                                                DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", -251500684)
+                                                DECORATOR.DECOR_SET_INT(veh, "PV_Slot", 47)
                                                 DECORATOR.DECOR_SET_INT(veh, "Veh_Modded_By_Player", 0)
                                                 DECORATOR.DECOR_SET_INT(veh, "Not_Allow_As_Saved_Veh", 0)
+                                                DECORATOR.DECOR_SET_BOOL(veh, "IgnoredByQuickSave", false)
+                                                DECORATOR.DECOR_SET_INT(veh, "MPBitset", 16777224)
                                             end)
                                         end
 
@@ -3928,6 +3944,65 @@ function SussySpt:init() -- SECTION SussySpt:init
                                 for i = 0, 47 do
                                     stats.set_int(mpx.."TATTOO_FM_UNLOCKS_"..i, -1)
                                 end
+                                for i = 0, 63 do
+                                    for j = 0, 05 do
+                                        stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL"..j, true, i)
+                                    end
+                                end
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Unlock all parachutes") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 20) -- Sprunk Bag
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 21) -- eCola Bag
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 22) -- Halloween Bag
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 23) -- Sprunk Chute
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 24) -- eCola Chute
+                                stats.set_bool_masked(mpx.."TUNERPSTAT_BOOL1", true, 25) -- Halloween Chute
+                                stats.set_bool_masked(mpx.."DLC12022PSTAT_BOOL1", true, 63) -- Junk Energy Drink Bag
+                                stats.set_bool_masked(mpx.."DLC12022PSTAT_BOOL2", true, 0) -- Junk Energy Drink Chute
+                                stats.set_bool_masked(mpx.."TUPSTAT_BOOL7", true, 50) -- High Flyer Bag
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Daily objective related") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."COMPLETEDAILYOBJ", 100)
+                                stats.set_int(mpx.."COMPLETEDAILYOBJTOTAL", 100)
+                                stats.set_int(mpx.."TOTALDAYCOMPLETED", 100)
+                                stats.set_int(mpx.."TOTALWEEKCOMPLETED", 400)
+                                stats.set_int(mpx.."TOTALMONTHCOMPLETED", 1800)
+                                stats.set_int(mpx.."CONSECUTIVEDAYCOMPLETED", 30)
+                                stats.set_int(mpx.."CONSECUTIVEWEEKCOMPLETED", 4)
+                                stats.set_int(mpx.."CONSECUTIVEMONTHCOMPLETE", 1)
+                                stats.set_int(mpx.."COMPLETEDAILYOBJSA", 100)
+                                stats.set_int(mpx.."COMPLETEDAILYOBJTOTALSA", 100)
+                                stats.set_int(mpx.."TOTALDAYCOMPLETEDSA", 100)
+                                stats.set_int(mpx.."TOTALWEEKCOMPLETEDSA", 400)
+                                stats.set_int(mpx.."TOTALMONTHCOMPLETEDSA", 1800)
+                                stats.set_int(mpx.."CONSECUTIVEDAYCOMPLETEDSA", 30)
+                                stats.set_int(mpx.."CONSECUTIVEWEEKCOMPLETEDSA", 4)
+                                stats.set_int(mpx.."CONSECUTIVEMONTHCOMPLETESA", 1)
+                                stats.set_int(mpx.."AWD_DAILYOBJCOMPLETEDSA", 100)
+                                stats.set_int(mpx.."AWD_DAILYOBJCOMPLETED", 100)
+                                stats.set_bool(mpx.."AWD_DAILYOBJMONTHBONUS", true)
+                                stats.set_bool(mpx.."AWD_DAILYOBJWEEKBONUS", true)
+                                stats.set_bool(mpx.."AWD_DAILYOBJWEEKBONUSSA", true)
+                                stats.set_bool(mpx.."AWD_DAILYOBJMONTHBONUSSA", true)
+                            end)
+                        end
+
+                        if ImGui.SmallButton("Engine upgrades") then
+                            SussySpt.addTask(function()
+                                local mpx = yu.mpx()
+                                stats.set_int(mpx.."USJS_COMPLETED_MASK", 50)
+                                stats.set_int(mpx.."USJS_FOUND_MASK", 50)
+                                stats.set_int(mpx.."USJS_TOTAL_COMPLETED", 50)
+                                stats.set_int(mpx.."USJS_COMPLETED", 50)
+                                stats.set_int(mpx.."USJS_FOUND", 50)
                             end)
                         end
                     end
@@ -5356,18 +5431,6 @@ function SussySpt:initCategories() -- SECTION SussySpt:initCategories
     for k, v in pairs({"hbo", "qa"}) do
         yu.rendering.setCheckboxChecked("cat_"..v, SussySpt.cfg.get("cat_"..v, false))
     end
-
-    SussySpt.tab:add_imgui(function()
-        ImGui.Text("Categories")
-
-        if SussySpt.in_online then
-            ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
-            SussySpt.cfg.set("cat_hbo", yu.rendering.renderCheckbox("HBO", "cat_hbo"))
-            yu.rendering.tooltip("Most of the things wont work due to the latest gta update.\nUse with caution")
-            ImGui.PopStyleColor()
-        end
-        SussySpt.cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
-    end)
 end -- !SECTION
 
 function SussySpt:initTabHBO() -- SECTION SussySpt:initTabHBO
