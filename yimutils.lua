@@ -36,12 +36,6 @@ return (function(fnew)
         end
 
         ---@deprecated
-        api.god = api.get_or_default
-
-        ---@deprecated
-        api.gd = api.get_or_default
-
-        ---@deprecated
         api.get_all_players_2 = function()
             local handles = entities.get_all_peds_as_handles()
             if handles ~= nil then
