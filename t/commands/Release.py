@@ -11,17 +11,17 @@ def run(root):
 
     lines = convertLines(increaseSussySptVersionId(), {"versionType": _StaticStorage.VersionType.RELEASE})
 
-    with open(root + "/out/SussySpt.lua", "w") as f:
+    with open(root + "/out/SussySpt.Single.lua", "w") as f:
         f.write("\n".join(lines))
 
-        print("  > Created SussySpt.lua")
+        print("  > Created SussySpt.Single.lua")
 
-    with open(root + "/out/SussySpt.Merged.lua", "w") as f:
+    with open(root + "/out/SussySpt.lua", "w") as f:
         from Merger import Merger
 
         f.write("\n".join(Merger.merge(_os.path.abspath("SussySpt.lua"), lines)))
 
-        print("  > Created SussySpt.Merged.lua")
+        print("  > Created SussySpt.lua")
 
     _shutil.copy(root + "/yimutils.lua", root + "/out/yimutils.lua")
     print("  > Created yimutils.lua")
@@ -34,5 +34,5 @@ def run(root):
                 print("    > Minified " + file)
 
         minify("SussySpt.lua")
-        minify("SussySpt.Merged.lua")
+        minify("SussySpt.Single.lua")
         minify("yimutils.lua")
