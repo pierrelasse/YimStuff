@@ -1,7 +1,7 @@
 --[[ SussySpt ]]
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.17",
-    versionid = 3183,
+    versionid = 3188,
     versiontype = 0--[[VERSIONTYPE]],
     build = 0--[[BUILD]],
     needInit = true
@@ -190,7 +190,27 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             lucky_wheel_win_state = 278,
             lucky_wheel_prize = 14,
-            lucky_wheel_prize_state = 45
+            lucky_wheel_prize_state = 45,
+
+            arcadegames_ggsm_data = 703,
+            arcadegames_ggsm_stats = 4572,
+            arcadegames_ggsm_playtime = 6,
+            arcadegames_ggsm_playerlives = 4583,
+            arcadegames_ggsm_score = 7,
+            arcadegames_ggsm_entities = 484,
+            arcadegames_ggsm_hp = 23,
+            arcadegames_ggsm_kills = 5,
+            arcadegames_ggsm_powerupscollected = 4,
+            arcadegames_ggsm_position = 7,
+            arcadegames_ggsm_weapontype = 48,
+            arcadegames_ggsm_weaponslot = 2811,
+            arcadegames_ggsm_powerups = {
+                44, -- GGSM_SPRITE_POWER_UP_DECOY
+                49, -- GGSM_SPRITE_POWER_UP_NUKE
+                50, -- GGSM_SPRITE_POWER_UP_REPULSE
+                53, -- GGSM_SPRITE_POWER_UP_SHIELD
+                54  -- GGSM_SPRITE_POWER_UP_STUN
+            }
         },
         t = { -- ANCHOR Tunables
             salvageyard_week = 488207018
@@ -342,7 +362,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                 return 250, 250 * (1 - SussySpt.update.ago / SussySpt.update.max), 50
             end
 
-            SussySpt.update.updateAgo()
+            -- SussySpt.update.updateAgo()
         end
 
         SussySpt.rendering.newTab = function(name, render)
@@ -400,12 +420,12 @@ function SussySpt:init() -- SECTION SussySpt:init
 
             SussySpt.rendering.times.starttime = os.clock()
 
-            if SussySpt.update.ago > 0 then
-                SussySpt.update.updateAgo()
-                local r, g, b = SussySpt.update.colors()
-                yu.rendering.coloredtext("Your version is "..yu.format_seconds(SussySpt.update.ago).." old. Maybe try updating", r, g, b, 255)
-                ImGui.Spacing()
-            end
+            -- if SussySpt.update.ago > 0 then
+            --     SussySpt.update.updateAgo()
+            --     local r, g, b = SussySpt.update.colors()
+            --     yu.rendering.coloredtext("Your version is "..yu.format_seconds(SussySpt.update.ago).." old. Maybe try updating", r, g, b, 255)
+            --     ImGui.Spacing()
+            -- end
 
             for k, v in pairs(SussySpt.rendercb) do
                 v()
@@ -2823,6 +2843,185 @@ function SussySpt:init() -- SECTION SussySpt:init
                 do -- SECTION Arcade
                     local tab3 = SussySpt.rendering.newTab("Arcade")
 
+                    do -- SECTION Games
+                        local tab4 = SussySpt.rendering.newTab("Games")
+
+                        do -- SECTION Go Go Space Monkey
+                            local tab5 = SussySpt.rendering.newTab("Go Go Space Monkey")
+
+                            tab5.script = "ggsm_arcade"
+                            tab5.scriptHashed = joaat(tab5.script)
+                            tab5.scriptRunning = false
+
+                            tab5.musicStopEvent = "ARCADE_SM_STOP"
+
+                            tab5.godmode = false
+
+                            tab5.playerShipIndex = 1
+
+                            tab5.weapons = {
+                                "Default", "Beam", "Cone Spread", "Laser", "Shot", "Shot Rapid", "Spread",
+                                "Timed Spread", "Enemy Vulcan", "Cluster Bomb", "Fruit Bowl",
+                                "Granana Glasses", "Granana Glasses 2", "Granana Hair", "Granana Spread",
+                                "Granana Spread 2", "Exp Shell", "Player Vulcan", "Scatter",
+                                "Homing Rocket", "Dual Arch", "Wave Blaster", "Back Vulcan", "Bread Spread",
+                                "Smooth IE Spread", "Smooth IE Vulcan", "Dank Cannon", "Dank Rocket",
+                                "Dank Homing Rocket", "Dank Scatter", "Dank Spread", "Dank Cluster Bomb",
+                                "Acid", "Acid Vulkan", "Marine Launcher", "Marine Spread", "Test Weapon"
+                            }
+
+                            tab5.powerups = {"Decoy", "Nuke", "Repulse", "Shield", "Stun"}
+                            tab5.powerupSlots {"Defense", "Special"}
+                            tab5.powerupSlot = 2
+
+                            tab5.sectors = {
+                                "Earth", "Asteroid Belt", "Pink Ring", "Yellow Clam", "Dough Ball",
+                                "Banana Star", "Boss Rush", "Boss Test"
+                            }
+
+                            tab5.getTimePlayed = function()
+                                local seconds = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_playtime)
+                                return yu.format_seconds(seconds)
+                            end
+
+                            tab5.tick = function()
+                                tab5.scriptRunning = yu.is_script_running_hash(tab5.scriptHashed)
+
+                                if tab5.scriptRunning then
+                                    tab5.playerShipIndex = 1 + (locals.get_int(tab5.script, 703 + 2680) * 56)
+
+                                    tab5.lives = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_playerlives)
+                                    tab5.score = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_score)
+                                    tab5.kills = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_kills)
+                                    tab5.powerupsCollected = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_powerupscollected)
+                                    tab5.pos = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_position)
+
+                                    tab5.timePlayed = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_playtime)
+                                    tab5.timePlayedFormatted = yu.format_seconds(tab5.timePlayed)
+
+                                    if tab5.godmode then
+                                        tab5.heal = true
+                                    end
+
+                                    if tab5.heal then
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_hp, 4)
+                                        tab5.heal = false
+                                    end
+
+                                    if tab5.weapon ~= nil then
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_weapontype, tab5.weapon + 1)
+                                        tab5.weapon = nil
+                                    end
+
+                                    if tab5.powerup ~= nil then
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_weaponslot + (tab5.powerupSlot + 1), SussySpt.p.l.arcadegames_ggsm_powerups[tab5.powerup + 1])
+                                        tab5.powerup = nil
+                                    end
+
+                                    if tab5.sector ~= nil then
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_sector, tab5.sector)
+                                        tab5.sector = nil
+                                    end
+                                end
+                            end
+
+                            tab5.render = function()
+                                SussySpt.tasks.thing_arcade_games_ggsm = tab5.tick
+
+                                if not tab5.scriptRunning then
+                                    ImGui.Text("The Go Go Space Monkey script is not running")
+                                    return
+                                end
+
+                                do
+                                    local newvalue, changed = ImGui.InputInt("Lives", tab5.lives)
+                                    if changed then
+                                        local value = math.max(1, math.min(100, newvalue))
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_playerlives, value)
+                                    end
+                                end
+
+                                ImGui.Spacing()
+
+                                do
+                                    local newvalue, changed = ImGui.InputInt("Score", tab5.score)
+                                    if changed then
+                                        local value = math.max(0, math.min(9999999, newvalue))
+                                        locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_score, value)
+                                    end
+                                end
+
+                                ImGui.Spacing()
+
+                                do
+                                    local state, toggled = ImGui.Checkbox("Godmode", tab5.godmode)
+                                    if toggled then
+                                        tab5.godmode = state
+                                    end
+                                end
+
+                                ImGui.Spacing()
+
+                                if ImGui.Button("Heal") then
+                                    tab5.heal = true
+                                end
+
+                                ImGui.SameLine()
+
+                                if ImGui.Button("Stop Music") then
+                                    SussySpt.addTask(function()
+                                        AUDIO.TRIGGER_MUSIC_EVENT(tab5.musicStopEvent)
+                                    end)
+                                end
+
+                                ImGui.Separator()
+
+                                do
+                                    ImGui.Text("Weapons")
+
+                                    if ImGui.BeginListBox("##weapons_list", 150, 262) then
+                                        for k, v in pairs(tab5.weapons) do
+                                            if ImGui.Selectable(v, false) then
+                                                tab5.weapon = k
+                                            end
+                                        end
+
+                                        ImGui.EndListBox()
+                                    end
+                                end
+
+                                ImGui.Separator()
+
+                                do
+                                    ImGui.Text("Power-Ups")
+
+                                    do
+                                        ImGui.PushItemWidth(342)
+                                        local value, changed = ImGui.SliderInt("Slot", tab5.powerupSlot, 1, 2, tab5.powerupSlots[tab5.powerupSlot])
+                                        if changed then
+                                            tab5.powerupSlot = value
+                                        end
+                                        ImGui.PopItemWidth()
+                                    end
+
+                                    if ImGui.BeginListBox("##powerups_list", 150, 262) then
+                                        for k, v in pairs(tab5.powerups) do
+                                            if ImGui.Selectable(v, false) then
+                                                tab5.powerup = k
+                                            end
+                                        end
+
+                                        ImGui.EndListBox()
+                                    end
+                                end
+                            end
+
+                            tab4.sub[1] = tab5
+                        end -- !SECTION
+
+                        tab3.sub[1] = tab4
+                    end -- !SECTION
+
                     tab2.sub[9] = tab3
                 end -- !SECTION
 
@@ -3392,7 +3591,6 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                 local a = {
                     apps = {
-                        ["appsecuroserv"] = "SecuroServ (Office)",
                         ["appbusinesshub"] = "Nightclub",
                         ["appAvengerOperations"] = "Avenger Operations",
                         ["appfixersecurity"] = "Agency",
