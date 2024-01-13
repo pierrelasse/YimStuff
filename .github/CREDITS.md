@@ -19,10 +19,12 @@ This is not 100% and not everything is listed because i started doing this later
 
    - [George0828Zhang/Fun-House - DisableExplosionShake.lua](https://github.com/George0828Zhang/Fun-House/blob/main/DisableExplosionShake.lua): op
 
+   - [YimMenu-Lua/ArcadeGames](https://github.com/YimMenu-Lua/ArcadeGames/blob/main/ggsm.lua): Online->Thing->Arcade->Games
+
    - [Originns/luamenus](https://github.com/Originns/luamenus): potential feature inspiration
 
    - [Pocakking/GTAV-1.50-Scripts](https://github.com/Pocakking/GTAV-1.50-Scripts)
-   - [XxpichoclesxX/GtaVScripts](https://github.com/XxpichoclesxX/GtaVScripts): potential feature inspiration
+   - [XxpichoclesxX/GtaVScripts](https://github.com/XxpichoclesxX/GtaVScripts)
 
    - [mathiasbynens/luamin](https://github.com/mathiasbynens/luamin)
 
