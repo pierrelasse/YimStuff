@@ -2871,7 +2871,7 @@ function SussySpt:init() -- SECTION SussySpt:init
                             }
 
                             tab5.powerups = {"Decoy", "Nuke", "Repulse", "Shield", "Stun"}
-                            tab5.powerupSlots {"Defense", "Special"}
+                            tab5.powerupSlots = {"Defense", "Special"}
                             tab5.powerupSlot = 2
 
                             tab5.sectors = {
