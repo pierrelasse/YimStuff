@@ -15,7 +15,7 @@ The scripts are made for [YimMenu](https://github.com/YimMenu/YimMenu).
 ## Quick installation
 
 This guide will help you install SussySpt.
-- Download [SussySpt.Merged.lua](https://github.com/pierrelasse/YimStuff/releases/download/v1.3.17/SussySpt.Merged.lua) and put it into your scripts folder (`%appdata%/YimMenu/scripts`)
+- Download [SussySpt.Merged.lua](https://github.com/pierrelasse/YimStuff/releases/download/v1.3.18/SussySpt.Merged.lua) and put it into your scripts folder (`%appdata%/YimMenu/scripts`)
 - Go to `Settings->Lua Scripts` in YimMenu and press the `Reload All` button
 - Enjoy. See [Table of contents](#table-of-contents) for more things to look at.
 
