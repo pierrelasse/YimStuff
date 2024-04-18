@@ -1,3 +1,4 @@
+local tasks = require("./tasks")
 
 SussySpt.qa = {}
 
