@@ -1,4 +1,4 @@
---[[ SussySpt ]]
+
 SussySpt = { -- ANCHOR SussySpt
     version = "1.3.18",
     versionid = 3213,
@@ -17,7 +17,7 @@ function SussySpt:init() -- SECTION SussySpt:init
 
     do -- SECTION Load yimutils
         local function load()
-            yu = require("yimutils")
+            yu = require("../yimutils/main")
         end
 
         local success, result = pcall(load)
@@ -704,7 +704,8 @@ function SussySpt:init() -- SECTION SussySpt:init
                         ["Action Figure - Pogo"] = "vw_prop_vw_colle_pogo",
                         ["Action Figure - UWU"] = "vw_prop_vw_colle_prbubble",
                         ["Action Figure - Imporage"] = "vw_prop_vw_colle_imporage",
-                        ["Action Figure - Alien"] = "vw_prop_vw_colle_alien"
+                        ["Action Figure - Alien"] = "vw_prop_vw_colle_alien",
+                        ["Tresure chest (has delay)"] = "tr_prop_tr_chest_01a",
                     },
                     pickupoption = "Action Figure - UWU",
 
@@ -4182,6 +4183,8 @@ function SussySpt:init() -- SECTION SussySpt:init
 
                                 do
                                     ImGui.Text("Power-Ups")
+
+                                    ImGui.Text("  Collected: "..tab5.powerupsCollected)
 
                                     do
                                         ImGui.PushItemWidth(342)

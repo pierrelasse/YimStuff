@@ -1,11 +1,12 @@
-# Files for testing things
+# Testing
 idk
 
-# Local config
+# Config
 config.json
 
-# Files for releases, etc.
+# Build
+build/**
 out
 
-# Cache files
+# Cache
 __pycache__

@@ -1,12 +1,12 @@
 {
     "editor.formatOnSave": false,
     "Lua.diagnostics.globals": [
+        "exports",
         "ImGuiTableFlags",
         "ImGuiWindowFlags",
         "ImGuiCol",
         "ImGuiStyleVar",
         "ImGuiInputTextFlags",
-
         "infraction",
         "command",
         "entities",
@@ -25,7 +25,6 @@
         "tunables",
         "vehicles",
         "weapons",
-
         "APP",
         "AUDIO",
         "BRAIN",
@@ -76,6 +75,8 @@
         "lowercase-global",
         "redefined-local"
     ],
+    "Lua.diagnostics.ignoredFiles": "Disable",
+    "Lua.workspace.useGitIgnore": true,
     "commentAnchors.tags.matchPrefix": [
         "--"
     ],
