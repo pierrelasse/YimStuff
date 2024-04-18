@@ -39,8 +39,11 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
             fileContent = callback(fileContent, { path, relPath }) || fileContent;
         }
 
-        const moduleContent = fileContent.split("\n").join("\n");
-        modules.push(`[${moduleId}] = function(exports, require) --[[ ${relPath} ]]\n${moduleContent}\n        end`);
+        const moduleContent = fileContent
+            .split("\n")
+            .filter(v => v.trimStart().length !== 0)
+            .join("\n            ");
+        modules.push(`[${moduleId}] = function(exports, require) --[[ ${relPath} ]]\n            ${moduleContent}\n        end`);
     }
 
     requireMapping[entryFile] = moduleCounter;
@@ -49,20 +52,26 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
     const out = `do
     local modules = {
         ${modules.join(",\n        ")}
-    };
-    local cache = {};
+    }
+    local cache = {}
 
     local function mrequire(path)
         local val = cache[path]
         if val ~= nil then return val.exports end
         local module = {exports = {}}
         cache[path] = module
-        local ret = modules[path](module.exports, mrequire)
-        if ret ~= nil then module.exports = ret end
+        local success, result = pcall(modules[path], module.exports, mrequire)
+        if success then
+            if result ~= nil and result ~= module.exports then
+                module.exports = result
+            end
+        else
+            print("[!!!] Error require-ing "..path..": "..result.." [!!!]")
+        end
         return module.exports
     end
 
-    return mrequire(0);
+    return mrequire(0)
 end
 `;
 
