@@ -1,0 +1,89 @@
+{
+    "diagnostics.disable": [
+        "lowercase-global",
+        "redefined-local"
+    ],
+
+    "workspace.ignoreDir": [
+        "build"
+    ],
+
+    "diagnostics.globals": [
+        // Modules
+        "exports",
+
+        // ImGui
+        "ImGuiTableFlags",
+        "ImGuiWindowFlags",
+        "ImGuiCol",
+        "ImGuiStyleVar",
+        "ImGuiInputTextFlags",
+
+        // YimMenu
+        "infraction",
+        "command",
+        "entities",
+        "event",
+        "joaat",
+        "globals",
+        "gui",
+        "ImGui",
+        "locals",
+        "log",
+        "memory",
+        "menu_event",
+        "network",
+        "script",
+        "stats",
+        "tunables",
+        "vehicles",
+        "weapons",
+
+        // Natives
+        "APP",
+        "AUDIO",
+        "BRAIN",
+        "CAM",
+        "CLOCK",
+        "CUTSCENE",
+        "DATAFILE",
+        "DECORATOR",
+        "DLC",
+        "ENTITY",
+        "EVENT",
+        "FILES",
+        "FIRE",
+        "GRAPHICS",
+        "HUD",
+        "INTERIOR",
+        "ITEMSET",
+        "LOADINGSCREEN",
+        "LOCALIZATION",
+        "MISC",
+        "MOBLE",
+        "MONEY",
+        "NETSHOPPING",
+        "NETWORK",
+        "OBJECT",
+        "PAD",
+        "PATHFIND",
+        "PED",
+        "PHYSICS",
+        "PLAYER",
+        "RECORDING",
+        "REPLAY",
+        "SAVEMIGRATION",
+        "SCRIPT",
+        "SECURITY",
+        "SHAPETEST",
+        "SOCIALCLUB",
+        "STATS",
+        "STREAMING",
+        "SYSTEM",
+        "TASK",
+        "VEHICLE",
+        "WATER",
+        "WEAPON",
+        "ZONE"
+    ]
+}
