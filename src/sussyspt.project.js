@@ -40,10 +40,8 @@ module.exports = {
         return data;
     },
     mapPackPost: (data) => {
-        if (!parser.hasShort("minify")) {
-            console.log("\n> Minifiying... SKIP");
-            return;
-        }
+        if (!isRelease) return;
+
         console.log("\n> Minifiying...");
 
         const minify = getMinify();
