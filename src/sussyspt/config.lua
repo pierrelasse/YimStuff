@@ -3,6 +3,7 @@ if io == nil or io.open == nil then
     return
 end
 
+-- FIXME: Fix SussySpt not existing?
 -- SussySpt.debug("Loading config system")
 
 local cfg = {file = "sussyspt", changed = false, lastAutosave = os.time()}

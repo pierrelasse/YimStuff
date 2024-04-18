@@ -28,11 +28,11 @@ module.exports = {
     },
 
     mapPack: (data, { path, relPath }) => {
-        if (relPath === "main.lua") {
-            console.log(">   Transforming main");
+        if (relPath === "version.lua") {
+            console.log(`>   Transforming ${relPath}`);
 
-            data = data.replace("0--[[VERSIONTYPE]]", isRelease ? 1 : 2);
-            data = data.replace("0--[[BUILD]]", Date.now());
+            data = data.replace("0 --[[VERSIONTYPE]]", isRelease ? 1 : 2);
+            data = data.replace("0 --[[BUILD]]", Date.now());
 
             console.log(">   Transformed!");
         }

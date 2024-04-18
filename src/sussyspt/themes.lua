@@ -67,4 +67,4 @@ return {
         ImGuiCol = {BorderShadow = {0, 0, 0, 0}},
         ImGuiStyleVar = {FrameBorderSize = {4.05}}
     }
-};
+}

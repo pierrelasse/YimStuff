@@ -56,4 +56,4 @@ return {
     bounty_self_time = 1 + 2359296 + 5150 + 13,
 
     agency_maxpayout = 262145 + 32466
-};
+}
