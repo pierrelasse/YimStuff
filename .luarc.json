@@ -1,7 +1,8 @@
 {
     "diagnostics.disable": [
         "lowercase-global",
-        "redefined-local"
+        "redefined-local",
+        "different-requires"
     ],
 
     "workspace.ignoreDir": [
