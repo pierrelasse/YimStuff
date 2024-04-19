@@ -25,7 +25,14 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
                 if (!modulePath.startsWith(".")) {
                     return `require("${modulePath}")`;
                 }
-                const resolved = normalizePath(require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] }));
+                let resolved;
+                try {
+                    resolved = require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] });
+                } catch (err) {
+                    throw Error(`Error while resolving module path for '${modulePath}' in '${path}'`);
+                }
+                resolved = normalizePath(resolved);
+
                 if (!requireMapping.hasOwnProperty(resolved)) {
                     requireMapping[resolved] = ++moduleCounter;
                     packFile(resolved);
@@ -128,9 +135,16 @@ module.exports.handle = (command, args) => {
     const projectBuildDir = `${buildDir}${project}/`;
     ensureFolderCreated(projectBuildDir);
 
+    let out;
+
     const packedFile = `${projectBuildDir}packed`;
     console.log("\n> Packing...");
-    let out = pack(srcProjectDir, mainFile, packedFile, projectScript.mapPack, projectScript.ext ? projectScript.ext() : ".lua");
+    try {
+        out = pack(srcProjectDir, mainFile, packedFile, projectScript.mapPack, projectScript.ext ? projectScript.ext() : ".lua");
+    } catch (err) {
+        console.info(`> An error occured while packing files:\n${err}`);
+        return true;
+    }
     console.log("> Packed!");
 
     if (projectScript.mapPackPost) {
