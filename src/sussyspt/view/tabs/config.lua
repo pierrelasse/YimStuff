@@ -1,6 +1,6 @@
-local tasks = require("../tasks")
-local version = require("./version")
-local cfg = require("./config")
+local tasks = require("../../tasks")
+local version = require("../../version")
+local cfg = require("../../config")
 
 local tab = SussySpt.rendering.newTab("Config")
 
@@ -9,15 +9,15 @@ do -- ANCHOR Info
 
     yu.rendering.setCheckboxChecked("dev", SussySpt.dev)
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("Made by pierrelasse.")
         ImGui.Text("SussySpt & yimutils download: https://github.com/pierrelasse/YimStuff")
 
         ImGui.Separator()
 
         ImGui.Text("Version: "..version.version)
-        ImGui.Text("Version id: "..version.versionid)
-        ImGui.Text("Version type: "..version.versiontype)
+        ImGui.Text("Version id: "..version.versionId)
+        ImGui.Text("Version type: "..version.versionType)
         ImGui.Text("Build: "..version.build)
 
         ImGui.Separator()
@@ -70,7 +70,7 @@ do -- ANCHOR Theme
         customthemetext = ""
     }
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("Theme: "..SussySpt.rendering.theme)
         ImGui.PushItemWidth(265)
         if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
@@ -181,7 +181,7 @@ end
 do -- ANCHOR Weird ESP
     local tab2 = SussySpt.rendering.newTab("Weird ESP")
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("This was just a test and is for now nothing real.")
         ImGui.Text("And yes it is working but there is currently no way to render it above things using natives.")
         ImGui.Spacing()
@@ -202,7 +202,7 @@ do -- ANCHOR Invisible
     }
 
     local makingVehicleInivs = false
-    SussySpt.ensureVis = function(state, id, veh)
+    function SussySpt.ensureVis(state, id, veh)
         if state ~= true and state ~= false then
             return nil
         end
@@ -220,7 +220,7 @@ do -- ANCHOR Invisible
         end
     end
 
-    SussySpt.enableVis = function()
+    function SussySpt.enableVis()
         SussySpt.invisible = nil
         SussySpt.ensureVis(true, yu.ppid(), yu.veh())
     end
@@ -250,7 +250,7 @@ do -- ANCHOR Invisible
     yu.rendering.setCheckboxChecked("invisible_self", cfg.get("invisible_self", true))
     yu.rendering.setCheckboxChecked("invisible_vehicle", cfg.get("invisible_vehicle", true))
 
-    tab2.render = function()
+    function tab2.render()
         yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
             if state then
                 SussySpt.invisible = true

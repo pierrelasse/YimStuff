@@ -1,3 +1,7 @@
+-- ======================
+-- = Currently disabled =
+-- ======================
+
 SussySpt.debug("Creating esp thread")
 
 local function drawLine(ped, index1, index2)

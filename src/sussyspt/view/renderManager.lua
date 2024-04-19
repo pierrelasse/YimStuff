@@ -15,31 +15,31 @@ end
 
 SussySpt.rendering.theme = cfg.get("theme", "Fatality")
 if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
-    SussySpt.debug("Theme " .. SussySpt.rendering.theme ..
+    SussySpt.debug("Theme "..SussySpt.rendering.theme..
                        " does not exist. Selecting a different one")
     SussySpt.rendering.theme = next(SussySpt.rendering.themes)
 end
 
-SussySpt.debug("Using theme '" .. SussySpt.rendering.theme .. "'")
+SussySpt.debug("Using theme '"..SussySpt.rendering.theme.."'")
 
-SussySpt.rendering.getTheme = function()
+function SussySpt.rendering.getTheme()
     return SussySpt.rendering.themes[SussySpt.rendering.theme] or {}
 end
 
 local windowTitle
 local function updateTitle()
     local title = "SussySpt"
-    if version.versiontype == 2 then
-        title = title .. " vD" .. version.version
-        title = title .. "[" .. version.versionid .. "]@" .. version.build
+    if version.versionType == 2 then
+        title = title.." vD"..version.version
+        title = title.."["..version.versionId.."]@"..version.build
     else
-        title = title .. " v" .. version.version
+        title = title.." v"..version.version
     end
-    windowTitle = title .. "###sussyspt_mainwindow"
+    windowTitle = title.."###sussyspt_mainwindow"
 end
 updateTitle()
 
-SussySpt.rendering.newTab = function(name, render)
+function SussySpt.rendering.newTab(name, render)
     return {
         name = name,
         render = render,
@@ -54,7 +54,7 @@ local function renderTab(v)
         ImGui.BeginTabItem(v.name) then
         if type(v.render) == "function" then v.render() end
         if yu.len(v.sub) > 0 then
-            ImGui.BeginTabBar("##tabbar_" .. v.id)
+            ImGui.BeginTabBar("##tabbar_"..v.id)
             for k1, v1 in pairs(v.sub) do renderTab(v1) end
             ImGui.EndTabBar()
         end
@@ -97,8 +97,8 @@ function exports.render() -- ANCHOR render
     if not success then
         local err = yu.removeErrorPath(result)
         ImGui.PushStyleColor(ImGuiCol.Text, 1, 0, 0, 1)
-        ImGui.Text("[RENDER ERROR] Line: " .. err[2] .. " Error: " .. err[3])
-        log.warning("Error while rendering (line " .. err[2] .. "): " .. err[3])
+        ImGui.Text("[RENDER ERROR] Line: "..err[2].." Error: "..err[3])
+        log.warning("Error while rendering (line "..err[2].."): "..err[3])
         ImGui.PopStyleColor()
     end
 

@@ -1,9 +1,10 @@
-local tasks = require("../tasks")
-local cfg = require("./config")
+local tasks = require("../../tasks")
+local cfg = require("../../config")
+local values = require("../../values")
 
 local tab = SussySpt.rendering.newTab("Online")
 
-tab.should_display = function()
+function tab.should_display()
     return SussySpt.in_online or yu.len(SussySpt.players) >= 2
 end
 
@@ -241,8 +242,7 @@ do -- SECTION Players
                         local vehiclePassengers = VEHICLE.GET_VEHICLE_NUMBER_OF_PASSENGERS(vehicle, false, true)
                         local vehicleMaxPassengers = VEHICLE.GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle)
 
-                        v.info.vehicle[2] = v.info.vehicle[2].."."
-                            .." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
+                        v.info.vehicle[2] = v.info.vehicle[2]..".".." Type: "..vehicles.get_vehicle_display_name(vehicleHash)
 
                         local vehicleClass = yu.cache.vehicle_classes[VEHICLE.GET_VEHICLE_CLASS(vehicle) + 1]
                         if type(vehicleClass) == "string" then
@@ -497,7 +497,7 @@ do -- SECTION Players
 
     yu.rendering.setCheckboxChecked("online_players_ram_delete")
 
-    tab2.render = function() -- SECTION Render
+    function tab2.render() -- SECTION Render
         a.open = 2
         ImGui.BeginGroup()
         ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
@@ -874,7 +874,7 @@ do -- SECTION Players
                                         STREAMING.REQUEST_MODEL(modelHash)
                                         repeat runscript:yield() until STREAMING.HAS_MODEL_LOADED(modelHash)
 
-                                        local createObject = function(offsetX, offsetY, heading)
+                                        local function createObject(offsetX, offsetY, heading)
                                             local obj = OBJECT.CREATE_OBJECT(modelHash, x + offsetX, y + offsetY, z - 1, true, true, true)
                                             networkobj(obj)
                                             ENTITY.SET_ENTITY_HEADING(obj, heading)
@@ -1513,13 +1513,13 @@ do -- SECTION Thing
                 },
                 set = {
                     crew = function(v)
-                        globals.set_int(SussySpt.p.g.apartment_cuts_other + 1, 100 - (v * 4))
-                        globals.set_int(SussySpt.p.g.apartment_cuts_other + 2, v)
-                        globals.set_int(SussySpt.p.g.apartment_cuts_other + 3, v)
-                        globals.set_int(SussySpt.p.g.apartment_cuts_other + 4, v)
+                        globals.set_int(values.g.apartment_cuts_other + 1, 100 - (v * 4))
+                        globals.set_int(values.g.apartment_cuts_other + 2, v)
+                        globals.set_int(values.g.apartment_cuts_other + 3, v)
+                        globals.set_int(values.g.apartment_cuts_other + 4, v)
                     end,
                     self = function(v)
-                        globals.set_int(SussySpt.p.g.apartment_cuts_self, v)
+                        globals.set_int(values.g.apartment_cuts_self, v)
                     end
                 }
             }
@@ -1528,7 +1528,7 @@ do -- SECTION Thing
         do -- ANCHOR Preperations
             local tab4 = SussySpt.rendering.newTab("Preperations")
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.Button("Complete preps") then
                     tasks.addTask(function()
                         stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
@@ -1550,10 +1550,10 @@ do -- SECTION Thing
         do -- ANCHOR Extra
             local tab4 = SussySpt.rendering.newTab("Extra")
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.Button("Unlock replay screen") then
                     tasks.addTask(function()
-                        globals.set_int(SussySpt.p.g.apartment_replay, 27)
+                        globals.set_int(values.g.apartment_replay, 27)
                     end)
                 end
                 yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
@@ -1562,9 +1562,9 @@ do -- SECTION Thing
                     tasks.addTask(function()
                         local script = "fm_mission_controller"
                         if SussySpt.requireScript(script) then
-                            locals.set_int(script, SussySpt.p.l.apartment_instantfinish1, 12)
-                            locals.set_int(script, SussySpt.p.l.apartment_instantfinish2, 99999)
-                            locals.set_int(script, SussySpt.p.l.apartment_instantfinish3, 99999)
+                            locals.set_int(script, values.l.apartment_instantfinish1, 12)
+                            locals.set_int(script, values.l.apartment_instantfinish2, 99999)
+                            locals.set_int(script, values.l.apartment_instantfinish3, 99999)
                         end
                     end)
                 end
@@ -1578,7 +1578,7 @@ do -- SECTION Thing
                 if ImGui.Button("Skip hack##fleeca") then
                     tasks.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_int("fm_mission_controller", SussySpt.p.l.apartment_fleeca_hackstage, 7)
+                            locals.set_int("fm_mission_controller", values.l.apartment_fleeca_hackstage, 7)
                         end
                     end)
                 end
@@ -1588,7 +1588,7 @@ do -- SECTION Thing
                 if ImGui.Button("Skip drill##fleeca") then
                     tasks.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_float("fm_mission_controller", SussySpt.p.l.apartment_fleeca_drillstage, 100)
+                            locals.set_float("fm_mission_controller", values.l.apartment_fleeca_drillstage, 100)
                         end
                     end)
                 end
@@ -1600,7 +1600,7 @@ do -- SECTION Thing
         do -- ANCHOR Cuts
             local tab4 = SussySpt.rendering.newTab("Cuts")
 
-            tab4.render = function()
+            function tab4.render()
                 ImGui.Text("$15m cuts")
                 ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
                 ImGui.Text(" > Fleeca currently works the best")
@@ -1672,7 +1672,7 @@ do -- SECTION Thing
             end
             tasks.addTask(refresh)
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.SmallButton("Refresh") then
                     tasks.addTask(refresh)
                 end
@@ -1732,11 +1732,11 @@ do -- SECTION Thing
         do -- ANCHOR Extra
             local tab4 = SussySpt.rendering.newTab("Extra")
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.Button("Instant finish (solo)") then
                     tasks.addTask(function()
-                        locals.set_int("fm_mission_controller_2020", SussySpt.p.g.agency_instantfinish1, 51338752)
-                        locals.set_int("fm_mission_controller_2020", SussySpt.p.g.agency_instantfinish2, 50)
+                        locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish1, 51338752)
+                        locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish2, 50)
                     end)
                 end
 
@@ -1744,7 +1744,7 @@ do -- SECTION Thing
 
                 if ImGui.Button("Remove cooldown") then
                     tasks.addTask(function()
-                        globals.set_int(SussySpt.p.g.fm + SussySpt.p.g.agency_cooldown, 0)
+                        globals.set_int(values.g.fm + values.g.agency_cooldown, 0)
                     end)
                 end
 
@@ -1752,7 +1752,7 @@ do -- SECTION Thing
 
                 yu.rendering.renderCheckbox("$2m finale", "online_thing_agency_2mfinale", function(state)
                     yu.rif(function(rs)
-                        local p = SussySpt.p.g.fm + SussySpt.p.g.agency_payout
+                        local p = values.g.fm + values.g.agency_payout
                         if state then
                             while yu.rendering.isCheckboxChecked("online_thing_agency_2mfinale") do
                                 if SussySpt.in_online then
@@ -1801,7 +1801,7 @@ do -- SECTION Thing
             end
             tasks.addTask(refresh)
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.SmallButton("Refresh") then
                     tasks.addTask(refresh)
                 end
@@ -1878,8 +1878,8 @@ do -- SECTION Thing
                 if ImGui.Button("Instant finish") then
                     tasks.addTask(function()
                         if SussySpt.requireScript("fm_mission_controller_2020") then
-                            locals.set_int("fm_mission_controller_2020", SussySpt.p.g.autoshop_instantfinish1, 51338977)
-                            locals.set_int("fm_mission_controller_2020", SussySpt.p.g.autoshop_instantfinish2, 101)
+                            locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish1, 51338977)
+                            locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish2, 101)
                         end
                     end)
                 end
@@ -1909,7 +1909,7 @@ do -- SECTION Thing
             end
             tasks.addTask(refresh)
 
-            tab4.render = function()
+            function tab4.render()
                 if ImGui.SmallButton("Refresh") then
                     tasks.addTask(refresh)
                 end
@@ -2131,7 +2131,7 @@ do -- SECTION Thing
             end
             tasks.addTask(refreshCooldowns)
 
-            tab4.render = function()
+            function tab4.render()
                 ImGui.BeginGroup()
                 yu.rendering.bigText("Preperations")
 
@@ -2489,7 +2489,7 @@ do -- SECTION Thing
                 yu.rendering.bigText("Extra")
 
                 if ImGui.Button("Remove all cameras") then
-                    tasks.addTask(require("../util/removeAllCameras"))
+                    tasks.addTask(require("../../util/removeAllCameras"))
                 end
                 yu.rendering.tooltip("This can make your game crash. Be careful")
 
@@ -2650,7 +2650,7 @@ do -- SECTION Thing
         do -- SECTION Kosatka
             local tab4 = SussySpt.rendering.newTab("Kosatka")
 
-            tab4.render = function()
+            function tab4.render()
                 ImGui.Text("\\/ Placeholder. Does not work")
 
                 yu.rendering.renderCheckbox("Remove kosatka missle cooldown", "kosatka_nomisslecd", function(state)
@@ -2736,7 +2736,7 @@ do -- SECTION Thing
                 a.loaded = nil
             end
 
-            tab4.render = function() -- ANCHOR render
+            function tab4.render() -- ANCHOR render
                 tasks.tasks.thing_salvageyard_robbery_tick = tick
 
                 if a.loaded == false then
@@ -2841,7 +2841,7 @@ do -- SECTION Thing
 
                 if ImGui.Button("Remove") then
                     tasks.addTask(function()
-                        tunables.set_int(SussySpt.p.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC") + 1)
+                        tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC") + 1)
                     end)
                 end
 
@@ -2849,7 +2849,7 @@ do -- SECTION Thing
 
                 if ImGui.Button("Restore") then
                     tasks.addTask(function()
-                        tunables.set_int(SussySpt.p.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC"))
+                        tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC"))
                     end)
                 end
 
@@ -3064,7 +3064,7 @@ do -- SECTION Thing
             tasks.addTask(updateCooldowns)
 
 
-            tab4.render = function()
+            function tab4.render()
                 ImGui.Text("To skip the first scopeout mission, use the heisteditor, unlock cancellation, and call lester to cancel the heist")
                 ImGui.Spacing()
 
@@ -3466,24 +3466,24 @@ do -- SECTION Thing
                     "Banana Star", "Boss Rush", "Boss Test"
                 }
 
-                tab5.getTimePlayed = function()
-                    local seconds = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_playtime)
+                function tab5.getTimePlayed()
+                    local seconds = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_playtime)
                     return yu.format_seconds(seconds)
                 end
 
-                tab5.tick = function()
+                function tab5.tick()
                     tab5.scriptRunning = yu.is_script_running_hash(tab5.scriptHashed)
 
                     if tab5.scriptRunning then
                         tab5.playerShipIndex = 1 + (locals.get_int(tab5.script, 703 + 2680) * 56)
 
-                        tab5.lives = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_playerlives)
-                        tab5.score = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_score)
-                        tab5.kills = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_kills)
-                        tab5.powerupsCollected = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_powerupscollected)
-                        tab5.pos = locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_position)
+                        tab5.lives = locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_playerlives)
+                        tab5.score = locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_score)
+                        tab5.kills = locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_kills)
+                        tab5.powerupsCollected = locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_powerupscollected)
+                        tab5.pos = locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_entities + tab5.playerShipIndex + values.l.arcadegames_ggsm_position)
 
-                        tab5.timePlayed = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_playtime)
+                        tab5.timePlayed = MISC.GET_GAME_TIMER() - locals.get_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_playtime)
                         tab5.timePlayedFormatted = yu.format_seconds(tab5.timePlayed)
 
                         if tab5.godmode then
@@ -3491,28 +3491,28 @@ do -- SECTION Thing
                         end
 
                         if tab5.heal then
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_hp, 4)
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_entities + tab5.playerShipIndex + values.l.arcadegames_ggsm_hp, 4)
                             tab5.heal = false
                         end
 
                         if tab5.weapon ~= nil then
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_entities + tab5.playerShipIndex + SussySpt.p.l.arcadegames_ggsm_weapontype, tab5.weapon + 1)
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_entities + tab5.playerShipIndex + values.l.arcadegames_ggsm_weapontype, tab5.weapon + 1)
                             tab5.weapon = nil
                         end
 
                         if tab5.powerup ~= nil then
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_weaponslot + (tab5.powerupSlot + 1), SussySpt.p.l.arcadegames_ggsm_powerups[tab5.powerup + 1])
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_weaponslot + (tab5.powerupSlot + 1), values.l.arcadegames_ggsm_powerups[tab5.powerup + 1])
                             tab5.powerup = nil
                         end
 
                         if tab5.sector ~= nil then
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_sector, tab5.sector)
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_sector, tab5.sector)
                             tab5.sector = nil
                         end
                     end
                 end
 
-                tab5.render = function()
+                function tab5.render()
                     tasks.tasks.thing_arcade_games_ggsm = tab5.tick
 
                     if not tab5.scriptRunning then
@@ -3524,7 +3524,7 @@ do -- SECTION Thing
                         local newvalue, changed = ImGui.InputInt("Lives", tab5.lives)
                         if changed then
                             local value = math.max(1, math.min(100, newvalue))
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_playerlives, value)
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_playerlives, value)
                         end
                     end
 
@@ -3534,7 +3534,7 @@ do -- SECTION Thing
                         local newvalue, changed = ImGui.InputInt("Score", tab5.score)
                         if changed then
                             local value = math.max(0, math.min(9999999, newvalue))
-                            locals.set_int(tab5.script, SussySpt.p.l.arcadegames_ggsm_data + SussySpt.p.l.arcadegames_ggsm_stats + SussySpt.p.l.arcadegames_ggsm_score, value)
+                            locals.set_int(tab5.script, values.l.arcadegames_ggsm_data + values.l.arcadegames_ggsm_stats + values.l.arcadegames_ggsm_score, value)
                         end
                     end
 
@@ -3698,7 +3698,7 @@ do -- SECTION Thing
             end
         end
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.Button("Refresh") then
                 tasks.addTask(refresh)
             end
@@ -3839,19 +3839,19 @@ do -- SECTION Thing
                 [18] = "VEHICLE"
             }
 
-            a.tick = function()
+            function a.tick()
                 a.scriptRunning = yu.is_script_running_hash(a.scriptHashed)
             end
 
-            a.win = function(prize)
+            function a.win(prize)
                 if a.scriptRunning then
-                    locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize, prize)
-                    locals.set_int(a.script, SussySpt.p.l.lucky_wheel_win_state + SussySpt.p.l.lucky_wheel_prize_state, 11)
+                    locals.set_int(a.script, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize, prize)
+                    locals.set_int(a.script, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize_state, 11)
                 end
                 return a.scriptRunning
             end
 
-            tab4.render = function()
+            function tab4.render()
                 tasks.tasks.online_thing_casino_lucky_wheel = a.tick
 
                 if not a.scriptRunning then
@@ -3903,7 +3903,7 @@ do -- SECTION Thing
             end
             tasks.addTask(updateStoryMission)
 
-            tab4.render = function()
+            function tab4.render()
                 local smr = yu.rendering.renderList(storyMissions, storyMission, "hbo_casinoresort_sm", "Story mission")
                 if smr.changed then
                     storyMission = smr.key
@@ -4022,7 +4022,7 @@ do -- SECTION Stats
         end
         tasks.addTask(refresh)
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.SmallButton("Refresh") then
                 tasks.addTask(refresh)
             end
@@ -4184,7 +4184,7 @@ do -- SECTION Stats
             if SussySpt.dev and ImGui.TreeNodeEx("Bounty") then
                 if ImGui.SmallButton("Remove bounty") then
                     tasks.addTask(function()
-                        globals.set_int(SussySpt.p.bounty_self_time, 2880000)
+                        globals.set_int(values.g.bounty_self_time, 2880000)
                     end)
                 end
 
@@ -4305,7 +4305,7 @@ do -- SECTION Stats
             yu.notify(1, applied.." stat/s where applied", "Online->Stats->Loader")
         end
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.Button("Load") then
                 yu.rif(load)
             end
@@ -4366,7 +4366,7 @@ do -- ANCHOR Chatlog
     yu.rendering.setCheckboxChecked("online_chatlog_console", cfg.get("chatlog_console", true))
     yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", cfg.get("chatlog_timestamp", true))
 
-    tab2.render = function()
+    function tab2.render()
         if cfg.set("chatlog_enabled", yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled")) then
             ImGui.Spacing()
             cfg.set("chatlog_console", yu.rendering.renderCheckbox("Log to console", "online_chatlog_console"))
@@ -4419,7 +4419,7 @@ do -- ANCHOR CMM
         end)
     end
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("Works best when low ping / session host")
 
         for k, v in pairs(a.apps) do
@@ -4484,7 +4484,7 @@ do -- SECTION Unlocks
             }
         }
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.Button("Unlock LSCarMeet podium prize") then
                 tasks.addTask(function()
                     local mpx = yu.mpx()
@@ -4746,7 +4746,7 @@ do -- SECTION Unlocks
             crank_checking = false
         }
 
-        a.getRankFromRP = function(rp)
+        function a.getRankFromRP(rp)
             local rank = 0
             for k, v in pairs(yu.cache.xp_to_rank) do
                 if v < rp then
@@ -4781,7 +4781,7 @@ do -- SECTION Unlocks
         end
         yu.rif(refresh)
 
-        tab3.render = function()
+        function tab3.render()
             do -- ANCHOR Rank
                 ImGui.Text("Rank")
                 ImGui.SameLine()
@@ -4893,7 +4893,7 @@ do -- SECTION Unlocks
     do -- ANCHOR Player
         local tab3 = SussySpt.rendering.newTab("Player")
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.SmallButton("Allow gender change") then
                 tasks.addTask(function()
                     stats.set_int(yu.mpx("ALLOW_GENDER_CHANGE"), 52)
@@ -5018,7 +5018,7 @@ do -- SECTION Unlocks
     do -- ANCHOR Weapons
         local tab3 = SussySpt.rendering.newTab("Weapons")
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.SmallButton("Unlock guns") then
                 tasks.addTask(function()
                     local mpx = yu.mpx()
@@ -5107,7 +5107,7 @@ do -- SECTION Unlocks
     do -- ANCHOR Vehicles
         local tab3 = SussySpt.rendering.newTab("Vehicles")
 
-        tab3.render = function()
+        function tab3.render()
             if ImGui.SmallButton("Unlock xmas liveries") then
                 tasks.addTask(function()
                     stats.set_int("MPPLY_XMASLIVERIES", -1)
@@ -5225,7 +5225,7 @@ do -- ANCHOR Session
 
     tab2.should_display = SussySpt.getDev
 
-    tab2.render = function()
+    function tab2.render()
         yu.rendering.renderCheckbox("Create ghost session", "online_session_ghostsess", function(state)
             if state then
                 NETWORK.NETWORK_START_SOLO_TUTORIAL_SESSION()
@@ -5291,7 +5291,7 @@ do -- ANCHOR Money
         moneyMade = 0
     }
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("This feature is unstable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
         ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected")
         ImGui.Spacing()

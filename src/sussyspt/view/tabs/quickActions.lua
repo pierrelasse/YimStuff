@@ -1,6 +1,6 @@
 local tab = SussySpt.rendering.newTab("Quick Actions")
 
-tab.render = function()
+function tab.render()
     if ImGui.Button("Save") then
         SussySpt.qa.config.save()
     end

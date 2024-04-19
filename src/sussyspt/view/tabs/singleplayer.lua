@@ -1,4 +1,4 @@
-local tasks = require("../tasks")
+local tasks = require("../../tasks")
 
 local tab = SussySpt.rendering.newTab("Singleplayer")
 
@@ -21,7 +21,7 @@ do -- ANCHOR Cash
     end
     yu.rif(refresh)
 
-    tab2.render = function()
+    function tab2.render()
         for k, v in pairs(a.cash) do
             local resp = yu.rendering.input("int", {
                 label = a.characters[k],

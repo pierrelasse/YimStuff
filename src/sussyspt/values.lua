@@ -6,6 +6,7 @@ return {
         agency_instantfinish1 = 38397,
         agency_instantfinish2 = 39772,
         agency_cooldown = 32500, -- CLO_FXM_L_3_5
+        agency_maxpayout = 262145 + 32466,
 
         autoshop_payout1 = 31602,
         autoshop_payout2 = 31610,
@@ -16,7 +17,9 @@ return {
         apartment_cuts_self = 1930201 + 3008 + 1,
         apartment_replay = 2635522, -- HEIST_REPLAY_FIN
 
-        bullshark_stage = 2672741 + 3694
+        bullshark_stage = 2672741 + 3694,
+
+        bounty_self_time = 1 + 2359296 + 5150 + 13
     },
     l = { -- ANCHOR Locals
         apartment_fleeca_hackstage = 11776 + 24,
@@ -51,9 +54,5 @@ return {
     },
     t = { -- ANCHOR Tunables
         salvageyard_week = 488207018
-    },
-
-    bounty_self_time = 1 + 2359296 + 5150 + 13,
-
-    agency_maxpayout = 262145 + 32466
+    }
 }

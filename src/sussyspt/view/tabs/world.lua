@@ -1,5 +1,5 @@
-local tasks = require("../tasks")
-local cfg = require("./config")
+local tasks = require("../../tasks")
+local cfg = require("../../config")
 
 local tab = SussySpt.rendering.newTab("World")
 
@@ -27,7 +27,7 @@ do -- ANCHOR Object Spawner
         end)
     end
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.BeginGroup()
 
         ImGui.Text("Spawner")
@@ -143,7 +143,7 @@ do -- ANCHOR Entities
 
     tab2.should_display = SussySpt.getDev
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.Text("This is not finished!")
 
         ImGui.Spacing()
@@ -188,7 +188,7 @@ do -- ANCHOR Particle Spawner
         effect = "ent_sht_petrol_fire"
     }
 
-    tab2.render = function()
+    function tab2.render()
         ImGui.PushItemWidth(a.awidth)
 
         local dict, _ = ImGui.InputTextWithHint("Dict", "ex. core", a.dict, 32)
@@ -243,7 +243,7 @@ do -- ANCHOR Peds
         end
     end)
 
-    tab2.render = function()
+    function tab2.render()
         yu.rendering.renderCheckbox("Make enemies blind", "world_peds_pedsblind")
     end
 
@@ -283,7 +283,7 @@ do -- ANCHOR Other
         SussySpt.debug((enabled and "Blocked " or "Found ")..tostring(exp_count).." explosion shakes")
     end)
 
-    tab2.render = function()
+    function tab2.render()
         yu.rendering.renderCheckbox("Block explosion shake", "world_other_blockexplosionshake", function(state)
             enabled = cfg.set("world_blockexplosionshake", state)
 

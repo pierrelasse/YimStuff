@@ -8,8 +8,8 @@ SussySpt.chatlog = {
         local text = ""
         local newline = ""
         local doTimestamp = yu.rendering.isCheckboxChecked("online_chatlog_log_timestamp")
-        for k, v in pairs(SussySpt.chatlog.messages) do
-            text = text..newline..(doTimestamp and ("["..v[4].."] ") or "")..v[2]..": "..v[3]
+        for _, message in pairs(SussySpt.chatlog.messages) do
+            text = text..newline..(doTimestamp and ("["..message[4].."] ") or "")..message[2]..": "..message[3]
             newline = "\n"
         end
 
