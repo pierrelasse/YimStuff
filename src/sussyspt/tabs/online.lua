@@ -1,4 +1,5 @@
 local tasks = require("../tasks")
+local cfg = require("./config")
 
 local tab = SussySpt.rendering.newTab("Online")
 
@@ -4361,19 +4362,19 @@ end -- !SECTION
 do -- ANCHOR Chatlog
     local tab2 = SussySpt.rendering.newTab("Chatlog")
 
-    yu.rendering.setCheckboxChecked("online_chatlog_enabled", SussySpt.cfg.get("chatlog_enabled", true))
-    yu.rendering.setCheckboxChecked("online_chatlog_console", SussySpt.cfg.get("chatlog_console", true))
-    yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", SussySpt.cfg.get("chatlog_timestamp", true))
+    yu.rendering.setCheckboxChecked("online_chatlog_enabled", cfg.get("chatlog_enabled", true))
+    yu.rendering.setCheckboxChecked("online_chatlog_console", cfg.get("chatlog_console", true))
+    yu.rendering.setCheckboxChecked("online_chatlog_log_timestamp", cfg.get("chatlog_timestamp", true))
 
     tab2.render = function()
-        if SussySpt.cfg.set("chatlog_enabled", yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled")) then
+        if cfg.set("chatlog_enabled", yu.rendering.renderCheckbox("Enabled", "online_chatlog_enabled")) then
             ImGui.Spacing()
-            SussySpt.cfg.set("chatlog_console", yu.rendering.renderCheckbox("Log to console", "online_chatlog_console"))
+            cfg.set("chatlog_console", yu.rendering.renderCheckbox("Log to console", "online_chatlog_console"))
         end
 
         if SussySpt.chatlog.text ~= nil then
             if ImGui.TreeNodeEx("Logs") then
-                SussySpt.cfg.set("chatlog_timestamp", yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog))
+                cfg.set("chatlog_timestamp", yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog))
 
                 do
                     local x, y = ImGui.GetContentRegionAvail()

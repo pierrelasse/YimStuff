@@ -1,4 +1,5 @@
 local tasks = require("./tasks")
+local cfg = require("./config")
 
 SussySpt.qa = {}
 
@@ -144,7 +145,7 @@ do -- SECTION Config
     }
 
     SussySpt.qa.config.load = function()
-        local sort = SussySpt.cfg.get("qa_sort")
+        local sort = cfg.get("qa_sort")
         if sort == nil then
             sort = yu.copy_table(SussySpt.qa.config.default)
         end
@@ -156,11 +157,11 @@ do -- SECTION Config
             return
         end
         if table.compare(SussySpt.qa.config.default, SussySpt.qa.config.sort) then
-            SussySpt.cfg.set("qa_sort", nil)
+            cfg.set("qa_sort", nil)
         else
-            SussySpt.cfg.set("qa_sort", SussySpt.qa.config.sort)
+            cfg.set("qa_sort", SussySpt.qa.config.sort)
         end
-        SussySpt.cfg.save()
+        cfg.save()
     end
 
     SussySpt.qa.config.load()

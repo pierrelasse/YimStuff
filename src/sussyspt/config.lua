@@ -1,23 +1,20 @@
 if io == nil or io.open == nil then
-    log.warning("Error: Could not access io.open")
+    log.warning("Fatal: Unable to access io.open")
     return
 end
 
--- FIXME: Fix SussySpt not existing?
--- SussySpt.debug("Loading config system")
-
 local cfg = {file = "sussyspt", changed = false, lastAutosave = os.time()}
 
-cfg.has = function(path) return cfg.data ~= nil and cfg.data[path] ~= nil end
+function cfg.has(path) return cfg.data ~= nil and cfg.data[path] ~= nil end
 
-cfg.get = function(path, default)
+function cfg.get(path, default)
     if cfg.data == nil then error("No config data is present") end
     local v = cfg.data[path]
     if v == nil then return default end
     return v
 end
 
-cfg.set = function(path, value, setchanged)
+function cfg.set(path, value, setchanged)
     if cfg.data == nil then return value end
 
     if cfg.data[path] ~= value then
@@ -28,7 +25,7 @@ cfg.set = function(path, value, setchanged)
     return value
 end
 
-cfg.save = function()
+function cfg.save()
     cfg.changed = false
 
     local content = yu.json.encode(cfg.data)
@@ -49,7 +46,7 @@ cfg.save = function()
     end
 end
 
-cfg.autosave = function()
+function cfg.autosave()
     if not cfg.changed or cfg.data == nil then return end
 
     local time = os.time()
@@ -63,20 +60,23 @@ cfg.autosave = function()
     end
 end
 
-local f = io.open("sussyspt", "r")
-if f ~= nil then
-    local content = f:read("*all")
-    if type(content) == "string" and
-        (content:startswith("{") or content:startswith("[")) then
-        cfg.data = yu.json.decode(content)
-        -- SussySpt.debug("Config loaded")
+function cfg.load()
+    SussySpt.debug("Loading config system")
+    local f = io.open("sussyspt", "r")
+    if f ~= nil then
+        local content = f:read("*all")
+        if type(content) == "string" and
+            (content:startswith("{") or content:startswith("[")) then
+            cfg.data = yu.json.decode(content)
+            -- SussySpt.debug("Config loaded")
+        else
+            log.warning("Unable to load config")
+        end
     else
-        log.warning("Unable to load config")
+        log.info("You can ignore the warning above")
+        cfg.data = {}
+        cfg.save()
     end
-else
-    log.info("You can ignore the warning above")
-    cfg.data = {}
-    cfg.save()
 end
 
 return cfg

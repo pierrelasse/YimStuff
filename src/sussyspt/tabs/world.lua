@@ -1,4 +1,5 @@
 local tasks = require("../tasks")
+local cfg = require("./config")
 
 local tab = SussySpt.rendering.newTab("World")
 
@@ -262,7 +263,7 @@ do -- ANCHOR Other
         }
     }
 
-    yu.rendering.setCheckboxChecked("world_other_blockexplosionshake", SussySpt.cfg.get("world_blockexplosionshake", false))
+    yu.rendering.setCheckboxChecked("world_other_blockexplosionshake", cfg.get("world_blockexplosionshake", false))
 
     yu.rif(function()
         CExplosionInfoManager = memory.scan_pattern(a.blockexplosionshake.pattern):add(3):rip()
@@ -284,7 +285,7 @@ do -- ANCHOR Other
 
     tab2.render = function()
         yu.rendering.renderCheckbox("Block explosion shake", "world_other_blockexplosionshake", function(state)
-            enabled = SussySpt.cfg.set("world_blockexplosionshake", state)
+            enabled = cfg.set("world_blockexplosionshake", state)
 
             local i = 0
             for k, v in ipairs(a.blockexplosionshake.patch_registry) do

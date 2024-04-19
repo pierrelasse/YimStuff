@@ -13,27 +13,22 @@
 
     local cfg = require("./config")
     if cfg == nil then return end
-    SussySpt.cfg = cfg
-
-    yu.rendering.setCheckboxChecked("debug_console", SussySpt.cfg.get("debug_console", false))
 
     SussySpt.dev = api.versiontype == 2
     SussySpt.getDev = function() return SussySpt.dev end
 
-    do -- SECTION Debug
-        SussySpt.debugtext = ""
-
-        SussySpt.debug = function(s)
-            if type(s) == "string" then
-                SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
-                if yu.rendering.isCheckboxChecked("debug_console") then
-                    log.debug(s)
-                end
+    SussySpt.debugtext = ""
+    SussySpt.debug = function(s)
+        if type(s) == "string" then
+            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
+            if yu.rendering.isCheckboxChecked("debug_console") then
+                log.debug(s)
             end
         end
+    end
 
-        SussySpt.debug("Initialized debug logger")
-    end -- !SECTION
+    cfg.load()
+    yu.rendering.setCheckboxChecked("debug_console", cfg.get("debug_console", false))
 
     SussySpt.debug("Loading SussySpt v"..api.version.." ["..api.versionid.."] build "..api.build)
 
@@ -47,7 +42,7 @@
 
     SussySpt.p = require("./values")
 
-    require("./rendering")
+    local renderManager = require("./view/renderManager")
 
     do -- SECTION Disable controls
         SussySpt.disableControls = 0
@@ -58,32 +53,6 @@
         end
     end -- !SECTION
 
-    SussySpt.mainLoop = function(rs) -- ANCHOR mainLoop
-        while true do
-            rs:yield()
-
-            SussySpt.in_online = NETWORK.NETWORK_IS_IN_SESSION() == true
-
-            if SussySpt.invisible == true then
-                SussySpt.ensureVis(false, yu.ppid(), yu.veh())
-            end
-
-            if SussySpt.disableControls > 0 then
-                SussySpt.disableControls = SussySpt.disableControls - 1
-
-                for i = 0, 2 do
-                    for i2 = 0, 360 do
-                        PAD.DISABLE_CONTROL_ACTION(i, i2, true)
-                    end
-                end
-            end
-
-            tasks.runAll(rs)
-
-            SussySpt.cfg.autosave()
-        end
-    end
-
     SussySpt.requireScript = function(name)
         if yu.is_script_running(name) == false then
             yu.notify(3, "Script '"..name.."' is not running!", "Script Requirement")
@@ -91,8 +60,6 @@
         end
         return true
     end
-
-
 
     do -- SECTION init
         SussySpt.rendercb = {}
@@ -135,10 +102,10 @@
         end
 
         SussySpt.debug("Registering mainloop")
-        yu.rif(SussySpt.mainLoop)
+        yu.rif(require("./gameloop"))
 
         SussySpt.debug("Adding render callback")
-        SussySpt.tab:add_imgui(SussySpt.render)
+        SussySpt.tab:add_imgui(renderManager.render)
 
         require("./categories")
 

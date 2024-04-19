@@ -1,5 +1,6 @@
 local tasks = require("../tasks")
 local version = require("./version")
+local cfg = require("./config")
 
 local tab = SussySpt.rendering.newTab("Config")
 
@@ -23,7 +24,7 @@ do -- ANCHOR Info
 
         if SussySpt.debugtext ~= "" and ImGui.TreeNodeEx("Debug log") then
             yu.rendering.renderCheckbox("Log to console", "debug_console", function(state)
-                SussySpt.cfg.set("debug_console", state)
+                cfg.set("debug_console", state)
             end)
 
             local x, y = ImGui.GetContentRegionAvail()
@@ -40,17 +41,13 @@ do -- ANCHOR Info
         yu.rendering.tooltip("This just enables testing and not serious things")
 
         if SussySpt.dev then
-            if SussySpt.cfg.data ~= nil then
+            if cfg.data ~= nil then
                 ImGui.Spacing()
                 if ImGui.Button("Unload config") then
-                    SussySpt.cfg.save()
-                    SussySpt.cfg.data = nil
+                    cfg.save()
+                    cfg.data = nil
                 end
             end
-
-            ImGui.Spacing()
-
-            yu.rendering.renderCheckbox("Display times", "dev_times")
 
             ImGui.Spacing()
 
@@ -81,7 +78,7 @@ do -- ANCHOR Theme
                 if ImGui.Selectable(k, false) then
                     SussySpt.rendering.theme = k
                     if k ~= "Custom" then
-                        SussySpt.cfg.set("theme", k)
+                        cfg.set("theme", k)
                     end
                     SussySpt.debug("Set theme to '"..k.."'")
                 end
@@ -201,7 +198,7 @@ do -- ANCHOR Invisible
     local tab2 = SussySpt.rendering.newTab("Invisible")
 
     local a = {
-        key = SussySpt.cfg.get("invisible_key", "L")
+        key = cfg.get("invisible_key", "L")
     }
 
     local makingVehicleInivs = false
@@ -248,10 +245,10 @@ do -- ANCHOR Invisible
     end
     bindHotkey(yu.keys[a.key])
 
-    yu.rendering.setCheckboxChecked("invisible_hotkey", SussySpt.cfg.get("invisible_hotkey", false))
-    yu.rendering.setCheckboxChecked("invisible_log", SussySpt.cfg.get("invisible_log", false))
-    yu.rendering.setCheckboxChecked("invisible_self", SussySpt.cfg.get("invisible_self", true))
-    yu.rendering.setCheckboxChecked("invisible_vehicle", SussySpt.cfg.get("invisible_vehicle", true))
+    yu.rendering.setCheckboxChecked("invisible_hotkey", cfg.get("invisible_hotkey", false))
+    yu.rendering.setCheckboxChecked("invisible_log", cfg.get("invisible_log", false))
+    yu.rendering.setCheckboxChecked("invisible_self", cfg.get("invisible_self", true))
+    yu.rendering.setCheckboxChecked("invisible_vehicle", cfg.get("invisible_vehicle", true))
 
     tab2.render = function()
         yu.rendering.renderCheckbox("Enabled", "invisible", function(state)
@@ -264,13 +261,13 @@ do -- ANCHOR Invisible
 
         ImGui.Spacing()
 
-        SussySpt.cfg.set("invisible_hotkey", yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey"))
-        SussySpt.cfg.set("invisible_log", yu.rendering.renderCheckbox("Log", "invisible_log"))
+        cfg.set("invisible_hotkey", yu.rendering.renderCheckbox("Hotkey enabled", "invisible_hotkey"))
+        cfg.set("invisible_log", yu.rendering.renderCheckbox("Log", "invisible_log"))
 
         ImGui.Spacing()
 
-        SussySpt.cfg.set("invisible_self", yu.rendering.renderCheckbox("Self", "invisible_self"))
-        SussySpt.cfg.set("invisible_vehicle", yu.rendering.renderCheckbox("Vehicle", "invisible_vehicle"))
+        cfg.set("invisible_self", yu.rendering.renderCheckbox("Self", "invisible_self"))
+        cfg.set("invisible_vehicle", yu.rendering.renderCheckbox("Vehicle", "invisible_vehicle"))
 
         ImGui.Spacing()
 
@@ -280,7 +277,7 @@ do -- ANCHOR Invisible
                 if ImGui.Selectable(k, false) then
                     a.key = k
                     bindHotkey(yu.keys[k])
-                    SussySpt.cfg.set("invisible_key", k)
+                    cfg.set("invisible_key", k)
                 end
             end
             ImGui.EndCombo()
