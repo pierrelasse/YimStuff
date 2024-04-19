@@ -1,24 +1,15 @@
 # YimStuff
-> yimutils, a libary for script developers. SussySpt, a script for gta online with tons of features
+> SussySpt is a script for gta online with tons of features.<br />
+> Yimutils, a libary for script developers
 
 The scripts are made for [YimMenu](https://github.com/YimMenu/YimMenu).
 
 ## Table of contents
 
- * [Quick installation](#quick-installation) (of SussySpt)
- * [SussySpt](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySpt.md) (list of all features)
- * [yimutils](https://github.com/pierrelasse/YimStuff/blob/master/docs/yimutils.md) (documentation for developers)
+ * [SussySpt installation](#https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptInstallation.md)
  * [Feedback](#feedback)
+ * [Build everything yourself](#build-it-yourself)
  * [Other](#other)
-
-
-## Quick installation
-
-This guide will help you install SussySpt.
-- Download [SussySpt.Merged.lua](https://github.com/pierrelasse/YimStuff/releases/download/v1.3.18/SussySpt.Merged.lua) and put it into your scripts folder (`%appdata%/YimMenu/scripts`)
-- Go to `Settings->Lua Scripts` in YimMenu and press the `Reload All` button
-- Enjoy. See [Table of contents](#table-of-contents) for more things to look at.
-
 
 ## Feedback
 
@@ -30,6 +21,18 @@ You can optionally contact me on discord `dcistdreck`.
 If you like the project and want to let me and others know, you can star the repo! ⭐
 
 If you don't know if you should make a issue or not. Just go ahead and make one. ;)
+
+## Build it yourself
+
+To build the final files yourself,
+open a terminal (command prompt) inside of the project folder,
+and execute the following command to build SussySpt.
+- `Windows`: `t.bat build` or `t.bat build --release`
+- `Linux or related`: `./t.sh build` or `./t.sh build --release`
+
+<br />
+
+You can find the final file located at `build/libs/SussySpt.lua`.
 
 ## Other
 

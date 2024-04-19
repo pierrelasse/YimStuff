@@ -1,3 +1,11 @@
+#! ==============================================
+#! = This is outdated and needs to be remade.   =
+#! = If you want to know what functions exist,  =
+#! = then you need to look directly at the file =
+#! = in src/yimutils/main.lua                   =
+#! ==============================================
+
+
 # Utils
 shc(condition: boolean, [trueValue], [falseValue]) : any
     Returns: trueValue if condition is true and falseValue if condition is not true
