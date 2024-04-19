@@ -1,6 +1,6 @@
 name: Bug Report
-description: 'Submit a Bug Report'
-title: '[Bug] '
+description: "Submit a Bug Report"
+title: "[Bug] "
 labels: bug
 body:
   - type: textarea
@@ -29,7 +29,7 @@ body:
       label: Logs and Screenshots (if applicable)
       description: |
         Include the cout.log file from YimMenu.
-        You can find it here: '%appdata%/YimMenu/cout.log'.
+        You can find it at "%appdata%/YimMenu/cout.log".
         Tip: You can drag and drop files here for upload.
     validations:
       required: false

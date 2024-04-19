@@ -1,13 +1,12 @@
 # Contributing to YimStuff
 
 Thank you for your interest in contributing to this repository!
-We appreciate your help in making this project better.
 
 You can contribute to YimStuff in several ways:
 
-- [Creating Issues](#creating-issues)
-- [Pull Requests](#pull-requests)
-- [Contacting](#contacting)
+- [Creating an issue](#creating-issues) to report anything.
+- [Making a pull Requests](#pull-requests) to make changes yourself.
+- [Contacting](#contacting) to contact bruh.
 
 ## Creating Issues
 
@@ -42,17 +41,7 @@ By following these guidelines, you can help maintain code consistency and qualit
 
 ## Formatting Style
 
-### Indents
-Use 4 spaces for indentation in your Lua code.
-
-```lua
-function exampleFunction()
-    if condition then
-        -- Four spaces of indentation
-        print("Indented text")
-    end
-end
-```
+Basic things are handled by the editorconfig extension.
 
 ### Merging Strings
 When concatenating strings using the `..` operator, avoid spaces before and after it to save space and maintain a clean code appearance:
@@ -62,6 +51,5 @@ local concatenatedString = "string1".."string2"
 ```
 
 # Your own version
-If you want to make changes to yimutils.lua, just go ahead.
 
-After making changes to SussySpt.lua, you need to run `t update` to have it updated.
+Coming soon mh.

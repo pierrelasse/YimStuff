@@ -1,6 +1,6 @@
 name: Other
 description: Something else
-title: "[Other]: "
+title: "[Other] "
 labels: other
 body:
 - type: textarea
