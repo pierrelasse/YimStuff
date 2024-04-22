@@ -73,7 +73,6 @@ function cfg.load()
             log.warning("Unable to load config")
         end
     else
-        log.info("You can ignore the warning above")
         cfg.data = {}
         cfg.save()
     end

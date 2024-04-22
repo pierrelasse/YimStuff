@@ -1,5 +1,3 @@
--- local cfg = require("./config")
-
 SussySpt.debug("Initializing chatlog")
 
 SussySpt.chatlog = {
@@ -26,8 +24,6 @@ event.register_handler(menu_event.ChatMessageReceived, function(player_id, chat_
             chat_message,
             os.date("%H:%M:%S")
         }
-
-        -- cfg.set("chatlog_messages", SussySpt.chatlog.messages, false)
 
         if yu.rendering.isCheckboxChecked("online_chatlog_console") then
             log.info("[CHAT] "..name..": "..chat_message)

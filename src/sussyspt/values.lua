@@ -19,7 +19,9 @@ return {
 
         bullshark_stage = 2672741 + 3694,
 
-        bounty_self_time = 1 + 2359296 + 5150 + 13
+        bounty_self_time = 1 + 2359296 + 5150 + 13,
+
+        transaction_base = 4537212
     },
     l = { -- ANCHOR Locals
         apartment_fleeca_hackstage = 11776 + 24,

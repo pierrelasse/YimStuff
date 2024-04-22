@@ -1,20 +1,21 @@
 (function()
     print = log.info
-    SussySpt = {}
-
-    local api = require("./version")
 
     if require("./yimutilsLoader") ~= true then return end
 
-    if not yu.is_num_between(api.versionType, 1, 2) then
+    local version = require("./version")
+
+    if not yu.is_num_between(version.versionType, 1, 2) then
         log.warning("Fatal: Could not start due to an invalid version type. Are you using a source file?")
-        return api
+        return version
     end
+
+    SussySpt = {}
 
     local cfg = require("./config")
     if cfg == nil then return end
 
-    SussySpt.dev = api.versionType == 2
+    SussySpt.dev = version.versionType == 2
     function SussySpt.getDev() return SussySpt.dev end
 
     SussySpt.debugtext = ""
@@ -30,7 +31,7 @@
     cfg.load()
     yu.rendering.setCheckboxChecked("debug_console", cfg.get("debug_console", false))
 
-    SussySpt.debug("Loading SussySpt v"..api.version.." ["..api.versionId.."] build "..api.build)
+    SussySpt.debug("Loading SussySpt v"..version.version.." ["..version.versionId.."] build "..version.build)
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
@@ -38,7 +39,7 @@
 
     SussySpt.in_online = false
 
-    local renderManager = require("./view/renderManager")
+    local renderManager = require("./rendering/renderManager")
 
     do -- SECTION Disable controls
         SussySpt.disableControls = 0
@@ -68,11 +69,9 @@
 
     require("./chatlog")
 
-    require("./view/tabs")
+    require("./rendering/tabs")
 
     require("./qa")
-
-    -- require("./esptest")
 
     do -- ANCHOR Verify tabs
         local tabSize = 0
@@ -105,7 +104,5 @@
     require("./categories")
 
     SussySpt.debug("Loaded successfully!")
-    yu.notify(1, "Loaded v"..api.version.." ["..api.versionId.."]!", "Welcome")
-
-    return api
+    yu.notify(1, "Loaded v"..version.version.." ["..version.versionId.."]!", "Welcome")
 end)()

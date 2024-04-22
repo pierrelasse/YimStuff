@@ -1,21 +1,21 @@
 local values = require("./values")
 
-SussySpt.qa.actions = {
+local actions = {
     -- { Func, DisplayName, [Description], [Cond] }
 }
 
 function SussySpt.qa.onlineCond() return SussySpt.in_online end
 
-SussySpt.qa.actions.heal = { -- ANCHOR heal
+actions.heal = { -- ANCHOR heal
     function()
-        SussySpt.qa.actions.refillHealth[1]()
-        SussySpt.qa.actions.refillArmor[1]()
+        actions.refillHealth[1]()
+        actions.refillArmor[1]()
     end,
     "Heal",
     "Refills your health and armor"
 }
 
-SussySpt.qa.actions.refillHealth = { -- ANCHOR refillHealth
+actions.refillHealth = { -- ANCHOR refillHealth
     function()
         ENTITY.SET_ENTITY_HEALTH(yu.ppid(), PED.GET_PED_MAX_HEALTH(yu.ppid()), 0, 0)
     end,
@@ -23,7 +23,7 @@ SussySpt.qa.actions.refillHealth = { -- ANCHOR refillHealth
     "Refills your health"
 }
 
-SussySpt.qa.actions.refillArmor = { -- ANCHOR refillArmor
+actions.refillArmor = { -- ANCHOR refillArmor
     function()
         PED.SET_PED_ARMOUR(yu.ppid(), PLAYER.GET_PLAYER_MAX_ARMOUR(yu.pid()))
     end,
@@ -31,7 +31,7 @@ SussySpt.qa.actions.refillArmor = { -- ANCHOR refillArmor
     "Refills your armor"
 }
 
-SussySpt.qa.actions.clearWantedLevel = { -- ANCHOR clearWantedLevel
+actions.clearWantedLevel = { -- ANCHOR clearWantedLevel
     function()
         PLAYER.CLEAR_PLAYER_WANTED_LEVEL(yu.pid())
     end,
@@ -39,7 +39,7 @@ SussySpt.qa.actions.clearWantedLevel = { -- ANCHOR clearWantedLevel
     "Sets your current wanted level to 0"
 }
 
-SussySpt.qa.actions.ri2 = { -- ANCHOR ri2
+actions.ri2 = { -- ANCHOR ri2
     function()
         local ppid = yu.ppid()
         INTERIOR.REFRESH_INTERIOR(INTERIOR.GET_INTERIOR_FROM_ENTITY(ppid))
@@ -50,7 +50,7 @@ SussySpt.qa.actions.ri2 = { -- ANCHOR ri2
     "Refreshes the interior you are currently in\nClears the ped's tasks\n\nThis is good for when you can't see anything"
 }
 
-SussySpt.qa.actions.skipCutscene = { -- ANCHOR skipCutscene
+actions.skipCutscene = { -- ANCHOR skipCutscene
     function()
         CUTSCENE.STOP_CUTSCENE_IMMEDIATELY()
         if NETWORK.NETWORK_IS_IN_MP_CUTSCENE() then
@@ -61,14 +61,14 @@ SussySpt.qa.actions.skipCutscene = { -- ANCHOR skipCutscene
     "There are some unskippable \"cutscenes\" where this doesn't work"
 }
 
-SussySpt.qa.actions.removeBlackscreen = { -- ANCHOR removeBlackscreen
+actions.removeBlackscreen = { -- ANCHOR removeBlackscreen
     function()
         CAM.DO_SCREEN_FADE_IN(0)
     end,
     "Remove blackscreen"
 }
 
-SussySpt.qa.actions.repairVehicle = { -- ANCHOR repairVehicle
+actions.repairVehicle = { -- ANCHOR repairVehicle
     function()
         local veh = yu.veh()
         if veh ~= nil and entities.take_control_of(veh) then
@@ -80,7 +80,7 @@ SussySpt.qa.actions.repairVehicle = { -- ANCHOR repairVehicle
     "Repairs the vehicle.\nUse with caution because this closes doors and stuff"
 }
 
-SussySpt.qa.actions.stfu = { -- ANCHOR stfu
+actions.stfu = { -- ANCHOR stfu
     function()
         AUDIO.STOP_SCRIPTED_CONVERSATION(false)
     end,
@@ -88,7 +88,7 @@ SussySpt.qa.actions.stfu = { -- ANCHOR stfu
     "Tries to stop the blah blah from npcs"
 }
 
-SussySpt.qa.actions.instantBST = { -- ANCHOR instantBST
+actions.instantBST = { -- ANCHOR instantBST
     function()
         globals.set_int(values.g.bullshark_stage, 1)
     end,
@@ -97,7 +97,7 @@ SussySpt.qa.actions.instantBST = { -- ANCHOR instantBST
     SussySpt.qa.onlineCond
 }
 
-SussySpt.qa.actions.depositWallet = { -- ANCHOR depositWallet
+actions.depositWallet = { -- ANCHOR depositWallet
     function()
         local pi = yu.playerindex()
         local amount = MONEY.NETWORK_GET_VC_WALLET_BALANCE(pi)
@@ -113,7 +113,7 @@ SussySpt.qa.actions.depositWallet = { -- ANCHOR depositWallet
     SussySpt.qa.onlineCond
 }
 
-SussySpt.qa.actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
+actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
     function()
         STREAMING.STOP_PLAYER_SWITCH()
         SCRIPT.SHUTDOWN_LOADING_SCREEN()
@@ -126,3 +126,5 @@ SussySpt.qa.actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
     end,
     "Stop player switch"
 }
+
+return actions

@@ -1,6 +1,5 @@
 
 const fs = require("fs");
-const _path = require("path");
 
 
 function getMinify() {
@@ -56,15 +55,17 @@ module.exports = {
     },
 
     finish: (data) => {
-        let scriptsPath = expandEnvVars(parser.getLong("scriptsDir") || "%appdata%/YimMenu/scripts/");
-        if (fs.existsSync(scriptsPath)) {
-            while (scriptsPath.includes("\\")) scriptsPath = scriptsPath.replace("\\", "/");
+        if (!parser.hasShort("nocpy")) {
+            let scriptsPath = expandEnvVars(parser.getLong("scriptsDir") || "%appdata%/YimMenu/scripts/");
+            if (fs.existsSync(scriptsPath)) {
+                while (scriptsPath.includes("\\")) scriptsPath = scriptsPath.replace("\\", "/");
 
-            console.log(`\n> Copying final script to ${scriptsPath}`);
+                console.log(`\n> Copying final script to ${scriptsPath}`);
 
-            fs.writeFileSync(`${scriptsPath}/SussySpt.lua`, data);
+                fs.writeFileSync(`${scriptsPath}/SussySpt.lua`, data);
 
-            console.log("> Copied!");
+                console.log("> Copied!");
+            }
         }
     }
 };
