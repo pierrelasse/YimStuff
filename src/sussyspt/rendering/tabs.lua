@@ -1,6 +1,7 @@
 
 require("./tabs/online")
-require("./tabs/world")
+require("./tabs/qol")
 require("./tabs/singleplayer")
 require("./tabs/quickActions")
 require("./tabs/config")
+require("./tabs/dev")

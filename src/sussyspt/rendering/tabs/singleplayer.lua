@@ -45,4 +45,4 @@ do -- ANCHOR Cash
     tab.sub[1] = tab2
 end
 
-SussySpt.rendering.tabs[3] = tab
+SussySpt.rendering.tabs[4] = tab

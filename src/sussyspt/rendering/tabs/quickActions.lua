@@ -79,4 +79,4 @@ function tab.render()
     end
 end
 
-SussySpt.rendering.tabs[4] = tab
+SussySpt.rendering.tabs[5] = tab

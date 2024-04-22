@@ -11,136 +11,7 @@ function exports.register(tab)
         end
     end
 
-    do -- SECTION Apartment
-        local tab3 = SussySpt.rendering.newTab("Apartment")
 
-        local a = {
-            cuts15m = {
-                heists = {
-                    ["The Freeca Job"] = 7453,
-                    ["The Prison Break"] = 2142,
-                    ["The Humane Labs Raid"] = 1587,
-                    ["The Pacific Standard Job"] = 1000,
-                    ["Series A Funding"] = 2121
-                },
-                set = {
-                    crew = function(v)
-                        globals.set_int(values.g.apartment_cuts_other + 1, 100 - (v * 4))
-                        globals.set_int(values.g.apartment_cuts_other + 2, v)
-                        globals.set_int(values.g.apartment_cuts_other + 3, v)
-                        globals.set_int(values.g.apartment_cuts_other + 4, v)
-                    end,
-                    self = function(v)
-                        globals.set_int(values.g.apartment_cuts_self, v)
-                    end
-                }
-            }
-        }
-
-        do -- ANCHOR Preperations
-            local tab4 = SussySpt.rendering.newTab("Preperations")
-
-            function tab4.render()
-                if ImGui.Button("Complete preps") then
-                    tasks.addTask(function()
-                        stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
-                    end)
-                end
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Reset preps") then
-                    tasks.addTask(function()
-                        stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), 0)
-                    end)
-                end
-            end
-
-            tab3.sub[1] = tab4
-        end
-
-        do -- ANCHOR Extra
-            local tab4 = SussySpt.rendering.newTab("Extra")
-
-            function tab4.render()
-                if ImGui.Button("Unlock replay screen") then
-                    tasks.addTask(function()
-                        globals.set_int(values.g.apartment_replay, 27)
-                    end)
-                end
-                yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
-
-                if ImGui.Button("Instant finish (solo)") then
-                    tasks.addTask(function()
-                        local script = "fm_mission_controller"
-                        if SussySpt.requireScript(script) then
-                            locals.set_int(script, values.l.apartment_instantfinish1, 12)
-                            locals.set_int(script, values.l.apartment_instantfinish2, 99999)
-                            locals.set_int(script, values.l.apartment_instantfinish3, 99999)
-                        end
-                    end)
-                end
-
-                ImGui.Spacing()
-
-                ImGui.Text("Fleeca")
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Skip hack##fleeca") then
-                    tasks.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_int("fm_mission_controller", values.l.apartment_fleeca_hackstage, 7)
-                        end
-                    end)
-                end
-
-                ImGui.SameLine()
-
-                if ImGui.Button("Skip drill##fleeca") then
-                    tasks.addTask(function()
-                        if SussySpt.requireScript("fm_mission_controller") then
-                            locals.set_float("fm_mission_controller", values.l.apartment_fleeca_drillstage, 100)
-                        end
-                    end)
-                end
-            end
-
-            tab3.sub[2] = tab4
-        end
-
-        do -- ANCHOR Cuts
-            local tab4 = SussySpt.rendering.newTab("Cuts")
-
-            function tab4.render()
-                ImGui.Text("$15m cuts")
-                ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
-                ImGui.Text(" > Fleeca currently works the best")
-                ImGui.Spacing()
-
-                if a.cuts15mactive ~= true then
-                    for k, v in pairs(a.cuts15m.heists) do
-                        if ImGui.Button(k) then
-                            a.cuts15mactive = true
-                            yu.rif(function(rs)
-                                a.cuts15m.set.crew(v)
-
-                                a.cuts15m.set.self(v)
-
-                                a.cuts15mactive = nil
-                            end)
-                        end
-                    end
-                else
-                    ImGui.Text("Applying. Please wait")
-                end
-            end
-
-            tab3.sub[3] = tab4
-        end
-
-        tab2.sub[1] = tab3
-    end -- !SECTION
 
     do -- SECTION Agency
         local tab3 = SussySpt.rendering.newTab("Agency")
@@ -1005,68 +876,57 @@ function exports.register(tab)
                 end
                 yu.rendering.tooltip("This can make your game crash. Be careful")
 
-                ImGui.SameLine()
-
-                if ImGui.Button("Skip printing cutscene") then
-                    -- tasks.addTask(function()
-                    --     if locals.get_int("fm_mission_controller", 22032) == 4 then
-                    --         locals.set_int("fm_mission_controller", 22032, 5)
-                    --     end
-                    -- end)
-                end
-                yu.rendering.tooltip("Idfk what this is or what this does")
-
                 if ImGui.Button("Skip sewer tunnel cut") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020")
-                    --         and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
-                    --             or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
-                    --         locals.set_int("fm_mission_controller_2020", 28446, 6)
-                    --         yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020")
+                            and (locals.get_int("fm_mission_controller_2020", 28446) >= 3
+                                or locals.get_int("fm_mission_controller_2020", 28446) <= 6) then
+                            locals.set_int("fm_mission_controller_2020", 28446, 6)
+                            yu.notify("Skipped sewer tunnel cut (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip door hack") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020")
-                    --         and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
-                    --         locals.set_int("fm_mission_controller_2020", 54024, 5)
-                    --         yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020")
+                            and locals.get_int("fm_mission_controller_2020", 54024) ~= 4 then
+                            locals.set_int("fm_mission_controller_2020", 54024, 5)
+                            yu.notify("Skipped door hack (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 if ImGui.Button("Skip fingerprint hack") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020")
-                    --         and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
-                    --         locals.set_int("fm_mission_controller_2020", 23669, 5)
-                    --         yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020")
+                            and locals.get_int("fm_mission_controller_2020", 23669) == 4 then
+                            locals.set_int("fm_mission_controller_2020", 23669, 5)
+                            yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 ImGui.SameLine()
 
                 if ImGui.Button("Skip plasmacutter cut") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
-                    --         locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
-                    --         yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
+                            locals.set_float("fm_mission_controller_2020", 29685 + 3, 100)
+                            yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
+                        end
+                    end)
                 end
 
                 if ImGui.Button("Obtain the primary target") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
-                    --         locals.set_int("fm_mission_controller_2020", 29684, 5)
-                    --         locals.set_int("fm_mission_controller_2020", 29685, 3)
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 29684, 5)
+                            locals.set_int("fm_mission_controller_2020", 29685, 3)
+                        end
+                    end)
                 end
                 yu.rendering.tooltip("It works i guess but the object will not get changed")
 
@@ -1086,13 +946,13 @@ function exports.register(tab)
                 yu.rendering.tooltip("This is good")
 
                 if ImGui.Button("Instant finish") then
-                    -- tasks.addTask(function()
-                    --     if SussySpt.requireScript("fm_mission_controller_2020") then
-                    --         locals.set_int("fm_mission_controller_2020", 45450, 9)
-                    --         locals.set_int("fm_mission_controller_2020", 46829, 50)
-                    --         yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
-                    --     end
-                    -- end)
+                    tasks.addTask(function()
+                        if SussySpt.requireScript("fm_mission_controller_2020") then
+                            locals.set_int("fm_mission_controller_2020", 45450, 9)
+                            locals.set_int("fm_mission_controller_2020", 46829, 50)
+                            yu.notify("Idk if you should use this but i i capitan", "Cayo Perico Heist")
+                        end
+                    end)
                 end
                 yu.rendering.tooltip("This is really weird and only you get money i think")
 
@@ -1102,7 +962,7 @@ function exports.register(tab)
                     tasks.addTask(refreshExtra)
                 end
 
-                -- ImGui.PushItemWidth(390)
+                ImGui.PushItemWidth(390)
 
                 -- local lifesValue, lifesChanged = ImGui.SliderInt("Lifes", a.lifes, 0, 10)
                 -- yu.rendering.tooltip("Only works when you are playing alone (i think)")

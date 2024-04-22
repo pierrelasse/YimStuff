@@ -178,22 +178,6 @@ do -- ANCHOR Theme
     tab.sub[2] = tab2
 end
 
-do -- ANCHOR Weird ESP
-    local tab2 = SussySpt.rendering.newTab("Weird ESP")
-
-    function tab2.render()
-        ImGui.Text("This was just a test and is for now nothing real.")
-        ImGui.Text("And yes it is working but there is currently no way to render it above things using natives.")
-        ImGui.Spacing()
-        yu.rendering.renderCheckbox("Very cool skeleton esp enabled", "config_esp_enabled")
-        ImGui.Spacing()
-        ImGui.Spacing()
-        yu.rendering.renderCheckbox("Super cool rgb gamer spotlight", "config_esp_spotlight_enabled")
-    end
-
-    tab.sub[3] = tab2
-end
-
 do -- ANCHOR Invisible
     local tab2 = SussySpt.rendering.newTab("Invisible")
 
@@ -285,7 +269,9 @@ do -- ANCHOR Invisible
         ImGui.PopItemWidth()
     end
 
-    tab.sub[4] = tab2
+    tab.sub[3] = tab2
 end
 
-SussySpt.rendering.tabs[5] = tab
+require("./config/values").register(tab)
+
+SussySpt.rendering.tabs[1] = tab

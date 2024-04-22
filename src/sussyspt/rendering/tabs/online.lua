@@ -13,4 +13,4 @@ require("./online/unlocks").register(tab)
 require("./online/session").register(tab)
 require("./online/money").register(tab)
 
-SussySpt.rendering.tabs[1] = tab
+SussySpt.rendering.tabs[2] = tab

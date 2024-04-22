@@ -11,7 +11,7 @@ return {
         autoshop_payout1 = 31602,
         autoshop_payout2 = 31610,
 
-        autoshop_instantfinish1 = 48513 + 1,
+        autoshop_instantfinish1 = 48513, -- + 1,
         autoshop_instantfinish2 = 48513 + 1378 + 1,
         apartment_cuts_other = 1928233 + 1,
         apartment_cuts_self = 1930201 + 3008 + 1,

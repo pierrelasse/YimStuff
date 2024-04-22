@@ -16,12 +16,10 @@ end
 
 function cfg.set(path, value, setchanged)
     if cfg.data == nil then return value end
-
     if cfg.data[path] ~= value then
         cfg.data[path] = value
         cfg.changed = setchanged ~= false
     end
-
     return value
 end
 

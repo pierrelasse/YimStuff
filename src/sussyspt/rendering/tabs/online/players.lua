@@ -2,8 +2,8 @@ local tasks = require("../../../tasks")
 local networkent = require("../../../util/networkent")
 local networkobj = require("../../../util/networkobj")
 
-function exports.register(tab)
-    local tab2 = SussySpt.rendering.newTab("Players")
+function exports.register(parentTab)
+    local tab = SussySpt.rendering.newTab("Players")
 
     local a = {
         playerlistwidth = 211,
@@ -17,19 +17,7 @@ function exports.register(tab)
         selectedplayer = nil,
         selectedplayerinfo = {},
 
-        namecolors = {
-            modder     = {209, 13, 13},
-            friend     = {103, 246, 92},
-            noped      = {87, 87, 87},
-            dead       = {81, 0, 8},
-            noblip     = {151, 151, 151},
-            ghost      = {201, 201, 201},
-            vehicle    = {201, 247, 255},
-            cutscene   = {83, 75, 115},
-            host       = {255, 181, 101},
-            scripthost = {255, 226, 171},
-            unknownpos = {227, 223, 237}
-        },
+        namecolors = require("./players/namecolors"),
 
         ramoptions = {
             ["bus"] = "Bus",
@@ -453,7 +441,7 @@ function exports.register(tab)
 
     yu.rendering.setCheckboxChecked("online_players_ram_delete")
 
-    function tab2.render() -- SECTION Render
+    function tab.render() -- SECTION Render
         a.open = 2
         ImGui.BeginGroup()
         ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
@@ -606,8 +594,15 @@ function exports.register(tab)
                                 yu.rendering.tooltip("Does not work well / teleports them under the map")
                             end
 
-                            if ImGui.SmallButton("Mark as modder") then
-                                network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, "Marked as modder by the user")
+                            do
+                                local defaultText = "Marked as modder by the user"
+                                local text, changed = ImGui.InputText("##mark_input", a.markinput or defaultText, 128)
+                                if changed then a.markinput = text end
+                                ImGui.SameLine()
+                                if ImGui.Button("Mark") and a.markinput ~= nil then
+                                    network.flag_player_as_modder(player.player, infraction.CUSTOM_REASON, a.markinput)
+                                    SussySpt.debug("Marked "..player.name.." as a modder for '"..a.markinput.."'")
+                                end
                             end
 
                             yu.rendering.renderCheckbox("Spectate", "online_players_spectate", function(state)
@@ -1443,7 +1438,7 @@ function exports.register(tab)
         end
     end -- !SECTION
 
-    tab.sub[1] = tab2
+    parentTab.sub[1] = tab
 end
 
 return exports
