@@ -2,7 +2,8 @@
     "diagnostics.disable": [
         "lowercase-global",
         "redefined-local",
-        "different-requires"
+        "different-requires",
+        "duplicate-set-field" // because there's no "diagnostics.locals"
     ],
 
     "workspace.ignoreDir": [
