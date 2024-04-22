@@ -20,25 +20,28 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
         const moduleId = moduleCounter;
 
         let fileContent = fs.readFileSync(path).toString()
-            .trim()
-            .replace(/require\(["'](.+?)["']\)/g, (match, modulePath) => {
-                if (!modulePath.startsWith(".")) {
-                    return `require("${modulePath}")`;
-                }
-                let resolved;
-                try {
-                    resolved = require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] });
-                } catch (err) {
-                    throw Error(`Error while resolving module path for '${modulePath}' in '${path}'`);
-                }
-                resolved = normalizePath(resolved);
+            .trim();
+        fileContent = fileContent.replace(/require\(["'](.+?)["']\)/g, (match, modulePath) => {
+            function getLine() {
+                return fileContent.substring(0, fileContent.indexOf(match)).split("\n").length;
+            }
+            if (!modulePath.startsWith(".")) {
+                throw Error(`Module does not start with a '.'! '${modulePath}' in [${path}:${getLine()}]`);
+            }
+            let resolved;
+            try {
+                resolved = require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] });
+            } catch (err) {
+                throw Error(`Error while resolving module path for '${modulePath}' in [${path}:${getLine()}]`);
+            }
+            resolved = normalizePath(resolved);
 
-                if (!requireMapping.hasOwnProperty(resolved)) {
-                    requireMapping[resolved] = ++moduleCounter;
-                    packFile(resolved);
-                }
-                return `require(${requireMapping[resolved]})`;
-            });
+            if (!requireMapping.hasOwnProperty(resolved)) {
+                requireMapping[resolved] = ++moduleCounter;
+                packFile(resolved);
+            }
+            return `require(${requireMapping[resolved]})`;
+        });
 
         const relPath = path.replace(srcDir, "");
 
