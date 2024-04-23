@@ -15,6 +15,10 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
     const requireMapping = {};
 
     if (!require.extensions[ext]) require.extensions[ext] = function (module, filename) { };
+    // const prevExtensions = require.extensions;
+    // require.extensions = {
+    //     [ext]: function (module, filename) { }
+    // };
 
     function packFile(path) {
         const moduleId = moduleCounter;
@@ -25,9 +29,9 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
             function getLine() {
                 return fileContent.substring(0, fileContent.indexOf(match)).split("\n").length;
             }
-            if (!modulePath.startsWith(".")) {
-                throw Error(`Module does not start with a '.'! '${modulePath}' in [${path}:${getLine()}]`);
-            }
+            // if (!modulePath.startsWith(".")) {
+            //     throw Error(`Module does not start with a '.'! '${modulePath}' in [${path}:${getLine()}]`);
+            // }
             let resolved;
             try {
                 resolved = require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] });
@@ -58,6 +62,8 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
 
     requireMapping[entryFile] = moduleCounter;
     packFile(entryFile);
+
+    // require.extensions = prevExtensions;
 
     const out = `do
     local modules = {
