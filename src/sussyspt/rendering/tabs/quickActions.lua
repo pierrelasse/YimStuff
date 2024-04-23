@@ -1,5 +1,9 @@
 local tab = SussySpt.rendering.newTab("Quick Actions")
 
+local tableFlags =
+    ImGuiTableFlags.Borders
+    | ImGuiTableFlags.RowBg
+
 function tab.render()
     if ImGui.Button("Save") then
         SussySpt.qa.config.save()
@@ -11,10 +15,10 @@ function tab.render()
         SussySpt.qa.config.sort = yu.copy_table(SussySpt.qa.config.default)
     end
 
-    if ImGui.BeginTable("##actions", 2) then
+    if ImGui.BeginTable("##actions", 2, tableFlags) then
         -- ImGui.TableSetupColumn("##1")
         -- ImGui.TableSetupColumn("##2")
-        ImGui.TableHeadersRow()
+        -- ImGui.TableHeadersRow()
 
         local row = 0
         for k, v in pairs(SussySpt.qa.config.sort) do

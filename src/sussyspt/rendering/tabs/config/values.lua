@@ -5,10 +5,6 @@ local tableFlags =
     | ImGuiTableFlags.RowBg
     | ImGuiTableFlags.NoClip
 
-local inputValueFlagsBase =
-    ImGuiInputTextFlags.AutoSelectAll
-    | ImGuiInputTextFlags.EnterReturnsTrue
-
 local function renderValues()
     -- local allowEdit = yu.rendering.renderCheckbox("Allow edit", "config/values/allowEdit")
     -- if ImGui.IsItemHovered() then

@@ -22,8 +22,6 @@ yu.rendering.setCheckboxChecked("world_objspawner_missionent")
 yu.rendering.setCheckboxChecked("world_objspawner_hashmodel")
 
 local function renderObjectSpawner()
-    ImGui.Text("Object spawner")
-
     ImGui.BeginGroup()
 
     ImGui.Text("Spawner")
@@ -218,8 +216,13 @@ local function renderParticleSpawner()
 end
 
 function tab.render()
+    yu.rendering.bigText("Object spawner")
     renderObjectSpawner()
+    ImGui.Separator()
+    yu.rendering.bigText("Particle spawner")
     renderParticleSpawner()
+    ImGui.Separator()
+    yu.rendering.bigText("Door controller")
     renderDoorController()
 end
 
