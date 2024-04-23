@@ -169,7 +169,7 @@ module.exports.handle = (command, args) => {
         projectScript.finish(out);
     }
 
-    console.log("\nBUILD DONE!");
+    console.log("\nBUILD SUCCESS!");
 
     return true;
 };
