@@ -1,91 +1,133 @@
 {
-    "diagnostics.disable": [
-        "lowercase-global",
-        "redefined-local",
-        "different-requires",
-        "duplicate-set-field" // because there's no "diagnostics.locals"
-    ],
-
-    "workspace.ignoreDir": [
-        "build"
-    ],
-
-    "diagnostics.globals": [
-        // Modules
-        "exports",
-
-        // ImGui
-        "ImGuiTableFlags",
-        "ImGuiWindowFlags",
-        "ImGuiCol",
-        "ImGuiStyleVar",
-        "ImGuiInputTextFlags",
-
-        // YimMenu
-        "infraction",
-        "command",
-        "entities",
-        "event",
-        "joaat",
-        "globals",
-        "gui",
-        "ImGui",
-        "locals",
-        "log",
-        "memory",
-        "menu_event",
-        "network",
-        "script",
-        "stats",
-        "tunables",
-        "vehicles",
-        "weapons",
-
-        // Natives
-        "APP",
-        "AUDIO",
-        "BRAIN",
-        "CAM",
-        "CLOCK",
-        "CUTSCENE",
-        "DATAFILE",
-        "DECORATOR",
-        "DLC",
-        "ENTITY",
-        "EVENT",
-        "FILES",
-        "FIRE",
-        "GRAPHICS",
-        "HUD",
-        "INTERIOR",
-        "ITEMSET",
-        "LOADINGSCREEN",
-        "LOCALIZATION",
-        "MISC",
-        "MOBLE",
-        "MONEY",
-        "NETSHOPPING",
-        "NETWORK",
-        "OBJECT",
-        "PAD",
-        "PATHFIND",
-        "PED",
-        "PHYSICS",
-        "PLAYER",
-        "RECORDING",
-        "REPLAY",
-        "SAVEMIGRATION",
-        "SCRIPT",
-        "SECURITY",
-        "SHAPETEST",
-        "SOCIALCLUB",
-        "STATS",
-        "STREAMING",
-        "SYSTEM",
-        "TASK",
-        "VEHICLE",
-        "WATER",
-        "WEAPON",
-        "ZONE"
-    ]
+    "runtime": {
+        "version": "Lua 5.4",
+        "path": [
+            "src/?.lua"
+        ],
+        "pathStrict": false
+    },
+    "completion": {
+        "autoRequire": false,
+        "requireSeparator": "/"
+    },
+    "workspace": {
+        "maxPreload": 1600,
+        "preloadFileSize": 1000,
+        "ignoreDir": [
+            "/.vscode/",
+            "/build/",
+            "/idk/"
+        ],
+        "checkThirdParty": false
+    },
+    "typeFormat": {
+        "config": {
+            "format_line": "false"
+        }
+    },
+    "type": {
+        "castNumberToInteger": false
+    },
+    "doc": {
+        "privateName": [
+            "_*"
+        ]
+    },
+    "diagnostics": {
+        "disable": [
+            "lowercase-global",
+            "redefined-local",
+            "different-requires",
+            "duplicate-set-field" // because there's no "diagnostics.locals"
+        ],
+        "groupFileStatus": {
+            "ambiguity": "Any",
+            "await": "Any",
+            "duplicate": "Any",
+            "global": "Any",
+            "luadoc": "Any",
+            "redefined": "Any",
+            "strict": "Any",
+            "type-check": "Any",
+            "unbalanced": "Any",
+            "unused": "Any"
+        },
+        "ignoredFiles": "Opened",
+        "libraryFiles": "Opened",
+        "globals": [
+            // Modules
+            "exports",
+            // ImGui
+            "ImGuiTableFlags",
+            "ImGuiWindowFlags",
+            "ImGuiCol",
+            "ImGuiStyleVar",
+            "ImGuiInputTextFlags",
+            // YimMenu
+            "infraction",
+            "command",
+            "entities",
+            "event",
+            "joaat",
+            "globals",
+            "gui",
+            "ImGui",
+            "locals",
+            "log",
+            "memory",
+            "menu_event",
+            "network",
+            "script",
+            "stats",
+            "tunables",
+            "vehicles",
+            "weapons",
+            // Natives
+            "APP",
+            "AUDIO",
+            "BRAIN",
+            "CAM",
+            "CLOCK",
+            "CUTSCENE",
+            "DATAFILE",
+            "DECORATOR",
+            "DLC",
+            "ENTITY",
+            "EVENT",
+            "FILES",
+            "FIRE",
+            "GRAPHICS",
+            "HUD",
+            "INTERIOR",
+            "ITEMSET",
+            "LOADINGSCREEN",
+            "LOCALIZATION",
+            "MISC",
+            "MOBLE",
+            "MONEY",
+            "NETSHOPPING",
+            "NETWORK",
+            "OBJECT",
+            "PAD",
+            "PATHFIND",
+            "PED",
+            "PHYSICS",
+            "PLAYER",
+            "RECORDING",
+            "REPLAY",
+            "SAVEMIGRATION",
+            "SCRIPT",
+            "SECURITY",
+            "SHAPETEST",
+            "SOCIALCLUB",
+            "STATS",
+            "STREAMING",
+            "SYSTEM",
+            "TASK",
+            "VEHICLE",
+            "WATER",
+            "WEAPON",
+            "ZONE"
+        ]
+    }
 }
