@@ -40,7 +40,6 @@ function SussySpt.qa.render()
         for k, v in pairs(SussySpt.qa.config.sort) do
             if type(v) == "number" then
                 if v == 0 then sameline = false end
-
             elseif type(v) == "string" then
                 local b = SussySpt.qa.actions[v]
                 if b ~= nil then

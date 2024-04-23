@@ -53,11 +53,11 @@ local function renderValues()
                 valueText = "???"
             end
 
-            if allowEdit then
-                ImGui.InputText("", valueText, inputValueFlagsBase)
-            else
-                ImGui.Text(valueText)
-            end
+            -- if allowEdit then
+            --     ImGui.InputText("", valueText, inputValueFlagsBase)
+            -- else
+            ImGui.Text(valueText)
+            -- end
         end
 
         do

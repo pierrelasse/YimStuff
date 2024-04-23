@@ -388,7 +388,8 @@ local function initAutoShop()
     local cooldowns = {}
     local function refreshCooldowns()
         for i = 0, 7 do
-            cooldowns[i] = "  - "..a.heists[i]..": "..yu.format_seconds(stats.get_int(yu.mpx("TUNER_CONTRACT"..i.."_POSIX")) - os.time())
+            cooldowns[i] = "  - "..
+            a.heists[i]..": "..yu.format_seconds(stats.get_int(yu.mpx("TUNER_CONTRACT"..i.."_POSIX")) - os.time())
         end
     end
     tasks.addTask(refreshCooldowns)
@@ -602,7 +603,8 @@ local function initAgency()
             ImGui.BeginGroup()
             yu.rendering.bigText("Preperations")
 
-            local dlr = yu.rendering.renderList(a.vipcontracts, a.vipcontract, "hbo_agency_dl", "The Dr. Dre VIP Contract", a.vipcontractssort)
+            local dlr = yu.rendering.renderList(a.vipcontracts, a.vipcontract, "hbo_agency_dl",
+                "The Dr. Dre VIP Contract", a.vipcontractssort)
             if dlr.changed then
                 yu.notify(1, "Set The Dr. Dre VIP Contract to "..a.vipcontracts[dlr.key].." ["..dlr.key.."]", "Agency")
                 a.vipcontract = dlr.key
@@ -621,7 +623,7 @@ local function initAgency()
 
                         stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
 
-                        for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_STRAND","FIXER_STORY_COOLDOWN"}) do
+                        for k, v in pairs({ "FIXER_GENERAL_BS", "FIXER_COMPLETED_BS", "FIXER_STORY_STRAND", "FIXER_STORY_COOLDOWN" }) do
                             stats.set_int(yu.mpx(v), -1)
                         end
 
@@ -649,7 +651,7 @@ local function initAgency()
 
             if ImGui.Button("Complete all missions") then
                 tasks.addTask(function()
-                    for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
+                    for k, v in pairs({ "FIXER_GENERAL_BS", "FIXER_COMPLETED_BS", "FIXER_STORY_BS", "FIXER_STORY_COOLDOWN" }) do
                         stats.set_int(yu.mpx(v), -1)
                     end
                 end)
@@ -691,7 +693,7 @@ local function initOffice()
             yu.rendering.bigText("Warehouse")
 
             ImGui.Text("Get warehouse crate instantly:")
-            for _, i in ipairs({1, 2, 3, 5, 10, 15, 20, 25, 30, 35}) do
+            for _, i in ipairs({ 1, 2, 3, 5, 10, 15, 20, 25, 30, 35 }) do
                 ImGui.SameLine()
                 if ImGui.Button(tostring(i)) then
                     getCrates(i)

@@ -28,7 +28,6 @@ function tab.render()
                     yu.rendering.coloredtext("[Newline]", 106, 106, 106, 255)
                     ok = true
                 end
-
             elseif type(v) == "string" then
                 local b = SussySpt.qa.actions[v]
                 if b ~= nil then

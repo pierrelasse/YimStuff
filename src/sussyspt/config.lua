@@ -3,9 +3,11 @@ if io == nil or io.open == nil then
     return
 end
 
-local cfg = {file = "sussyspt", changed = false, lastAutosave = os.time()}
+local cfg = { file = "sussyspt", changed = false, lastAutosave = os.time() }
 
-function cfg.has(path) return cfg.data ~= nil and cfg.data[path] ~= nil end
+function cfg.has(path)
+    return cfg.data ~= nil and cfg.data[path] ~= nil
+end
 
 function cfg.get(path, default)
     if cfg.data == nil then error("No config data is present") end
@@ -63,8 +65,7 @@ function cfg.load()
     local f = io.open("sussyspt", "r")
     if f ~= nil then
         local content = f:read("*all")
-        if type(content) == "string" and
-            (content:startswith("{") or content:startswith("[")) then
+        if type(content) == "string" and (content:startswith("{") or content:startswith("[")) then
             cfg.data = yu.json.decode(content)
             -- SussySpt.debug("Config loaded")
         else

@@ -1,4 +1,3 @@
-
 require("./tabs/online")
 require("./tabs/qol")
 require("./tabs/singleplayer")

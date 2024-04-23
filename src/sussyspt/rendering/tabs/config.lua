@@ -28,7 +28,8 @@ do -- ANCHOR Info
             end)
 
             local x, y = ImGui.GetContentRegionAvail()
-            ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), x, math.min(140, y), ImGuiInputTextFlags.ReadOnly)
+            ImGui.InputTextMultiline("##debug_log", SussySpt.debugtext, SussySpt.debugtext:length(), x, math.min(140, y),
+                                     ImGuiInputTextFlags.ReadOnly)
             ImGui.TreePop()
         end
 
@@ -120,8 +121,7 @@ do -- ANCHOR Theme
             if ImGui.Button("Load") then
                 local success, result = pcall(yu.json.decode, a.customthemetext)
                 if not success then
-                    a.message = {"Error: "..yu.removeErrorPath(result)[2], 255, 25, 25}
-
+                    a.message = { "Error: "..yu.removeErrorPath(result)[2], 255, 25, 25 }
                 elseif type(result) == "table" then
                     if result.parent == "Custom" then
                         result.parent = nil
@@ -134,7 +134,7 @@ do -- ANCHOR Theme
                         end
                     end
                     SussySpt.rendering.themes["Custom"] = result
-                    a.message = {"Success! You can now select the 'Custom' theme above", 60, 222, 22}
+                    a.message = { "Success! You can now select the 'Custom' theme above", 60, 222, 22 }
                 end
             end
 
@@ -149,12 +149,12 @@ do -- ANCHOR Theme
                     for k, v in pairs(ImGuiCol) do
                         if k ~= "COUNT" then
                             local r, g, b, a = ImGui.GetStyleColorVec4(v)
-                            data["ImGuiCol"][k] = {math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), a}
+                            data["ImGuiCol"][k] = { math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), a }
                         end
                     end
 
                     a.customthemetext = yu.json.encode(data)
-                    a.message = {"Success! You can now put the text into a json formatter :D", 60, 222, 22}
+                    a.message = { "Success! You can now put the text into a json formatter :D", 60, 222, 22 }
                 end)
             end
 

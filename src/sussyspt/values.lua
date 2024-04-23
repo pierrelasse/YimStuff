@@ -1,6 +1,6 @@
 return {
-    g = { -- ANCHOR Globals
-        fm = 262145, -- freemode
+    g = {                      -- ANCHOR Globals
+        fm = 262145,           -- freemode
 
         agency_payout = 32466, -- CLO_FXM_L_1_0
         agency_instantfinish1 = 38397,
@@ -51,7 +51,7 @@ return {
             49, -- GGSM_SPRITE_POWER_UP_NUKE
             50, -- GGSM_SPRITE_POWER_UP_REPULSE
             53, -- GGSM_SPRITE_POWER_UP_SHIELD
-            54 -- GGSM_SPRITE_POWER_UP_STUN
+            54  -- GGSM_SPRITE_POWER_UP_STUN
         }
     },
     t = { -- ANCHOR Tunables

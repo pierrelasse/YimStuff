@@ -10,7 +10,6 @@ SussySpt.chatlog = {
             text = text..newline..(doTimestamp and ("["..message[4].."] ") or "")..message[2]..": "..message[3]
             newline = "\n"
         end
-
         SussySpt.chatlog.text = text
     end
 }

@@ -2,7 +2,7 @@ local version = require("../version")
 local cfg = require("../config")
 local themeManager = require("./themeManager")
 
-SussySpt.rendering = {tabs = {}}
+SussySpt.rendering = { tabs = {} }
 
 SussySpt.rendering.themes = themeManager.themes
 for k, v in pairs(SussySpt.rendering.themes) do
@@ -16,7 +16,7 @@ end
 SussySpt.rendering.theme = cfg.get("theme", "Fatality")
 if SussySpt.rendering.themes[SussySpt.rendering.theme] == nil then
     SussySpt.debug("Theme "..SussySpt.rendering.theme..
-                       " does not exist. Selecting a different one")
+        " does not exist. Selecting a different one")
     SussySpt.rendering.theme = next(SussySpt.rendering.themes)
 end
 
@@ -51,7 +51,7 @@ end
 
 local function renderTab(v)
     if not (type(v.should_display) == "function" and v.should_display() == false) and
-        ImGui.BeginTabItem(v.name) then
+    ImGui.BeginTabItem(v.name) then
         if type(v.render) == "function" then v.render() end
         if yu.len(v.sub) > 0 then
             ImGui.BeginTabBar("##tabbar_"..v.id)
@@ -83,7 +83,6 @@ local function renderCategories()
         ImGui.PopStyleColor()
     end
     cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
-
 end
 
 function exports.render() -- ANCHOR render

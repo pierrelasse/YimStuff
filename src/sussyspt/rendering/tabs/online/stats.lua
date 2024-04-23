@@ -10,44 +10,44 @@ function exports.register(tab)
         local a = {
             stats = {
                 -- {Stat, Type, Display}
-                {"MPPLY_IS_CHEATER", 1, "Is cheater"},
-                {"MPPLY_ISPUNISHED", 1, "Is punished"},
-                {"MPPLY_IS_HIGH_EARNER", 1, "High earner"},
-                {"MPPLY_WAS_I_BAD_SPORT", 1, "Was i badsport"},
-                {"MPPLY_CHAR_IS_BADSPORT", 1, "Is character badsport"},
+                { "MPPLY_IS_CHEATER",         1, "Is cheater" },
+                { "MPPLY_ISPUNISHED",         1, "Is punished" },
+                { "MPPLY_IS_HIGH_EARNER",     1, "High earner" },
+                { "MPPLY_WAS_I_BAD_SPORT",    1, "Was i badsport" },
+                { "MPPLY_CHAR_IS_BADSPORT",   1, "Is character badsport" },
 
-                {"MPPLY_OVERALL_CHEAT", 2, "Overall cheat"},
-                {"MPPLY_OVERALL_BADSPORT", 2, "Overall badsport"},
-                {"MPPLY_PLAYERMADE_TITLE", 2, "Playermade title"},
-                {"MPPLY_PLAYERMADE_DESC", 2, "Playermade description"},
+                { "MPPLY_OVERALL_CHEAT",      2, "Overall cheat" },
+                { "MPPLY_OVERALL_BADSPORT",   2, "Overall badsport" },
+                { "MPPLY_PLAYERMADE_TITLE",   2, "Playermade title" },
+                { "MPPLY_PLAYERMADE_DESC",    2, "Playermade description" },
 
-                {"MPPLY_GRIEFING", 2, "Reports -> Griefing"},
-                {"MPPLY_EXPLOITS", 2, "Reports -> Exploits"},
-                {"MPPLY_GAME_EXPLOITS", 2, "Reports -> Game exploits"},
-                {"MPPLY_TC_ANNOYINGME", 2, "Reports -> Text chat -> Annoying me"},
-                {"MPPLY_TC_HATE", 2, "Reports -> Text chat -> Hate Speech"},
-                {"MPPLY_VC_ANNOYINGME", 2, "Reports -> Voice chat > Annoying me"},
-                {"MPPLY_VC_HATE", 2, "Reports -> Voice chat > Hate Speech"},
-                {"MPPLY_OFFENSIVE_LANGUAGE", 2, "Reports -> Offensive language"},
-                {"MPPLY_OFFENSIVE_TAGPLATE", 2, "Reports -> Offensive tagplate"},
-                {"MPPLY_OFFENSIVE_UGC", 2, "Reports -> Offensive content"},
-                {"MPPLY_BAD_CREW_NAME", 2, "Reports -> Bad crew name"},
-                {"MPPLY_BAD_CREW_MOTTO", 2, "Reports -> Bad crew motto"},
-                {"MPPLY_BAD_CREW_STATUS", 2, "Reports -> Bad crew status"},
-                {"MPPLY_BAD_CREW_EMBLEM", 2, "Reports -> Bad crew emblem"},
-                {"MPPLY_FRIENDLY", 2, "Commend -> Friendly"},
-                {"MPPLY_HELPFUL", 2, "Commend -> Helpful"},
+                { "MPPLY_GRIEFING",           2, "Reports -> Griefing" },
+                { "MPPLY_EXPLOITS",           2, "Reports -> Exploits" },
+                { "MPPLY_GAME_EXPLOITS",      2, "Reports -> Game exploits" },
+                { "MPPLY_TC_ANNOYINGME",      2, "Reports -> Text chat -> Annoying me" },
+                { "MPPLY_TC_HATE",            2, "Reports -> Text chat -> Hate Speech" },
+                { "MPPLY_VC_ANNOYINGME",      2, "Reports -> Voice chat > Annoying me" },
+                { "MPPLY_VC_HATE",            2, "Reports -> Voice chat > Hate Speech" },
+                { "MPPLY_OFFENSIVE_LANGUAGE", 2, "Reports -> Offensive language" },
+                { "MPPLY_OFFENSIVE_TAGPLATE", 2, "Reports -> Offensive tagplate" },
+                { "MPPLY_OFFENSIVE_UGC",      2, "Reports -> Offensive content" },
+                { "MPPLY_BAD_CREW_NAME",      2, "Reports -> Bad crew name" },
+                { "MPPLY_BAD_CREW_MOTTO",     2, "Reports -> Bad crew motto" },
+                { "MPPLY_BAD_CREW_STATUS",    2, "Reports -> Bad crew status" },
+                { "MPPLY_BAD_CREW_EMBLEM",    2, "Reports -> Bad crew emblem" },
+                { "MPPLY_FRIENDLY",           2, "Commend -> Friendly" },
+                { "MPPLY_HELPFUL",            2, "Commend -> Helpful" },
             },
             abilities = {
                 -- {Display, Getter, Setter, Value, Changed value}
-                {"Stamina", "STAMINA", "SCRIPT_INCREASE_STAM"},
-                {"Strength", "STRENGTH", "SCRIPT_INCREASE_STRN"},
-                {"Shooting", "SHOOTING_ABILITY", "SCRIPT_INCREASE_SHO"},
-                {"Stealth", "STEALTH_ABILITY", "SCRIPT_INCREASE_STL"},
-                {"Flying", "FLYING_ABILITY", "SCRIPT_INCREASE_FLY"},
-                {"Driving", "WHEELIE_ABILITY", "SCRIPT_INCREASE_DRIV"},
-                {"Diving", "LUNG_CAPACITY", "SCRIPT_INCREASE_LUNG"},
-                {"Mental State", "PLAYER_MENTAL_STATE", nil}
+                { "Stamina",      "STAMINA",             "SCRIPT_INCREASE_STAM" },
+                { "Strength",     "STRENGTH",            "SCRIPT_INCREASE_STRN" },
+                { "Shooting",     "SHOOTING_ABILITY",    "SCRIPT_INCREASE_SHO" },
+                { "Stealth",      "STEALTH_ABILITY",     "SCRIPT_INCREASE_STL" },
+                { "Flying",       "FLYING_ABILITY",      "SCRIPT_INCREASE_FLY" },
+                { "Driving",      "WHEELIE_ABILITY",     "SCRIPT_INCREASE_DRIV" },
+                { "Diving",       "LUNG_CAPACITY",       "SCRIPT_INCREASE_LUNG" },
+                { "Mental State", "PLAYER_MENTAL_STATE", nil }
             }
         }
 
@@ -272,7 +272,8 @@ function exports.register(tab)
         local tab3 = SussySpt.rendering.newTab("Loader")
 
         local a = {
-            input = "# This is a comment\nbool SOME_STAT 0\nbool MPX_SOME_STAT 1\nbool SOME_STAT true\nbool MPX_SOME_STAT false\nint SOME_STAT 1\nfloat MPX_SOME_STAT 1.23",
+            input =
+            "# This is a comment\nbool SOME_STAT 0\nbool MPX_SOME_STAT 1\nbool SOME_STAT true\nbool MPX_SOME_STAT false\nint SOME_STAT 1\nfloat MPX_SOME_STAT 1.23",
             types = {
                 "bool",
                 "int",
@@ -345,7 +346,7 @@ function exports.register(tab)
                             end
                         end
 
-                        table.insert(tokens, {type, stat, value})
+                        table.insert(tokens, { type, stat, value })
                     end
                 end
                 ::continue::
