@@ -43,12 +43,16 @@ module.exports = {
 
         console.log("\n> Minifiying...");
 
-        const minify = getMinify();
-        if (minify !== undefined) {
-            data = `--[[ More info & source @ https://github.com/pierrelasse/YimStuff ]]\n${minify(data)}\n`;
-            console.log("> Minified!");
-        } else {
-            console.log("> Minifying not available. See t/minify/installation.txt for more info");
+        try {
+            const minify = getMinify();
+            if (minify !== undefined) {
+                data = `--[[ More info & source @ https://github.com/pierrelasse/YimStuff ]]\n${minify(data)}\n`;
+                console.log("> Minified!");
+            } else {
+                console.log(`> Minifying not available. Use 't installminify' to install the minifier`);
+            }
+        } catch (err) {
+            throw new Error(`An error occured while minifing the file:\n${err.stack || err}`);
         }
 
         return data;
