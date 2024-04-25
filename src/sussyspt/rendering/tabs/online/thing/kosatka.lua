@@ -1,5 +1,5 @@
-local tasks = require("../../../tasks")
-local removeAllCameras = require("../../../util/removeAllCameras")
+local tasks = require("../../../../tasks")
+local removeAllCameras = require("../../../../util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
 
 function exports.register(tab2)

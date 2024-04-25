@@ -1,5 +1,5 @@
-local tasks = require("../../../tasks")
-local values = require("../../../values")
+local tasks = require("../../../../tasks")
+local values = require("../../../../values")
 
 function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Salvage Yard")
