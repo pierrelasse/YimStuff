@@ -1,11 +1,17 @@
 
-To install the minifier,
+Run
+  ./t.sh installminifier
+or
+  t.bat installminifier
+to automatically install the minifier.
+
+
+To manually install the minifier,
 
 navigate to https://github.com/mathiasbynens/luamin/blob/master/luamin.js
 and download the file using the small download button near the "Raw" button.
 
-do the same for this one. \/
-https://github.com/fstirlitz/luaparse/blob/master/luaparse.js
+do the same for this one: https://github.com/fstirlitz/luaparse/blob/master/luaparse.js
 
 After you downloaded both files, put them into the same directory as this file.
 Ensure that the files are called "luamin.js" and "luaparse.js"
