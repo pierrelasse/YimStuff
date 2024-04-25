@@ -107,15 +107,18 @@ You still have the config.json file.
 `);
 }
 
-module.exports.handle = (command, args) => {
+/**
+ *
+ * @param {string} command
+ * @param {argParser.ArgParser} parser
+ * @returns {boolean}
+ */
+module.exports.handle = (command, parser) => {
     if (command !== "build") return;
-
-    const parser = new argParser.ArgParser();
-    parser.parse(process.argv.slice(3));
 
     checkConfigFile(parser);
 
-    const project = (parser.values[0]?.replace(/[/\\]|(\.\.)/g, "")) || "sussyspt";
+    const project = (parser.values[1]?.replace(/[/\\]|(\.\.)/g, "")) || "sussyspt";
     console.log(`Building project '${project}'`);
 
     const srcDir = `${normalizePath(_path.resolve(`src/`))}/`;

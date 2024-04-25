@@ -1,30 +1,34 @@
 
-function getCommands() {
-    return [
-        require("./commands/build"),
-        require("./commands/clean"),
-    ];
-}
+const argParser = require("./util/argParser");
 
 
-function main(argv) {
-    const commands = getCommands();
+const commands = [
+    require("./commands/build"),
+    require("./commands/clean"),
+    require("./commands/installminify")
+];
 
-    if (argv[0]) {
-        for (const i of commands) {
-            const handler = i.handle;
-            if (handler(argv[0]) == true)
+
+async function main() {
+    const parser = new argParser.ArgParser();
+    parser.parseArgv();
+
+    const command = parser.values[0];
+    if (command !== undefined) {
+        for (const cmd of commands) {
+            const handler = cmd.handle;
+            if (await handler(command, parser) == true)
                 return;
         }
     }
 
     // Well done nodejs. My code looks very clean and awesome with this multiline string
-    console.log(`Running t@v1.0.0
-${argv[0] ? "Command not found.\n" : ""}
+    console.log(`Running t@v1.1.0
+${command === undefined ? "" : "\nCommand not found."}
 Available commands:
-    build, clean
+    build, clean, installminify
 
 Usage: ./t.sh <command>`);
 }
 
-main(process.argv.slice(2));
+main();

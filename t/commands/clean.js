@@ -17,7 +17,13 @@ function deleteDirectoryRecursive(dirPath) {
     }
 }
 
-module.exports.handle = (command) => {
+/**
+ *
+ * @param {string} command
+ * @param {argParser.ArgParser} parser
+ * @returns {boolean}
+ */
+module.exports.handle = (command, parser) => {
     if (command !== "clean") return;
 
     console.log("> Cleaning...");
