@@ -1,5 +1,7 @@
 local tasks = require("../../../../tasks")
 
+local exports = {}
+
 function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Nightclub")
 

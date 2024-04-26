@@ -1,5 +1,7 @@
 local cfg = require("../../../config")
 
+local exports = {}
+
 function exports.register(tab)
     local tab2 = SussySpt.rendering.newTab("Chatlog")
 

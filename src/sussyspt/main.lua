@@ -1,4 +1,4 @@
-(function()
+do
     print = log.info
 
     if require("./yimutilsLoader") ~= true then return end
@@ -105,4 +105,4 @@
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..version.version.." ["..version.versionId.."]!", "Welcome")
-end)()
+end

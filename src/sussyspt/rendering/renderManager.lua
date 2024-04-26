@@ -2,6 +2,8 @@ local version = require("../version")
 local cfg = require("../config")
 local themeManager = require("./themeManager")
 
+local exports = {}
+
 SussySpt.rendering = { tabs = {} }
 
 SussySpt.rendering.themes = themeManager.themes

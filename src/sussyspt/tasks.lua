@@ -1,3 +1,5 @@
+local exports = {}
+
 exports.tasks = {}
 
 function exports.addTask(cb)

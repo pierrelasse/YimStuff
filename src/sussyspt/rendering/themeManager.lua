@@ -1,4 +1,7 @@
 local themes = require("./defaultThemes")
+
+local exports = {}
+
 exports.themes = themes
 
 local pops = {}

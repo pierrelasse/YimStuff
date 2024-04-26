@@ -2,6 +2,8 @@ local tasks = require("../../../../tasks")
 local values = require("../../../../values")
 local addUnknownValue = require("./addUnknownValue")
 
+local exports = {}
+
 function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Arcade")
 

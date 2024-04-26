@@ -1,6 +1,8 @@
 local tasks = require("../../../tasks")
 local values = require("../../../values")
 
+local exports = {}
+
 function exports.register(tab)
     local tab2 = SussySpt.rendering.newTab("Stats")
 

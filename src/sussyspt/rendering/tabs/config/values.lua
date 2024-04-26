@@ -76,9 +76,13 @@ local function render()
     end
 end
 
+local exports = {}
+
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("Values")
     tab.should_display = SussySpt.getDev
     tab.render = render
     parentTab.sub[#parentTab.sub + 1] = tab
 end
+
+return exports

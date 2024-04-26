@@ -2,6 +2,8 @@ local tasks = require("../../../../tasks")
 local removeAllCameras = require("../../../../util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
 
+local exports = {}
+
 function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Kosatka")
 

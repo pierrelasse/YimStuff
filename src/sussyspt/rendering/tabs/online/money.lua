@@ -2,6 +2,8 @@ local tasks = require("../../../tasks")
 local values = require("../../../values")
 local triggerTransaction = require("../../../util/triggerTransaction")
 
+local exports = {}
+
 function exports.register(tab)
     local tab2 = SussySpt.rendering.newTab("Money")
 

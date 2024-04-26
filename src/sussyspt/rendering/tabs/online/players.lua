@@ -2,6 +2,8 @@ local tasks = require("../../../tasks")
 local networkent = require("../../../util/networkent")
 local networkobj = require("../../../util/networkobj")
 
+local exports = {}
+
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("Players")
 

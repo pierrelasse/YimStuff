@@ -36,7 +36,7 @@
             "lowercase-global",
             "redefined-local",
             "different-requires",
-            "duplicate-set-field" // because there's no "diagnostics.locals"
+            "missing-local-export-doc"
         ],
         "groupFileStatus": {
             "ambiguity": "Any",
@@ -53,8 +53,6 @@
         "ignoredFiles": "Opened",
         "libraryFiles": "Opened",
         "globals": [
-            // Modules
-            "exports",
             // ImGui
             "ImGuiTableFlags",
             "ImGuiWindowFlags",
