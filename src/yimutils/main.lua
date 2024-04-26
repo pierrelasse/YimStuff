@@ -1,6 +1,6 @@
 
-return (function(fnew)
-    if not fnew and yu ~= nil then return yu end
+do
+    if yu ~= nil then return yu end
 
     local data = {}
     local api = {}
@@ -1256,4 +1256,4 @@ return (function(fnew)
 
     yu = api
     return yu
-end)()
+end

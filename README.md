@@ -8,7 +8,7 @@ The scripts are made for [YimMenu](https://github.com/YimMenu/YimMenu).
 
  * [SussySpt installation](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptInstallation.md)
  * [Feedback](#feedback)
- * [Build everything yourself](#build-it-yourself)
+ * [Build it yourself](#build-it-yourself)
  * [Other](#other)
 
 ## Feedback
