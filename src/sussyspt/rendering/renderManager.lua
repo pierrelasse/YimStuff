@@ -1,6 +1,6 @@
-local version = require("../version")
-local cfg = require("../config")
-local themeManager = require("./themeManager")
+local version = require("sussyspt/version")
+local cfg = require("sussyspt/config")
+local themeManager = require("sussyspt/rendering/themeManager")
 
 local exports = {}
 

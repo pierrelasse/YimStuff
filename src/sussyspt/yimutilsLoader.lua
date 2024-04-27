@@ -1,4 +1,4 @@
-local function load() yu = require("../yimutils/main") end
+local function load() yu = require("yimutils/main") end
 
 local success, result = pcall(load)
 local err

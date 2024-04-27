@@ -1,5 +1,5 @@
-local tasks = require("../../../../tasks")
-local values = require("../../../../values")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
 
 local exports = {}
 
@@ -7,7 +7,7 @@ function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Salvage Yard")
 
     local a = {
-        loaded = false,
+        loading = true,
 
         cooldown = {
             value = 0,
@@ -64,13 +64,14 @@ function exports.register(tab2)
             a.vehicle = tunables.get_int("SALV23_VEHICLE_ROBBERY_ID_"..a.slot) - 1
             a.canKeep = tunables.get_bool("SALV23_VEHICLE_ROBBERY_CAN_KEEP_"..a.slot)
 
-            a.loaded = nil
+            a.loading = nil
         end
 
         function tab4.render() -- ANCHOR render
-            tasks.tasks.thing_salvageyard_robbery_tick = tick
+            tasks.tasks.screen = tick
 
-            if a.loaded == false then
+            if a.loading == true then
+                ImGui.Text("Loading...")
                 return
             end
 

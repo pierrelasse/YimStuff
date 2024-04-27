@@ -1,5 +1,5 @@
-local tasks = require("../../../../tasks")
-local removeAllCameras = require("../../../../util/removeAllCameras")
+local tasks = require("sussyspt/tasks")
+local removeAllCameras = require("sussyspt/util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
 
 local exports = {}

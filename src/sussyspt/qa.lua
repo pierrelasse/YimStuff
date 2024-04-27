@@ -3,7 +3,7 @@ local cfg = require("./config")
 
 SussySpt.qa = {}
 
-SussySpt.qa.actions = require("./qaActions")
+SussySpt.qa.actions = require("sussyspt/qaActions")
 
 SussySpt.qa.config = {
     default = {

@@ -1,6 +1,6 @@
-local tasks = require("../../../tasks")
-local values = require("../../../values")
-local triggerTransaction = require("../../../util/triggerTransaction")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
+local triggerTransaction = require("sussyspt/util/triggerTransaction")
 
 local exports = {}
 

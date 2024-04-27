@@ -1,4 +1,4 @@
-local values = require("./values")
+local values = require("sussyspt/values")
 
 local actions = {
     -- { Func, DisplayName, [Description], [Cond] }

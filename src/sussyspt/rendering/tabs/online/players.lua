@@ -1,6 +1,6 @@
-local tasks = require("../../../tasks")
-local networkent = require("../../../util/networkent")
-local networkobj = require("../../../util/networkobj")
+local tasks = require("sussyspt/tasks")
+local networkent = require("sussyspt/util/networkent")
+local networkobj = require("sussyspt/util/networkobj")
 
 local exports = {}
 

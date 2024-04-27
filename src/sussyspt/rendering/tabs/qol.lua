@@ -1,4 +1,4 @@
-local cfg = require("../../config")
+local cfg = require("sussyspt/config")
 
 local tab = SussySpt.rendering.newTab("QOL")
 

@@ -1,7 +1,7 @@
 do
     print = log.info
 
-    if require("./yimutilsLoader") ~= true then return end
+    if require("sussyspt/yimutilsLoader") ~= true then return end
 
     local version = require("./version")
 
@@ -12,7 +12,7 @@ do
 
     SussySpt = {}
 
-    local cfg = require("./config")
+    local cfg = require("sussyspt/config")
     if cfg == nil then return end
 
     SussySpt.dev = version.versionType == 2
@@ -39,7 +39,7 @@ do
 
     SussySpt.in_online = false
 
-    local renderManager = require("./rendering/renderManager")
+    local renderManager = require("sussyspt/rendering/renderManager")
 
     do -- SECTION Disable controls
         SussySpt.disableControls = 0
@@ -67,11 +67,11 @@ do
         end
     end
 
-    require("./chatlog")
+    require("sussyspt/chatlog")
 
-    require("./rendering/tabs")
+    require("sussyspt/rendering/tabs")
 
-    require("./qa")
+    require("sussyspt/qa")
 
     do -- ANCHOR Verify tabs
         local tabSize = 0
@@ -96,12 +96,12 @@ do
     end
 
     SussySpt.debug("Registering mainloop")
-    yu.rif(require("./gameloop"))
+    yu.rif(require("sussyspt/gameloop"))
 
     SussySpt.debug("Adding render callback")
     SussySpt.tab:add_imgui(renderManager.render)
 
-    require("./categories")
+    require("sussyspt/categories")
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..version.version.." ["..version.versionId.."]!", "Welcome")

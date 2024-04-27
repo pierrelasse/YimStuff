@@ -1,6 +1,6 @@
-local tasks = require("../../tasks")
-local version = require("../../version")
-local cfg = require("../../config")
+local tasks = require("sussyspt/tasks")
+local version = require("sussyspt/version")
+local cfg = require("sussyspt/config")
 
 local tab = SussySpt.rendering.newTab("Config")
 
@@ -72,7 +72,6 @@ do -- ANCHOR Theme
     }
 
     function tab2.render()
-        ImGui.Text("Theme: "..SussySpt.rendering.theme)
         ImGui.PushItemWidth(265)
         if ImGui.BeginCombo("Theme", SussySpt.rendering.theme) then
             for k, v in pairs(SussySpt.rendering.themes) do

@@ -1,4 +1,4 @@
-local tasks = require("../../tasks")
+local tasks = require("sussyspt/tasks")
 
 local tab = SussySpt.rendering.newTab("Singleplayer")
 

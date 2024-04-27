@@ -1,123 +1,121 @@
-local tasks = require("../../../../tasks")
-local values = require("../../../../values")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
 
 local exports = {}
 
-function exports.register(tab2)
-    local tab3 = SussySpt.rendering.newTab("Agency")
+function exports.registerVIPContracts(parentTab)
+    local tab = SussySpt.rendering.newTab("VIP Contracts")
 
-    do -- ANCHOR Preperations
-        local tab4 = SussySpt.rendering.newTab("Preperations")
+    local vipcontract
+    local vipcontractSet
+    local vipcontracts = {
+        [3] = "[Nightlife Leak] Investigation: The Nightclub",
+        [4] = "[Nightlife Leak] Investigation: The Marina",
+        [12] = "[Nightlife Leak] Nightlife Leak/Finale",
+        [28] = "[High Society Leak] Investigation: The Country Club",
+        [60] = "[High Society Leak] Investigation: Guest List",
+        [124] = "[High Society Leak] High Society Leak/Finale",
+        [252] = "[South Central Leak] Investigation: Davis",
+        [508] = "[South Central Leak] Investigation: The Ballas",
+        [2044] = "[South Central Leak] South Central Leak/Finale",
+        [-1] = "Studio Time",
+        [4092] = "Don't Fuck With Dre"
+    }
+    local vipcontractsIds = {
+        3, 4, 12, 28, 60, 124, 252, 508, 2044, -1, 4092
+    }
 
-        local a = {
-            vipcontracts = {
-                [3] = "Nightlife Leak -> Investigation: The Nightclub",
-                [4] = "Nightlife Leak -> Investigation: The Marina",
-                [12] = "Nightlife Leak -> Nightlife Leak/Finale",
-                [28] = "High Society Leak -> Investigation: The Country Club",
-                [60] = "High Society Leak -> Investigation: Guest List",
-                [124] = "High Society Leak -> High Society Leak/Finale",
-                [252] = "South Central Leak -> Investigation: Davis",
-                [508] = "South Central Leak -> Investigation: The Ballas",
-                [2044] = "South Central Leak -> South Central Leak/Finale",
-                [-1] = "Studio Time",
-                [4092] = "Don't Fuck With Dre"
-            },
-            vipcontractssort = {
-                [1] = 3,
-                [2] = 4,
-                [3] = 12,
-                [4] = 28,
-                [5] = 60,
-                [6] = 124,
-                [7] = 252,
-                [8] = 508,
-                [9] = 2044,
-                [10] = -1,
-                [11] = 4092
-            }
-        }
+    local scriptName = "fm_mission_controller_2020"
+    local scriptHash = joaat(scriptName)
+    local scriptRunning = false
 
-        local function refresh()
-            local mpx = yu.mpx()
-
-            a.vipcontract = stats.get_int(mpx.."FIXER_STORY_BS")
+    local function completePreps(mpx)
+        for _, stat in pairs({ "FIXER_GENERAL_BS", "FIXER_COMPLETED_BS", "FIXER_STORY_STRAND", "FIXER_STORY_COOLDOWN" }) do
+            stats.set_int(mpx..stat, -1)
         end
-        tasks.addTask(refresh)
-
-        function tab4.render()
-            if ImGui.SmallButton("Refresh") then
-                tasks.addTask(refresh)
-            end
-
-            ImGui.Separator()
-
-            local re = yu.rendering.renderList(a.vipcontracts, a.vipcontract, "vipcontract", "The Dr. Dre VIP Contract", a.vipcontractssort)
-            if re.changed then
-                a.vipcontract = re.key
-                a.vipcontractchanged = true
-            end
-
-            ImGui.Spacing()
-
-            if ImGui.Button("Apply##stats") then
-                tasks.addTask(function()
-                    local changes = 0
-
-                    -- The Dr. Dre VIP Contract
-                    if a.vipcontractchanged then
-                        changes = changes + 1
-
-                        stats.set_int(yu.mpx("FIXER_STORY_BS"), a.vipcontract)
-
-                        for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_STRAND","FIXER_STORY_COOLDOWN"}) do
-                            stats.set_int(yu.mpx(v), -1)
-                        end
-
-                        if a.vipcontract == -1 then
-                            stats.set_int(yu.mpx("FIXER_STORY_STRAND"), -1)
-                        end
-                    end
-
-                    yu.notify(1, changes.." change"..yu.shc(changes == 1, "", "s").." applied.", "Agency")
-                    for k, v in pairs(a) do
-                        if tostring(k):endswith("changed") then
-                            a[k] = nil
-                        end
-                    end
-                end)
-            end
-
-            ImGui.SameLine()
-
-            if ImGui.Button("Complete preps") then
-                tasks.addTask(function()
-                    for k, v in pairs({"FIXER_GENERAL_BS","FIXER_COMPLETED_BS","FIXER_STORY_BS","FIXER_STORY_COOLDOWN"}) do
-                        stats.set_int(yu.mpx(v), -1)
-                    end
-                end)
-            end
-        end
-
-        tab3.sub[1] = tab4
     end
 
-    do -- ANCHOR Extra
-        local tab4 = SussySpt.rendering.newTab("Extra")
+    local function tick()
+        local mpx = yu.mpx()
 
-        function tab4.render()
-            if ImGui.Button("Instant finish (solo)") then
-                tasks.addTask(function()
-                    locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish1, 51338752)
-                    locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish2, 50)
-                end)
+        if vipcontractSet ~= nil then
+            stats.set_int(mpx.."FIXER_STORY_BS", vipcontractSet)
+
+            completePreps(mpx)
+
+            if vipcontractSet == -1 then stats.set_int(mpx.."FIXER_STORY_STRAND", -1) end
+
+            vipcontractSet = nil
+        end
+
+        vipcontract = stats.get_int(mpx.."FIXER_STORY_BS")
+
+        scriptRunning = yu.is_script_running_hash(scriptHash)
+    end
+
+    function tab.render()
+        tasks.tasks.screen = tick
+
+        if vipcontract == nil then return end
+
+        ImGui.Text("Vip Contracts")
+
+        ImGui.BeginGroup()
+        if ImGui.BeginListBox("##vipcontract_list", 410, 310) then
+            for _, k in pairs(vipcontractsIds) do
+                local v = vipcontracts[k]
+                local selected = vipcontract == k
+                if ImGui.Selectable(v, selected) and not selected then
+                    vipcontractSet = k
+                end
             end
 
+            ImGui.EndListBox()
+        end
+        ImGui.EndGroup()
+
+        ImGui.SameLine()
+
+        ImGui.BeginGroup()
+
+        if ImGui.Button("Remove cooldown") then
+            tasks.addTask(function()
+                globals.set_int(values.g.fm + values.g.agency_cooldown, 0)
+            end)
+        end
+
+        ImGui.BeginDisabled(not scriptRunning)
+        if ImGui.Button("Instant finish (solo)") then
+            tasks.addTask(function()
+                locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish1, 51338752)
+                locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish2, 50)
+            end)
+        end
+        ImGui.EndDisabled()
+
+        ImGui.EndGroup()
+    end
+
+    parentTab.sub[1] = tab
+end
+
+function exports.registerExtra()
+end
+
+function exports.register(parentTab)
+    local tab = SussySpt.rendering.newTab("Agency")
+
+    exports.registerVIPContracts(tab)
+
+    do -- ANCHOR Extra
+        local tab2 = SussySpt.rendering.newTab("Extra")
+
+        function tab2.render()
             ImGui.Spacing()
 
             if ImGui.Button("Remove cooldown") then
                 tasks.addTask(function()
-                    globals.set_int(values.g.fm + values.g.agency_cooldown, 0)
+
                 end)
             end
 
@@ -140,10 +138,10 @@ function exports.register(tab2)
             end)
         end
 
-        tab3.sub[2] = tab4
+        tab.sub[2] = tab2
     end
 
-    tab2.sub[2] = tab3
+    parentTab.sub[#parentTab.sub + 1] = tab
 end -- !SECTION
 
 return exports

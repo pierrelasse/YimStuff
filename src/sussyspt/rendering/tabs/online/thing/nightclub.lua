@@ -1,4 +1,4 @@
-local tasks = require("../../../../tasks")
+local tasks = require("sussyspt/tasks")
 
 local exports = {}
 

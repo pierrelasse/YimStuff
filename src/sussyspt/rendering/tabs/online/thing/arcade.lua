@@ -1,5 +1,5 @@
-local tasks = require("../../../../tasks")
-local values = require("../../../../values")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
 local addUnknownValue = require("./addUnknownValue")
 
 local exports = {}

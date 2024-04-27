@@ -1,133 +1,202 @@
-local tasks = require("../../../../tasks")
-local values = require("../../../../values")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
 local addUnknownValue = require("./addUnknownValue")
 
 local exports = {}
 
-function exports.register(tab2)
-    local tab3 = SussySpt.rendering.newTab("Casino")
+function exports.registerSlots(parentTab)
+    local tab           = SussySpt.rendering.newTab("Slots")
 
-    do -- SECTION Slots
-        local tab4 = SussySpt.rendering.newTab("Slots")
+    local scriptName    = "casino_slots"
+    local scriptHash    = joaat(scriptName)
+    local scriptRunning = false
 
-        tab3.sub[1] = tab4
-    end -- !SECTION
 
-    do -- SECTION Lucky wheel
-        local tab4 = SussySpt.rendering.newTab("Lucky wheel")
+    local slots_random_results_table = 1344
 
-        tab4.a = {}
-        local a = tab4.a
 
-        a.script = "casino_lucky_wheel"
-        a.scriptHashed = joaat(a.script)
+    local function tick()
+        scriptRunning = yu.is_script_running_hash(scriptHash)
 
-        a.prizes = {
-            [0] = "CLOTHING (1)",
-            [1] = "2,500 RP",
-            [2] = "$20,000",
-            [3] = "10,000 Chips",
-            [4] = "DISCOUNT %",
-            [5] = "5,000 RP",
-            [6] = "$30,000",
-            [7] = "15,000 Chips",
-            [8] = "CLOTHING (2)",
-            [9] = "7,500 RP",
-            [10] = "20,000 Chips",
-            [11] = "MYSTERY",
-            [12] = "CLOTHING (3)",
-            [13] = "10,000 RP",
-            [14] = "$40,000",
-            [15] = "25,000 Chips",
-            [16] = "CLOTHING (4)",
-            [17] = "15,000 RP",
-            [18] = "VEHICLE"
-        }
+        if not scriptRunning then return end
 
-        function a.tick()
-            a.scriptRunning = yu.is_script_running_hash(a.scriptHashed)
-        end
+        local shouldRig = yu.rendering.isCheckboxChecked("hbo_casinoresort_rsm")
 
-        function a.win(prize)
-            if a.scriptRunning then
-                locals.set_int(a.script, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize, prize)
-                locals.set_int(a.script, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize_state, 11)
-            end
-            return a.scriptRunning
-        end
+        local needsRun = false
 
-        function tab4.render()
-            tasks.tasks.online_thing_casino_lucky_wheel = a.tick
-
-            if not a.scriptRunning then
-                ImGui.Text("Please go near the lucky wheel at the Diamond Casino")
-                return
-            end
-
-            ImGui.Text("Click on a prize to win it")
-
-            local x, y = ImGui.GetContentRegionAvail()
-            if ImGui.BeginListBox("##prizes", 150, y) then
-                for k, v in pairs(a.prizes) do
-                    if ImGui.Selectable(v, false) then
-                        tasks.addTask(function()
-                            a.win(k)
-                        end)
+        if shouldRig then
+            for slots_iter = 3, 195, 1 do
+                if slots_iter ~= 67 and slots_iter ~= 132 then
+                    if locals.get_int("casino_slots", (slots_random_results_table) + (slots_iter)) ~= 6 then
+                        needsRun = true
                     end
                 end
-                ImGui.EndListBox()
             end
+        else
+            local sum = 0
+            for slots_iter = 3, 195, 1 do
+                if slots_iter ~= 67 and slots_iter ~= 132 then
+                    sum = sum + locals.get_int(scriptName, (slots_random_results_table) + (slots_iter))
+                end
+            end
+            needsRun = sum == 1146
         end
 
-        tab3.sub[2] = tab4
-    end -- !SECTION
-
-    do -- SECTION Story missions
-        local tab4 = SussySpt.rendering.newTab("Story missions")
-
-        local storyMissions = {
-            [1048576] = "Loose Cheng",
-            [1310785] = "House Keeping",
-            [1310915] = "Strong Arm Tactics",
-            [1311175] = "Play to Win",
-            [1311695] = "Bad Beat",
-            [1312735] = "Cashing Out"
-        }
-        local storyMissionIds = {
-            [1048576] = 0,
-            [1310785] = 1,
-            [1310915] = 2,
-            [1311175] = 3,
-            [1311695] = 4,
-            [1312735] = 5
-        }
-        local storyMission
-        local function updateStoryMission()
-            storyMission = stats.get_int(yu.mpx("VCM_FLOW_PROGRESS"))
-            addUnknownValue(storyMissions, storyMission)
-        end
-        tasks.addTask(updateStoryMission)
-
-        function tab4.render()
-            local smr = yu.rendering.renderList(storyMissions, storyMission, "hbo_casinoresort_sm", "Story mission")
-            if smr.changed then
-                storyMission = smr.key
-            end
-
-            ImGui.SameLine()
-
-            if ImGui.Button("Apply##sm") then
-                tasks.addTask(function()
-                    stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
-                    stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
-                end)
+        if needsRun then
+            for slots_iter = 3, 195, 1 do
+                if slots_iter ~= 67 and slots_iter ~= 132 then
+                    local slot_result = 6
+                    if shouldRig == false then
+                        math.randomseed(os.time() + slots_iter)
+                        slot_result = math.random(0, 7)
+                    end
+                    locals.set_int(scriptName, (slots_random_results_table) + (slots_iter), slot_result)
+                end
             end
         end
+    end
 
-        tab3.sub[3] = tab4
-    end -- !SECTION
+    function tab.render()
+        tasks.tasks.screen = tick
 
-    tab2.sub[11] = tab3
+        if not scriptRunning then
+            ImGui.Text("Please go near a slot mashine inside the casino")
+            return
+        end
+
+        ImGui.Text("Tip: Enable, spin, disable, spin, etc. to not get blocked")
+        yu.rendering.renderCheckbox("Rig slot machines", "hbo_casinoresort_rsm")
+    end
+
+    parentTab.sub[1] = tab
+end
+
+function exports.registerLuckyWheel(parentTab)
+    local tab = SussySpt.rendering.newTab("Lucky wheel")
+
+    tab.scriptName = "casino_lucky_wheel"
+    tab.scriptHash = joaat(tab.scriptName)
+
+    tab.prizes = {
+        [0] = "CLOTHING (1)",
+        [1] = "2,500 RP",
+        [2] = "$20,000",
+        [3] = "10,000 Chips",
+        [4] = "DISCOUNT %",
+        [5] = "5,000 RP",
+        [6] = "$30,000",
+        [7] = "15,000 Chips",
+        [8] = "CLOTHING (2)",
+        [9] = "7,500 RP",
+        [10] = "20,000 Chips",
+        [11] = "MYSTERY",
+        [12] = "CLOTHING (3)",
+        [13] = "10,000 RP",
+        [14] = "$40,000",
+        [15] = "25,000 Chips",
+        [16] = "CLOTHING (4)",
+        [17] = "15,000 RP",
+        [18] = "VEHICLE"
+    }
+
+    function tab.tick()
+        tab.scriptRunning = yu.is_script_running_hash(tab.scriptHash)
+    end
+
+    function tab.win(prize)
+        if tab.scriptRunning then
+            locals.set_int(tab.scriptName, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize, prize)
+            locals.set_int(tab.scriptName, values.l.lucky_wheel_win_state + values.l.lucky_wheel_prize_state, 11)
+        end
+        return tab.scriptRunning
+    end
+
+    function tab.render()
+        tasks.tasks.screen = tab.tick
+
+        if not tab.scriptRunning then
+            ImGui.Text("Please go near the lucky wheel at the Diamond Casino")
+            return
+        end
+
+        ImGui.Text("Click on a prize to win it")
+
+        local _, y = ImGui.GetContentRegionAvail()
+        if ImGui.BeginListBox("##prizes", 150, y) then
+            for k, v in pairs(tab.prizes) do
+                if ImGui.Selectable(v, false) then
+                    tasks.addTask(function()
+                        tab.win(k)
+                    end)
+                end
+            end
+            ImGui.EndListBox()
+        end
+    end
+
+    parentTab.sub[2] = tab
+end
+
+function exports.registerStoryMissions(parentTab)
+    local tab = SussySpt.rendering.newTab("Story missions")
+
+    local storyMission
+    local storyMissions = {
+        [1048576] = "Loose Cheng",
+        [1310785] = "House Keeping",
+        [1310915] = "Strong Arm Tactics",
+        [1311175] = "Play to Win",
+        [1311695] = "Bad Beat",
+        [1312735] = "Cashing Out"
+    }
+    local storyMissionIds = {
+        [1048576] = 0,
+        [1310785] = 1,
+        [1310915] = 2,
+        [1311175] = 3,
+        [1311695] = 4,
+        [1312735] = 5
+    }
+
+    local function tick()
+        storyMission = stats.get_int(yu.mpx("VCM_FLOW_PROGRESS"))
+        addUnknownValue(storyMissions, storyMission)
+    end
+
+    function tab.render()
+        tasks.tasks.screen = tick
+
+        if storyMission == nil then
+            ImGui.Text("Loading...")
+            return
+        end
+
+        local smr = yu.rendering.renderList(storyMissions, storyMission, "hbo_casinoresort_sm", "Story mission")
+        if smr.changed then
+            storyMission = smr.key
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Apply##sm") then
+            tasks.addTask(function()
+                stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
+                stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
+            end)
+        end
+    end
+
+    parentTab.sub[3] = tab
+end
+
+function exports.register(parentTab)
+    local tab = SussySpt.rendering.newTab("Casino")
+
+    exports.registerSlots(tab)
+    exports.registerLuckyWheel(tab)
+    exports.registerStoryMissions(tab)
+
+    parentTab.sub[11] = tab
 end
 
 return exports

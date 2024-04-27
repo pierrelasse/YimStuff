@@ -1,10 +1,10 @@
-local tasks = require("../../../../tasks")
-local values = require("../../../../values")
+local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
 
 local exports = {}
 
-function exports.register(tab2)
-    local tab3 = SussySpt.rendering.newTab("Apartment")
+function exports.register(parentTab)
+    local tab = SussySpt.rendering.newTab("Apartment")
 
     local a = {
         cuts15m = {
@@ -30,9 +30,9 @@ function exports.register(tab2)
     }
 
     do -- ANCHOR Preperations
-        local tab4 = SussySpt.rendering.newTab("Preperations")
+        local tab2 = SussySpt.rendering.newTab("Preperations")
 
-        function tab4.render()
+        function tab2.render()
             if ImGui.Button("Complete preps") then
                 tasks.addTask(function()
                     stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
@@ -48,13 +48,13 @@ function exports.register(tab2)
             end
         end
 
-        tab3.sub[1] = tab4
+        tab.sub[1] = tab2
     end
 
     do -- ANCHOR Extra
-        local tab4 = SussySpt.rendering.newTab("Extra")
+        local tab2 = SussySpt.rendering.newTab("Extra")
 
-        function tab4.render()
+        function tab2.render()
             if ImGui.Button("Unlock replay screen") then
                 tasks.addTask(function()
                     globals.set_int(values.g.apartment_replay, 27)
@@ -98,13 +98,13 @@ function exports.register(tab2)
             end
         end
 
-        tab3.sub[2] = tab4
+        tab.sub[2] = tab2
     end
 
     do -- ANCHOR Cuts
-        local tab4 = SussySpt.rendering.newTab("Cuts")
+        local tab2 = SussySpt.rendering.newTab("Cuts")
 
-        function tab4.render()
+        function tab2.render()
             ImGui.Text("$15m cuts")
             ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
             ImGui.Text(" > Fleeca currently works the best")
@@ -128,10 +128,10 @@ function exports.register(tab2)
             end
         end
 
-        tab3.sub[3] = tab4
+        tab.sub[3] = tab2
     end
 
-    tab2.sub[1] = tab3
+    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 return exports
