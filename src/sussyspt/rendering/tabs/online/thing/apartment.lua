@@ -114,8 +114,7 @@ function exports.register(parentTab)
 
         function tab2.render()
             ImGui.Text("$15m cuts")
-            ImGui.Text(" > Currently under development. Tutorial coming soon maybe")
-            ImGui.Text(" > Fleeca currently works the best")
+            ImGui.Text("> Very buggy. Just use silentnight for now")
             ImGui.Spacing()
 
             if a.cuts15mactive ~= true then
