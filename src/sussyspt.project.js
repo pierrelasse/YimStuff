@@ -27,7 +27,7 @@ module.exports = {
     },
 
     mapPack: (data, { path, relPath }) => {
-        if (relPath === "version.lua") {
+        if (relPath === "sussyspt/version.lua") {
             console.log(`>   Transforming ${relPath}`);
 
             data = data.replace("0 --[[VERSIONTYPE]]", isRelease ? 1 : 2);

@@ -9,7 +9,7 @@ const ensureFolderCreated = (folderPath) => { if (!fs.existsSync(folderPath)) fs
 
 const normalizePath = (path) => _path.normalize(path).replace(/\\/g, "/");
 
-function pack(srcDir, entryFile, outFile, callback, ext) {
+function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
     const modules = [];
     let moduleCounter = 0;
     const requireMapping = {};
@@ -23,29 +23,34 @@ function pack(srcDir, entryFile, outFile, callback, ext) {
     function packFile(path) {
         const moduleId = moduleCounter;
 
-        let fileContent = fs.readFileSync(path).toString()
-            .trim();
-        fileContent = fileContent.replace(/require\(["'](.+?)["']\)/g, (match, modulePath) => {
-            function getLine() {
-                return fileContent.substring(0, fileContent.indexOf(match)).split("\n").length;
-            }
-            // if (!modulePath.startsWith(".")) {
-            //     throw Error(`Module does not start with a '.'! '${modulePath}' in [${path}:${getLine()}]`);
-            // }
-            let resolved;
-            try {
-                resolved = require.resolve(modulePath, { paths: [srcDir, _path.dirname(path)] });
-            } catch (err) {
-                throw Error(`Error while resolving module path for '${modulePath}' in [${path}:${getLine()}]`);
-            }
-            resolved = normalizePath(resolved);
+        const resolveOptions = { paths: [_path.dirname(path)] };
 
-            if (!requireMapping.hasOwnProperty(resolved)) {
-                requireMapping[resolved] = ++moduleCounter;
-                packFile(resolved);
+        let fileContent = fs.readFileSync(path).toString().trim();
+
+        fileContent = fileContent.replace(/require\(["'](.+?)["']\)/g,
+            /** @param {string} modulePath */
+            (match, modulePath) => {
+                const getLine = () => fileContent.substring(0, fileContent.indexOf(match)).split("\n").length;
+
+                let resolved;
+                try {
+                    if (modulePath.startsWith(".") === true) {
+                        resolved = normalizePath(require.resolve(modulePath, resolveOptions));
+                    } else {
+                        resolved = normalizePath(`${srcDir}${modulePath}.lua`);
+                        if (fs.existsSync(resolved) === false) throw undefined;
+                    }
+                } catch (_) {
+                    throw Error(`Error while resolving module path for '${modulePath}' in [${path}:${getLine()}]`);
+                }
+
+                if (requireMapping.hasOwnProperty(resolved) === false) {
+                    requireMapping[resolved] = ++moduleCounter;
+                    packFile(resolved);
+                }
+                return `require(${requireMapping[resolved]})`;
             }
-            return `require(${requireMapping[resolved]})`;
-        });
+        );
 
         const relPath = path.replace(srcDir, "");
 
@@ -152,7 +157,7 @@ module.exports.handle = (command, parser) => {
     const packedFile = `${projectBuildDir}packed`;
     console.log("\n> Packing...");
     try {
-        out = pack(srcProjectDir, mainFile, packedFile, projectScript.mapPack, projectScript.ext ? projectScript.ext() : ".lua");
+        out = pack(srcDir, srcProjectDir, mainFile, packedFile, projectScript.mapPack, projectScript.ext ? projectScript.ext() : ".lua");
     } catch (err) {
         console.info(`> An error occured while packing files:\n${err}`);
         return true;
