@@ -209,9 +209,9 @@ do
         end
 
         api.removeErrorPath = function(s) -- ANCHOR removeErrorPath
-            local maxAmount = yu.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
+            local maxAmount = api.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
             local values = string.split(s, ":", maxAmount)
-            if yu.len(values) < 4 then
+            if api.len(values) < 4 then
                 return {
                     s,
                     -1,
