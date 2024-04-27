@@ -62,9 +62,19 @@ return {
         },
         ImGuiStyleVar = { WindowRounding = { 5 }, FrameRounding = { 2.5 } }
     },
-    FatalityBorderTest = { -- ANCHOR FatalityBorderTest
-        parent = "Fatality",
-        ImGuiCol = { BorderShadow = { 0, 0, 0, 0 } },
-        ImGuiStyleVar = { FrameBorderSize = { 4.05 } }
-    }
+    YouTube = { -- ANCHOR YouTube
+        ImGuiCol = {
+            TitleBg = { 160, 11, 10, 200 },
+            TitleBgActive = { 255, 0, 0, 200 },
+            WindowBg = { 27, 27, 26, 253 },
+            Tab = { 63, 64, 65, 250 },
+            TabActive = { 144, 145, 146, 250 },
+            TabHovered = { 128, 128, 128, 250 },
+            Button = { 54, 52, 46, 255 },
+            FrameBg = { 38, 38, 38, 255 },
+            FrameBgHovered = { 43, 43, 43, 255 },
+            FrameBgActive = { 40, 40, 40, 255 }
+        },
+        ImGuiStyleVar = { WindowRounding = { 6 }, FrameRounding = { 6 } }
+    },
 }
