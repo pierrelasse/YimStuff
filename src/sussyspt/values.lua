@@ -11,8 +11,10 @@ return {
         autoshop_payout1 = 31602,
         autoshop_payout2 = 31610,
 
-        autoshop_instantfinish1 = 48513, -- + 1,
-        autoshop_instantfinish2 = 48513 + 1378 + 1,
+        autoshop_instantfinish_1 = 48513, -- + 1,
+        autoshop_instantfinish_1_value = 51338977,
+        autoshop_instantfinish_2 = 48513 + 1378 + 1,
+        autoshop_instantfinish_2_value = 101,
         apartment_cuts_other = 1928233 + 1,
         apartment_cuts_self = 1930201 + 3008 + 1,
         apartment_replay = 2635522, -- HEIST_REPLAY_FIN
@@ -29,6 +31,14 @@ return {
         apartment_instantfinish1 = 19728,
         apartment_instantfinish2 = 28347 + 1,
         apartment_instantfinish3 = 31603 + 69,
+
+        warehouse_instant_1 = 606,
+        warehouse_instant_1_value = 1,
+        warehouse_instant_2 = 602,
+        warehouse_instant_3 = 792,
+        warehouse_instant_3_value = 6,
+        warehouse_instant_4 = 793,
+        warehouse_instant_4_value = 4,
 
         lucky_wheel_win_state = 278,
         lucky_wheel_prize = 14,
