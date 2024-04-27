@@ -23,7 +23,19 @@ return {
 
         bounty_self_time = 1 + 2359296 + 5150 + 13,
 
-        transaction_base = 4537212
+        transaction_base = 4537212,
+
+        request_service = 2738587,
+        request_service_moc = 930,
+        request_service_avenger = 938,
+        request_service_terrorbyte = 943,
+        request_service_kosatka = 960,
+        request_service_acidlab = 944,
+        request_service_dingy = 972,
+        request_service_motorbike = 994,
+        request_service_ballisticArmor = 901,
+        request_service_rcBandito = 6880,
+        request_service_rcTank = 6894
     },
     l = { -- ANCHOR Locals
         apartment_fleeca_hackstage = 11776 + 24,

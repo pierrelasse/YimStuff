@@ -62,6 +62,14 @@ function exports.register(parentTab)
             end
             yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
 
+            if ImGui.Button("All ready") then
+                tasks.addTask(function()
+                    globals.set_int(2657921 + 1 + (1 * 463) + 266, 6)
+                    globals.set_int(2657921 + 1 + (2 * 463) + 266, 6)
+                    globals.set_int(2657921 + 1 + (3 * 463) + 266, 6)
+                end)
+            end
+
             if ImGui.Button("Instant finish (solo)") then
                 tasks.addTask(function()
                     local script = "fm_mission_controller"

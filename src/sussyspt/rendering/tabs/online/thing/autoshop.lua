@@ -35,7 +35,9 @@ function exports.registerContracts(parentTab)
         end
 
         contract = stats.get_int(mpx.."TUNER_CURRENT")
-        addUnknownValue(contracts, contract)
+        if contract ~= -1 then
+            addUnknownValue(contracts, contract)
+        end
 
         scriptRunning = yu.is_script_running_hash(scriptHash)
     end
@@ -45,7 +47,7 @@ function exports.registerContracts(parentTab)
         if contract == nil then return end
 
         ImGui.BeginGroup()
-        if ImGui.BeginListBox("##contracts_list", 410, 310) then
+        if ImGui.BeginListBox("##contracts_list", 210, 226) then
             for k, v in pairs(contracts) do
                 local selected = contract == k
                 if ImGui.Selectable(v, selected) and not selected then
@@ -77,28 +79,29 @@ function exports.registerContracts(parentTab)
         if ImGui.Button("Reset contract") then
             tasks.addTask(function()
                 local mpx = yu.mpx()
-                stats.set_int(mpx.."TUNER_GEN_BS", 8371)
                 stats.set_int(mpx.."TUNER_CURRENT", -1)
+                stats.set_int(mpx.."TUNER_GEN_BS", 8371)
             end)
         end
 
         ImGui.SameLine()
 
-        if ImGui.Button("Reset stats") then
+        if ImGui.Button("Clear stats") then
             tasks.addTask(function()
-                stats.set_int(yu.mpx("TUNER_COUNT"), 0)
-                stats.set_int(yu.mpx("TUNER_EARNINGS"), 0)
+                local mpx = yu.mpx()
+                stats.set_int(mpx.."TUNER_EARNINGS", 0)
+                stats.set_int(mpx.."TUNER_COUNT", 0)
             end)
         end
-        yu.rendering.tooltip("This will set how many contracts you've done to 0 and how much you earned from it")
+        yu.rendering.tooltip("Sets earnings and contracts done to 0")
 
         ImGui.BeginDisabled(not scriptRunning)
         if ImGui.Button("Instant finish (solo)") then
             tasks.addTask(function()
                 locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish_1,
-                    values.g.autoshop_instantfinish_1_value)
+                               values.g.autoshop_instantfinish_1_value)
                 locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish_2,
-                    values.g.autoshop_instantfinish_2_value)
+                               values.g.autoshop_instantfinish_2_value)
             end)
         end
         ImGui.EndDisabled()

@@ -99,49 +99,10 @@ function exports.registerVIPContracts(parentTab)
     parentTab.sub[1] = tab
 end
 
-function exports.registerExtra()
-end
-
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("Agency")
-
     exports.registerVIPContracts(tab)
-
-    do -- ANCHOR Extra
-        local tab2 = SussySpt.rendering.newTab("Extra")
-
-        function tab2.render()
-            ImGui.Spacing()
-
-            if ImGui.Button("Remove cooldown") then
-                tasks.addTask(function()
-
-                end)
-            end
-
-            ImGui.Spacing()
-
-            yu.rendering.renderCheckbox("$2m finale", "online_thing_agency_2mfinale", function(state)
-                yu.rif(function(rs)
-                    local p = values.g.fm + values.g.agency_payout
-                    if state then
-                        while yu.rendering.isCheckboxChecked("online_thing_agency_2mfinale") do
-                            if SussySpt.in_online then
-                                globals.set_int(p, 2500000)
-                            end
-                            rs:sleep(10)
-                        end
-                    else
-                        globals.set_int(p, 1000000)
-                    end
-                end)
-            end)
-        end
-
-        tab.sub[2] = tab2
-    end
-
     parentTab.sub[#parentTab.sub + 1] = tab
-end -- !SECTION
+end
 
 return exports

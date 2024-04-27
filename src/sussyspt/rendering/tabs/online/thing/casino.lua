@@ -60,7 +60,7 @@ function exports.registerSlots(parentTab)
         tasks.tasks.screen = tick
 
         if not scriptRunning then
-            ImGui.Text("Please go near a slot mashine inside the casino")
+            ImGui.Text("Please head over to a slot machine at the Diamond Casino")
             return
         end
 
@@ -72,7 +72,7 @@ function exports.registerSlots(parentTab)
 end
 
 function exports.registerLuckyWheel(parentTab)
-    local tab = SussySpt.rendering.newTab("Lucky wheel")
+    local tab = SussySpt.rendering.newTab("Lucky Wheel")
 
     tab.scriptName = "casino_lucky_wheel"
     tab.scriptHash = joaat(tab.scriptName)
@@ -115,7 +115,7 @@ function exports.registerLuckyWheel(parentTab)
         tasks.tasks.screen = tab.tick
 
         if not tab.scriptRunning then
-            ImGui.Text("Please go near the lucky wheel at the Diamond Casino")
+            ImGui.Text("Please head over to the Lucky Wheel at the Diamond Casino")
             return
         end
 
@@ -141,25 +141,26 @@ function exports.registerStoryMissions(parentTab)
     local tab = SussySpt.rendering.newTab("Story missions")
 
     local storyMission
+    local storyMissionSet
     local storyMissions = {
-        [1048576] = "Loose Cheng",
-        [1310785] = "House Keeping",
-        [1310915] = "Strong Arm Tactics",
-        [1311175] = "Play to Win",
-        [1311695] = "Bad Beat",
-        [1312735] = "Cashing Out"
-    }
-    local storyMissionIds = {
-        [1048576] = 0,
-        [1310785] = 1,
-        [1310915] = 2,
-        [1311175] = 3,
-        [1311695] = 4,
-        [1312735] = 5
+        [0] = "Loose Cheng",
+        [1] = "House Keeping",
+        [2] = "Strong Arm Tactics",
+        [3] = "Play to Win",
+        [4] = "Bad Beat",
+        [5] = "Cashing Out"
     }
 
     local function tick()
-        storyMission = stats.get_int(yu.mpx("VCM_FLOW_PROGRESS"))
+        local mpx = yu.mpx()
+
+        if storyMissionSet ~= nil then
+            stats.set_int(mpx.."VCM_STORY_PROGRESS", storyMissionSet)
+            stats.set_int(mpx.."VCM_FLOW_PROGRESS", 1311695)
+            storyMissionSet = nil
+        end
+
+        storyMission = stats.get_int(mpx.."VCM_STORY_PROGRESS")
         addUnknownValue(storyMissions, storyMission)
     end
 
@@ -171,18 +172,15 @@ function exports.registerStoryMissions(parentTab)
             return
         end
 
-        local smr = yu.rendering.renderList(storyMissions, storyMission, "hbo_casinoresort_sm", "Story mission")
-        if smr.changed then
-            storyMission = smr.key
-        end
+        if ImGui.BeginListBox("##storymission_list", 200, 170) then
+            for k, v in pairs(storyMissions) do
+                local selected = storyMission == k
+                if ImGui.Selectable(v, selected) and not selected then
+                    storyMissionSet = k
+                end
+            end
 
-        ImGui.SameLine()
-
-        if ImGui.Button("Apply##sm") then
-            tasks.addTask(function()
-                stats.set_int(yu.mpx("VCM_STORY_PROGRESS"), storyMissionIds[storyMission])
-                stats.set_int(yu.mpx("VCM_FLOW_PROGRESS"), storyMission)
-            end)
+            ImGui.EndListBox()
         end
     end
 
