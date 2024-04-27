@@ -3,8 +3,7 @@
 where node >nul 2>nul
 if %errorlevel% neq 0 (
     echo Node.js is not installed. Please install Node.js to continue.
-    echo Official page: https://nodejs.org/
-    echo Ask chatgpt on how to install it on your system smth
+    echo Download page: https://nodejs.org/en/download
     exit /b 1
 )
 
