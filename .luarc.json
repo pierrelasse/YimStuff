@@ -1,7 +1,7 @@
 {
     "runtime": {
         "version": "Lua 5.4",
-        // "path": [ "src/?.lua" ],
+        // "path": [ "${workspace}/src/**/?.lua" ],
         "pathStrict": false
     },
     "completion": {
@@ -18,18 +18,8 @@
         ],
         "checkThirdParty": false
     },
-    "typeFormat": {
-        "config": {
-            "format_line": "false"
-        }
-    },
     "type": {
         "castNumberToInteger": false
-    },
-    "doc": {
-        "privateName": [
-            "_*"
-        ]
     },
     "diagnostics": {
         "disable": [
@@ -59,6 +49,7 @@
             "ImGuiCol",
             "ImGuiStyleVar",
             "ImGuiInputTextFlags",
+            "ImGuiHoveredFlags",
             // YimMenu
             "infraction",
             "command",
