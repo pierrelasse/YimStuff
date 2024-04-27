@@ -8,16 +8,12 @@ function exports.register(tab)
     require("./thing/autoshop").register(tab2)
     require("./thing/kosatka").register(tab2)
     require("./thing/salvageyard").register(tab2)
+    require("./thing/securoserv").register(tab2)
 
 
     -- do -- SECTION Motorcycle Club
     --     local tab3 = SussySpt.rendering.newTab("Motorcycle Club")
     --     tab2.sub[6] = tab3
-    -- end -- !SECTION
-
-    -- do -- SECTION Organization
-    --     local tab3 = SussySpt.rendering.newTab("Organization")
-    --     tab2.sub[7] = tab3
     -- end -- !SECTION
 
     -- do -- SECTION Bunker
