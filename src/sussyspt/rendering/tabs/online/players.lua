@@ -1430,6 +1430,10 @@ function exports.register(parentTab)
                                     end
                                 end)
                             end
+
+                            if ImGui.SmallButton("Boat skin crash") then
+                                require("sussyspt/rendering/tabs/online/players/boatskincrash")()
+                            end
                         end
                     end
 
