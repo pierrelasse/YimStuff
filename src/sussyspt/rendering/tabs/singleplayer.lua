@@ -2,6 +2,8 @@ local tasks = require("sussyspt/tasks")
 
 local tab = SussySpt.rendering.newTab("Singleplayer")
 
+tab.should_display = function () return not SussySpt.in_online end
+
 local a = {
     characters = {
         [0] = "Michael",
