@@ -35,7 +35,11 @@ return {
         request_service_motorbike = 994,
         request_service_ballisticArmor = 901,
         request_service_rcBandito = 6880,
-        request_service_rcTank = 6894
+        request_service_rcTank = 6894,
+
+        cayo_allready = function(index)
+            return 1971856 + 1 + (index * 27) + 8 + index
+        end
     },
     l = { -- ANCHOR Locals
         apartment_fleeca_hackstage = 11776 + 24,
@@ -74,7 +78,9 @@ return {
             50, -- GGSM_SPRITE_POWER_UP_REPULSE
             53, -- GGSM_SPRITE_POWER_UP_SHIELD
             54  -- GGSM_SPRITE_POWER_UP_STUN
-        }
+        },
+
+        heistislandplanning_board = 1544
     },
     t = { -- ANCHOR Tunables
         salvageyard_week = 488207018

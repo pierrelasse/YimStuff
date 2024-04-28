@@ -44,8 +44,9 @@ function exports.registerWarehouse(parentTab)
 
         ImGui.Text("Get crates instantly")
 
-        ImGui.PushItemWidth(150)
+        ImGui.SetNextItemWidth(150)
         local value, used = ImGui.InputInt("##input", amount, amountMin, amountMax)
+        SussySpt.pushDisableControls(ImGui.IsItemActive())
         if used then
             amount = value
         end
