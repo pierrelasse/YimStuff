@@ -1,6 +1,6 @@
 local exports = {}
 
-local global_computerType = 1962105
+-- local global_computerType = 1962105
 
 local function startScript(rs, scriptHash, stackSize, customComputerType)
     -- if yu.is_script_running_hash(scriptHash) then return end

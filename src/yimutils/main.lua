@@ -208,18 +208,19 @@ do
             return os.clock() * 1000
         end
 
-        api.removeErrorPath = function(s) -- ANCHOR removeErrorPath
-            local maxAmount = api.shc(s:getCharacterAtIndex(2) == ":", 4, 3)
-            local values = string.split(s, ":", maxAmount)
+        api.removeErrorPath = function(err) -- ANCHOR removeErrorPath
+            local errStr = tostring(err)
+            local maxAmount = api.shc(errStr:getCharacterAtIndex(2) == ":", 4, 3)
+            local values = string.split(errStr, ":", maxAmount)
             if api.len(values) < 4 then
                 return {
-                    s,
+                    errStr,
                     -1,
-                    s
+                    errStr
                 }
             end
             return {
-                s, -- full error
+                errStr, -- full error
                 values[3], -- line
                 values[4]:strip() -- error
             }
