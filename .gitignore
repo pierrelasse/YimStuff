@@ -5,8 +5,12 @@ idk
 config.json
 
 # Build
-build/**
+build
 out
 
 # Cache
 __pycache__
+
+# Node modules
+node_modules
+package-lock.json
