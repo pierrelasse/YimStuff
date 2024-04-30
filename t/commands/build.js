@@ -14,10 +14,10 @@ function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
     let moduleCounter = 0;
     const requireMapping = {};
 
-    if (!require.extensions[ext]) require.extensions[ext] = function (module, filename) { };
+    if (!require.extensions[ext]) require.extensions[ext] = function () { };
     // const prevExtensions = require.extensions;
     // require.extensions = {
-    //     [ext]: function (module, filename) { }
+    //     [ext]: function () { }
     // };
 
     function packFile(path) {
@@ -40,7 +40,7 @@ function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
                         resolved = normalizePath(`${srcDir}${modulePath}.lua`);
                         if (fs.existsSync(resolved) === false) throw undefined;
                     }
-                } catch (_) {
+                } catch (ignored) {
                     throw Error(`Error while resolving module path for '${modulePath}' in [${path}:${getLine()}]`);
                 }
 
@@ -126,7 +126,7 @@ module.exports.handle = (command, parser) => {
     const project = (parser.values[1]?.replace(/[/\\]|(\.\.)/g, "")) || "sussyspt";
     console.log(`Building project '${project}'`);
 
-    const srcDir = `${normalizePath(_path.resolve(`src/`))}/`;
+    const srcDir = `${normalizePath(_path.resolve("src/"))}/`;
 
     const projectScriptPath = `${srcDir}${project}.project.js`;
     const projectScript = fs.existsSync(projectScriptPath) ? require(projectScriptPath) : {};
@@ -148,7 +148,7 @@ module.exports.handle = (command, parser) => {
     }
 
 
-    const buildDir = `${normalizePath(_path.resolve(`build/`))}/`;
+    const buildDir = `${normalizePath(_path.resolve("build/"))}/`;
     const projectBuildDir = `${buildDir}${project}/`;
     ensureFolderCreated(projectBuildDir);
 
