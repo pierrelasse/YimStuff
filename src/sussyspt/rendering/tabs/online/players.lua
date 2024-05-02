@@ -596,8 +596,7 @@ function exports.register(parentTab)
                             end
 
                             do
-                                local defaultText = "Marked as modder by the user"
-                                local text, changed = ImGui.InputText("##mark_input", a.markinput or defaultText, 128)
+                                local text, changed = ImGui.InputTextWithHint("##mark_input", "Reason...", a.markinput or "", 128)
                                 SussySpt.pushDisableControls(ImGui.IsItemActive())
                                 if changed then a.markinput = text end
                                 ImGui.SameLine()
