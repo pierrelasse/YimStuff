@@ -131,12 +131,13 @@ function exports.register(tab2)
         end
         yu.rendering.tooltip("This will decrease the popularity by 50 and will put $50k in the safe.")
 
-        ImGui.SameLine()
+        -- ImGui.SameLine()
 
-        if ImGui.Button("Collect money") then
-            tasks.addTask(ensureScriptAndCollectSafe)
-        end
-        yu.rendering.tooltip("Experimental")
+        -- FIXME: Fix
+        -- if ImGui.Button("Collect money") then
+        --     tasks.addTask(ensureScriptAndCollectSafe)
+        -- end
+        -- yu.rendering.tooltip("Experimental")
 
         ImGui.EndGroup()
         ImGui.BeginGroup()
