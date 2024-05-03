@@ -123,6 +123,8 @@ actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
         GRAPHICS.ANIMPOSTFX_STOP_ALL()
         HUD.SET_FRONTEND_ACTIVE(true)
         HUD.CLEAR_HELP(true)
+        HUD.THEFEED_HIDE()
+        MISC.FORCE_GAME_STATE_PLAYING()
     end,
     "Stop player switch"
 }
