@@ -210,7 +210,7 @@ do
 
         api.removeErrorPath = function(err) -- ANCHOR removeErrorPath
             local errStr = tostring(err)
-            local maxAmount = api.shc(errStr:getCharacterAtIndex(2) == ":", 4, 3)
+            local maxAmount = errStr:getCharacterAtIndex(2) == ":" and 4 or 3
             local values = string.split(errStr, ":", maxAmount)
             if api.len(values) < 4 then
                 return {
@@ -271,7 +271,7 @@ do
             end
         end
         function string.split(str, delimiters, max)
-            local result = {} -- [0] = str
+            local result = {}
             if type(str) == "string" then
                 if type(delimiters) == "string" then
                     delimiters = {delimiters}
