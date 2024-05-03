@@ -33,15 +33,13 @@ function exports.register(parentTab)
         local tab2 = SussySpt.rendering.newTab("Preperations")
 
         function tab2.render()
-            if ImGui.Button("Complete preps") then
+            if ImGui.Button("Complete preperations") then
                 tasks.addTask(function()
                     stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
                 end)
             end
 
-            ImGui.SameLine()
-
-            if ImGui.Button("Reset preps") then
+            if ImGui.Button("Reset preperations") then
                 tasks.addTask(function()
                     stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), 0)
                 end)

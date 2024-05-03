@@ -158,7 +158,7 @@ function exports.register(tab2)
             ImGui.Spacing()
 
             ImGui.BeginDisabled(not a.canSkipPreps)
-            if ImGui.Button("Skip preps") then
+            if ImGui.Button("Skip preperations") then
                 tasks.addTask(function()
                     stats.set_int(yu.mpx("SALV23_FM_PROG"), -1)
                 end)

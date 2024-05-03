@@ -154,7 +154,7 @@ local function initApartment()
                     end
                 end)
             end
-            yu.rendering.tooltip("When being passenger, you need to play snake.")
+            yu.rendering.tooltip("You need to play snake while being a passenger")
 
             ImGui.SameLine()
 

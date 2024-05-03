@@ -129,7 +129,7 @@ function exports.register(tab2)
                 stats.set_int(yu.mpx("CLUB_PAY_TIME_LEFT"), -1)
             end)
         end
-        yu.rendering.tooltip("This will decrease the popularity by 50 and will put $50k in the safe.")
+        yu.rendering.tooltip("This will decrease the popularity by 50 and will put $50k in the safe")
 
         -- ImGui.SameLine()
 
@@ -180,7 +180,7 @@ function exports.register(tab2)
                 globals.set_float(286403, yu.shc(state, 0, .025))
             end)
         end)
-        yu.rendering.tooltip("Set Tony's cut to 0.\nWhen disabled, the cut will be set back to 0.025.")
+        yu.rendering.tooltip("Set Tony's cut to 0.\nWhen disabled, the cut will be set back to 0.025")
 
         ImGui.EndGroup()
     end

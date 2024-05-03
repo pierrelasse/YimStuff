@@ -58,15 +58,14 @@ function exports.registerContracts(parentTab)
 
         ImGui.BeginGroup()
 
-        if ImGui.Button("Complete Preps") then
+        -- TODO: Check state
+        if ImGui.Button("Complete preperations") then
             tasks.addTask(function()
                 stats.set_int(yu.mpx("TUNER_GEN_BS"), -1)
             end)
         end
 
-        ImGui.SameLine()
-
-        if ImGui.Button("Reset Preps") then
+        if ImGui.Button("Reset preperations") then
             tasks.addTask(function()
                 stats.set_int(yu.mpx("TUNER_GEN_BS"), 12467)
             end)
@@ -93,12 +92,21 @@ function exports.registerContracts(parentTab)
         yu.rendering.tooltip("Sets earnings and contracts done to 0")
 
         ImGui.BeginDisabled(not scriptRunning)
-        if ImGui.Button("Instant finish (solo)") then
+        if ImGui.Button("Instant finish") then -- TODO: Check if available
             tasks.addTask(function()
-                locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish_1,
-                               values.g.autoshop_instantfinish_1_value)
-                locals.set_int("fm_mission_controller_2020", values.g.autoshop_instantfinish_2,
-                               values.g.autoshop_instantfinish_2_value)
+                locals.set_int(scriptName, values.g.autoshop_instantfinish_1, values.g.autoshop_instantfinish_1_value)
+                locals.set_int(scriptName, values.g.autoshop_instantfinish_2, values.g.autoshop_instantfinish_2_value)
+            end)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Max payout") then -- TODO: Check if available
+            tasks.addTask(function()
+                globals.set_float(values.g.autoshop_payout_1, 0) -- TODO: values
+                for _, i in pairs({ values.g.autoshop_payout_2, values.g.autoshop_payout_3 }) do
+                    globals.set_int(i, 2000000)
+                end
             end)
         end
         ImGui.EndDisabled()
@@ -110,7 +118,7 @@ function exports.registerContracts(parentTab)
 end
 
 function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Autoshop")
+    local tab = SussySpt.rendering.newTab("Auto Shop")
 
     exports.registerContracts(tab)
 

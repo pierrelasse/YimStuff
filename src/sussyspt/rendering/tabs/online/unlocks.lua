@@ -430,7 +430,7 @@ function exports.register(tab)
                         a.crank_crew = value
                         refreshCrewRank()
                     end
-                    yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews.")
+                    yu.rendering.tooltip("The crew you want to change your rank for.\nFunfact: You can join multiple crews")
                 end
 
                 do

@@ -390,7 +390,7 @@ function exports.registerHeist(parentTab)
             end)
         end
 
-        if ImGui.Button("Complete Preps") then
+        if ImGui.Button("Complete preperations") then
             tasks.addTask(function()
                 local mpx = yu.mpx()
                 stats.set_int(mpx.."H3OPT_DISRUPTSHIP", a.guardstrength)
