@@ -8,7 +8,6 @@ function exports.registerContracts(parentTab)
     local tab = SussySpt.rendering.newTab("Contracts")
 
     local contract
-    local contractSet
     local contracts = {
         [0] = "Union Depository",
         [1] = "The Superdollar Deal",
@@ -27,13 +26,6 @@ function exports.registerContracts(parentTab)
     local function tick()
         local mpx = yu.mpx()
 
-        if contractSet ~= nil then
-            stats.set_int(mpx.."TUNER_GEN_BS", contractSet == 1 and 4351 or 12543)
-            stats.set_int(mpx.."TUNER_CURRENT", contractSet)
-
-            contractSet = nil
-        end
-
         contract = stats.get_int(mpx.."TUNER_CURRENT")
         if contract ~= -1 then
             addUnknownValue(contracts, contract)
@@ -51,7 +43,11 @@ function exports.registerContracts(parentTab)
             for k, v in pairs(contracts) do
                 local selected = contract == k
                 if ImGui.Selectable(v, selected) and not selected then
-                    contractSet = k
+                    tasks.addTask(function()
+                        local mpx = yu.mpx()
+                        stats.set_int(mpx.."TUNER_GEN_BS", k == 1 and 4351 or 12543)
+                        stats.set_int(mpx.."TUNER_CURRENT", k)
+                    end)
                 end
             end
             ImGui.EndListBox()
@@ -83,6 +79,7 @@ function exports.registerContracts(parentTab)
                 stats.set_int(mpx.."TUNER_GEN_BS", 8371)
             end)
         end
+        yu.rendering.tooltip("Removes the current contract and lets you select a new one")
 
         ImGui.SameLine()
 
@@ -113,12 +110,11 @@ function exports.registerContracts(parentTab)
 end
 
 function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Auto Shop")
+    local tab = SussySpt.rendering.newTab("Autoshop")
 
     exports.registerContracts(tab)
 
     -- local a = {
-
     --     cooldowns = {}
     -- }
 
