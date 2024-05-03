@@ -5,14 +5,14 @@ labels: bug
 body:
   - type: textarea
     attributes:
-      label: Bug Description
-      description: Provide a clear and concise description of the bug.
+      label: Describe the bug
+      description: Provide a clear and concise description of what went wrong.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Steps to Reproduce
-      description: Describe the steps to reproduce the issue.
+      label: Steps to reproduce
+      description: Describe the steps to reproduce the behavior.
       placeholder: |
         1. Do this
         2. Do that
@@ -21,12 +21,21 @@ body:
   - type: textarea
     attributes:
       label: Expected Behavior
-      description: Specify what you expected to happen.
+      description: Specify what you expected to happen if the bug didn't exist.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Logs and Screenshots (if applicable)
+      label: Logs and/or Screenshots (if applicable)
+      description: |
+        Include the cout.log file from YimMenu.
+        You can find it at "%appdata%/YimMenu/cout.log".
+        Tip: You can drag and drop files here for upload.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Additional info
       description: |
         Include the cout.log file from YimMenu.
         You can find it at "%appdata%/YimMenu/cout.log".
@@ -35,13 +44,9 @@ body:
       required: false
   - type: checkboxes
     attributes:
-      label: Version
+      label: Checklist
       options:
-        - label: The issue exists in the latest version
+        - label: The issue exists using the latest version (or was not fixed)
           required: true
-  - type: checkboxes
-    attributes:
-      label: Testing Without Scripts
-      options:
-        - label: The issue does not occur without yimutils and/or SussySpt loaded
+        - label: The issue only occurs with scripts from this repository loaded
           required: false
