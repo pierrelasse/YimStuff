@@ -62,6 +62,8 @@ function exports.register(parentTab)
             end
             yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
 
+            ImGui.SameLine()
+
             if ImGui.Button("Unlock all jobs") then
                 tasks.addTask(function()
                     local mpx = yu.mpx()
@@ -78,6 +80,8 @@ function exports.register(parentTab)
                 end)
             end
 
+            ImGui.Spacing()
+
             if ImGui.Button("All ready") then
                 tasks.addTask(function()
                     globals.set_int(2657921 + 1 + (1 * 463) + 266, 6)
@@ -85,6 +89,8 @@ function exports.register(parentTab)
                     globals.set_int(2657921 + 1 + (3 * 463) + 266, 6)
                 end)
             end
+
+            ImGui.SameLine()
 
             if ImGui.Button("Instant finish (solo)") then
                 tasks.addTask(function()
@@ -97,7 +103,7 @@ function exports.register(parentTab)
                 end)
             end
 
-            ImGui.Spacing()
+            ImGui.Separator()
 
             ImGui.Text("Fleeca")
 
@@ -125,11 +131,12 @@ function exports.register(parentTab)
         tab.sub[2] = tab2
     end
 
-    do -- ANCHOR Cuts
-        local tab2 = SussySpt.rendering.newTab("Cuts")
+    do -- ANCHOR $15m cuts
+        local tab2 = SussySpt.rendering.newTab("$15m cuts")
+
+        tab2.should_display = SussySpt.getDev
 
         function tab2.render()
-            ImGui.Text("$15m cuts")
             ImGui.Text("> Very buggy. Just use silentnight for now")
             ImGui.Spacing()
 
