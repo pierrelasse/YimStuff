@@ -428,8 +428,14 @@ function exports.register(parentTab)
             local success, result = pcall(refreshPlayerlist)
             if not success then
                 SussySpt.sortedPlayers = {}
-                local err = yu.removeErrorPath(result)
-                log.warning("Error while updating the playerlist(line "..err[2].."): "..err[3])
+                local function yay()
+                    local err = yu.removeErrorPath(result)
+                    log.warning("Error while updating the playerlist(line "..err[2].."): "..err[3])
+                end
+                local success2, result2 = pcall(yay)
+                if not success2 then
+                    log.warning("Error while error while updaing the playerlist: "..tostring(result2))
+                end
             end
 
             local isOpen = a.open > 0
