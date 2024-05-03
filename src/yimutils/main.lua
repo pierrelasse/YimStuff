@@ -210,7 +210,7 @@ do
 
         api.removeErrorPath = function(err) -- ANCHOR removeErrorPath
             local errStr = tostring(err)
-            local maxAmount = errStr:getCharacterAtIndex(2) == ":" and 4 or 3
+            local maxAmount = string.getCharacterAtIndex(errStr, 2) == ":" and 4 or 3
             local values = string.split(errStr, ":", maxAmount)
             if api.len(values) < 4 then
                 return {
@@ -272,21 +272,22 @@ do
         end
         function string.split(str, delimiters, max)
             local result = {}
-            if type(str) == "string" then
-                if type(delimiters) == "string" then
-                    delimiters = {delimiters}
-                end
-                if type(delimiters) == "table" then
-                    local pattern = "("..table.concat(delimiters, "|")..")"
-                    local count = 1
-                    local doMax = type(max) == "number" and max > 0
-                    for match in (str..table.concat(delimiters, "|")):gmatch("(.-)"..pattern) do
-                        table.insert(result, match)
-                        count = count + 1
-                        if doMax and max and count > max then
-                            break
-                        end
-                    end
+            if type(str) ~= "string" then
+                return result
+            end
+            if type(delimiters) == "string" then
+                delimiters = { delimiters }
+            elseif type(delimiters) ~= "table" then
+                return result
+            end
+            local pattern = "(" .. table.concat(delimiters, "|") .. ")"
+            local count = 1
+            local doMax = type(max) == "number" and max > 0
+            for match in (str .. table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
+                table.insert(result, match)
+                count = count + 1
+                if doMax and max and count > max then
+                    break
                 end
             end
             return result
@@ -567,6 +568,10 @@ do
 
         api.is_script_running = function(name) -- ANCHOR is_script_running
             return api.is_script_running_hash(joaat(name))
+        end
+
+        function api.is_host_of_script(name, pid) -- ANCHOR is_host_of_script
+            return NETWORK.NETWORK_GET_HOST_OF_SCRIPT(name, -1, 0) == (pid or api.pid())
         end
 
         api.get_all_players = function() -- ANCHOR get_all_players
