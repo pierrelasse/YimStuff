@@ -62,6 +62,22 @@ function exports.register(parentTab)
             end
             yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
 
+            if ImGui.Button("Unlock all jobs") then
+                tasks.addTask(function()
+                    local mpx = yu.mpx()
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_0", globals.get_int(values.g.apartment_jobs_1))
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_0_L", 5)
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_1", globals.get_int(values.g.apartment_jobs_2))
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_1_L", 5)
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_2", globals.get_int(values.g.apartment_jobs_3))
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_2_L", 5)
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_3", globals.get_int(values.g.apartment_jobs_4))
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_3_L", 5)
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_4", globals.get_int(values.g.apartment_jobs_5))
+                    stats.set_int(mpx.."HEIST_SAVED_STRAND_4_L", 5)
+                end)
+            end
+
             if ImGui.Button("All ready") then
                 tasks.addTask(function()
                     globals.set_int(2657921 + 1 + (1 * 463) + 266, 6)
