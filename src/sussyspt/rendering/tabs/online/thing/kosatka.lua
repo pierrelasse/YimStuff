@@ -2,31 +2,12 @@ local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 local removeAllCameras = require("sussyspt/util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
+local renderCutsSlider = require("sussyspt/util/renderCutsSlider")
 
 local exports = {}
 
 function exports.registerHeist(parentTab)
     local tab = SussySpt.rendering.newTab("Heist")
-
-    local function renderCutsSlider(tbl, index, callback)
-        local value = tbl[index] or 85
-        local text = yu.shc((index == 0), "Non-host self cut", "Player "..index.."'s cut")
-        local newValue, changed = ImGui.DragInt(text, value, .2, 0, 250, "%d%%", 5)
-        SussySpt.pushDisableControls(ImGui.IsItemActive())
-        if changed then
-            callback(index, newValue)
-        end
-        ImGui.SameLine()
-        ImGui.PushButtonRepeat(true)
-        if ImGui.Button(" - ##cuts_-"..index) then
-            callback(index, value - 1)
-        end
-        ImGui.SameLine()
-        if ImGui.Button(" + ##cuts_+"..index) then
-            callback(index, value + 1)
-        end
-        ImGui.PopButtonRepeat()
-    end
 
     local planningShown = false
 

@@ -1,4 +1,6 @@
 local tasks = require("sussyspt/tasks")
+local values = require("sussyspt/values")
+local renderCutsSlider = require("sussyspt/util/renderCutsSlider")
 
 local exports = {}
 
@@ -32,6 +34,8 @@ function exports.registerHeist(parentTab)
 
     local prepsCompleted = true
     local actResetted = false
+
+    local cuts = {}
 
     local function getAct(mpx)
         local expProgress = stats.get_int(mpx.."GANGOPS_FLOW_MISSION_PROG")
@@ -73,6 +77,14 @@ function exports.registerHeist(parentTab)
         stats.set_int(mpx.."GANGOPS_FM_MISSION_PROG", 0)
     end
 
+    local function cutsCallback(index, newValue)
+        if index == 0 then
+            cuts[index] = globals.set_int(values.g.facility_cutsSelf, newValue)
+        else
+            globals.set_int(values.g.facility_cuts + index, newValue)
+        end
+    end
+
     local function tick()
         local mpx = yu.mpx()
 
@@ -83,6 +95,19 @@ function exports.registerHeist(parentTab)
         actResetted =
             stats.get_int(mpx.."GANGOPS_FLOW_MISSION_PROG") == 0
             and stats.get_int(mpx.."GANGOPS_HEIST_STATUS") == 0
+
+        -- allReady =
+        -- globals.get_int(values.g.cayo_readyState(1)) == 1
+        -- and globals.get_int(values.g.cayo_readyState(2)) == 1
+        -- and globals.get_int(values.g.cayo_readyState(3)) == 1
+
+        for i = 0, 4 do
+            if i == 0 then
+                cuts[i] = globals.get_int(values.g.facility_cutsSelf)
+            else
+                cuts[i] = globals.get_int(values.g.facility_cuts + i)
+            end
+        end
     end
 
     function tab.render()
@@ -166,6 +191,14 @@ function exports.registerHeist(parentTab)
         end
 
         if ImGui.TreeNodeEx("Starting") then
+            ImGui.Text("Cuts")
+            renderCutsSlider(cuts, 0, cutsCallback)
+            renderCutsSlider(cuts, 1, cutsCallback)
+            renderCutsSlider(cuts, 2, cutsCallback)
+            renderCutsSlider(cuts, 3, cutsCallback)
+            renderCutsSlider(cuts, 4, cutsCallback)
+
+            ImGui.TreePop()
         end
     end
 

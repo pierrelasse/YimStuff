@@ -29,6 +29,9 @@ values.g = {
     autoshop_instantfinish_2 = 48513 + 1378 + 1,
     autoshop_instantfinish_2_value = 101,
 
+    facility_cuts = 1959865 + 812 + 50,
+    facility_cutsSelf = 2685249 + 6615,
+
     cayo_readyState = function(index)
         return 1971856 + 1 + (index * 27) + 8 + index
     end,
