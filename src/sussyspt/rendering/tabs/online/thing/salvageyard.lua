@@ -6,13 +6,15 @@ local exports = {}
 function exports.register(tab2)
     local tab3 = SussySpt.rendering.newTab("Salvage Yard")
 
+    local claimprice
+
     local a = {
         loading = true,
 
         cooldown = {
             value = 0,
 
-            getStatHashForCharStat = function()--Position - 0xD247
+            getStatHashForCharStat = function() --Position - 0xD247
                 return STATS.GET_STAT_HASH_FOR_CHARACTER_STAT_(0, 12230, yu.playerindex(2))
             end,
             get = function(self)
@@ -28,14 +30,19 @@ function exports.register(tab2)
         },
 
         vehicleSearch = "",
-        vehicles = {"lm87","cinquemila","autarch","tigon","champion","tenf","sm722","omnisegt","growler","deity","italirsx","coquette4",
-            "jubilee","astron","comet7","torero","cheetah2","turismo2","infernus2","stafford","gt500","viseris","mamba","coquette3",
-            "stingergt","ztype","broadway","vigero2","buffalo4","ruston","gauntlet4","dominator8","btype3","swinger","feltzer3","omnis",
-            "tropos","jugular","patriot3","toros","caracara2","sentinel3","weevil","kanjo","eudora","kamacho","hellion","ellie","hermes",
-            "hustler","turismo3","buffalo5","stingertt","virtue","ignus","zentorno","neon","furia","zorrusso","thrax","vagner","panthere",
-            "italigto","s80","tyrant","entity3","torero2","neo","corsita","paragon","btype2","comet4","fr36","everon2","komoda","tailgater2",
-            "jester3","jester4","euros","zr350","cypher","dominator7","baller8","casco","yosemite2","everon","penumbra2","vstr","dominator9",
-            "schlagen","cavalcade3","clique","boor","sugoi","greenwood","brigham","issi8","seminole2","kanjosj","previon"},
+        vehicles = {
+            "lm87", "cinquemila", "autarch", "tigon", "champion", "tenf", "sm722", "omnisegt", "growler", "deity",
+            "italirsx", "coquette4", "jubilee", "astron", "comet7", "torero", "cheetah2", "turismo2", "infernus2",
+            "stafford", "gt500", "viseris", "mamba", "coquette3", "stingergt", "ztype", "broadway", "vigero2", "buffalo4",
+            "ruston", "gauntlet4", "dominator8", "btype3", "swinger", "feltzer3", "omnis", "tropos", "jugular",
+            "patriot3", "toros", "caracara2", "sentinel3", "weevil", "kanjo", "eudora", "kamacho", "hellion", "ellie",
+            "hermes", "hustler", "turismo3", "buffalo5", "stingertt", "virtue", "ignus", "zentorno", "neon", "furia",
+            "zorrusso", "thrax", "vagner", "panthere", "italigto", "s80", "tyrant", "entity3", "torero2", "neo",
+            "corsita", "paragon", "btype2", "comet4", "fr36", "everon2", "komoda", "tailgater2", "jester3", "jester4",
+            "euros", "zr350", "cypher", "dominator7", "baller8", "casco", "yosemite2", "everon", "penumbra2", "vstr",
+            "dominator9", "schlagen", "cavalcade3", "clique", "boor", "sugoi", "greenwood", "brigham", "issi8",
+            "seminole2", "kanjosj", "previon"
+        },
         translatedVehicles = {},
 
         slot = 1,
@@ -58,6 +65,8 @@ function exports.register(tab2)
         local function tick() -- ANCHOR tick
             local mpx = yu.mpx()
 
+            claimprice = tunables.get_int("SALV23_VEHICLE_CLAIM_PRICE")
+
             a.savlv23 = stats.get_int(mpx.."SALV23_GEN_BS")
             a.canSkipPreps = (a.savlv23 & (1 << 0)) ~= 0
             a.robbery = tunables.get_int("SALV23_VEHICLE_ROBBERY_"..a.slot)
@@ -77,7 +86,7 @@ function exports.register(tab2)
 
             do
                 ImGui.PushItemWidth(342)
-                local value, changed = ImGui.SliderInt("Slot", a.slot, 1, 3)
+                local value, changed = ImGui.SliderInt("Slot", a.slot, 0, 2, tostring(a.slot + 1))
                 if changed then
                     a.slot = value
                 end
@@ -153,6 +162,17 @@ function exports.register(tab2)
                 end
             end
 
+            do
+                ImGui.SetNextItemWidth(120)
+                local value, used = ImGui.InputInt("Claim price", claimprice, 0, 20000)
+                if used then
+                    tasks.addTask(function()
+                        tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE", value)
+                        tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE_FORGERY_DISCOUNT", value)
+                    end)
+                end
+            end
+
             ImGui.EndGroup()
 
             ImGui.Spacing()
@@ -164,6 +184,18 @@ function exports.register(tab2)
                 end)
             end
             ImGui.EndDisabled()
+
+            ImGui.SameLine()
+
+            if ImGui.Button("Reset preperations") then
+                tasks.addTask(function()
+                    local mpx = yu.mpx()
+                    stats.set_int(mpx.."SALV23_GEN_BS", -1)
+                    stats.set_int(mpx.."SALV23_SCOPE_BS", -1)
+                    stats.set_int(mpx.."SALV23_FM_PROG", -1)
+                    stats.set_int(mpx.."SALV23_INST_PROG", -1)
+                end)
+            end
 
             ImGui.Separator()
 
@@ -199,7 +231,8 @@ function exports.register(tab2)
                     a.cooldown.value = resp.value
                 end
                 ImGui.PopItemWidth()
-                yu.rendering.tooltip("Sets the cooldown below in seconds.\n'An error has occurred. There is a short delay before you can start another robbery.'")
+                yu.rendering.tooltip(
+                    "Sets the cooldown below in seconds.\n'An error has occurred. There is a short delay before you can start another robbery.'")
             end
 
             ImGui.SameLine()
