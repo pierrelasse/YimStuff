@@ -7,7 +7,6 @@ function exports.registerVIPContracts(parentTab)
     local tab = SussySpt.rendering.newTab("VIP Contracts")
 
     local vipcontract
-    local vipcontractSet
     local vipcontracts = {
         [3] = "[Nightlife Leak] Investigation: The Nightclub",
         [4] = "[Nightlife Leak] Investigation: The Marina",
@@ -29,36 +28,49 @@ function exports.registerVIPContracts(parentTab)
     local scriptHash = joaat(scriptName)
     local scriptRunning = false
 
-    local function completePreps(mpx)
-        for _, stat in pairs({ "FIXER_GENERAL_BS", "FIXER_COMPLETED_BS", "FIXER_STORY_STRAND", "FIXER_STORY_COOLDOWN" }) do
+    local prepsCompleted = true
+    local noCooldown = false
+    local cannotInstantFinish = true
+
+    local prepsStats = { "FIXER_GENERAL_BS", "FIXER_COMPLETED_BS", "FIXER_STORY_STRAND", "FIXER_STORY_COOLDOWN" }
+
+    local function completePreps()
+        local mpx = yu.mpx()
+        for _, stat in pairs(prepsStats) do
             stats.set_int(mpx..stat, -1)
         end
+    end
+
+    local function arePrepsCompleted(mpx)
+        for _, stat in pairs(prepsStats) do
+            if stats.get_int(mpx..stat) ~= -1 then
+                return false
+            end
+        end
+        return true
     end
 
     local function tick()
         local mpx = yu.mpx()
 
-        if vipcontractSet ~= nil then
-            stats.set_int(mpx.."FIXER_STORY_BS", vipcontractSet)
-
-            completePreps(mpx)
-
-            if vipcontractSet == -1 then stats.set_int(mpx.."FIXER_STORY_STRAND", -1) end
-
-            vipcontractSet = nil
-        end
-
         vipcontract = stats.get_int(mpx.."FIXER_STORY_BS")
 
         scriptRunning = yu.is_script_running_hash(scriptHash)
+        if scriptRunning then
+            cannotInstantFinish = not yu.is_host_of_script(scriptName)
+        end
+
+        prepsCompleted = arePrepsCompleted(mpx)
+        noCooldown = globals.get_int(values.g.agency_cooldown) == 0
     end
 
     function tab.render()
         tasks.tasks.screen = tick
 
-        if vipcontract == nil then return end
-
-        ImGui.Text("Vip Contracts")
+        if vipcontract == nil then
+            ImGui.Text("Loading...")
+            return
+        end
 
         ImGui.BeginGroup()
         if ImGui.BeginListBox("##vipcontract_list", 410, 310) then
@@ -66,7 +78,13 @@ function exports.registerVIPContracts(parentTab)
                 local v = vipcontracts[k]
                 local selected = vipcontract == k
                 if ImGui.Selectable(v, selected) and not selected then
-                    vipcontractSet = k
+                    tasks.addTask(function ()
+                        local mpx = yu.mpx()
+                        stats.set_int(mpx.."FIXER_STORY_BS", k)
+                        if k == -1 then
+                            stats.set_int(mpx.."FIXER_STORY_STRAND", -1)
+                        end
+                    end)
                 end
             end
 
@@ -78,17 +96,26 @@ function exports.registerVIPContracts(parentTab)
 
         ImGui.BeginGroup()
 
+        ImGui.BeginDisabled(prepsCompleted)
+        if ImGui.Button("Complete preperations") then
+            tasks.addTask(completePreps)
+        end
+        ImGui.EndDisabled()
+        -- TODO: Reset preps
+
+        ImGui.BeginDisabled(noCooldown)
         if ImGui.Button("Remove cooldown") then
             tasks.addTask(function()
-                globals.set_int(values.g.fm + values.g.agency_cooldown, 0)
+                globals.set_int(values.g.agency_cooldown, 0)
             end)
         end
+        ImGui.EndDisabled()
 
-        ImGui.BeginDisabled(not scriptRunning)
-        if ImGui.Button("Instant finish (solo)") then
+        ImGui.BeginDisabled(not scriptRunning or cannotInstantFinish)
+        if ImGui.Button("Instant finish") then
             tasks.addTask(function()
-                locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish1, 51338752)
-                locals.set_int("fm_mission_controller_2020", values.g.agency_instantfinish2, 50)
+                locals.set_int(scriptName, values.g.agency_instantfinish1, 51338752)
+                locals.set_int(scriptName, values.g.agency_instantfinish2, 50)
             end)
         end
         ImGui.EndDisabled()

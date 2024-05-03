@@ -278,7 +278,7 @@ function exports.registerHeist(parentTab)
 
             planningBoardReloaded =
                 not yu.is_script_running("heist_island_planning")
-                or locals.get_int("heist_island_planning", values.l.heistislandplanning_board) == 2
+                or locals.get_int("heist_island_planning", values.l.kosatka_boardStage) == 2
 
             hasHeist =
                 approach ~= 0
@@ -290,9 +290,9 @@ function exports.registerHeist(parentTab)
 
         if startingShown then
             allReady =
-                globals.get_int(values.g.cayo_allready(1)) == 1
-                and globals.get_int(values.g.cayo_allready(2)) == 1
-                and globals.get_int(values.g.cayo_allready(3)) == 1
+                globals.get_int(values.g.cayo_readyState(1)) == 1
+                and globals.get_int(values.g.cayo_readyState(2)) == 1
+                and globals.get_int(values.g.cayo_readyState(3)) == 1
 
             for i = 0, 4 do
                 if i == 0 then
@@ -542,7 +542,7 @@ function exports.registerHeist(parentTab)
             if ImGui.Button("All ready") then
                 tasks.addTask(function()
                     for i = 1, 3 do
-                        globals.set_int(values.g.cayo_allready(i), 1)
+                        globals.set_int(values.g.cayo_readyState(i), 1)
                     end
                 end)
             end

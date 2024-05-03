@@ -24,6 +24,7 @@ function exports.register(tab)
     require("./thing/arcade").register(tab2)
     require("./thing/nightclub").register(tab2)
     require("./thing/casino").register(tab2)
+    require("./thing/facility").register(tab2)
 
     tab.sub[2] = tab2
 end
