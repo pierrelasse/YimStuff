@@ -31,7 +31,7 @@ do
     cfg.load()
     yu.rendering.setCheckboxChecked("debug_console", cfg.get("debug_console", false))
 
-    SussySpt.debug("Loading SussySpt v"..version.version.." ["..version.versionId.."] build "..version.build)
+    log.info("Loading SussySpt v"..version.version.." ["..version.versionId.."] build "..version.build)
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
