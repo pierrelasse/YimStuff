@@ -20,6 +20,7 @@ This is not 100% and not everything is listed because i started doing this later
    - [George0828Zhang/Fun-House - DisableExplosionShake.lua](https://github.com/George0828Zhang/Fun-House/blob/main/DisableExplosionShake.lua): op
 
    - [YimMenu-Lua/ArcadeGames](https://github.com/YimMenu-Lua/ArcadeGames/blob/main/ggsm.lua): Online->Thing->Arcade->Games
+   - [YimMenu-Lua/YimResupplier](https://github.com/YimMenu-Lua/YimResupplier): Online->Thing->MC->Supplies
 
    - [Originns/luamenus](https://github.com/Originns/luamenus): potential feature inspiration
 
