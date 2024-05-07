@@ -47,16 +47,18 @@ function string.split(str, delimiter, max)
 
     delimiter = delimiter or " "
     local result = {}
-    local pattern = "(.-)"..delimiter
+    local pattern = "(.-)" .. delimiter
     local startPos, endPos = 1, 1
 
     while endPos do
-        startPos, endPos = str:find(pattern, endPos)
+        local pos = string.find(str, pattern, endPos)
+        if pos == nil then break end
+        startPos, endPos = pos, pos + #delimiter - 1
         if startPos and (not max or #result < max - 1) then
-            table.insert(result, str:sub(startPos, endPos - 1))
+            table.insert(result, string.sub(str, startPos, endPos - 1))
             endPos = endPos + 1
         else
-            table.insert(result, str:sub(startPos))
+            table.insert(result, string.sub(str, startPos))
             break
         end
     end
