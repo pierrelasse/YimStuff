@@ -2,7 +2,9 @@ local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 local renderCutsSlider = require("sussyspt/util/renderCutsSlider")
 
-local exports = {}
+local exports = {
+    name = "Facility"
+}
 
 function exports.registerHeist(parentTab)
     local tab = SussySpt.rendering.newTab("Heist")

@@ -54,13 +54,17 @@ end
 local function renderTab(v)
     if not (type(v.should_display) == "function" and v.should_display() == false) and
     ImGui.BeginTabItem(v.name) then
-        if type(v.render) == "function" then v.render() end
-        if yu.len(v.sub) > 0 then
-            ImGui.BeginTabBar("##tabbar_"..v.id)
-            for k1, v1 in pairs(v.sub) do renderTab(v1) end
-            ImGui.EndTabBar()
-        end
+        exports.renderTabContent(v)
         ImGui.EndTabItem()
+    end
+end
+
+function exports.renderTabContent(v)
+    if type(v.render) == "function" then v.render() end
+    if yu.len(v.sub) > 0 then
+        ImGui.BeginTabBar("##tabbar_"..v.id)
+        for _, v1 in pairs(v.sub) do renderTab(v1) end
+        ImGui.EndTabBar()
     end
 end
 

@@ -1,7 +1,9 @@
 local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 
-local exports = {}
+local exports = {
+    name = "Agency"
+}
 
 function exports.registerVIPContracts(parentTab)
     local tab = SussySpt.rendering.newTab("VIP Contracts")

@@ -2,7 +2,9 @@ local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 local addUnknownValue = require("./addUnknownValue")
 
-local exports = {}
+local exports = {
+    name = "Casino"
+}
 
 function exports.registerSlots(parentTab)
     local tab           = SussySpt.rendering.newTab("Slots")

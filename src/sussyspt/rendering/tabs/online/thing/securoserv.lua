@@ -2,7 +2,9 @@ local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 -- local cmm = require("sussyspt/util/cmm")
 
-local exports = {}
+local exports = {
+    name = "SecuroServ"
+}
 
 function exports.registerWarehouse(parentTab)
     local tab = SussySpt.rendering.newTab("Warehouse")
@@ -63,9 +65,7 @@ end
 
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("SecuroServ")
-
     exports.registerWarehouse(tab)
-
     parentTab.sub[#parentTab.sub + 1] = tab
 end
 

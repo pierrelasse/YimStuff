@@ -4,7 +4,9 @@ local removeAllCameras = require("sussyspt/util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
 local renderCutsSlider = require("sussyspt/util/renderCutsSlider")
 
-local exports = {}
+local exports = {
+    name = "Kosatka"
+}
 
 function exports.registerHeist(parentTab)
     local tab = SussySpt.rendering.newTab("Heist")
