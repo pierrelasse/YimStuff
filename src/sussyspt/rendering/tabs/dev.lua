@@ -53,19 +53,17 @@ local function renderObjectSpawner()
     ImGui.PopItemWidth()
 
     if not objSpawner.blocked and ImGui.Button("Spawn") then
-        yu.rif(function(runscript)
+        yu.rif(function(rs)
             objSpawner.blocked = true
 
             local hash = yu.rendering.isCheckboxChecked("world_objspawner_hashmodel") and joaat(objSpawner.model)
-                or tonumber(objSpawner.model)
+                or objSpawner.model
 
-            if hash == nil or not STREAMING.IS_MODEL_VALID(hash) or not STREAMING.IS_MODEL_A_VEHICLE(hash) then
+            if hash == nil or not STREAMING.IS_MODEL_VALID(hash) then
                 objSpawner.invalidmodel = true
             else
                 STREAMING.REQUEST_MODEL(hash)
-                repeat
-                    runscript:yield()
-                until STREAMING.HAS_MODEL_LOADED(hash)
+                repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
 
                 if
                     yu.rendering.isCheckboxChecked("world_objspawner_deleteprev")
@@ -215,7 +213,9 @@ local function renderParticleSpawner()
     end
 end
 
-function tab.render()
+local tab2 = SussySpt.rendering.newTab("Old")
+
+function tab2.render()
     yu.rendering.bigText("Object spawner")
     renderObjectSpawner()
     ImGui.Separator()
@@ -225,5 +225,9 @@ function tab.render()
     yu.rendering.bigText("Door controller")
     renderDoorController()
 end
+
+tab.sub[#tab.sub + 1] = tab2
+
+require("sussyspt/rendering/tabs/dev/entityspawner").register(tab)
 
 SussySpt.rendering.tabs[6] = tab
