@@ -131,6 +131,7 @@ do
             return newTable
         end
 
+        ---@deprecated
         api.splitText = function(inputText, delimiter) -- ANCHOR splitText
             return string.split(inputText, delimiter)
         end
@@ -209,18 +210,18 @@ do
         end
 
         api.removeErrorPath = function(err) -- ANCHOR removeErrorPath
-            local errStr = tostring(err)
-            local maxAmount = string.getCharacterAtIndex(errStr, 2) == ":" and 4 or 3
-            local values = string.split(errStr, ":", maxAmount)
+            err = tostring(err)
+            local values = string.split(err, ":",
+                string.getCharacterAtIndex(err, 2) == ":" and 4 or 3)
             if api.len(values) < 4 then
                 return {
-                    errStr,
+                    err,
                     -1,
-                    errStr
+                    err
                 }
             end
             return {
-                errStr, -- full error
+                err, -- full error - kinda useless ngl
                 values[3], -- line
                 values[4]:strip() -- error
             }
@@ -234,129 +235,8 @@ do
     end -- !SECTION
 
     do -- SECTION Lua - Language
-        function string.startswith(str, prefix)
-            return (str == nil or prefix == nil or prefix == "") or str:sub(1, #prefix) == prefix
-        end
-        function string.endswith(str, ending)
-            return (str == nil or ending == nil or ending == "") or str:sub(-#ending) == ending
-        end
-        function string.replace(str, what, with)
-            if type(str) == "string" and type(what) == "string" and type(with) == "string" then
-                return string.gsub(str, what, with)
-            end
-        end
-        function string.uppercase(str)
-            if type(str) == "string" then
-                return string.upper(str)
-            end
-        end
-        function string.lowercase(str)
-            if type(str) == "string" then
-                return string.lower(str)
-            end
-        end
-        function string.contains(str, value)
-            if type(str) == "string" and type(value) == "string" then
-                return string.find(str, value, 1, true) ~= nil
-            end
-        end
-        function string.containsregex(str, pattern)
-            if type(str) == "string" then
-                return string.match(str, pattern)
-            end
-        end
-        function string.length(str)
-            if type(str) == "string" then
-                return string.len(str)
-            end
-        end
-        function string.split(str, delimiters, max)
-            local result = {}
-            if type(str) ~= "string" then
-                return result
-            end
-            if type(delimiters) == "string" then
-                delimiters = { delimiters }
-            elseif type(delimiters) ~= "table" then
-                return result
-            end
-            local pattern = "(" .. table.concat(delimiters, "|") .. ")"
-            local count = 1
-            local doMax = type(max) == "number" and max > 0
-            for match in (str .. table.concat(delimiters, "|")):gmatch("(.-)" .. pattern) do
-                table.insert(result, match)
-                count = count + 1
-                if doMax and max and count > max then
-                    break
-                end
-            end
-            return result
-        end
-        function string.strip(str)
-            if type(str) == "string" then
-                return str:gsub("^%s*(.-)%s*$", "%1")
-            end
-        end
-        function string.trim(str)
-            if type(str) == "string" then
-                return str:gsub("%s+", " ")
-            end
-        end
-        function string.substring(str, startIndex, endIndex)
-            if type(str) == "string" then
-                return string.sub(str, startIndex, endIndex)
-            end
-        end
-        function string.getCharacterAtIndex(str, index)
-            if type(str) == "string" and type(index) == "number" and index >= 1 and index <= #str then
-                return str:sub(index, index)
-            end
-        end
-
-        function table.length(tbl)
-            if type(tbl) == "table" then
-                local i = 0
-                for k, v in pairs(tbl) do
-                    i = i + 1
-                end
-                return i
-            end
-        end
-        function table.unpck(tbl, endIndex, startIndex)
-            startIndex = startIndex or 1
-            endIndex = endIndex or #tbl
-            if startIndex <= endIndex then
-                return tbl[startIndex], table.unpck(tbl, endIndex, startIndex + 1)
-            end
-        end
-        function table.join(tbl, delimiter)
-            local result = ""
-            if type(tbl) == "table" and type(delimiter) == "string" then
-                for i, value in ipairs(tbl) do
-                    result = result..value
-                    if i < #tbl then
-                        result = result..delimiter
-                    end
-                end
-            end
-            return result
-        end
-        function table.swap(tbl, index1, index2)
-            if type(tbl) == "table" and type(index1) == "number" and type(index2) == "number" then
-                tbl[index1], tbl[index2] = tbl[index2], tbl[index1]
-                return tbl
-            end
-        end
-        function table.compare(tbl, tbl2)
-            if type(tbl) == "table" and type(tbl2) == "table" then
-                for k, v in pairs(tbl) do
-                    if v ~= tbl2[k] then
-                        return false
-                    end
-                end
-                return true
-            end
-        end
+        require("yimutils/featuresString")
+        require("yimutils/featuresTable")
     end -- !SECTION
 
     do -- SECTION Lua - Math
