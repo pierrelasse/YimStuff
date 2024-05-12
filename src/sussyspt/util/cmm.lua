@@ -17,7 +17,7 @@ function exports.master(rs) startScript(rs, "apparcadebusinesshub", 1424) end
 
 function exports.bunker(rs) startScript(rs, "appBunkerBusiness", 1424) end
 
-function exports.biker(rs) startScript(rs, "appBikerBusiness", 4592) end
+function exports.biker(rs) startScript(rs, "appBikerBusiness", 4592, 0) end
 
 function exports.biker_cocaine(rs) startScript(rs, "appBikerBusiness", 4592, 8) end
 
@@ -41,9 +41,7 @@ function exports.biker_documents(rs) startScript(rs, "appBikerBusiness", 4592, 1
 --     startScript(rs, "appSmuggler", 4592)
 -- end
 
--- function exports.arcade(rs)
---     startScript(rs, "appArcadeBusiness", 4592)
--- end
+function exports.arcade(rs) startScript(rs, "appArcadeBusiness", 4592) end
 
 -- function exports.avenger(rs)
 --     startScript(rs, "appAvengerOperations", 4592)
