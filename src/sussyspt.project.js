@@ -10,7 +10,15 @@ function getMinify() {
 }
 
 function expandEnvVars(input) {
-    return input.replace(/%([^%]+)%/g, (_, n) => process.env[n])
+    return input.replace(/%([^%]+)%/g, (_, n) => process.env[n]);
+}
+
+function upgradeVersionId() {
+    console.log(">  Upgrading version id");
+    const filePath = "src/sussyspt/version.lua";
+    let content = fs.readFileSync(filePath, "utf8");
+    content = content.replace(/(\d+) --\[\[VERSIONID]]/, (_, num) => `${parseInt(num, 10) + 1} --[[VERSIONID]]`);
+    fs.writeFileSync(filePath, content);
 }
 
 let parser;
@@ -20,13 +28,15 @@ module.exports = {
     configure: (parserIn) => {
         parser = parserIn;
         isRelease = parser.hasShort("re") || parser.hasLong("release");
+
+        upgradeVersionId();
     },
 
     outName: () => {
-        return "SussySpt.lua"
+        return "SussySpt.lua";
     },
 
-    mapPack: (data, { path, relPath }) => {
+    mapPack: (data, { _path, relPath }) => {
         if (relPath === "sussyspt/version.lua") {
             console.log(`>   Transforming ${relPath}`);
 
@@ -45,11 +55,11 @@ module.exports = {
 
         try {
             const minify = getMinify();
-            if (minify !== undefined) {
+            if (minify === undefined) {
+                console.log("> Minifying not available. Use 't installminify' to install the minifier");
+            } else {
                 data = `--[[ More info & source @ https://github.com/pierrelasse/YimStuff ]]\n${minify(data)}\n`;
                 console.log("> Minified!");
-            } else {
-                console.log(`> Minifying not available. Use 't installminify' to install the minifier`);
             }
         } catch (err) {
             throw new Error(`An error occured while minifing the file:\n${err.stack || err}`);
