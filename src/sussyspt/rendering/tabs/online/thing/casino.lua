@@ -1,10 +1,25 @@
 local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 local addUnknownValue = require("./addUnknownValue")
+local blipTp = require("sussyspt/util/blipTp")
 
 local exports = {
     name = "Casino"
 }
+
+function exports.registerManage(parentTab)
+    local tab = SussySpt.rendering.newTab("Manage")
+
+    local function tpTo()
+        PED.SET_PED_COORDS_KEEP_VEHICLE(yu.ppid(), 925.2, 46.5, 80.4)
+    end
+
+    function tab.render()
+        if ImGui.Button("Teleport to the Diamond Casino") then tasks.addTask(tpTo) end
+    end
+
+    parentTab.sub[#parentTab.sub + 1] = tab
+end
 
 function exports.registerSlots(parentTab)
     local tab           = SussySpt.rendering.newTab("Slots")
@@ -70,7 +85,7 @@ function exports.registerSlots(parentTab)
         yu.rendering.renderCheckbox("Rig slot machines", "hbo_casinoresort_rsm")
     end
 
-    parentTab.sub[1] = tab
+    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 function exports.registerLuckyWheel(parentTab)
@@ -136,7 +151,7 @@ function exports.registerLuckyWheel(parentTab)
         end
     end
 
-    parentTab.sub[2] = tab
+    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 function exports.registerStoryMissions(parentTab)
@@ -186,17 +201,14 @@ function exports.registerStoryMissions(parentTab)
         end
     end
 
-    parentTab.sub[3] = tab
+    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Casino")
-
+function exports.register(tab)
+    exports.registerManage(tab)
     exports.registerSlots(tab)
     exports.registerLuckyWheel(tab)
     exports.registerStoryMissions(tab)
-
-    parentTab.sub[11] = tab
 end
 
 return exports

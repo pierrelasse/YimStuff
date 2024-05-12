@@ -5,6 +5,23 @@ local exports = {
     name = "Agency"
 }
 
+function exports.registerOther(parentTab)
+    local tab = SussySpt.rendering.newTab("Other")
+
+    function tab.render()
+        if ImGui.Button("Pay now") then
+            tasks.addTask(function()
+                local mpx = yu.mpx()
+                stats.set_int(mpx.."FIXER_COUNT", 500)
+                stats.set_int(mpx.."FIXER_PASSIVE_PAY_TIME_LEFT", -1)
+            end)
+        end
+        yu.rendering.tooltip("Puts $10,000 in your safe.\nIt can take a few seconds until the money appears")
+    end
+
+    parentTab.sub[#parentTab.sub + 1] = tab
+end
+
 function exports.registerVIPContracts(parentTab)
     local tab = SussySpt.rendering.newTab("VIP Contracts")
 
@@ -80,7 +97,7 @@ function exports.registerVIPContracts(parentTab)
                 local v = vipcontracts[k]
                 local selected = vipcontract == k
                 if ImGui.Selectable(v, selected) and not selected then
-                    tasks.addTask(function ()
+                    tasks.addTask(function()
                         local mpx = yu.mpx()
                         stats.set_int(mpx.."FIXER_STORY_BS", k)
                         if k == -1 then
@@ -125,13 +142,12 @@ function exports.registerVIPContracts(parentTab)
         ImGui.EndGroup()
     end
 
-    parentTab.sub[1] = tab
+    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Agency")
+function exports.register(tab)
+    exports.registerOther(tab)
     exports.registerVIPContracts(tab)
-    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 return exports

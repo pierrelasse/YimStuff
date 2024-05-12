@@ -1,10 +1,23 @@
 local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
+-- local cmm = require("sussyspt/util/cmm")
 local addUnknownValue = require("./addUnknownValue")
 
 local exports = {
     name = "Arcade"
 }
+
+-- function exports.registerComputer(parentTab)
+--     local tab = SussySpt.rendering.newTab("Computer")
+
+--     function tab.render()
+--         -- if ImGui.Button("Open arcade computer") then
+--         --     tasks.addTask(cmm.arcade)
+--         -- end
+--     end
+
+--     parentTab.sub[#parentTab.sub + 1] = tab
+-- end
 
 function exports.registerHeist(parentTab)
     local tab = SussySpt.rendering.newTab("Heist")
@@ -750,11 +763,10 @@ function exports.registerGames(parentTab)
     parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Arcade")
+function exports.register(tab)
+    -- exports.registerComputer(tab)
     exports.registerHeist(tab)
     exports.registerGames(tab)
-    parentTab.sub[9] = tab
 end
 
 return exports

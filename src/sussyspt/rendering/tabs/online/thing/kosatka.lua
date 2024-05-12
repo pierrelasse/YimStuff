@@ -3,10 +3,55 @@ local values = require("sussyspt/values")
 local removeAllCameras = require("sussyspt/util/removeAllCameras")
 local addUnknownValue = require("./addUnknownValue")
 local renderCutsSlider = require("sussyspt/util/renderCutsSlider")
+local blipTp = require("sussyspt/util/blipTp")
 
 local exports = {
     name = "Kosatka"
 }
+
+function exports.registerManage(parentTab)
+    local tab = SussySpt.rendering.newTab("Manage")
+
+    local function tpKosatka()
+        blipTp(760 --[[ radar_sub2 ]])
+    end
+
+    function tab.render()
+        if ImGui.Button("Request Kosatka") then
+            tasks.addTask(function()
+                globals.set_int(values.g.request_service + values.g.request_service_kosatka, 1)
+            end)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Teleport to Kosatka") then
+            tasks.addTask(tpKosatka)
+        end
+
+        -- if ImGui.Button("Request Sparrow") then
+        --     tasks.addTask(function()
+        --         globals.set_int(values.g.request_service + values.g.request_service_sparrow, 1)
+        --     end)
+        -- end
+
+        -- ImGui.SameLine()
+
+        -- if ImGui.Button("Request Avisa") then
+        --     tasks.addTask(function()
+        --         globals.set_int(values.g.request_service + values.g.request_service_avisa, 1)
+        --     end)
+        -- end
+
+        if ImGui.Button("Request Dinghy") then
+            tasks.addTask(function()
+                globals.set_int(values.g.request_service + values.g.request_service_dingy, 1)
+            end)
+        end
+    end
+
+    parentTab.sub[#parentTab.sub + 1] = tab
+end
 
 function exports.registerHeist(parentTab)
     local tab = SussySpt.rendering.newTab("Heist")
@@ -648,46 +693,10 @@ function exports.registerMissiles(parentTab)
     parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.registerManage(parentTab)
-    local tab = SussySpt.rendering.newTab("Manage")
-
-    function tab.render()
-        if ImGui.Button("Request Kosatka") then
-            tasks.addTask(function()
-                globals.set_int(values.g.request_service + values.g.request_service_kosatka, 1)
-            end)
-        end
-
-        -- if ImGui.Button("Request Sparrow") then
-        --     tasks.addTask(function()
-        --         -- globals.set_int(values.g.request_service + values.g.request_service_sparrow, 1)
-        --     end)
-        -- end
-
-        -- ImGui.SameLine()
-
-        -- if ImGui.Button("Request Avisa") then
-        --     tasks.addTask(function()
-        --         -- globals.set_int(values.g.request_service + values.g.request_service_avisa, 1)
-        --     end)
-        -- end
-
-        if ImGui.Button("Request Dinghy") then
-            tasks.addTask(function()
-                globals.set_int(values.g.request_service + values.g.request_service_dingy, 1)
-            end)
-        end
-    end
-
-    parentTab.sub[#parentTab.sub + 1] = tab
-end
-
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Kosatka")
+function exports.register(tab)
+    exports.registerManage(tab)
     exports.registerHeist(tab)
     exports.registerMissiles(tab)
-    exports.registerManage(tab)
-    parentTab.sub[4] = tab
 end
 
 return exports

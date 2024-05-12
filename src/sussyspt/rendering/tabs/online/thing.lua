@@ -2,6 +2,16 @@ local renderManager = require("sussyspt/rendering/renderManager")
 
 local exports = {}
 
+function exports.loadTabs(item)
+    for k, v in pairs(item.tabs) do
+        if type(v) == "function" then
+            item.tabs[k] = v()
+        else
+            item.tabs[k] = nil
+        end
+    end
+end
+
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("Thing")
 
@@ -15,13 +25,16 @@ function exports.register(parentTab)
         require("./thing/salvageyard"),
         require("./thing/mc"),
         require("./thing/autoshop"),
-        -- require("./thing/hangar"),
+        require("./thing/hangar"),
         require("./thing/bunker"),
         require("./thing/arcade"),
         require("./thing/nightclub")
     }
 
-    for _, item in ipairs(modules) do item.stage = false end
+    for _, item in ipairs(modules) do
+        item.parent = exports
+        item.stage = false
+    end
 
     local selected
 
@@ -39,19 +52,25 @@ function exports.register(parentTab)
             ImGui.Separator()
 
             if selected.stage == nil then
-                local renderFunc = selected.render or function()
-                    for _, modTab in pairs(selected.tab.sub) do
-                        renderManager.renderTabContent(modTab)
-                        break
-                    end
-                end
-                renderFunc()
+                selected.render()
             else
                 if selected.stage == false then
                     selected.stage = true
                     local loadFunc = selected.load or function()
-                        selected.tab = { sub = {} }
-                        selected.register(selected.tab)
+                        if selected.render == nil then
+                            selected.subTabs = {}
+                            selected.register({ sub = selected.subTabs })
+
+                            selected.render = function()
+                                if ImGui.BeginTabBar("##tabbar_thing_"..selected.name) then
+                                    for _, subTab in pairs(selected.subTabs) do
+                                        renderManager.renderTab(subTab)
+                                    end
+                                    ImGui.EndTabBar()
+                                end
+                            end
+                        end
+
                         selected.stage = nil
                     end
                     loadFunc()

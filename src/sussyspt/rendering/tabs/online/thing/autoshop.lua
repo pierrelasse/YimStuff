@@ -103,7 +103,7 @@ function exports.registerContracts(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Max payout") then -- TODO: Check if available
+        if ImGui.Button("Max payout") then                       -- TODO: Check if available
             tasks.addTask(function()
                 globals.set_float(values.g.autoshop_payout_1, 0) -- TODO: values
                 for _, i in pairs({ values.g.autoshop_payout_2, values.g.autoshop_payout_3 }) do
@@ -119,81 +119,77 @@ function exports.registerContracts(parentTab)
     parentTab.sub[1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Auto Shop")
-
+function exports.register(tab)
     exports.registerContracts(tab)
-
-    -- local a = {
-    --     cooldowns = {}
-    -- }
-
-    -- do -- ANCHOR Cooldowns
-    --     local tab2 = SussySpt.rendering.newTab("Cooldowns")
-
-    --     local function refreshCooldown(mpx, i)
-    --         local cooldown = math.max(0,
-    --                                   stats.get_int(mpx.."TUNER_CONTRACT"..i.."_POSIX") - os.time())
-
-    --         a.cooldowns[i] = {
-    --             a.heists[i],
-    --             yu.format_seconds(cooldown)
-    --         }
-    --     end
-
-    --     local function refresh()
-    --         local mpx = yu.mpx()
-    --         for i = 0, 7 do
-    --             refreshCooldown(mpx, i)
-    --         end
-    --     end
-    --     tasks.addTask(refresh)
-
-    --     function tab2.render()
-    --         if ImGui.SmallButton("Refresh") then
-    --             tasks.addTask(refresh)
-    --         end
-
-    --         ImGui.Separator()
-
-    --         if ImGui.BeginTable("cooldowns", 3, 3905) then
-    --             ImGui.TableSetupColumn("Contract")
-    --             ImGui.TableSetupColumn("Cooldown")
-    --             ImGui.TableSetupColumn("Actions")
-    --             ImGui.TableHeadersRow()
-
-    --             local row = 0
-    --             for k, v in pairs(a.cooldowns) do
-    --                 ImGui.TableNextRow()
-
-    --                 ImGui.PushID(row)
-
-    --                 ImGui.TableSetColumnIndex(0)
-    --                 ImGui.Text(v[1])
-
-    --                 ImGui.TableSetColumnIndex(1)
-    --                 ImGui.Text(v[2])
-
-    --                 ImGui.TableSetColumnIndex(2)
-    --                 if ImGui.Button("Clear##row_"..row) then
-    --                     tasks.addTask(function()
-    --                         stats.set_int(yu.mpx("TUNER_CONTRACT"..k.."_POSIX"), os.time())
-    --                         refreshCooldown(yu.mpx(), k)
-    --                     end)
-    --                 end
-
-    --                 ImGui.PopID()
-    --                 row = row + 1
-    --             end
-
-    --             ImGui.EndTable()
-    --         end
-    --     end
-
-    --     tab.sub[2] = tab2
-    -- end
-
-    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 return exports
+
+-- local a = {
+--     cooldowns = {}
+-- }
+
+-- do -- ANCHOR Cooldowns
+--     local tab2 = SussySpt.rendering.newTab("Cooldowns")
+
+--     local function refreshCooldown(mpx, i)
+--         local cooldown = math.max(0,
+--                                   stats.get_int(mpx.."TUNER_CONTRACT"..i.."_POSIX") - os.time())
+
+--         a.cooldowns[i] = {
+--             a.heists[i],
+--             yu.format_seconds(cooldown)
+--         }
+--     end
+
+--     local function refresh()
+--         local mpx = yu.mpx()
+--         for i = 0, 7 do
+--             refreshCooldown(mpx, i)
+--         end
+--     end
+--     tasks.addTask(refresh)
+
+--     function tab2.render()
+--         if ImGui.SmallButton("Refresh") then
+--             tasks.addTask(refresh)
+--         end
+
+--         ImGui.Separator()
+
+--         if ImGui.BeginTable("cooldowns", 3, 3905) then
+--             ImGui.TableSetupColumn("Contract")
+--             ImGui.TableSetupColumn("Cooldown")
+--             ImGui.TableSetupColumn("Actions")
+--             ImGui.TableHeadersRow()
+
+--             local row = 0
+--             for k, v in pairs(a.cooldowns) do
+--                 ImGui.TableNextRow()
+
+--                 ImGui.PushID(row)
+
+--                 ImGui.TableSetColumnIndex(0)
+--                 ImGui.Text(v[1])
+
+--                 ImGui.TableSetColumnIndex(1)
+--                 ImGui.Text(v[2])
+
+--                 ImGui.TableSetColumnIndex(2)
+--                 if ImGui.Button("Clear##row_"..row) then
+--                     tasks.addTask(function()
+--                         stats.set_int(yu.mpx("TUNER_CONTRACT"..k.."_POSIX"), os.time())
+--                         refreshCooldown(yu.mpx(), k)
+--                     end)
+--                 end
+
+--                 ImGui.PopID()
+--                 row = row + 1
+--             end
+
+--             ImGui.EndTable()
+--         end
+--     end
+
+--     tab.sub[2] = tab2
+-- end

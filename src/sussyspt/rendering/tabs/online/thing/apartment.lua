@@ -5,56 +5,52 @@ local exports = {
     name = "Apartment"
 }
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Apartment")
+local function registerHeists(parentTab)
+    local heist
+    local heists = {
+        "The Freeca Job",
+        "The Prison Break",
+        "The Humane Labs Raid",
+        "The Pacific Standard Job",
+        "Series A Funding"
+    }
 
-    local a = {
-        cuts15m = {
-            heists = {
-                ["The Freeca Job"] = 7453,
-                ["The Prison Break"] = 2142,
-                ["The Humane Labs Raid"] = 1587,
-                ["The Pacific Standard Job"] = 1000,
-                ["Series A Funding"] = 2121
-            },
-            set = {
-                crew = function(v)
-                    globals.set_int(values.g.apartment_cuts_other + 1, 100 - (v * 4))
-                    globals.set_int(values.g.apartment_cuts_other + 2, v)
-                    globals.set_int(values.g.apartment_cuts_other + 3, v)
-                    globals.set_int(values.g.apartment_cuts_other + 4, v)
-                end,
-                self = function(v)
-                    globals.set_int(values.g.apartment_cuts_self, v)
-                end
-            }
+    local cuts15m = {
+        crew = function(v, two)
+            globals.set_int(values.g.apartment_cuts_other + 1, 100 - (v * (two and 2 or 4)))
+            globals.set_int(values.g.apartment_cuts_other + 2, v)
+            if not two then
+                globals.set_int(values.g.apartment_cuts_other + 3, v)
+                globals.set_int(values.g.apartment_cuts_other + 4, v)
+            end
+        end,
+        self = function(v)
+            globals.set_int(values.g.apartment_cuts_self, v)
+        end,
+
+        values = {
+            7453, 2142,
+            1587, 1000, 2121
         }
     }
 
-    do -- ANCHOR Preperations
-        local tab2 = SussySpt.rendering.newTab("Preperations")
+    local function renderPlanning()
+        if ImGui.TreeNodeEx("Planning") then
+            -- ImGui.BeginGroup()
+            -- if ImGui.BeginListBox("##heists_list", 210, 144) then
+            --     for k, v in pairs(heists) do
+            --         if ImGui.Selectable(v, heist == k) and heist ~= k then
+            --             heist = k
+            --         end
+            --     end
+            --     ImGui.EndListBox()
+            -- end
+            -- ImGui.EndGroup()
 
-        function tab2.render()
-            if ImGui.Button("Complete preperations") then
-                tasks.addTask(function()
-                    stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), -1)
-                end)
-            end
+            -- ImGui.SameLine()
 
-            if ImGui.Button("Reset preperations") then
-                tasks.addTask(function()
-                    stats.set_int(yu.mpx("HEIST_PLANNING_STAGE"), 0)
-                end)
-            end
-        end
+            ImGui.BeginGroup()
 
-        tab.sub[1] = tab2
-    end
-
-    do -- ANCHOR Extra
-        local tab2 = SussySpt.rendering.newTab("Extra")
-
-        function tab2.render()
             if ImGui.Button("Unlock replay screen") then
                 tasks.addTask(function()
                     globals.set_int(values.g.apartment_replay, 27)
@@ -62,7 +58,27 @@ function exports.register(parentTab)
             end
             yu.rendering.tooltip("This allows you to play any heist you want and unlocks heist cancellation from Lester")
 
+            if ImGui.Button("Complete preperations") then
+                tasks.addTask(function()
+                    local mpx = yu.mpx()
+                    stats.set_int(mpx.."HEIST_PLANNING_STAGE", -1)
+                end)
+            end
+
             ImGui.SameLine()
+
+            if ImGui.Button("Reset preperations") then
+                tasks.addTask(function()
+                    local mpx = yu.mpx()
+                    stats.set_int(mpx.."HEIST_PLANNING_STAGE", 0)
+                end)
+            end
+
+            if ImGui.Button("Unlock disabled heists") then
+                tasks.addTask(function()
+                    globals.set_int(values.g.apartment_heistUnlock, 31)
+                end)
+            end
 
             if ImGui.Button("Unlock all jobs") then
                 tasks.addTask(function()
@@ -80,7 +96,30 @@ function exports.register(parentTab)
                 end)
             end
 
-            ImGui.Spacing()
+
+            ImGui.EndGroup()
+
+            ImGui.TreePop()
+        end
+    end
+
+    local function renderStarting()
+        if ImGui.TreeNodeEx("Starting") then
+            if heist ~= nil then
+                if ImGui.Button("$15m cuts") then
+                    tasks.addTask(function(rs)
+                        local value = cuts15m.values[heist]
+                        if value == nil then return end
+                        cuts15m.crew(v)
+                        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 201 --[[ ENTER / NUMPAD ENTER ]], 1)
+                        rs:sleep(1000)
+                        PAD.SET_CONTROL_VALUE_NEXT_FRAME(2, 202 --[[ BACKSPACE / ESC ]], 1)
+                        rs:sleep(1000)
+                        cuts15m.self(v)
+                        yu.notify(1, "Cuts done", "Online->Thing->Apartment")
+                    end)
+                end
+            end
 
             if ImGui.Button("All ready") then
                 tasks.addTask(function()
@@ -90,8 +129,12 @@ function exports.register(parentTab)
                 end)
             end
 
-            ImGui.SameLine()
+            ImGui.TreePop()
+        end
+    end
 
+    local function renderIngame()
+        if ImGui.TreeNodeEx("Ingame") then
             if ImGui.Button("Instant finish (solo)") then
                 tasks.addTask(function()
                     local script = "fm_mission_controller"
@@ -103,11 +146,7 @@ function exports.register(parentTab)
                 end)
             end
 
-            ImGui.Separator()
-
             ImGui.Text("Fleeca")
-
-            ImGui.SameLine()
 
             if ImGui.Button("Skip hack##fleeca") then
                 tasks.addTask(function()
@@ -117,8 +156,6 @@ function exports.register(parentTab)
                 end)
             end
 
-            ImGui.SameLine()
-
             if ImGui.Button("Skip drill##fleeca") then
                 tasks.addTask(function()
                     if SussySpt.requireScript("fm_mission_controller") then
@@ -126,42 +163,24 @@ function exports.register(parentTab)
                     end
                 end)
             end
-        end
 
-        tab.sub[2] = tab2
+            ImGui.TreePop()
+        end
     end
 
-    do -- ANCHOR $15m cuts
-        local tab2 = SussySpt.rendering.newTab("$15m cuts")
+    local tab = SussySpt.rendering.newTab("Heists")
 
-        tab2.should_display = SussySpt.getDev
-
-        function tab2.render()
-            ImGui.Text("> Very buggy. Just use silentnight for now")
-            ImGui.Spacing()
-
-            if a.cuts15mactive ~= true then
-                for k, v in pairs(a.cuts15m.heists) do
-                    if ImGui.Button(k) then
-                        a.cuts15mactive = true
-                        yu.rif(function(rs)
-                            a.cuts15m.set.crew(v)
-
-                            a.cuts15m.set.self(v)
-
-                            a.cuts15mactive = nil
-                        end)
-                    end
-                end
-            else
-                ImGui.Text("Applying. Please wait")
-            end
-        end
-
-        tab.sub[3] = tab2
+    function tab.render()
+        renderPlanning()
+        renderStarting()
+        renderIngame()
     end
 
     parentTab.sub[#parentTab.sub + 1] = tab
+end
+
+function exports.register(tab)
+    registerHeists(tab)
 end
 
 return exports

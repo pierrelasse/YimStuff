@@ -8,6 +8,7 @@ values.g = {
 
     apartment_cuts_other = 1928233 + 1,
     apartment_cuts_self = 1930201 + 3008 + 1,
+    apartment_heistUnlock = 1933381 + 420,
     apartment_replay = 2635522,    -- HEIST_REPLAY_FIN
     apartment_jobs_1 = fmg + 9237, -- "ROOT_ID_HASH_THE_FLECCA_JOB"
     apartment_jobs_2 = fmg + 9242, -- "ROOT_ID_HASH_THE_PRISON_BREAK"

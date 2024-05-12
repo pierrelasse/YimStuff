@@ -207,10 +207,8 @@ function exports.registerHeist(parentTab)
     parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("Facility")
+function exports.register(tab)
     exports.registerHeist(tab)
-    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 return exports

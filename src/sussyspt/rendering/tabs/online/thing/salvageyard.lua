@@ -5,8 +5,8 @@ local exports = {
     name = "Salvage Yard"
 }
 
-function exports.register(tab2)
-    local tab3 = SussySpt.rendering.newTab("Salvage Yard")
+function exports.registerRobbery(parentTab)
+    local tab = SussySpt.rendering.newTab("Robbery")
 
     local claimprice
 
@@ -61,203 +61,201 @@ function exports.register(tab2)
         a.translatedVehicles[k] = vehicles.get_vehicle_display_name(joaat(v))
     end
 
-    do -- SECTION Robbery
-        local tab4 = SussySpt.rendering.newTab("Robbery")
+    local function tick()
+        local mpx = yu.mpx()
 
-        local function tick() -- ANCHOR tick
-            local mpx = yu.mpx()
+        claimprice = tunables.get_int("SALV23_VEHICLE_CLAIM_PRICE")
 
-            claimprice = tunables.get_int("SALV23_VEHICLE_CLAIM_PRICE")
+        a.savlv23 = stats.get_int(mpx.."SALV23_GEN_BS")
+        a.canSkipPreps = (a.savlv23 & (1 << 0)) ~= 0
+        a.robbery = tunables.get_int("SALV23_VEHICLE_ROBBERY_"..a.slot)
+        a.vehicle = tunables.get_int("SALV23_VEHICLE_ROBBERY_ID_"..a.slot) - 1
+        a.canKeep = tunables.get_bool("SALV23_VEHICLE_ROBBERY_CAN_KEEP_"..a.slot)
 
-            a.savlv23 = stats.get_int(mpx.."SALV23_GEN_BS")
-            a.canSkipPreps = (a.savlv23 & (1 << 0)) ~= 0
-            a.robbery = tunables.get_int("SALV23_VEHICLE_ROBBERY_"..a.slot)
-            a.vehicle = tunables.get_int("SALV23_VEHICLE_ROBBERY_ID_"..a.slot) - 1
-            a.canKeep = tunables.get_bool("SALV23_VEHICLE_ROBBERY_CAN_KEEP_"..a.slot)
+        a.loading = nil
+    end
 
-            a.loading = nil
+    function tab.render()
+        tasks.tasks.screen = tick
+
+        if a.loading == true then
+            ImGui.Text("Loading...")
+            return
         end
 
-        function tab4.render() -- ANCHOR render
-            tasks.tasks.screen = tick
-
-            if a.loading == true then
-                ImGui.Text("Loading...")
-                return
-            end
-
-            do
-                ImGui.PushItemWidth(342)
-                local value, changed = ImGui.SliderInt("Slot", a.slot, 0, 2, tostring(a.slot + 1))
-                if changed then
-                    a.slot = value
-                end
-                ImGui.PopItemWidth()
-            end
-
-            ImGui.BeginGroup()
-            ImGui.Text("Robbery ["..tostring(a.robbery).."]")
-            if ImGui.BeginListBox("##robbery_list", 150, 262) then
-                for k, v in pairs(a.robberies) do
-                    local selected = a.robbery == k
-                    if ImGui.Selectable(v, selected) and not selected then
-                        tasks.addTask(function()
-                            tunables.set_int("SALV23_VEHICLE_ROBBERY_"..a.slot, k)
-                        end)
-                    end
-                    yu.rendering.tooltip(k)
-                end
-
-                ImGui.EndListBox()
-            end
-            ImGui.EndGroup()
-
-            ImGui.SameLine()
-
-            ImGui.BeginGroup()
-            ImGui.Text("Vehicle ["..tostring(a.vehicle).."]")
-
-            ImGui.PushItemWidth(180)
-            do
-                local resp = yu.rendering.input("text", {
-                    label = "##vehicle_search",
-                    hint = "Search...",
-                    text = a.vehicleSearch
-                })
-                SussySpt.pushDisableControls(ImGui.IsItemActive())
-                if resp ~= nil and resp.changed then
-                    a.vehicleSearch = resp.text:lowercase()
-                end
+        do
+            ImGui.PushItemWidth(342)
+            local value, changed = ImGui.SliderInt("Slot", a.slot, 0, 2, tostring(a.slot + 1))
+            if changed then
+                a.slot = value
             end
             ImGui.PopItemWidth()
+        end
 
-            if ImGui.BeginListBox("##vehicle_list", 180, 224) then
-                for k, v in pairs(a.translatedVehicles) do
-                    if a.vehicles[k]:contains(a.vehicleSearch) or v:lowercase():contains(a.vehicleSearch) then
-                        local selected = a.vehicle == k
-                        if ImGui.Selectable(v, selected) and not selected then
-                            tasks.addTask(function()
-                                tunables.set_int("SALV23_VEHICLE_ROBBERY_ID_"..a.slot, k + 1)
-                            end)
-                        end
-                        if ImGui.IsItemHovered() then
-                            ImGui.SetTooltip(a.vehicles[k])
-                        end
-                    end
-                end
-
-                ImGui.EndListBox()
-            end
-            ImGui.EndGroup()
-
-            ImGui.SameLine()
-
-            ImGui.BeginGroup()
-
-            ImGui.Text("Options")
-
-            do
-                local state, toggled = ImGui.Checkbox("Can keep", a.canKeep)
-                yu.rendering.tooltip("Allows you to buy the vehicle")
-                if toggled then
-                    tunables.set_bool("SALV23_VEHICLE_ROBBERY_CAN_KEEP_"..a.slot, state)
-                end
-            end
-
-            do
-                ImGui.SetNextItemWidth(120)
-                local value, used = ImGui.InputInt("Claim price", claimprice, 0, 20000)
-                if used then
+        ImGui.BeginGroup()
+        ImGui.Text("Robbery ["..tostring(a.robbery).."]")
+        if ImGui.BeginListBox("##robbery_list", 150, 262) then
+            for k, v in pairs(a.robberies) do
+                local selected = a.robbery == k
+                if ImGui.Selectable(v, selected) and not selected then
                     tasks.addTask(function()
-                        tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE", value)
-                        tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE_FORGERY_DISCOUNT", value)
+                        tunables.set_int("SALV23_VEHICLE_ROBBERY_"..a.slot, k)
                     end)
                 end
+                yu.rendering.tooltip(k)
             end
 
-            ImGui.EndGroup()
+            ImGui.EndListBox()
+        end
+        ImGui.EndGroup()
 
-            ImGui.Spacing()
+        ImGui.SameLine()
 
-            ImGui.BeginDisabled(not a.canSkipPreps)
-            if ImGui.Button("Skip preperations") then
-                tasks.addTask(function()
-                    stats.set_int(yu.mpx("SALV23_FM_PROG"), -1)
-                end)
+        ImGui.BeginGroup()
+        ImGui.Text("Vehicle ["..tostring(a.vehicle).."]")
+
+        ImGui.PushItemWidth(180)
+        do
+            local resp = yu.rendering.input("text", {
+                label = "##vehicle_search",
+                hint = "Search...",
+                text = a.vehicleSearch
+            })
+            SussySpt.pushDisableControls(ImGui.IsItemActive())
+            if resp ~= nil and resp.changed then
+                a.vehicleSearch = resp.text:lowercase()
             end
-            ImGui.EndDisabled()
+        end
+        ImGui.PopItemWidth()
 
-            ImGui.SameLine()
-
-            if ImGui.Button("Reset preperations") then
-                tasks.addTask(function()
-                    local mpx = yu.mpx()
-                    stats.set_int(mpx.."SALV23_GEN_BS", -1)
-                    stats.set_int(mpx.."SALV23_SCOPE_BS", -1)
-                    stats.set_int(mpx.."SALV23_FM_PROG", -1)
-                    stats.set_int(mpx.."SALV23_INST_PROG", -1)
-                end)
-            end
-
-            ImGui.Separator()
-
-            ImGui.Text("Weekly cooldown")
-
-            ImGui.SameLine()
-
-            if ImGui.Button("Remove") then
-                tasks.addTask(function()
-                    tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC") + 1)
-                end)
-            end
-
-            ImGui.SameLine()
-
-            if ImGui.Button("Restore") then
-                tasks.addTask(function()
-                    tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC"))
-                end)
-            end
-
-            ImGui.Spacing()
-
-            ImGui.Text("Robbery delay")
-            ImGui.SameLine()
-            do
-                ImGui.PushItemWidth(148)
-                local resp = yu.rendering.input("int", {
-                    label = "##cooldown_input",
-                    value = a.cooldown.value
-                })
-                if resp ~= nil and resp.changed then
-                    a.cooldown.value = resp.value
+        if ImGui.BeginListBox("##vehicle_list", 180, 224) then
+            for k, v in pairs(a.translatedVehicles) do
+                if a.vehicles[k]:contains(a.vehicleSearch) or v:lowercase():contains(a.vehicleSearch) then
+                    local selected = a.vehicle == k
+                    if ImGui.Selectable(v, selected) and not selected then
+                        tasks.addTask(function()
+                            tunables.set_int("SALV23_VEHICLE_ROBBERY_ID_"..a.slot, k + 1)
+                        end)
+                    end
+                    if ImGui.IsItemHovered() then
+                        ImGui.SetTooltip(a.vehicles[k])
+                    end
                 end
-                ImGui.PopItemWidth()
-                yu.rendering.tooltip(
-                    "Sets the cooldown below in seconds.\n'An error has occurred. There is a short delay before you can start another robbery.'")
             end
 
-            ImGui.SameLine()
+            ImGui.EndListBox()
+        end
+        ImGui.EndGroup()
 
-            if ImGui.Button("Set##cooldown") then
-                tasks.addTask(function()
-                    a.cooldown:set(a.cooldown.value)
-                end)
+        ImGui.SameLine()
+
+        ImGui.BeginGroup()
+
+        ImGui.Text("Options")
+
+        do
+            local state, toggled = ImGui.Checkbox("Can keep", a.canKeep)
+            yu.rendering.tooltip("Allows you to buy the vehicle")
+            if toggled then
+                tunables.set_bool("SALV23_VEHICLE_ROBBERY_CAN_KEEP_"..a.slot, state)
             end
+        end
 
-            ImGui.SameLine()
-
-            if ImGui.Button("Get##cooldown") then
+        do
+            ImGui.SetNextItemWidth(120)
+            local value, used = ImGui.InputInt("Claim price", claimprice, 0, 20000)
+            if used then
                 tasks.addTask(function()
-                    a.cooldown.value = a.cooldown:get()
+                    tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE", value)
+                    tunables.set_int("SALV23_VEHICLE_CLAIM_PRICE_FORGERY_DISCOUNT", value)
                 end)
             end
         end
 
-        tab3.sub[1] = tab4
-    end -- !SECTION
+        ImGui.EndGroup()
 
-    tab2.sub[5] = tab3
+        ImGui.Spacing()
+
+        ImGui.BeginDisabled(not a.canSkipPreps)
+        if ImGui.Button("Skip preperations") then
+            tasks.addTask(function()
+                stats.set_int(yu.mpx("SALV23_FM_PROG"), -1)
+            end)
+        end
+        ImGui.EndDisabled()
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Reset preperations") then
+            tasks.addTask(function()
+                local mpx = yu.mpx()
+                stats.set_int(mpx.."SALV23_GEN_BS", -1)
+                stats.set_int(mpx.."SALV23_SCOPE_BS", -1)
+                stats.set_int(mpx.."SALV23_FM_PROG", -1)
+                stats.set_int(mpx.."SALV23_INST_PROG", -1)
+            end)
+        end
+
+        ImGui.Separator()
+
+        ImGui.Text("Weekly cooldown")
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Remove") then
+            tasks.addTask(function()
+                tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC") + 1)
+            end)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Restore") then
+            tasks.addTask(function()
+                tunables.set_int(values.t.salvageyard_week, stats.get_int("MPX_SALV23_WEEK_SYNC"))
+            end)
+        end
+
+        ImGui.Spacing()
+
+        ImGui.Text("Robbery delay")
+        ImGui.SameLine()
+        do
+            ImGui.PushItemWidth(148)
+            local resp = yu.rendering.input("int", {
+                label = "##cooldown_input",
+                value = a.cooldown.value
+            })
+            if resp ~= nil and resp.changed then
+                a.cooldown.value = resp.value
+            end
+            ImGui.PopItemWidth()
+            yu.rendering.tooltip(
+                "Sets the cooldown below in seconds.\n'An error has occurred. There is a short delay before you can start another robbery.'")
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Set##cooldown") then
+            tasks.addTask(function()
+                a.cooldown:set(a.cooldown.value)
+            end)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Get##cooldown") then
+            tasks.addTask(function()
+                a.cooldown.value = a.cooldown:get()
+            end)
+        end
+    end
+
+    parentTab.sub[#parentTab.sub + 1] = tab
+end
+
+function exports.register(tab)
+    exports.registerRobbery(tab)
 end
 
 return exports

@@ -63,10 +63,8 @@ function exports.registerWarehouse(parentTab)
     parentTab.sub[1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("SecuroServ")
+function exports.register(tab)
     exports.registerWarehouse(tab)
-    parentTab.sub[#parentTab.sub + 1] = tab
 end
 
 return exports

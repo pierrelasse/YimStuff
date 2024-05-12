@@ -51,7 +51,7 @@ function SussySpt.rendering.newTab(name, render)
     }
 end
 
-local function renderTab(v)
+function exports.renderTab(v)
     if not (type(v.should_display) == "function" and v.should_display() == false) and
     ImGui.BeginTabItem(v.name) then
         exports.renderTabContent(v)
@@ -63,7 +63,7 @@ function exports.renderTabContent(v)
     if type(v.render) == "function" then v.render() end
     if yu.len(v.sub) > 0 then
         ImGui.BeginTabBar("##tabbar_"..v.id)
-        for _, v1 in pairs(v.sub) do renderTab(v1) end
+        for _, v1 in pairs(v.sub) do exports.renderTab(v1) end
         ImGui.EndTabBar()
     end
 end
@@ -71,7 +71,7 @@ end
 local function renderMainWindow()
     if ImGui.Begin(windowTitle) then
         ImGui.BeginTabBar("##tabbar")
-        for k, v in pairs(SussySpt.rendering.tabs) do renderTab(v) end
+        for k, v in pairs(SussySpt.rendering.tabs) do exports.renderTab(v) end
         ImGui.EndTabBar()
     end
     ImGui.End()

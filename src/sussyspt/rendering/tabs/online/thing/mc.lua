@@ -6,54 +6,119 @@ local exports = {
     name = "Motorcyle Club"
 }
 
-function exports.registerComputer(parentTab)
-    local tab = SussySpt.rendering.newTab("Computer")
+function exports.registerManage(parentTab)
+    local tab = SussySpt.rendering.newTab("Manage")
 
     function tab.render()
+        ImGui.Text("Computer")
         if ImGui.Button("The Open Road") then tasks.addTask(cmm.biker) end
-        if ImGui.Button("Counterfeit Cash factory") then tasks.addTask(cmm.biker_cash) end
-        if ImGui.Button("Cocaine Lockup") then tasks.addTask(cmm.biker_cocaine) end
-        if ImGui.Button("Meth Lab") then tasks.addTask(cmm.biker_meth) end
-        if ImGui.Button("Weed Farm") then tasks.addTask(cmm.biker_weed) end
-        if ImGui.Button("Document Forgery Office") then tasks.addTask(cmm.biker_documents) end
-    end
 
-    parentTab.sub[#parentTab.sub + 1] = tab
-end
+        ImGui.Separator()
 
-function exports.registerSupplies(parentTab)
-    local tab = SussySpt.rendering.newTab("Supplies")
+        if ImGui.Button("Raise sell prices") then
+            tasks.addTask(function()
+                globals.set_int(262145 + 17629, 30000)  -- Counterfeit Cash factory
+                globals.set_int(262145 + 17630, 100000) -- Cocaine Lockup
+                globals.set_int(262145 + 17631, 60000)  -- Meth Lab
+                globals.set_int(262145 + 17632, 15000)  -- Weed Farm
+                globals.set_int(262145 + 17628, 20000)  -- Document Forgery Office
+            end)
+        end
 
-    -- ["Acid Lab"] = base + 7
+        ImGui.SameLine()
 
-    local base = values.g.resupply_base
-    local items = {
-        ["Counterfeit Cash Factory"] = base + 1,
-        ["Cocaine Lockup"] = base + 2,
-        ["Meth Lab"] = base + 3,
-        ["Weed Farm"] = base + 4,
-        ["Document Forgery Office"] = base + 5,
-    }
-
-    function tab.render()
-        ImGui.Text("Click to resupply")
-        for k, v in pairs(items) do
-            if ImGui.Button(k) then
-                tasks.addTask(function()
-                    globals.set_int(v, 1)
-                end)
-            end
+        if ImGui.Button("Faster production") then
+            tasks.addTask(function()
+                globals.set_int(262145 + 17603, 25500) -- Counterfeit Cash factory
+                globals.set_int(262145 + 17601, 25500) -- Cocaine Lockup
+                globals.set_int(262145 + 17600, 25500) -- Meth Lab
+                globals.set_int(262145 + 17599, 25500) -- Weed Farm
+                globals.set_int(262145 + 17602, 25500) -- Document Forgery Office
+            end)
         end
     end
 
     parentTab.sub[#parentTab.sub + 1] = tab
 end
 
-function exports.register(parentTab)
-    local tab = SussySpt.rendering.newTab("MC")
-    exports.registerComputer(tab)
-    exports.registerSupplies(tab)
+function exports.registerBusinesses(parentTab)
+    local tab = SussySpt.rendering.newTab("Businesses")
+
+    local businesses = {
+        "Counterfeit Cash Factory",
+        "Cocaine Lockup",
+        "Meth Lab",
+        "Weed Farm",
+        "Document Forgery Office"
+    }
+
+    local computers = {
+        cmm.biker_cash,
+        cmm.biker_cocaine,
+        cmm.biker_meth,
+        cmm.biker_weed,
+        cmm.biker_documents
+    }
+
+    local tableFlags =
+        ImGuiTableFlags.Resizable
+        | ImGuiTableFlags.RowBg
+        | ImGuiTableFlags.BordersOuter
+
+
+    function tab.render()
+        if ImGui.BeginTable("##businesses_table", 3, tableFlags) then
+            ImGui.TableSetupColumn("Name")
+            ImGui.TableSetupColumn("Stats")
+            ImGui.TableSetupColumn("Actions")
+            ImGui.TableHeadersRow()
+
+            local row = 0
+            for businessId, businessName in ipairs(businesses) do
+                ImGui.TableNextRow()
+                ImGui.PushID(row)
+
+                ImGui.TableSetColumnIndex(0)
+                ImGui.TextWrapped(businessName)
+
+                ImGui.TableSetColumnIndex(1)
+                ImGui.Text("Coming soon mb")
+                yu.rendering.tooltip("R* code very hard to read and unnessary complicated")
+
+                ImGui.TableSetColumnIndex(2)
+                if ImGui.SmallButton("Computer") then
+                    tasks.addTask(computers[businessId])
+                end
+
+                ImGui.SameLine()
+
+                if ImGui.SmallButton("Resupply") then
+                    tasks.addTask(function()
+                        globals.set_int(values.g.resupply_base + businessId, 1)
+                    end)
+                end
+
+                if SussySpt.dev and ImGui.SmallButton("help123456789") then
+                    tasks.addTask(function()
+                        log.info("Smth2: "..
+                            globals.get_int(1845263 + (yu.pid() + 877) + 267 + 195 + (businessId + 13) + 12))
+                    end)
+                end
+
+                ImGui.PopID()
+                row = row + 1
+            end
+        end
+
+        ImGui.EndTable()
+    end
+
     parentTab.sub[#parentTab.sub + 1] = tab
+end
+
+function exports.register(tab)
+    exports.registerManage(tab)
+    exports.registerBusinesses(tab)
 end
 
 return exports
