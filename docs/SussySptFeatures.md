@@ -1,13 +1,12 @@
 
-# SussySpt
-
-### A very basic and temporary feature list
+# SussySpt Features
 
 ##### A player list where you can tp, bring, and troll players
 ![Players tab](assets/s_online_players.png)
 
 ##### A heist editor, casino slots thingy, and more
-![Heist editor, etc.](assets/s_online_thing.png)
+![Overview](assets/s_online_thing_overview.png)
+![Cayo](assets/s_online_thing_cayo.png)
 
 ##### Manage your ability stats and view your reports that are probably not correct
 ![Stats](assets/s_online_stats_other.png)
