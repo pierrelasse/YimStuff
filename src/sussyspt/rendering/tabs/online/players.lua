@@ -7,6 +7,8 @@ local exports = {}
 function exports.register(parentTab)
     local tab = SussySpt.rendering.newTab("Players")
 
+    local viewGlobal = false
+
     local a = {
         playerlistwidth = 211,
 
@@ -448,12 +450,24 @@ function exports.register(parentTab)
 
     yu.rendering.setCheckboxChecked("online_players_ram_delete")
 
+    local globalRenderer = require("sussyspt/rendering/tabs/online/players/global")
+
     function tab.render() -- SECTION Render
+        if viewGlobal then
+            if globalRenderer.render() then viewGlobal = false end
+            return
+        end
+
         a.open = 2
         ImGui.BeginGroup()
         ImGui.Text("Players ("..yu.len(SussySpt.players)..")")
         if a.playersTooltip ~= nil then
             yu.rendering.tooltip(a.playersTooltip)
+        end
+
+        ImGui.SameLine()
+        if ImGui.SmallButton("Global") then
+            viewGlobal = true
         end
 
         ImGui.PushItemWidth(a.playerlistwidth)
@@ -595,6 +609,8 @@ function exports.register(parentTab)
                                         if HUD.DOES_BLIP_EXIST(blip) then
                                             local c = HUD.GET_BLIP_COORDS(blip)
                                             network.set_player_coords(player.player, c.x, c.y, c.z)
+                                        else
+                                            yu.notify(3, "Waypoint blip not found")
                                         end
                                     end)
                                 end
@@ -1312,6 +1328,39 @@ function exports.register(parentTab)
                                 end
                             end)
 
+                            ImGui.Spacing()
+
+                            if ImGui.SmallButton("Gift vehicle") then
+                                tasks.addTask(function()
+                                    local veh = yu.veh(player.ped)
+                                    if veh == nil then
+                                        yu.notify(3, "Player needs to be in a vehicle", "Gift vehicle")
+                                        return
+                                    end
+
+                                    if not entities.take_control_of(veh) then
+                                        yu.notify(3, "Failed to take control of player's vehicle. Make sure that they're not moving", "Gift vehicle")
+                                        return
+                                    end
+
+                                    local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
+                                    DECORATOR.DECOR_SET_INT(veh, "MPBitset", 8)
+                                    DECORATOR.DECOR_SET_INT(veh, "Not_Allow_As_Saved_Veh", 0)
+                                    DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", nwhash)
+                                    DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", nwhash)
+                                    DECORATOR.DECOR_SET_INT(veh, "Veh_Modded_By_Player", nwhash)
+
+                                    yu.notify(1, "Successfully gifted vehicle to "..player.name, "Gift vehicle")
+                                end)
+                            end
+
+                            if ImGui.SmallButton("Give much RP") then
+                                tasks.addTask(function ()
+                                    local muchrp = require("sussyspt/rendering/tabs/online/players/muchrp")
+                                    muchrp(player)
+                                end)
+                            end
+
                             ImGui.TreePop()
                         end
 
@@ -1368,48 +1417,6 @@ function exports.register(parentTab)
                                 end)
                             end
 
-                            if (true or not v.isSelf) and ImGui.SmallButton("Gift vehicle") then
-                                tasks.addTask(function()
-                                    local veh = yu.veh()
-                                    if veh == nil then
-                                        yu.notify(3, "You need to be in a vehicle", "Gift vehicle")
-                                        return
-                                    end
-
-                                    -- if DECORATOR.DECOR_IS_REGISTERED_AS_TYPE("Player_Vehicle", 3) then
-                                    --     if not DECORATOR.DECOR_EXIST_ON(veh, "Player_Vehicle") then
-                                    --         local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(yu.pid())
-                                    --         log.info("NWHASH: "..tostring(nwhash))
-                                    --         local hash = DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", nwhash)
-                                    --         log.info("HASH: "..tostring(hash))
-                                    --     end
-                                    -- end
-
-                                    local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(PLAYER.PLAYER_ID())
-                                    log.info("NWHASH: "..tostring(nwhash))
-
-                                    local function printDecor(decor, a)
-                                        log.info("[GIFT VEHICLE] DECOR: "..decor.."="..DECORATOR.DECOR_GET_INT(veh, decor))
-                                    end
-
-                                    printDecor("Player_Vehicle", nwhash)
-                                    printDecor("Previous_Owner")
-                                    printDecor("PV_Slot")
-                                    printDecor("Veh_Modded_By_Player")
-                                    printDecor("Not_Allow_As_Saved_Veh")
-                                    log.info("[GIFT VEHICLE] DECOR: ".."IgnoredByQuickSave".."="..tostring(DECORATOR.DECOR_GET_BOOL(veh, "IgnoredByQuickSave")))
-                                    printDecor("MPBitset")
-
-                                    DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", -251500684)
-                                    DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", -251500684)
-                                    DECORATOR.DECOR_SET_INT(veh, "PV_Slot", 47)
-                                    DECORATOR.DECOR_SET_INT(veh, "Veh_Modded_By_Player", 0)
-                                    DECORATOR.DECOR_SET_INT(veh, "Not_Allow_As_Saved_Veh", 0)
-                                    DECORATOR.DECOR_SET_BOOL(veh, "IgnoredByQuickSave", false)
-                                    DECORATOR.DECOR_SET_INT(veh, "MPBitset", 16777224)
-                                end)
-                            end
-
                             if ImGui.SmallButton("Gooch present thing") then
                                 tasks.addTask(function()
                                     local modelHash = joaat("xm3_prop_xm3_present_01a")
@@ -1433,10 +1440,6 @@ function exports.register(parentTab)
                                         STREAMING.SET_MODEL_AS_NO_LONGER_NEEDED(joaat("xm3_prop_xm3_present_01a"))
                                     end
                                 end)
-                            end
-
-                            if ImGui.SmallButton("Boat skin crash") then
-                                require("sussyspt/rendering/tabs/online/players/boatskincrash")()
                             end
                         end
                     end
