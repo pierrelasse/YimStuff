@@ -256,14 +256,10 @@ function exports.register(tab)
                 ImGui.TreePop()
             end
 
-            if SussySpt.dev and ImGui.TreeNodeEx("Bounty") then
-                if ImGui.SmallButton("Remove bounty") then
-                    tasks.addTask(function()
-                        globals.set_int(values.g.bounty_self_time, 2880000)
-                    end)
-                end
-
-                ImGui.TreePop()
+            if SussySpt.dev and ImGui.SmallButton("Remove bounty") then
+                tasks.addTask(function()
+                    globals.set_int(values.g.bounty_self_time, 2880000)
+                end)
             end
         end
 
