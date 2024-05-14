@@ -1,4 +1,3 @@
-
 do
     if yu ~= nil then return yu end
 
@@ -17,9 +16,9 @@ do
             return data.un
         end
         api.gun = api.get_unique_number
-    end -- !SECTION
+    end                                 -- !SECTION
 
-    do -- SECTION deprecated
+    do                                  -- SECTION deprecated
         ---@deprecated
         api.add = function(num, amount) -- ANCHOR add
             return num + amount
@@ -52,9 +51,9 @@ do
         api.xp_to_rank = function()
             return api.cache.xp_to_rank
         end
-    end -- !SECTION
+    end                                                      -- !SECTION
 
-    do -- SECTION Lua - Utils
+    do                                                       -- SECTION Lua - Utils
         api.shc = function(condition, trueValue, falseValue) -- ANCHOR shc
             return condition and trueValue or falseValue or true
         end
@@ -212,7 +211,7 @@ do
         api.removeErrorPath = function(err) -- ANCHOR removeErrorPath
             err = tostring(err)
             local values = string.split(err, ":",
-                string.getCharacterAtIndex(err, 2) == ":" and 4 or 3)
+                                        string.getCharacterAtIndex(err, 2) == ":" and 4 or 3)
             if api.len(values) < 4 then
                 return {
                     err,
@@ -221,8 +220,8 @@ do
                 }
             end
             return {
-                err, -- full error - kinda useless ngl
-                values[3], -- line
+                err,              -- full error - kinda useless ngl
+                values[3],        -- line
                 values[4]:strip() -- error
             }
         end
@@ -234,12 +233,12 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION Lua - Language
+    do  -- SECTION Lua - Language
         require("yimutils/featuresString")
         require("yimutils/featuresTable")
-    end -- !SECTION
+    end                                -- !SECTION
 
-    do -- SECTION Lua - Math
+    do                                 -- SECTION Lua - Math
         api.deg_to_rad = function(deg) -- ANCHOR deg_to_rad
             return (math.pi / 180) * deg
         end
@@ -254,9 +253,9 @@ do
                 z = math.sin(x)
             }
         end
-    end -- !SECTION
+    end                                                     -- !SECTION
 
-    do -- SECTION Yim - Utils
+    do                                                      -- SECTION Yim - Utils
         api.set_notification_title_prefix = function(title) -- ANCHOR set_notification_title_prefix
             api.set_stat("NOTIFY_DEFTITLE", title)
         end
@@ -279,7 +278,8 @@ do
         end
 
         api.get_entity_proofs = function(entity) -- ANCHOR get_entity_proofs
-            local s, bp, fp, ep, cp, mp, sp, p7, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false, false, false, false)
+            local s, bp, fp, ep, cp, mp, sp, p7, dp = ENTITY.GET_ENTITY_PROOFS(entity, false, false, false, false, false,
+                false, false, false)
             local data = {
                 bullet = bp,
                 fire = fp,
@@ -345,7 +345,7 @@ do
             }
         end
 
-        api.rif = script.run_in_fiber -- ANCHOR rif
+        api.rif = script.run_in_fiber         -- ANCHOR rif
 
         api.does_entity_exist = function(ent) -- ANCHOR does_entity_exist
             if type(ent) ~= "number" or ent == 0 then
@@ -404,10 +404,10 @@ do
 
         api.coords = function(entity, force) -- ANCHOR coords
             if not force and ENTITY.DOES_ENTITY_EXIST(entity) == false then
-                return {x = 0, y = 0, z = 0}
+                return { x = 0, y = 0, z = 0 }
             end
             local c = ENTITY.GET_ENTITY_COORDS(entity, false)
-            return {x = c.x, y = c.y, z = c.z}
+            return { x = c.x, y = c.y, z = c.z }
         end
 
         api.create_vehicle = function(x, y, z, hash, heading, networked) -- ANCHOR create_vehicle
@@ -456,7 +456,8 @@ do
 
         api.get_all_players = function() -- ANCHOR get_all_players
             local players = {}
-            for i = 0, 31 do
+            local connectedPlayers = NETWORK.NETWORK_GET_NUM_CONNECTED_PLAYERS()
+            for i = 0, (connectedPlayers) do
                 local name = PLAYER.GET_PLAYER_NAME(i)
                 if type(name) == "string" and name ~= "**Invalid**" then
                     players[name:lowercase()] = {
@@ -470,7 +471,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION GTA Cache
+    do  -- SECTION GTA Cache
         -- Plz add cache access mr yimmenu
 
         api.cache = {}
@@ -584,7 +585,7 @@ do
         }
     end -- !SECTION
 
-    do -- SECTION ImGui - Utils
+    do  -- SECTION ImGui - Utils
         api.imcolor = function(r, g, b, alpha, max)
             if max == nil then
                 max = 255
@@ -596,7 +597,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION Stats
+    do  -- SECTION Stats
         data.stats = {}
 
         api.set_stat = function(key, value)
@@ -630,7 +631,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION Key listener
+    do  -- SECTION Key listener
         data.key_listener = {
             cb = {},
             ks = {}
@@ -680,7 +681,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION Rendering
+    do  -- SECTION Rendering
         api.rendering = {}
         data.rendering = {
             checkboxstates = {}
@@ -806,7 +807,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION Tasks
+    do  -- SECTION Tasks
         data.tasks = {}
 
         api.add_task = function(func)
@@ -823,7 +824,7 @@ do
         end
     end -- !SECTION
 
-    do -- SECTION json
+    do  -- SECTION json
         local encode, decode, parse
 
         local escape_char_map = {
@@ -836,7 +837,7 @@ do
             ["\t"] = "\\t"
         }
 
-        local escape_char_map_inv = {["/"] = "/"}
+        local escape_char_map_inv = { ["/"] = "/" }
         for k, v in pairs(escape_char_map) do escape_char_map_inv[v] = k end
 
         local function escape_char(c)
@@ -914,7 +915,7 @@ do
         local escape_chars = create_set("\\", "/", '"', "b", "f", "n", "r", "t", "u")
         local literals = create_set("true", "false", "null")
 
-        local literal_map = {["true"] = true, ["false"] = false, ["null"] = nil}
+        local literal_map = { ["true"] = true, ["false"] = false, ["null"] = nil }
 
         local function next_char(str, idx, set, negate)
             for i = idx, #str do
@@ -944,10 +945,10 @@ do
                 return string.char(f(n / 64) + 192, n % 64 + 128)
             elseif n <= 0xffff then
                 return string.char(f(n / 4096) + 224, f(n % 4096 / 64) + 128,
-                                n % 64 + 128)
+                                   n % 64 + 128)
             elseif n <= 0x10ffff then
                 return string.char(f(n / 262144) + 240, f(n % 262144 / 4096) + 128,
-                                f(n % 4096 / 64) + 128, n % 64 + 128)
+                                   f(n % 4096 / 64) + 128, n % 64 + 128)
             end
             error(string.format("invalid unicode codepoint '%x'", n))
         end
@@ -958,7 +959,7 @@ do
 
             if n2 then
                 return codepoint_to_utf8((n1 - 0xd800) * 0x400 + (n2 - 0xdc00) +
-                                            0x10000)
+                    0x10000)
             else
                 return codepoint_to_utf8(n1)
             end
@@ -980,15 +981,15 @@ do
                     if c == "u" then
                         local hex =
                             str:match("^[dD][89aAbB]%x%x\\u%x%x%x%x", j + 1) or
-                                str:match("^%x%x%x%x", j + 1) or
-                                decode_error(str, j - 1,
-                                            "invalid unicode escape in string")
+                            str:match("^%x%x%x%x", j + 1) or
+                            decode_error(str, j - 1,
+                                         "invalid unicode escape in string")
                         res = res..parse_unicode_escape(hex)
                         j = j + #hex
                     else
                         if not escape_chars[c] then
-                            decode_error(str, j - 1, "invalid escape char '"..c ..
-                                            "' in string")
+                            decode_error(str, j - 1, "invalid escape char '"..c..
+                                "' in string")
                         end
                         res = res..escape_char_map_inv[c]
                     end
@@ -1089,22 +1090,22 @@ do
 
         local char_func_map = {
             ['"'] = parse_string,
-            ['0'] = parse_number,
-            ['1'] = parse_number,
-            ['2'] = parse_number,
-            ['3'] = parse_number,
-            ['4'] = parse_number,
-            ['5'] = parse_number,
-            ['6'] = parse_number,
-            ['7'] = parse_number,
-            ['8'] = parse_number,
-            ['9'] = parse_number,
-            ['-'] = parse_number,
-            ['t'] = parse_literal,
-            ['f'] = parse_literal,
-            ['n'] = parse_literal,
-            ['['] = parse_array,
-            ['{'] = parse_object
+            ["0"] = parse_number,
+            ["1"] = parse_number,
+            ["2"] = parse_number,
+            ["3"] = parse_number,
+            ["4"] = parse_number,
+            ["5"] = parse_number,
+            ["6"] = parse_number,
+            ["7"] = parse_number,
+            ["8"] = parse_number,
+            ["9"] = parse_number,
+            ["-"] = parse_number,
+            ["t"] = parse_literal,
+            ["f"] = parse_literal,
+            ["n"] = parse_literal,
+            ["["] = parse_array,
+            ["{"] = parse_object
         }
 
         parse = function(str, idx)
@@ -1128,7 +1129,7 @@ do
             encode = encode,
             decode = decode
         }
-    end -- !SECTION
+    end                                           -- !SECTION
 
     script.register_looped("yimutils", function() -- ANCHOR Loop
         data.key_listener.tick()
