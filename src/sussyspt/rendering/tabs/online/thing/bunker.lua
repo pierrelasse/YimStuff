@@ -51,7 +51,7 @@ function exports.render()
 
     if SussySpt.dev then
         if ImGui.Button("Research A") then
-            tasks.addTask(function ()
+            tasks.addTask(function()
                 setResearch(1, 1, 1, 0, 0)
             end)
         end
@@ -59,8 +59,16 @@ function exports.render()
         ImGui.SameLine()
 
         if ImGui.Button("Research B") then
-            tasks.addTask(function ()
+            tasks.addTask(function()
                 setResearch(60, 300000, 45000, 2, 1)
+            end)
+        end
+
+        ImGui.SameLine()
+
+        if ImGui.Button("Research C") then
+            tasks.addTask(function()
+                globals.set_int(2695900, 1)
             end)
         end
     end

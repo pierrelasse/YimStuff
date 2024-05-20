@@ -13,7 +13,7 @@ local function startScript(rs, script, stackSize, customComputerType)
     SCRIPT.SET_SCRIPT_AS_NO_LONGER_NEEDED(script)
 end
 
-function exports.master(rs) startScript(rs, "apparcadebusinesshub", 1424) end
+function exports.master(rs) startScript(rs, "appArcadeBusinessHub", 1424) end
 
 function exports.bunker(rs) startScript(rs, "appBunkerBusiness", 1424) end
 

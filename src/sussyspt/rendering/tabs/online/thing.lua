@@ -28,6 +28,7 @@ function exports.register(parentTab)
         require("./thing/hangar"),
         require("./thing/bunker"),
         require("./thing/arcade"),
+        -- require("./thing/nightclubold"),
         require("./thing/nightclub")
     }
 
