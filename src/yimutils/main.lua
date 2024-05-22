@@ -456,8 +456,7 @@ do
 
         api.get_all_players = function() -- ANCHOR get_all_players
             local players = {}
-            local connectedPlayers = NETWORK.NETWORK_GET_NUM_CONNECTED_PLAYERS()
-            for i = 0, (connectedPlayers) do
+            for i = 0, 32 do
                 local name = PLAYER.GET_PLAYER_NAME(i)
                 if type(name) == "string" and name ~= "**Invalid**" then
                     players[name:lowercase()] = {
