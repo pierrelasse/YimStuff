@@ -980,15 +980,17 @@ function exports.register(parentTab)
                         end
 
                         if ImGui.TreeNodeEx("Weapons") then -- ANCHOR Weapons
-                            if ImGui.SmallButton("Remove all weapons") then
+                            if ImGui.SmallButton("Remove current weapon") then
                                 tasks.addTask(function()
-                                    WEAPON.REMOVE_ALL_PED_WEAPONS(player.ped, true)
-                                    for k, v in pairs(yu.get_all_weapons()) do
-                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, v)
+                                    local _, weaponHash = WEAPON.GET_CURRENT_PED_WEAPON(player.ped, 0, 1)
+                                    if weaponHash ~= 0 then
+                                        WEAPON.REMOVE_WEAPON_FROM_PED(player.ped, weaponHash)
+                                    else
+                                        yu.notify(3, "No weapon to remove", "Remove current weapon")
                                     end
                                 end)
                             end
-                            yu.rendering.tooltip("Most of them.\nThis will be fixed when yimmenu finally allows access to the cache...")
+                            yu.rendering.tooltip("Also removes a weapon even if they don't any")
 
                             ImGui.Text("Parachute:")
                             ImGui.SameLine()
