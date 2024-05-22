@@ -600,23 +600,6 @@ function exports.register(parentTab)
                             end
                             yu.rendering.tooltip("Sets a waypoint to them")
 
-                            if SussySpt.dev then
-                                ImGui.SameLine()
-
-                                if ImGui.SmallButton("Waypoint") then
-                                    tasks.addTask(function()
-                                        local blip = 8 -- radar_waypoint
-                                        if HUD.DOES_BLIP_EXIST(blip) then
-                                            local c = HUD.GET_BLIP_COORDS(blip)
-                                            network.set_player_coords(player.player, c.x, c.y, c.z)
-                                        else
-                                            yu.notify(3, "Waypoint blip not found")
-                                        end
-                                    end)
-                                end
-                                yu.rendering.tooltip("Does not work well / teleports them under the map")
-                            end
-
                             do
                                 local text, changed = ImGui.InputTextWithHint("##mark_input", "Reason...", a.markinput or "", 128)
                                 SussySpt.pushDisableControls(ImGui.IsItemActive())
