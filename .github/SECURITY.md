@@ -1,9 +1,6 @@
 # Security Policy
 
-## Supported Versions
-
-I guess the newest version :^D
-
 ## Reporting a Vulnerability
 
-Rip
+Not sure how a vulnerability can be in a lua script.<br />
+You should might take a look [here](https://github.com/YimMenu/YimMenu/security) then.
