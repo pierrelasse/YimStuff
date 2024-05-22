@@ -683,41 +683,12 @@ function exports.register(parentTab)
 
                             ImGui.SameLine()
 
-                            if ImGui.SmallButton("Stumble") then
+                            if ImGui.SmallButton("Frag crash") then
                                 yu.rif(function(rs)
-                                    local hash = joaat("prop_roofvent_06a")
-                                    STREAMING.REQUEST_MODEL(hash)
-                                    repeat rs:yield() until STREAMING.HAS_MODEL_LOADED(hash)
-
-                                    local c = yu.coords(player.ped)
-                                    c.z = c.z - 2.4
-
-                                    local obj = OBJECT.CREATE_OBJECT(hash, c.x, c.y, c.z, true, true, false)
-                                    ENTITY.SET_ENTITY_VISIBLE(obj, true, false)
-                                    ENTITY.SET_ENTITY_ALPHA(obj, 0, true)
-
-                                    local pos = {
-                                        x = 0,
-                                        y = 0,
-                                        z = 0
-                                    }
-                                    local objects = {}
-                                    for i = 1, 4 do
-                                        local angle = (i / 4) * 360
-                                        pos.z = angle
-                                        pos.x = pos.x * 1.25
-                                        pos.y = pos.y * 1.25
-                                        pos.z = pos.z * 1.25
-                                        pos.x = pos.x + c.x
-                                        pos.y = pos.y + c.y
-                                        pos.z = pos.z + c.z
-                                        objects[i] = OBJECT.CREATE_OBJECT(hash, pos.x, pos.y, pos.z, true, true, false)
-                                        ENTITY.SET_ENTITY_VISIBLE(objects[i], true, false)
-                                        ENTITY.SET_ENTITY_ALPHA(objects[i], 0, true)
-                                        ENTITY.SET_ENTITY_AS_NO_LONGER_NEEDED(objects[i])
-                                    end
+                                    require("sussyspt/rendering/tabs/online/players/fragcrash")(rs, player)
                                 end)
                             end
+                            yu.rendering.tooltip("Makes the player's game crash after a few seconds by lag.\n- Can affect other players")
 
                             if ImGui.SmallButton("Spawn animation") then
                                 tasks.addTask(function()
