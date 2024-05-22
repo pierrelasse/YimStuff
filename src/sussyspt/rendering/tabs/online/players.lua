@@ -301,9 +301,8 @@ function exports.register(parentTab)
                 local reasons = string.split(network.get_flagged_modder_reason(v.player), ", ")
                 if table.length(reasons) > 0 then
                     v.tooltip = v.tooltip.."\n\nInfractions:"
-
-                    for k2, v2 in pairs(reasons) do
-                        v.tooltip = v.tooltip.."\n  - "..v2
+                    for _, reason in pairs(reasons) do
+                        v.tooltip = v.tooltip.."\n  - "..reason
                     end
                 end
             end
@@ -591,6 +590,8 @@ function exports.register(parentTab)
                                     end)
                                 end
                             end
+
+                            ImGui.SameLine()
 
                             if ImGui.SmallButton("Set waypoint") then
                                 tasks.addTask(function()
