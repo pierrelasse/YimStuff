@@ -47,20 +47,16 @@ function string.split(str, delimiter, max)
 
     delimiter = delimiter or " "
     local result = {}
-    local pattern = "(.-)" .. delimiter
-    local startPos, endPos = 1, 1
+    local pattern = "(.-)"..delimiter:gsub("([^%w])", "%%%1")
 
-    while endPos do
-        local pos = string.find(str, pattern, endPos)
-        if pos == nil then break end
-        startPos, endPos = pos, pos + #delimiter - 1
-        if startPos and (not max or #result < max - 1) then
-            table.insert(result, string.sub(str, startPos, endPos - 1))
-            endPos = endPos + 1
-        else
-            table.insert(result, string.sub(str, startPos))
-            break
-        end
+    for part in string.gmatch(str, pattern) do
+        table.insert(result, part)
+        if max ~= nil and max - 1 > 0 then break end
+    end
+
+    local remainder = string.sub(str, #table.concat(result, delimiter) + #delimiter + 1)
+    if remainder ~= "" then
+        table.insert(result, remainder)
     end
 
     return result
