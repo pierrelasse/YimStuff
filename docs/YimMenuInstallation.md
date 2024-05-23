@@ -40,6 +40,6 @@ Now release the left mouse button. The "Images" box should now look like this:<b
 ![](assets/yi_xenos_process_gta.png)
 
 10) Just press the `Inject` button and you're done with injecting YimMenu into GTA V.<br />
-![](assets/yi_xenos_process_gta.png)
+![](assets/yi_xenos_inject.png)
 
 11) For help from the community and/or contributors, you can start a discussion [here](https://github.com/YimMenu/YimMenu/discussions).
