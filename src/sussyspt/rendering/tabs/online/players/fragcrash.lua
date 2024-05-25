@@ -14,7 +14,7 @@ return function(rs, player)
     end
 
     for _ = 0, 100 do
-        c = yu.coords(player.ped, true)
+        c = yu.coords(player.ped)
         for i = 1, #objects do
             ENTITY.SET_ENTITY_COORDS_NO_OFFSET(objects[i], c.x, c.y, c.z, false, true, true)
         end
