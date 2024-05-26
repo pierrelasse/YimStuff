@@ -1,6 +1,6 @@
 local versionType = 0 --[[VERSIONTYPE]]
 local build = 0 --[[BUILD]]
-local versionId = 3265 --[[VERSIONID]]
+local versionId = 3266 --[[VERSIONID]]
 
 local version = { 1, 4, 3 } -- {major, minor, patch}
 local versionStr = table.join(version, ".")
