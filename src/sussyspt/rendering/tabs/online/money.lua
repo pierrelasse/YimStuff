@@ -28,7 +28,7 @@ function exports.register(tab)
             { "1M (Music Trip)",                        0xDF314B5A,  1000000 },
             { "1M (Daily Objective Event)",             0x314FB8B0,  1000000 },
             { "1M (Daily Objective)",                   0xBFCBE6B6,  1000000 },
-            { "1M (Juggalo Story Award)",               0x615762F1,  1000000 },
+            { "[DETECTED] 1M (Juggalo Story Award)",    0x615762F1,  1000000 },
             { "700K (Gangpos Loyal Award)",             0xED74CC1D,  700000 },
             { "680K (Betting)",                         0xACA75AAE,  680000 },
             { "620K (Vehicle Export)",                  0xEE884170,  620000 },
@@ -56,9 +56,9 @@ function exports.register(tab)
     }
 
     function tab2.render()
-        ImGui.Text("This feature is unstable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
-        ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected")
-        ImGui.Spacing()
+        -- ImGui.Text("This feature is unstable and it is recommended to leave it on the '1M (Juggalo Story Award)'")
+        -- ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected")
+        -- ImGui.Spacing()
 
         if a.moneyMade > 0 then
             ImGui.Text("Money made: "..yu.format_num(a.moneyMade))
@@ -106,7 +106,7 @@ function exports.register(tab)
                 end)
             end
         end)
-        yu.rendering.tooltip("You should only use the loop with the '1M (Juggalo Story Award)' transaction")
+        -- yu.rendering.tooltip("You should only use the loop with the '1M (Juggalo Story Award)' transaction")
 
         if SussySpt.dev and ImGui.Button("Dump globals") then
             tasks.addTask(function()
