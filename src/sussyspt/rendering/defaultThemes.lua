@@ -89,10 +89,10 @@ return {
             TabHovered = { 127, 115, 100, 255 },
             Button = { 88, 80, 60, 255 },
             FrameBg = { 38, 38, 48, 255 },
-            FrameBgHovered = { 38, 38, 48, 255 },
-            FrameBgActive = { 38, 38, 48, 255 },
+            FrameBgHovered = { 107, 107, 123, 255 },
+            FrameBgActive = { 77, 77, 88, 255 },
             HeaderActive = { 37, 37, 46, 255 },
-            HeaderHovered = { 37, 37, 46, 255 }
+            HeaderHovered = { 100, 100, 124, 255 }
         },
         ImGuiStyleVar = { WindowRounding = { 4 }, FrameRounding = { 4 } }
     }
