@@ -7,32 +7,22 @@ local exports = {
 }
 
 local function resupply()
-    globals.set_int(values.g.resupply_base + 6, 1)
+    globals.set_int(values.g.bunker_resupply_base + 6, 1)
 end
 
-local function triggerResearch()
-    local mpx = yu.mpx()
-    stats.set_int(mpx.."GR_RESEARCH_PRODUCTION_TIME", 0)
-    stats.set_int(mpx.."GR_RESEARCH_UPGRADE_EQUIPMENT_REDUCTION_TIME", 0)
-    stats.set_int(mpx.."GR_RESEARCH_UPGRADE_STAFF_REDUCTION_TIME", 0)
-end
-
-local BUCg1 = values.g.fm + 21505 -- bunker unlocker cooldown global 1 (946764522)
-local BUCg2 = values.g.fm + 21757 -- bunker unlocker cooldown global 2 ("GR_RESEARCH_CAPACITY")
-local BUCg3 = values.g.fm + 21758 -- bunker unlocker cooldown global 3 ("GR_RESEARCH_PRODUCTION_TIME")
-local BUCg4 = values.g.fm + 21759 -- bunker unlocker cooldown global 4 ("GR_RESEARCH_UPGRADE_EQUIPMENT_REDUCTION_TIME")
-local BUAg1 = values.g.fm + 21761 -- bunker unlocker additional global 1 (1485279815)
-local BUAg2 = values.g.fm + 21762 -- bunker unlocker additional global 2 (2041812011)
-
-local function setResearch(a, b, c, d, e)
-    globals.set_int(BUCg1, a)
-    globals.set_int(BUCg2, b)
-    for i = BUCg3, BUCg4, 1 do
-        globals.set_int(i, c)
+local function instantSell()
+    local scriptName = "gb_gunrunning"
+    if SussySpt.requireScript(scriptName) then
+        locals.set_int(scriptName, values.l.bunker_instant_sell, 0)
     end
-    globals.set_int(BUAg1, d)
-    globals.set_int(BUAg2, e)
 end
+
+-- local function triggerResearch()
+--     local mpx = yu.mpx()
+--     stats.set_int(mpx.."GR_RESEARCH_PRODUCTION_TIME", 0)
+--     stats.set_int(mpx.."GR_RESEARCH_UPGRADE_EQUIPMENT_REDUCTION_TIME", 0)
+--     stats.set_int(mpx.."GR_RESEARCH_UPGRADE_STAFF_REDUCTION_TIME", 0)
+-- end
 
 function exports.load()
     exports.stage = nil
@@ -44,34 +34,10 @@ function exports.render()
     ImGui.Spacing()
 
     if ImGui.Button("Resupply") then tasks.addTask(resupply) end
+    -- ImGui.SameLine()
+    -- if ImGui.Button("Trigger research") then tasks.addTask(triggerResearch) end
 
-    ImGui.SameLine()
-
-    if ImGui.Button("Trigger research") then tasks.addTask(triggerResearch) end
-
-    if SussySpt.dev then
-        if ImGui.Button("Research A") then
-            tasks.addTask(function()
-                setResearch(1, 1, 1, 0, 0)
-            end)
-        end
-
-        ImGui.SameLine()
-
-        if ImGui.Button("Research B") then
-            tasks.addTask(function()
-                setResearch(60, 300000, 45000, 2, 1)
-            end)
-        end
-
-        ImGui.SameLine()
-
-        if ImGui.Button("Research C") then
-            tasks.addTask(function()
-                globals.set_int(2695900, 1)
-            end)
-        end
-    end
+    if ImGui.Button("Instant sell") then tasks.addTask(instantSell) end
 
     ImGui.Spacing()
 
@@ -89,6 +55,39 @@ function exports.render()
             stats.set_bool(mpx.."SR_TIER_1_REWARD", true)
             stats.set_bool(mpx.."SR_TIER_3_REWARD", true)
             stats.set_bool(mpx.."SR_INCREASE_THROW_CAP", true)
+        end)
+    end
+
+    if ImGui.Button("Some other unlocks idk") then
+        tasks.addTask(function()
+            local mpx = yu.mpx()
+            for i = 0, 63 do
+                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL0", true, i, mpx)
+                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL1", true, i, mpx)
+                stats.set_bool_masked(mpx.."DLCGUNPSTAT_BOOL2", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL0", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL1", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL2", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL3", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL4", true, i, mpx)
+                stats.set_bool_masked(mpx.."GUNTATPSTAT_BOOL5", true, i, mpx)
+            end
+            local bitSize = 8
+            for i = 0, 64 / bitSize - 1 do
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT0", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT1", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT2", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT3", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT4", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT5", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT6", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT7", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT8", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT9", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT10", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT11", -1, i * bitSize, bitSize)
+                stats.set_masked_int(mpx.."GUNRPSTAT_INT12", -1, i * bitSize, bitSize)
+            end
         end)
     end
 end

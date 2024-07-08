@@ -55,7 +55,7 @@ values.g = {
 
     transaction_base = 4537212,
 
-    resupply_base = 1662873
+    bunker_resupply_base = 1662873
 }
 
 -- ANCHOR Locals
@@ -96,9 +96,11 @@ values.l = {
         54  -- GGSM_SPRITE_POWER_UP_STUN
     },
 
-    lucky_wheel_win_state = 278,
+    lucky_wheel_win_state = 280,
     lucky_wheel_prize = 14,
-    lucky_wheel_prize_state = 45
+    lucky_wheel_prize_state = 45,
+
+    bunker_instant_sell = 1983
 }
 
 -- ANCHOR Tunables

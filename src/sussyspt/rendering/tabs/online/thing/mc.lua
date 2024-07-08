@@ -94,7 +94,7 @@ function exports.registerBusinesses(parentTab)
 
                 if ImGui.SmallButton("Resupply") then
                     tasks.addTask(function()
-                        globals.set_int(values.g.resupply_base + businessId, 1)
+                        globals.set_int(values.g.bunker_resupply_base + businessId, 1)
                     end)
                 end
 

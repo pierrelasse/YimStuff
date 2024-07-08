@@ -1,7 +1,6 @@
 local tasks = require("sussyspt/tasks")
 local values = require("sussyspt/values")
 local addUnknownValue = require("./addUnknownValue")
-local blipTp = require("sussyspt/util/blipTp")
 
 local exports = {
     name = "Casino"
@@ -29,7 +28,7 @@ function exports.registerSlots(parentTab)
     local scriptRunning = false
 
 
-    local slots_random_results_table = 1344
+    local slots_random_results_table = 1348
 
 
     local function tick()

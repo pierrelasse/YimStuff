@@ -60,6 +60,8 @@ function exports.register(tab)
         -- ImGui.Text("You can do this every second so $1M/1s. Seems to be undetected")
         -- ImGui.Spacing()
 
+        ImGui.Text("Transactions currently broken? (not receiving any money)")
+
         if a.moneyMade > 0 then
             ImGui.Text("Money made: "..yu.format_num(a.moneyMade))
         end
