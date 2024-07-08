@@ -9,7 +9,7 @@ SussySpt.qa.config = {
     default = {
         "heal", "refillHealth", "refillArmor", "clearWantedLevel", 0,
         "ri2", "skipCutscene", "removeBlackscreen", 0,
-        "repairVehicle", "stfu", 0,
+        "repairVehicle", "stfu", "masterControl", 0,
         "instantBST", "depositWallet", "stopPlayerSwitch"
     }
 }
@@ -48,9 +48,7 @@ function SussySpt.qa.render()
                         sameline = true
 
                         if ImGui.Button(b[2]) then
-                            tasks.addTask(function()
-                                b[1]()
-                            end)
+                            tasks.addTask(b[1])
                         end
                         if b[3] ~= nil and ImGui.IsItemHovered() then
                             ImGui.SetTooltip(b[3])

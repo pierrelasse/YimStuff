@@ -1,4 +1,5 @@
 local values = require("sussyspt/values")
+local cmm = require("sussyspt/util/cmm")
 
 local actions = {
     -- { Func, DisplayName, [Description], [Cond] }
@@ -86,6 +87,12 @@ actions.stfu = { -- ANCHOR stfu
     end,
     "Stop conversation",
     "Tries to stop the blah blah from npcs"
+}
+
+actions.masterControl = { -- ANCHOR MasterControl
+    cmm.master,
+    "MasterControl",
+    "Opens the Master Control Computer from the Arcade"
 }
 
 actions.instantBST = { -- ANCHOR instantBST
