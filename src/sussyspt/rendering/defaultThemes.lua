@@ -77,4 +77,23 @@ return {
         },
         ImGuiStyleVar = { WindowRounding = { 6 }, FrameRounding = { 6 } }
     },
+    Stone = { -- ANCHOR Stone
+        ImGuiCol = {
+            Text = { 231, 190, 125, 255 },
+            TextDisabled = { 129, 100, 53, 255 },
+            TitleBg = { 45, 52, 70, 244 },
+            TitleBgActive = { 19, 37, 56, 250 },
+            WindowBg = { 17, 38, 58, 200 },
+            Tab = { 85, 79, 72, 255 },
+            TabActive = { 106, 94, 81, 255 },
+            TabHovered = { 127, 115, 100, 255 },
+            Button = { 88, 80, 60, 255 },
+            FrameBg = { 38, 38, 48, 255 },
+            FrameBgHovered = { 38, 38, 48, 255 },
+            FrameBgActive = { 38, 38, 48, 255 },
+            HeaderActive = { 37, 37, 46, 255 },
+            HeaderHovered = { 37, 37, 46, 255 }
+        },
+        ImGuiStyleVar = { WindowRounding = { 4 }, FrameRounding = { 4 } }
+    }
 }
