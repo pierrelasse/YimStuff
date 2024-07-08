@@ -17,16 +17,19 @@ local function pushTheme(theme)
         if type(k) == "string" and type(v) == "table" then
             for k1, v1 in pairs(v) do
                 if k == "ImGuiCol" then
-                    ImGui.PushStyleColor(ImGuiCol[k1], v1[1], v1[2], v1[3],
-                                         v1[4])
-                    pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
-                elseif k == "ImGuiStyleVar" then
-                    if v1[2] == nil then
-                        ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
-                    else
-                        ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
+                    if ImGuiCol[k1] ~= nil then
+                        ImGui.PushStyleColor(ImGuiCol[k1], v1[1], v1[2], v1[3], v1[4])
+                        pops.PopStyleColor = (pops.PopStyleColor or 0) + 1
                     end
-                    pops.PopStyleVar = (pops.PopStyleVar or 0) + 1
+                elseif k == "ImGuiStyleVar" then
+                    if ImGuiStyleVar[k1] ~= nil then
+                        if v1[2] == nil then
+                            ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1])
+                        else
+                            ImGui.PushStyleVar(ImGuiStyleVar[k1], v1[1], v1[2])
+                        end
+                        pops.PopStyleVar = (pops.PopStyleVar or 0) + 1
+                    end
                 end
             end
         end
