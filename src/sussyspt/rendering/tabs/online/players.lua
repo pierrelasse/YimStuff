@@ -1284,7 +1284,7 @@ function exports.register(parentTab)
 
                             ImGui.Spacing()
 
-                            if ImGui.SmallButton("Gift vehicle") then
+                            if ImGui.SmallButton("Gift vehicle (broken)") then
                                 tasks.addTask(function()
                                     local veh = yu.veh(player.ped)
                                     if veh == nil then
@@ -1307,6 +1307,7 @@ function exports.register(parentTab)
                                     yu.notify(1, "Successfully gifted vehicle to "..player.name, "Gift vehicle")
                                 end)
                             end
+                            yu.rendering.tooltip("May not work at the moment")
 
                             if ImGui.SmallButton("Give much RP") then
                                 tasks.addTask(function ()
