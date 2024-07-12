@@ -1,7 +1,7 @@
 local tasks = require("sussyspt/tasks")
 
 local tab = SussySpt.rendering.newTab("Dev")
-tab.should_display = SussySpt.getDev
+-- tab.should_display = SussySpt.getDev
 
 -- ANCHOR Object Spawner
 
