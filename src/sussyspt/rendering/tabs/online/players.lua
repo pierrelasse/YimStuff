@@ -1298,7 +1298,7 @@ function exports.register(parentTab)
                                     end
 
                                     local nwhash = NETWORK.NETWORK_HASH_FROM_PLAYER_HANDLE(player.player)
-                                    DECORATOR.DECOR_SET_INT(veh, "MPBitset", 8)
+                                    DECORATOR.DECOR_SET_INT(veh, "MPBitset", 3)
                                     DECORATOR.DECOR_SET_INT(veh, "Not_Allow_As_Saved_Veh", 0)
                                     DECORATOR.DECOR_SET_INT(veh, "Player_Vehicle", nwhash)
                                     DECORATOR.DECOR_SET_INT(veh, "Previous_Owner", nwhash)
@@ -1307,7 +1307,7 @@ function exports.register(parentTab)
                                     yu.notify(1, "Successfully gifted vehicle to "..player.name, "Gift vehicle")
                                 end)
                             end
-                            yu.rendering.tooltip("May not work at the moment")
+                            yu.rendering.tooltip("This is patched in every menu.\nWe will have to wait, until anyone figures out on how to bypass the patch")
 
                             if ImGui.SmallButton("Give much RP") then
                                 tasks.addTask(function ()
