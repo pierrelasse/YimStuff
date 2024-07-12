@@ -256,7 +256,7 @@ function exports.register(tab)
                 ImGui.TreePop()
             end
 
-            if SussySpt.dev and ImGui.SmallButton("Remove bounty") then
+            if SussySpt.dev and ImGui.SmallButton("Remove bounty [broken]") then
                 tasks.addTask(function()
                     globals.set_int(values.g.bounty_self_time, 2880000)
                 end)

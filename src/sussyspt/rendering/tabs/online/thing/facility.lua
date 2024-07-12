@@ -145,7 +145,7 @@ function exports.registerHeist(parentTab)
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Reload planning screen") then
+                if ImGui.Button("Reload planning screen [broken (probably)]") then
                     tasks.addTask(function(rs)
                         locals.set_int("gb_gang_ops_planning", 182, 6) -- Release resources - 0x21431
                         rs:yield()
@@ -193,7 +193,7 @@ function exports.registerHeist(parentTab)
         end
 
         if ImGui.TreeNodeEx("Starting") then
-            ImGui.Text("Cuts")
+            ImGui.Text("Cuts [broken]")
             renderCutsSlider(cuts, 0, cutsCallback)
             renderCutsSlider(cuts, 1, cutsCallback)
             renderCutsSlider(cuts, 2, cutsCallback)

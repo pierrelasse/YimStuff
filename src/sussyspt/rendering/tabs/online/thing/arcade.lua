@@ -371,7 +371,7 @@ function exports.registerHeist(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("All ready") then
+        if ImGui.Button("All ready [broken]") then
             tasks.addTask(function()
                 globals.set_int(1968308 + 1 + (1 * 68) + 8 + 1, 1)
                 globals.set_int(1968308 + 1 + (2 * 68) + 8 + 2, 1)
@@ -389,7 +389,7 @@ function exports.registerHeist(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Remove npc cuts") then
+        if ImGui.Button("Remove npc cuts [broken]") then
             tasks.addTask(function()
                 local b = 262145
 

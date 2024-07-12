@@ -17,7 +17,7 @@ function exports.registerManage(parentTab)
     end
 
     function tab.render()
-        if ImGui.Button("Request Kosatka") then
+        if ImGui.Button("Request Kosatka [broken]") then
             tasks.addTask(function()
                 globals.set_int(values.g.request_service + values.g.request_service_kosatka, 1)
             end)
@@ -25,7 +25,7 @@ function exports.registerManage(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Teleport to Kosatka") then
+        if ImGui.Button("Teleport to Kosatka [broken]") then
             tasks.addTask(tpKosatka)
         end
 
@@ -43,7 +43,7 @@ function exports.registerManage(parentTab)
         --     end)
         -- end
 
-        if ImGui.Button("Request Dinghy") then
+        if ImGui.Button("Request Dinghy [broken]") then
             tasks.addTask(function()
                 globals.set_int(values.g.request_service + values.g.request_service_dingy, 1)
             end)
@@ -529,7 +529,7 @@ function exports.registerHeist(parentTab)
             ImGui.SameLine()
 
             ImGui.BeginDisabled(planningBoardReloaded)
-            if ImGui.Button("Reload planning board") then
+            if ImGui.Button("Reload planning board [broken]") then
                 tasks.addTask(function()
                     if SussySpt.requireScript("heist_island_planning") then
                         locals.set_int("heist_island_planning", 1544, 2)
@@ -567,7 +567,7 @@ function exports.registerHeist(parentTab)
         startingShown = ImGui.TreeNodeEx("Starting")
         if startingShown then
             ImGui.BeginDisabled(allReady)
-            if ImGui.Button("All ready") then
+            if ImGui.Button("All ready [broken]") then
                 tasks.addTask(function()
                     for i = 1, 3 do
                         globals.set_int(values.g.cayo_readyState(i), 1)
@@ -596,7 +596,7 @@ function exports.registerHeist(parentTab)
                 tasks.addTask(removeAllCameras)
             end
 
-            if ImGui.Button("Skip sewer tunnel cut") then
+            if ImGui.Button("Skip sewer tunnel cut [broken]") then
                 tasks.addTask(function()
                     local scriptName = "fm_mission_controller_2020"
 
@@ -606,7 +606,7 @@ function exports.registerHeist(parentTab)
                 end)
             end
 
-            if ImGui.Button("Skip door hack") then
+            if ImGui.Button("Skip door hack [broken]") then
                 tasks.addTask(function()
                     local scriptName = "fm_mission_controller_2020"
                     if SussySpt.requireScript(scriptName) and locals.get_int(scriptName, 24333) ~= 4 then
@@ -615,26 +615,24 @@ function exports.registerHeist(parentTab)
                 end)
             end
 
-            if ImGui.Button("Skip fingerprint hack") then
+            if ImGui.Button("Skip fingerprint hack [broken]") then
                 tasks.addTask(function()
                     if  SussySpt.requireScript("fm_mission_controller_2020")
                     and locals.get_int("fm_mission_controller_2020", 24333) == 4 then
                         locals.set_int("fm_mission_controller_2020", 24333, 5)
-                        yu.notify("Skipped fingerprint hack (or?)", "Cayo Perico Heist")
                     end
                 end)
             end
 
-            if ImGui.Button("Skip plasmacutter cut") then
+            if ImGui.Button("Skip plasmacutter cut [broken]") then
                 tasks.addTask(function()
                     if SussySpt.requireScript("fm_mission_controller_2020") then
                         locals.set_float("fm_mission_controller_2020", 30357 + 3, 100)
-                        yu.notify("Skipped plasmacutter cut (or?)", "Cayo Perico Heist")
                     end
                 end)
             end
 
-            if ImGui.Button("Obtain the primary target") then
+            if ImGui.Button("Obtain the primary target [broken]") then
                 tasks.addTask(function()
                     if SussySpt.requireScript("fm_mission_controller_2020") then
                         locals.set_int("fm_mission_controller_2020", 29684, 5)
@@ -643,7 +641,7 @@ function exports.registerHeist(parentTab)
                 end)
             end
 
-            if ImGui.Button("Remove the drainage pipe") then
+            if ImGui.Button("Remove the drainage pipe [broken (probably)]") then
                 tasks.addTask(function()
                     local hash = joaat("prop_chem_grill_bit")
                     for k, v in pairs(entities.get_all_objects_as_handles()) do
@@ -655,7 +653,7 @@ function exports.registerHeist(parentTab)
                 end)
             end
 
-            if ImGui.Button("Instant finish") then
+            if ImGui.Button("Instant finish [broken (probably)]") then
                 tasks.addTask(function()
                     if SussySpt.requireScript("fm_mission_controller_2020") then
                         locals.set_int("fm_mission_controller_2020", 45450, 9)

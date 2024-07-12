@@ -55,7 +55,7 @@ function exports.registerWarehouse(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Get") then
+        if ImGui.Button("Get [broken (probably)]") then
             get = amount
         end
     end

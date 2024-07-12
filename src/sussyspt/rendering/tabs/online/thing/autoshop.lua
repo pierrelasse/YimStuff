@@ -94,7 +94,7 @@ function exports.registerContracts(parentTab)
         yu.rendering.tooltip("Sets earnings and contracts done to 0")
 
         ImGui.BeginDisabled(not scriptRunning)
-        if ImGui.Button("Instant finish") then -- TODO: Check if available
+        if ImGui.Button("Instant finish [broken (probably)]") then -- TODO: Check if available
             tasks.addTask(function()
                 locals.set_int(scriptName, values.g.autoshop_instantfinish_1, values.g.autoshop_instantfinish_1_value)
                 locals.set_int(scriptName, values.g.autoshop_instantfinish_2, values.g.autoshop_instantfinish_2_value)
@@ -103,7 +103,7 @@ function exports.registerContracts(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Max payout") then                       -- TODO: Check if available
+        if ImGui.Button("Max payout [broken]") then -- TODO: Check if available
             tasks.addTask(function()
                 globals.set_float(values.g.autoshop_payout_1, 0) -- TODO: values
                 for _, i in pairs({ values.g.autoshop_payout_2, values.g.autoshop_payout_3 }) do

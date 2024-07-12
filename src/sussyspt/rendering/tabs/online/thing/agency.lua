@@ -123,7 +123,7 @@ function exports.registerVIPContracts(parentTab)
         -- TODO: Reset preps
 
         ImGui.BeginDisabled(noCooldown)
-        if ImGui.Button("Remove cooldown") then
+        if ImGui.Button("Remove cooldown [broken]") then
             tasks.addTask(function()
                 globals.set_int(values.g.agency_cooldown, 0)
             end)

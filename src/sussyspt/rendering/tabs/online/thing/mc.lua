@@ -15,7 +15,7 @@ function exports.registerManage(parentTab)
 
         ImGui.Separator()
 
-        if ImGui.Button("Raise sell prices") then
+        if ImGui.Button("Raise sell prices [broken]") then
             tasks.addTask(function()
                 globals.set_int(262145 + 17629, 30000)  -- Counterfeit Cash factory
                 globals.set_int(262145 + 17630, 100000) -- Cocaine Lockup
@@ -27,7 +27,7 @@ function exports.registerManage(parentTab)
 
         ImGui.SameLine()
 
-        if ImGui.Button("Faster production") then
+        if ImGui.Button("Faster production [broken]") then
             tasks.addTask(function()
                 globals.set_int(262145 + 17603, 25500) -- Counterfeit Cash factory
                 globals.set_int(262145 + 17601, 25500) -- Cocaine Lockup

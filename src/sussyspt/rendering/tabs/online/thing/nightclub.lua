@@ -78,7 +78,7 @@ function exports.render()
 
     ImGui.SameLine()
 
-    if ImGui.Button("Collect##safe") then tasks.addTask(collectSafe) end
+    if ImGui.Button("Collect [broken (probably)]##safe") then tasks.addTask(collectSafe) end
 end
 
 return exports

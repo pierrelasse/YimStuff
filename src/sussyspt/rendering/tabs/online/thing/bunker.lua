@@ -33,11 +33,11 @@ function exports.render()
 
     ImGui.Spacing()
 
-    if ImGui.Button("Resupply") then tasks.addTask(resupply) end
+    if ImGui.Button("Resupply [broken]") then tasks.addTask(resupply) end
     -- ImGui.SameLine()
     -- if ImGui.Button("Trigger research") then tasks.addTask(triggerResearch) end
 
-    if ImGui.Button("Instant sell") then tasks.addTask(instantSell) end
+    if ImGui.Button("Instant sell [broken (probably)]") then tasks.addTask(instantSell) end
 
     ImGui.Spacing()
 

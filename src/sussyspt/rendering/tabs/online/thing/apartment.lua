@@ -51,7 +51,7 @@ local function registerHeists(parentTab)
 
             ImGui.BeginGroup()
 
-            if ImGui.Button("Unlock replay screen") then
+            if ImGui.Button("Unlock replay screen [broken]") then
                 tasks.addTask(function()
                     globals.set_int(values.g.apartment_replay, 27)
                 end)
@@ -74,7 +74,7 @@ local function registerHeists(parentTab)
                 end)
             end
 
-            if ImGui.Button("Unlock disabled heists") then
+            if ImGui.Button("Unlock disabled heists [broken]") then
                 tasks.addTask(function()
                     globals.set_int(values.g.apartment_heistUnlock, 31)
                 end)
@@ -106,7 +106,7 @@ local function registerHeists(parentTab)
     local function renderStarting()
         if ImGui.TreeNodeEx("Starting") then
             if heist ~= nil then
-                if ImGui.Button("$15m cuts") then
+                if ImGui.Button("$15m cuts [broken]") then
                     tasks.addTask(function(rs)
                         local value = cuts15m.values[heist]
                         if value == nil then return end
@@ -121,7 +121,7 @@ local function registerHeists(parentTab)
                 end
             end
 
-            if ImGui.Button("All ready") then
+            if ImGui.Button("All ready [broken]") then
                 tasks.addTask(function()
                     globals.set_int(2657921 + 1 + (1 * 463) + 266, 6)
                     globals.set_int(2657921 + 1 + (2 * 463) + 266, 6)
@@ -134,7 +134,7 @@ local function registerHeists(parentTab)
     end
 
     local function renderIngame()
-        if ImGui.TreeNodeEx("Ingame") then
+        if ImGui.TreeNodeEx("Ingame [broken (probably)]") then
             if ImGui.Button("Instant finish (solo)") then
                 tasks.addTask(function()
                     local script = "fm_mission_controller"
