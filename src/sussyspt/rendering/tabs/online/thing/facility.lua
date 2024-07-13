@@ -145,11 +145,11 @@ function exports.registerHeist(parentTab)
 
                 ImGui.SameLine()
 
-                if ImGui.Button("Reload planning screen [broken (probably)]") then
+                if ImGui.Button("Reload planning screen") then
                     tasks.addTask(function(rs)
-                        locals.set_int("gb_gang_ops_planning", 182, 6) -- Release resources - 0x21431
+                        locals.set_int("gb_gang_ops_planning", values.l.facility_planning_scriptStage, 6) -- Release resources
                         rs:yield()
-                        locals.set_int("gb_gang_ops_planning", 182, 3) -- Set show screen
+                        locals.set_int("gb_gang_ops_planning", values.l.facility_planning_scriptStage, 3) -- Set show screen
                     end)
                 end
 

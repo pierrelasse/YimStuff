@@ -100,7 +100,9 @@ values.l = {
     lucky_wheel_prize = 14,
     lucky_wheel_prize_state = 45,
 
-    bunker_instant_sell = 1983
+    bunker_instant_sell = 1983,
+
+    facility_planning_scriptStage = 184 -- file: gb_gang_ops_planning function: __EntryFunction__ at: first switch
 }
 
 -- ANCHOR Tunables
