@@ -17,7 +17,7 @@ async function main() {
     if (command !== undefined) {
         for (const cmd of commands) {
             const handler = cmd.handle;
-            if (await handler(command, parser) == true)
+            if (await handler(command, parser) === true)
                 return;
         }
     }

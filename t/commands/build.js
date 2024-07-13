@@ -1,31 +1,31 @@
 
 const fs = require("fs");
-const _path = require("path");
+const path = require("path");
 
 const argParser = require("../util/argParser");
 
 
-const ensureFolderCreated = (folderPath) => { if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true }); };
+function ensureDir(dirPath) {
+    if (!fs.existsSync(dirPath))
+        fs.mkdirSync(dirPath, { recursive: true });
+}
 
-const normalizePath = (path) => _path.normalize(path).replace(/\\/g, "/");
+const normalizeFilePath = (filePath) => path.normalize(filePath).replace(/\\/g, "/");
 
 function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
     const modules = [];
     let moduleCounter = 0;
     const requireMapping = {};
 
-    if (!require.extensions[ext]) require.extensions[ext] = function () { };
-    // const prevExtensions = require.extensions;
-    // require.extensions = {
-    //     [ext]: function () { }
-    // };
+    if (!require.extensions[ext])
+        require.extensions[ext] = () => { };
 
-    function packFile(path) {
+    function packFile(filePath) {
         const moduleId = moduleCounter;
 
-        const resolveOptions = { paths: [_path.dirname(path)] };
+        const resolveOptions = { paths: [path.dirname(filePath)] };
 
-        let fileContent = fs.readFileSync(path).toString().trim();
+        let fileContent = fs.readFileSync(filePath).toString().trim();
 
         fileContent = fileContent.replace(/require\(["'](.+?)["']\)/g,
             /** @param {string} modulePath */
@@ -35,13 +35,15 @@ function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
                 let resolved;
                 try {
                     if (modulePath.startsWith(".") === true) {
-                        resolved = normalizePath(require.resolve(modulePath, resolveOptions));
+                        resolved = normalizeFilePath(require.resolve(modulePath, resolveOptions));
                     } else {
-                        resolved = normalizePath(`${srcDir}${modulePath}.lua`);
-                        if (fs.existsSync(resolved) === false) throw undefined;
+                        resolved = normalizeFilePath(`${srcDir}${modulePath}.lua`);
+                        if (fs.existsSync(resolved) === false)
+                            // eslint-disable-next-line no-throw-literal
+                            throw undefined;
                     }
                 } catch (ignored) {
-                    throw Error(`Error while resolving module path for '${modulePath}' in [${path}:${getLine()}]`);
+                    throw Error(`Error while resolving module path for '${modulePath}' in [${filePath}:${getLine()}]`);
                 }
 
                 if (requireMapping.hasOwnProperty(resolved) === false) {
@@ -52,10 +54,10 @@ function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
             }
         );
 
-        const relPath = path.replace(srcDir, "");
+        const relPath = filePath.replace(srcDir, "");
 
         if (callback !== undefined) {
-            fileContent = callback(fileContent, { path, relPath }) || fileContent;
+            fileContent = callback(fileContent, { path: filePath, relPath }) || fileContent;
         }
 
         const moduleContent = fileContent
@@ -67,8 +69,6 @@ function pack(srcDir, srcProjectDir, entryFile, outFile, callback, ext) {
 
     requireMapping[entryFile] = moduleCounter;
     packFile(entryFile);
-
-    // require.extensions = prevExtensions;
 
     const out = `do
     local modules = {
@@ -119,21 +119,21 @@ You still have the config.json file.
  * @returns {boolean}
  */
 module.exports.handle = (command, parser) => {
-    if (command !== "build") return;
+    if (command !== "build")
+        return;
 
     checkConfigFile(parser);
 
     const project = (parser.values[1]?.replace(/[/\\]|(\.\.)/g, "")) || "sussyspt";
     console.log(`Building project '${project}'`);
 
-    const srcDir = `${normalizePath(_path.resolve("src/"))}/`;
+    const srcDir = `${normalizeFilePath(path.resolve("src/"))}/`;
 
     const projectScriptPath = `${srcDir}${project}.project.js`;
     const projectScript = fs.existsSync(projectScriptPath) ? require(projectScriptPath) : {};
 
     if (projectScript.configure)
         projectScript.configure(parser);
-
 
     const srcProjectDir = `${srcDir}${project}/`;
     if (!fs.existsSync(srcProjectDir)) {
@@ -148,9 +148,9 @@ module.exports.handle = (command, parser) => {
     }
 
 
-    const buildDir = `${normalizePath(_path.resolve("build/"))}/`;
+    const buildDir = `${normalizeFilePath(path.resolve("build/"))}/`;
     const projectBuildDir = `${buildDir}${project}/`;
-    ensureFolderCreated(projectBuildDir);
+    ensureDir(projectBuildDir);
 
     let out;
 
@@ -169,7 +169,7 @@ module.exports.handle = (command, parser) => {
     }
 
     const libsDir = `${buildDir}libs/`;
-    ensureFolderCreated(libsDir);
+    ensureDir(libsDir);
 
     fs.writeFileSync(`${libsDir}${projectScript.outName ? projectScript.outName() : `${project}.lua`}`, out);
 
