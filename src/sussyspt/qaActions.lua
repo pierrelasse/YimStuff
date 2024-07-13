@@ -5,7 +5,7 @@ local actions = {
     -- { Func, DisplayName, [Description], [Cond] }
 }
 
-function SussySpt.qa.onlineCond() return SussySpt.in_online end
+local function onlineCond() return SussySpt.in_online end
 
 actions.heal = { -- ANCHOR heal
     function()
@@ -101,7 +101,7 @@ actions.instantBST = { -- ANCHOR instantBST
     end,
     "Instant BST",
     "You will receive less damage and do more damage while the effect is active",
-    SussySpt.qa.onlineCond
+    onlineCond
 }
 
 actions.depositWallet = { -- ANCHOR depositWallet
@@ -117,7 +117,7 @@ actions.depositWallet = { -- ANCHOR depositWallet
     end,
     "Deposit wallet",
     "Puts all your money in the bank",
-    SussySpt.qa.onlineCond
+    onlineCond
 }
 
 actions.stopPlayerSwitch = { -- ANCHOR stopPlayerSwitch
