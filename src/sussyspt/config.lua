@@ -3,7 +3,11 @@ if io == nil or io.open == nil then
     return
 end
 
-local cfg = { file = "sussyspt", changed = false, lastAutosave = os.time() }
+local cfg = {
+    file = "sussyspt",
+    changed = false,
+    lastAutosave = os.time()
+}
 
 function cfg.has(path)
     return cfg.data ~= nil and cfg.data[path] ~= nil

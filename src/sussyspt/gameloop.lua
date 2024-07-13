@@ -1,6 +1,8 @@
 local tasks = require("./tasks")
 local cfg = require("./config")
 
+local gameloop = {}
+
 local function updateInOnline()
     SussySpt.in_online = NETWORK.NETWORK_IS_IN_SESSION() == true
 end
@@ -16,10 +18,9 @@ local function tickDisableControls()
     end
 end
 
-return function(rs)
+local function loop(rs)
     while true do
         rs:yield()
-
         updateInOnline()
 
         if SussySpt.invisible == true then
@@ -33,3 +34,10 @@ return function(rs)
         cfg.autosave()
     end
 end
+
+function gameloop.register()
+    gameloop.register = nil
+    yu.rif(loop)
+end
+
+return gameloop

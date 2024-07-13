@@ -1,4 +1,5 @@
-local qa = require("sussyspt/qa")
+local quickActions = require("sussyspt/quickActions")
+local cfg = require("sussyspt/config")
 
 local tab = SussySpt.rendering.newTab("Quick Actions")
 
@@ -7,23 +8,21 @@ local tableFlags =
     | ImGuiTableFlags.RowBg
 
 function tab.render()
+    cfg.set("cat_qa", yu.rendering.renderCheckbox("Enabled", "cat_qa"))
+
     if ImGui.Button("Save") then
-        qa.config.save()
+        quickActions.config.save()
     end
 
     ImGui.SameLine()
 
     if ImGui.Button("Reset") then
-        qa.config.sort = yu.copy_table(qa.config.default)
+        quickActions.config.sort = yu.copy_table(quickActions.config.default)
     end
 
     if ImGui.BeginTable("##actions", 2, tableFlags) then
-        -- ImGui.TableSetupColumn("##1")
-        -- ImGui.TableSetupColumn("##2")
-        -- ImGui.TableHeadersRow()
-
         local row = 0
-        for k, v in pairs(qa.config.sort) do
+        for k, v in pairs(quickActions.config.sort) do
             ImGui.TableNextRow()
             ImGui.PushID(row)
             ImGui.TableSetColumnIndex(0)
@@ -35,7 +34,7 @@ function tab.render()
                     ok = true
                 end
             elseif type(v) == "string" then
-                local b = qa.actions[v]
+                local b = quickActions.actions[v]
                 if b ~= nil then
                     ImGui.Text(b[2])
                     ok = true
@@ -51,29 +50,29 @@ function tab.render()
             if ImGui.Button("<##"..k) then
                 local newIndex = k - 1
                 if newIndex <= 0 then
-                    newIndex = #qa.config.sort
+                    newIndex = #quickActions.config.sort
                 end
-                table.swap(qa.config.sort, k, newIndex)
+                table.swap(quickActions.config.sort, k, newIndex)
             end
             ImGui.SameLine()
             if ImGui.Button(">##"..k) then
                 local newIndex = k + 1
-                if newIndex > #qa.config.sort then
+                if newIndex > #quickActions.config.sort then
                     newIndex = 1
                 end
-                table.swap(qa.config.sort, k, newIndex)
+                table.swap(quickActions.config.sort, k, newIndex)
             end
             ImGui.SameLine()
             if ImGui.Button("X##"..k) then
                 local tbl = {}
                 local i = 1
-                for k2, v2 in pairs(qa.config.sort) do
+                for k2, v2 in pairs(quickActions.config.sort) do
                     if k2 ~= k then
                         tbl[i] = v2
                         i = i + 1
                     end
                 end
-                qa.config.sort = tbl
+                quickActions.config.sort = tbl
             end
 
             ImGui.PopID()

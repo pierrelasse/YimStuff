@@ -1,4 +1,5 @@
 local cfg = require("sussyspt/config")
+local chatlog = require("sussyspt/chatlog")
 
 local exports = {}
 
@@ -15,13 +16,15 @@ function exports.register(tab)
             cfg.set("chatlog_console", yu.rendering.renderCheckbox("Log to console", "online_chatlog_console"))
         end
 
-        if SussySpt.chatlog.text ~= nil then
+        if chatlog.text ~= nil then
             if ImGui.TreeNodeEx("Logs") then
-                cfg.set("chatlog_timestamp", yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", SussySpt.chatlog.rebuildLog))
+                cfg.set("chatlog_timestamp",
+                        yu.rendering.renderCheckbox("Timestamp", "online_chatlog_log_timestamp", chatlog.rebuildLog))
 
                 do
                     local x, y = ImGui.GetContentRegionAvail()
-                    ImGui.InputTextMultiline("##chat_log", SussySpt.chatlog.text, SussySpt.chatlog.text:length(), x, math.min(140, y), ImGuiInputTextFlags.ReadOnly)
+                    ImGui.InputTextMultiline("##chat_log", chatlog.text, chatlog.text:length(), x, math.min(140, y),
+                                             ImGuiInputTextFlags.ReadOnly)
                 end
                 SussySpt.pushDisableControls(ImGui.IsItemActive())
 

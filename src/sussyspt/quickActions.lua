@@ -1,11 +1,11 @@
 local tasks = require("./tasks")
 local cfg = require("./config")
 
-local qa = {}
+local quickActions = {}
 
-qa.actions = require("sussyspt/qaActions")
+quickActions.actions = require("sussyspt/qaActions")
 
-qa.config = {
+quickActions.config = {
     default = {
         "heal", "refillHealth", "refillArmor", "clearWantedLevel", 0,
         "ri2", "skipCutscene", "removeBlackscreen", 0,
@@ -14,34 +14,36 @@ qa.config = {
     }
 }
 
-function qa.config.load()
+function quickActions.config.load()
     local sort = cfg.get("qa_sort")
-    if sort == nil then sort = yu.copy_table(qa.config.default) end
-    qa.config.sort = sort
+    if sort == nil then sort = yu.copy_table(quickActions.config.default) end
+    quickActions.config.sort = sort
+
+    yu.rendering.setCheckboxChecked("cat_qa", cfg.get("cat_qa", false))
 end
 
-function qa.config.save()
-    if type(qa.config.sort) ~= "table" then return end
-    if table.compare(qa.config.default, qa.config.sort) then
+function quickActions.config.save()
+    if type(quickActions.config.sort) ~= "table" then return end
+    if table.compare(quickActions.config.default, quickActions.config.sort) then
         cfg.set("qa_sort", nil)
     else
-        cfg.set("qa_sort", qa.config.sort)
+        cfg.set("qa_sort", quickActions.config.sort)
     end
     cfg.save()
 end
 
-qa.config.load()
+quickActions.config.load()
 
-function qa.render()
+function quickActions.render()
     if not yu.rendering.isCheckboxChecked("cat_qa") then return end
 
     if ImGui.Begin("Quick actions") then
         local sameline = false
-        for _, field in pairs(qa.config.sort) do
+        for _, field in pairs(quickActions.config.sort) do
             if type(field) == "number" then
                 if field == 0 then sameline = false end
             elseif type(field) == "string" then
-                local b = qa.actions[field]
+                local b = quickActions.actions[field]
                 if b ~= nil then
                     if type(b[4]) ~= "function" or b[4]() ~= false then
                         if sameline then ImGui.SameLine() end
@@ -61,4 +63,4 @@ function qa.render()
     ImGui.End()
 end
 
-return qa
+return quickActions

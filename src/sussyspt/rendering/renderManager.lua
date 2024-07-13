@@ -1,7 +1,7 @@
 local version = require("sussyspt/version")
 local cfg = require("sussyspt/config")
 local themeManager = require("sussyspt/rendering/themeManager")
-local qa = require("sussyspt/qa")
+local qa = require("sussyspt/quickActions")
 
 local renderManager = {}
 
@@ -79,19 +79,6 @@ local function renderMainWindow()
     return true
 end
 
-local function renderCategories()
-    ImGui.Text("Categories")
-
-    if SussySpt.in_online then
-        ImGui.PushStyleColor(ImGuiCol.Text, 1, .3, .3, 1)
-        cfg.set("cat_hbo", yu.rendering.renderCheckbox("HBO", "cat_hbo"))
-        yu.rendering.tooltip(
-            "Most of the things wont work due to the latest gta update.\nUse with caution")
-        ImGui.PopStyleColor()
-    end
-    cfg.set("cat_qa", yu.rendering.renderCheckbox("Quick actions", "cat_qa"))
-end
-
 function renderManager.render() -- ANCHOR render
     for k, v in pairs(SussySpt.rendercb) do v() end
 
@@ -109,8 +96,6 @@ function renderManager.render() -- ANCHOR render
     end
 
     themeManager.popTheme()
-
-    renderCategories()
 end
 
 return renderManager

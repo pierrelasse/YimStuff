@@ -1,16 +1,16 @@
-local exports = {}
+local tasks = {}
 
-exports.tasks = {}
+tasks.tasks = {}
 
-function exports.addTask(cb)
-    local id = #exports.tasks + 1
-    exports.tasks[id] = cb
+function tasks.addTask(cb)
+    local id = #tasks.tasks + 1
+    tasks.tasks[id] = cb
     return id
 end
 
-function exports.runAll(rs)
-    for taskId, taskFunc in pairs(yu.copy_table(exports.tasks)) do
-        exports.tasks[taskId] = nil
+function tasks.runAll(rs)
+    for taskId, taskFunc in pairs(yu.copy_table(tasks.tasks)) do
+        tasks.tasks[taskId] = nil
         local success, result = pcall(taskFunc, rs)
         if not success then
             log.warning("Error while executing task #'"..taskId.."': "..result)
@@ -19,4 +19,4 @@ function exports.runAll(rs)
     end
 end
 
-return exports
+return tasks

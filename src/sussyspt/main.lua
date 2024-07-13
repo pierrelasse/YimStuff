@@ -18,15 +18,7 @@ do
     SussySpt.dev = version.versionType == 2
     function SussySpt.getDev() return SussySpt.dev end
 
-    SussySpt.debugtext = ""
-    function SussySpt.debug(s)
-        if type(s) == "string" then
-            SussySpt.debugtext = SussySpt.debugtext..(SussySpt.debugtext == "" and "" or "\n")..s
-            if yu.rendering.isCheckboxChecked("debug_console") then
-                log.debug(s)
-            end
-        end
-    end
+    require("sussyspt/logger")
 
     cfg.load()
     yu.rendering.setCheckboxChecked("debug_console", cfg.get("debug_console", false))
@@ -35,11 +27,9 @@ do
 
     yu.set_notification_title_prefix("[SussySpt] ")
 
-    SussySpt.tab = gui.get_tab("SussySpt")
+    local tab = require("sussyspt/tab")
 
     SussySpt.in_online = false
-
-    local renderManager = require("sussyspt/rendering/renderManager")
 
     do -- SECTION Disable controls
         SussySpt.disableControls = 0
@@ -67,41 +57,14 @@ do
         end
     end
 
-    require("sussyspt/chatlog")
-
-    require("sussyspt/rendering/tabs")
-
-    require("sussyspt/qa")
-
-    do -- ANCHOR Verify tabs
-        local tabSize = 0
-
-        local function countTabs(tbl)
-            if type(tbl) ~= "table" then
-                return
-            end
-            for k, v in pairs(tbl) do
-                tabSize = tabSize + 1
-                if v.sub == tbl then
-                    tbl[k] = nil
-                    log.warning("Overflow for tab "..v.name)
-                else
-                    countTabs(v.sub)
-                end
-            end
-        end
-        countTabs(SussySpt.rendering.tabs)
-
-        SussySpt.debug("Created "..tabSize.." tabs")
-    end
+    tab.addTabs()
 
     SussySpt.debug("Registering mainloop")
-    yu.rif(require("sussyspt/gameloop"))
+    require("sussyspt/gameloop").register()
 
-    SussySpt.debug("Adding render callback")
-    SussySpt.tab:add_imgui(renderManager.render)
+    tab.addRender()
 
-    require("sussyspt/categories")
+    require("sussyspt/chatlog").registerListener()
 
     SussySpt.debug("Loaded successfully!")
     yu.notify(1, "Loaded v"..version.version.." ["..version.versionId.."]!", "Welcome")
