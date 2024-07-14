@@ -1,4 +1,4 @@
-local values = require("../values")
+local values = require("sussyspt/values")
 
 return function(rs, hash, amount)
     local b = values.g.transaction_base

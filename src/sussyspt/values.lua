@@ -53,7 +53,7 @@ values.g = {
 
     bounty_self_time = 1 + 2359296 + 5150 + 13,
 
-    transaction_base = 4537212,
+    transaction_base = 4537311,
 
     bunker_resupply_base = 1662873
 }
