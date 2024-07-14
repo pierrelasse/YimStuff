@@ -1,6 +1,8 @@
 
 # SussySpt Installation
 
+*The script is made for [YimMenu](https://github.com/YimMenu/YimMenu) and does not work on other menus.*
+
 1) Download [SussySpt.lua](https://github.com/pierrelasse/YimStuff/releases/download/v1.4.4/SussySpt.lua)
 2) Open your scripts folder at `%appdata%/YimMenu/scripts/`
 3) Drop the downloaded file inside the folder

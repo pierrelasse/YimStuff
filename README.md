@@ -1,16 +1,15 @@
-# YimStuff
-> SussySpt is a script for gta online with tons of features.<br />
-> Yimutils, a libary for script developers
-
-The scripts are made for [YimMenu](https://github.com/YimMenu/YimMenu).
-
 ## Table of contents
 
- * [SussySpt installation](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptInstallation.md)
- * [SussySpt feature list](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptFeatures.md)
+ * [Installation](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptInstallation.md)
+ * [Feature list](https://github.com/pierrelasse/YimStuff/blob/master/docs/SussySptFeatures.md)
  * [Feedback](#feedback)
  * [Build it yourself](#build-it-yourself)
  * [Other](#other)
+
+## Info
+
+> SussySpt is a script for gta online with tons of features.<br />
+> yimutils, a libary for script developers
 
 ## Feedback
 

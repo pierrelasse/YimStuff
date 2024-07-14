@@ -1,16 +1,1 @@
-# Testing
-idk
-
-# Config
-config.json
-
-# Build
 build
-out
-
-# Cache
-__pycache__
-
-# Node modules
-node_modules
-package-lock.json
