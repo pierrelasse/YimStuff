@@ -10,6 +10,8 @@
 
 4) After you set everything up, a pop-up talking something about the "Game cache" may appear. Just press `Update cache` or related. After a few seconds or minutes (if potato pc), you should be ready to go.
 
+5) If you need help installing scripts, you can look at this [tutorial here](https://github.com/pierrelasse/YimStuff/blob/master/docs/YimMenuScripts.md).
+
 
 # Xenos Tutorial
 
