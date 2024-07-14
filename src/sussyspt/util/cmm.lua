@@ -37,9 +37,7 @@ function exports.biker_documents(rs) startScript(rs, "appBikerBusiness", 4592, 1
 --     startScript(rs, "appHackerTruck", 4592)
 -- end
 
--- function exports.hangar(rs)
---     startScript(rs, "appSmuggler", 4592)
--- end
+function exports.hangar(rs) startScript(rs, "appSmuggler", 4592) end
 
 function exports.arcade(rs) startScript(rs, "appArcadeBusiness", 4592) end
 
